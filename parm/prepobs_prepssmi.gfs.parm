@@ -1,0 +1,31 @@
+
+  Cards for GFS Version of PREPSSMI
+
+  Note: "IVAR" below must be on a line all to itself, and it must not be
+        split across 2 lines (this is because the script may replace it
+        with one of the IVAR lines at the bottom of this file).
+
+ &SWTCH
+   IVAR   =    0,   0,9999,9999,9999,9999,9999,9999,9999,9999,
+   IQM    =    0,  QMPW   =FALSE, IALG    =   0,
+   DELAT  =  1.0,  DELON  = 1.0,  ISUPOB =    1,
+   IYEAR  = 0000,  IMONTH =  00,  IDAY   =   00, IHOUR = 00, IMIN   =  00,
+   IWINDO =  300,
+   LATS   =  -90,  LATN   =  90,  LONW   =  360, LONE  =  0, LIMCNT =   6,
+   LSAT   = 2*FALSE, FALSE, FALSE, FALSE, FALSE,  TRUE, FALSE, FALSE, FALSE
+ /
+LSAT---               F-09   F-10   F-11   F-12   F-13   F-14   F-15   F-16
+
+Special Case for "PREPSSMI_PROD_TYPE" = 'COMBINATION' ...
+One of the following sets of "IVAR" switches below will replace the set above
+ when the variable "PREPSSMI_PROD_TYPE" = 'COMBINATION' in the script - this
+ means PREPOBS_PREPSSMI will run twice: once reading in the operational FNOC
+ products and using the IVAR switches from "ssmip" below, and then again
+ reading in the NN3 products and using the IVAR switches from "ssmipn" below.
+ The output reprocessed BUFR files from the two runs are then combined into a
+ single file.  (Note: Do not change anything below except "9999" to "0" or
+ vice versa - the column positions must not be changed.)
+
+ssmip:   IVAR   = 9999,9999,   0,9999,9999,9999,9999,9999,9999,9999,
+ssmipn:   IVAR   =    0,   0,9999,9999,9999,9999,9999,9999,9999,9999,
+

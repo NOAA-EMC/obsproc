@@ -1,0 +1,13 @@
+
+ &nrlacqcinput
+  trad = 1.5, 
+  l_otw = .true., 
+  l_nhonly = .true., 
+  l_doprofiles = .true.,
+  l_allev_pf = .false.,
+  l_prof1lvl  = .false.
+ /
+
+  Cards for PREPACQC
+  Here: NAM Runs
+

@@ -1,0 +1,80 @@
+
+#  this will only work well if all codes in package need same version of each lib below
+
+w3nco_ver=2.0.6
+bufr_ver=11.3.0
+bacio_ver=2.0.2
+w3emc_ver=2.4.0
+nemsio_ver=2.2.2; nemsio_ver_CrayXC40=2.2.2; nemsio_ver_Dellp3=2.2.3; nemsio_ver_hera=2.2.3
+sigio_ver=2.0.1; sigio_ver_CrayXC40=2.0.1; sigio_ver_Dellp3=2.1.0; sigio_ver_hera=2.1.0
+sp_ver=2.0.2
+netcdf_ver=4.7.4; netcdf_ver_CrayXC40=4.7.4; netcdf_ver_RD=4.5.0
+hdf5_ver=1.10.6
+
+if [[ "$sys_tp" == Cray-CS400 || "$SITE" =~ (theia|THEIA) ]]; then
+   module use -a /scratch3/NCEPDEV/nwprod/lib/modulefiles
+fi
+
+# sigio and nemsio versions should match what was used to build the library
+#   holding gblevents (w3emc)    (improve this later -dcs)
+if [[ "$sys_tp" =~ Cray-XC40 && $sigio_ver != "$sigio_ver_CrayXC40" ]]; then
+   echo "CHANGING REQUESTED SIGIO VERSION FROM $sigio_ver to $sigio_ver_CrayXC40"
+   sigio_ver=$sigio_ver_CrayXC40
+fi
+if [[ "$sys_tp" =~ Cray-XC40 && $nemsio_ver != "$nemsio_ver_CrayXC40" ]]; then
+   echo "CHANGING REQUESTED NEMSIO VERSION FROM $nemsio_ver to $nemsio_ver_CrayXC40"
+   nemsio_ver=$nemsio_ver_CrayXC40
+fi
+if [[ "$sys_tp" =~ Cray-XC40 && $netcdf_ver != "$netcdf_ver_CrayXC40" ]]; then
+   echo "CHANGING REQUESTED NETCDF VERSION FROM $netcdf_ver to $netcdf_ver_CrayXC40"
+   netcdf_ver=$netcdf_ver_CrayXC40
+fi
+
+if [[ "$sys_tp" =~ Dell-p3 ]]; then
+   module load w3nco/$w3nco_ver
+   module load w3emc/$w3emc_ver
+   module load bufr/$bufr_ver
+   module load bacio/$bacio_ver
+   module load ips/18.0.5.274
+   module load sigio/$sigio_ver_Dellp3
+   module load nemsio/$nemsio_ver_Dellp3
+   module load sp/$sp_ver
+   module load HDF5-parallel/$hdf5_ver
+   module load NetCDF-parallel/$netcdf_ver
+elif [[ "$sys_tp" =~ Cray-XC40 ]]; then
+   module load w3nco-${lib_build}/$w3nco_ver
+   module load bufr-${lib_build}/$bufr_ver
+   module load bacio-${lib_build}/$bacio_ver
+   module load w3emc-${lib_build}/$w3emc_ver
+   module load nemsio-${lib_build}/$nemsio_ver
+   module load sigio-${lib_build}/$sigio_ver
+   module load sp-${lib_build}/$sp_ver
+   module load HDF5-parallel-${lib_build}-sandybridge/$hdf5_ver
+   module load NetCDF-${lib_build}-sandybridge/$netcdf_ver
+   export NETCDF_LDFLAGS="-L${NETCDF}/lib -lnetcdff -lnetcdf -L${HDF5}/lib -lhdf5_hl -lhdf5 -lz"
+elif [[ "$sys_tp" == Cray-CS400 || "$SITE" =~ (theia|THEIA) ]]; then
+   module load w3nco/v$w3nco_ver
+   module load bufr/v$bufr_ver
+   module load bacio/v$bacio_ver
+   module load w3emc/v$w3emc_ver
+   module load nemsio/v$nemsio_ver
+   module load sigio/v$sigio_ver
+   module load sp/v$sp_ver
+   module load netcdf/$netcdf_ver_RD
+elif [[ "$sys_tp" == HERA || "$SITE" =~ (hera|HERA) ]]; then
+   module use -a /scratch2/NCEPDEV/nwprod/NCEPLIBS/modulefiles
+   module load w3nco/$w3nco_ver
+   module load bufr/$bufr_ver
+   module load bacio/$bacio_ver
+   module load w3emc/$w3emc_ver
+   module load nemsio/$nemsio_ver_hera
+   module load sigio/$sigio_ver_hera
+   module load sp/$sp_ver
+elif [[ -n "$sys_tp" || -n "$SITE" ]]; then
+  echo " **** UNEXEPECTED PLATFORM: sys_tp: ${sys_tp:-not set}  SITE: ${SITE:-not set} ***** "
+  return 9
+else
+  echo " **** neither variable sys_tp nor SITE is set ***** "
+  return 9
+fi
+

@@ -1,0 +1,732 @@
+#!/bin/bash
+# dumpmb - 26 Feb 2019
+#
+# Abstract:
+#   This script creates MODS formatted BUFR data files according to user 
+# specified date range and data types.  Source data is located in /dcom or 
+# MODS online holdings.  If found in /dcom, data is dumped and converted to 
+# MODS format.  If found already existing in the online MODS archive, data 
+# is simply copied.  The destination of output data files is configurable 
+# via the DATA environment variable -- if blank, current directory is used 
+# as default.
+#
+#
+# Script history log:
+#  2004-07-08 JWhiting  Original script
+#   7/13/04 JAW - added user env vars printout
+#   7/22/04 JAW - default BTAB set to chkout/dcom.jifs/ version (temporary)
+#   2/09/05 JAW - fixed dumpjb rc, now passed thru;
+#                 altered some diag output.
+#   3/16/05 JAW - enabled NDATE in place of FDATE;
+#                 added RC_ARG error return processing.
+#   5/06/05 JAW - default MODX set to chkout/exec.jifs/ version (temporary)
+#   7/27/05 JAW - upgraded for operational use: TMPDIR=$DATA, etc
+#   8/04/05 JAW - default BTAB=/nwprod/fix/bufrtab.mods
+#  10/12/06 JAW - reset TMPDIR logic: now checks for /stmp availability
+#   6/28/07 JAW - enabled non-MODS-supported dtype dumping w/o conversion
+#   8/01/07 JAW - new non-MODS types added: sstnvp sstnsp envsal
+#   8/24/07 JAW - added TIME_CENTER & TIME_RADIUS parameters; Note: still 
+#                 won't subset files not dumped by dumpjb (eg, later than 
+#                 "day 10").
+#  10/15/07 JAW - new MODS type envsal (moved from non-MODS); 
+#                 new non-MODS type added: envsww
+#  03/10/09 CCM - added default set for DCOMROOT.             
+#  03/28/08 JAW - enabled sstnsg as valid non-MODS type
+#  04/22/09 JAW - fixed error (missing back-quotes on mtyp, styp lines)
+#  05/22/09 JAW - added non-operational dtyp 'ts_dif' for AOML T/salinity data
+#  06/29/09 JAW - enabled JASON-2 Navoceano dtyps (njsn2o, njsn2i) for GODAS; 
+#                 added return code 32 for 'no data found'
+#  07/09/09 JAW - enabled AXBT (031004, axbt) as non-MODS dtyp
+#  08/18/09 JAW - added non-MODS dtyp river
+#  12/18/09 JAW - merged w/ prod ver of Mar 10 2009 (DCOMROOT is only change)
+#   3/12/10 JAW - disabled dcomdev as source of cstgd & envsal
+#   3/06/12 JAW - updated for SHIPSU & SHPALL (group dtyp) support
+#   2/04/13 JAW - Port to WCOSS (linux) platforms:
+#                  replaced XLF logical unit number specifications w/ 
+#                   appropritate FORTxx logic;
+#                  changed syntax where needed (echo -n, time -p);
+#                  updated doc block.
+#   2/10/17 DAK - If /dcom tank file (1st choice) is present but does not
+#                 contain any reports for a specified YYYYMMDD when dumped
+#                 (i.e., it has rc=22; a case where only dictionary messages
+#                 might be present), the MODS online holdings for that date (2nd
+#                 choice) are now examined and if found are used just as if the
+#                 /dcom tank file for that date was not present.
+#                 BENEFIT: Prior to this, a rc=22 from the dump of a /dcom tank
+#                          file here (although rare) would result in that
+#                          YYYYMMDD being skipped. Not only did that cause a
+#                          loss of information, but it also lead to a non-zero
+#                          return code (22) coming out of the execution of this
+#                          script.  Parent scripts such as exgodas1_dump.sh.ecf
+#                          in job JGODAS1_DUMP which read this rc would abort in
+#                          this case.
+#   2/26/19 JAW - adapted to run on WCOSS phase 3 (Dell) platforms; 
+#                  set to run under /bin/bash shell
+#                  added various environment variables and dependencies to
+#                    accomodate the use of modules;
+#                  parameterized missing TMPDIR defaults by platform;
+#
+ver='12/07/2020'
+vertxt=' (WCOSS ph3)'
+#
+# Usage: 
+#   dumpmb  ymd1 ymd2  dType1 [dType2 [... [dTypeN]]]
+#     where ymd1 == Start date
+#           ymd2 ==   End date
+#         dType* == data types (eg, metar, ships, bathy, etc)
+#
+#   Date strings (ymd*) are expected in YYYYMMDD format.
+#   A value of 'all' for dType1 will cause all valid types to be processed.
+#
+#
+# Environment variables ( [ default value] ):
+#  TANK - directory path to online data       [ $DCOMROOT/$dfix ]    
+#  BTAB - path to MODS bufrtable              [ $HOMEobsproc/fix/bufrtab.mods ]
+#  DATA - directory path for MODS output      [ pwd ]
+#  MODX - path to bufr_prepmods exec          [ $HOMEobsproc/exec/bufr_prepmods ]
+#  DUMP - path to general dump script         [ $HOMEbufr_util/ush/dumpjb ]
+#  LIST - path to dumplist file               [ $HOMEbufr_util/fix/bufr_dumplist ]
+#
+#
+# Exit conditions:
+#   This script will exit with a return code equal to the greatest 
+# value returned from any of the called dump or conversion 
+# processes.  For certain fatal errors, specific error codes are 
+# returned:
+#
+#   code   reason
+#    00  - No problem encountered
+#    77  - Incorrect usage (arguments)
+#    78  - Invalid date (arguments)
+#    79  - No valid data types specified
+#    88  - Invalid Directory (DATA or TANK env vars)
+#    89  - one of various required environment variables is not set
+#    66  - Error creating/using working dir
+#    99  - Error initializing module environment
+#
+#
+# Modules and files referenced:
+#  user scripts: dumpjb
+#  fixed fields: bufr_dumplist  bufrtab.mods
+#  executables : bufr_prepmods  /nwprod/util/exec/ndate
+#
+#
+# Issues/caveats:
+# - Subsetting by time (less than the default 24-hour dump) is done via 
+#    environment vars TIME_CENTER & TIME_RADIUS;  These are passed as 
+#    arguments to the DUMPJB call.  See usage of /nwprod/ush/dumpjb script 
+#    for details.  NOTE: script will not subset files that are not dumped 
+#    via DUMPJB (eg, files later than ten days ago).
+# - No geographic subsetting is supported.
+# - Will overwrite existing files in destination directory.
+#
+######################set -x
+usage="\
+dumpmb: This script generates MODS formatted BUFR files.
+
+Usage: 
+  dumpmb  ymd1 ymd2  dType1 [dType2 [... [dTypeN]]]
+    where ymd1 == Start date
+          ymd2 == End date
+        dType* == data types (eg, metar, ships, bathy, etc)
+
+  Date strings (ymd*) are expected in YYYYMMDD format.
+  A value of 'all' for dType1 will cause all valid types to be processed.
+
+This verson created on $ver$vertxt"
+
+[ $# -lt 3 ] && { echo "$usage" ; exit 77 ; }
+
+echo 'dumpmb: ============================================================'
+echo 'dumpmb:       Starting execution of MODS dump script -- dumpmb'
+echo "dumpmb:                       of $ver"
+echo "dumpmb:           Start time: `date`"
+echo 'dumpmb: ============================================================'
+
+
+RC_ARG=0   # Arguments testing return code
+
+cymd1=${1:?"$usage"}
+cymd2=${2:?"$usage"}
+
+# Initialize the Modules package in case we need to load an environmment module
+#  (update the following lines if this script moves away from ksh)
+# -- assumes module init files are unique to each system;
+if [ -f /usrx/local/Modules/default/init/ksh ]; then          # IBM-p1/2
+    . /usrx/local/Modules/default/init/ksh > /dev/null
+
+elif [ -f /opt/modules/default/init/ksh ]; then               # Cray-XC40
+    . /opt/modules/default/init/ksh  > /dev/null
+
+elif [ -f /usrx/local/prod/lmod/lmod/init/profile ] ; then    # Dell-p3 
+    . /usrx/local/prod/lmod/lmod/init/profile > /dev/null
+    . /usrx/local/prod/modulefiles/.defaultmodules > /dev/null
+
+    LMOD_EXACT_MATCH=no
+
+else
+  echo "ERROR: could not initialize module environment"
+  echo
+  echo "ABNORMAL EXIT!!!!!!!!!!!"
+  echo
+  [ $LOUD = on ] && set -x
+  exit 99 ; RC_ARG=99
+fi
+
+module load prod_util      # for NDATE utility
+
+#echo "debug: $# args='$*'"
+#---
+set -a     # auto export variables
+
+
+# Parse args for valid dates 
+# --------------------------
+
+for cymd in $cymd1 $cymd2 ; do 
+  $NDATE 24 ${cymd}12 > /dev/null 2>&1  ; RC=$?
+  if [ $RC -ne 0 ] ; then 
+    echo "dumpmb: ERROR: - invalid Date argument '$cymd' -- exiting (78)" 
+    RC_ARG=78
+  fi # RC != 0
+done # cymd
+
+if [ $cymd1 -gt $cymd2 ] ; then 
+  echo "dumpmb: ERROR: - invalid Dates '$cymd1' > '$cymd2' -- exiting (78)"
+  RC_ARG=78
+fi # cymd1 > cymd2
+
+
+if [ $RC_ARG -eq 0 ] ; then 
+
+  echo "dumpmb: Creating MODS formatted BUFR files for"
+  echo -n "dumpmb:     Date range:  $cymd1"
+  [ $cymd2 = $cymd1 ] || echo " thru $cymd2" && echo ""
+
+
+# Parse args for valid data types
+# -------------------------------
+  t000=' metar '
+  t001=' ships  dbuoy  mbuoy  lcman  tideg  slpbg  cstgd  shipsu'
+  t012='        sstns  sstnvh ssmipn '  # ersal
+  t031=' bathy  tesac  trkob  nersal ngfoal ntpxal njsnal envsal'
+
+  g031=' shpall'
+  gtypes=${g031}   # group dtyp
+
+  alltypes=${t000}${t001}${t012}${t031}
+
+  n001=' river'
+  n012=' sstnvp sstnsp sstnsg'
+  n031=' envsww njsn2o njsn2i ts_dif  axbt'
+  ntypes=${n001}${n012}${n031}   # non-MODS datatypes -- for dump only
+
+  dtypes="$3"
+  badtypes=' '
+  nontypes=' '
+  if [ ".$dtypes" = . -o ".$dtypes" = '.all' ] ; then 
+    dtypes=$alltypes
+  else
+    shift 2
+    dtypes=''
+    while [ $# -ge 1 ] ; do
+      arg1=$1
+      shift 1
+      for DTYP in $arg1 ; do
+        DTYP=`echo $DTYP | tr [A-Z] [a-z]`
+
+        if [ -z "`echo \" $alltypes \" | grep \" $DTYP \"`" ] ; then
+          if [ -z "`echo \" $ntypes $gtypes \" | grep \" $DTYP \"`" ] ; then
+            badtypes=$badtypes" $DTYP"
+            continue
+          else
+            if [ -n "`echo \" $ntypes \" | grep \" $DTYP \"`" ] ; then
+              nontypes=$nontypes" $DTYP"       # allow non-MODS dtypes 
+            fi # DTYP found in ntypes
+
+            if [ -n "`echo \" $gtypes \" | grep \" $DTYP \"`" ] ; then
+              grptypes=$grptypes" $DTYP"       # allow group dtypes
+            fi # DTYP found in gtypes
+
+          fi # non-MODS dtype
+        fi # valid dtype
+
+        dtypes="$dtypes $DTYP"
+
+      done # for DTYP
+    done # while args exist
+  fi # dtypes = blank|all
+  if [ -n "$dtypes" ] ; then echo "dumpmb:     Data types: $dtypes" ; fi
+
+  for BTYP in $badtypes ; do 
+    msg="dumpmb: ! Input argument '$BTYP' not a supported datatype."
+    echo $msg
+  done # badtypes
+
+  for NTYP in $nontypes ; do 
+    msg="dumpmb: ! Input argument '$NTYP' will be not be converted to MODS format."
+    echo $msg
+  done # nontypes
+
+  if [ -z "$dtypes" ] ; then 
+    echo "dumpmb: ERROR: - No valid data types listed - exiting (79)"
+    RC_ARG=79
+  fi # no valid dtypes
+
+fi # RC_ARG = 0
+
+#echo "debug exit" ; exit 
+
+if [ $RC_ARG -eq 0 ] ; then 
+
+# Set up environment parms
+# ------------------------
+# ---make list (UVARs) of non-blank (user set) env vars
+# eVARs='TANK BTAB DATA MODX DUMP LIST'
+  eVARs='TIME_CENTER TIME_RADIUS TANK BTAB DATA MODX DUMP LIST'
+  UVARs=''
+  for eVAR in $eVARs ; do
+     eval var=\$$eVAR
+     [ -n "$var" ] && UVARs="$UVARs $eVAR"
+  done # for env Vars (eVar)
+
+# ---set default values
+  [ -n "$DATA" ] && userDATA="$DATA"
+  DATA=${DATA:-"`pwd`"}
+
+# -- BTAB HOMEobsproc
+   btab_msg="dumpmb: ERROR: neither BTAB nor HOMEobsproc is set."
+  btab_msg2="dumpmb: Must specify bufrtab.mods file or location - exiting (89)"
+
+  if [[ -z "$BTAB" && -z "$HOMEobsproc" ]] ; then 
+    echo ; echo "$btab_msg" ; echo "$btab_msg2" ; exit 89 ; RC_ARG=89
+  fi # BTAB nor HOMEobsproc
+  BTAB=${BTAB:-"${HOMEobsproc:?"$btab_msg"}/fix/bufrtab.mods"}
+  userDATA="`pwd`"
+
+# -- MODX HOMEobsproc
+   modx_msg="dumpmb: ERROR: neither MODX nor HOMEobsproc is set."
+  modx_msg2="dumpmb: Must specify bufr_prepmods exec's location or file - exiting (89)"
+
+  if [[ -z "$MODX" && -z "$HOMEobsproc" ]] ; then 
+    echo ; echo "$modx_msg" ; echo "$modx_msg2" ; exit 89 ; RC_ARG=89
+  fi # MODX nor HOMEobsproc
+  MODX=${MODX:-"${HOMEobsproc:?"$modx_msg"}/exec/bufr_prepmods"}
+
+# -- DUMP DUMPJB HOMEbufr_util
+   dump_msg="dumpmb: ERROR: neither DUMP nor HOMEbufr_util is set."
+  dump_msg2="dumpmb: Must specify obsproc dump package location or dumpjb file - exiting (89)"
+
+  if [[ -z "$DUMP" && -z "$DUMPJB" && -z "$HOMEbufr_util" ]] ; then 
+    echo ; echo "$dump_msg" ; echo "$dump_msg2" ; exit 89 ; RC_ARG=89
+  fi # DUMP nor HOMEbufr_util
+  DUMPJB=${DUMPJB:-"${HOMEbufr_util:?"$dump_msg"}/ush/dumpjb"}
+  DUMP=$DUMPJB
+
+# -- LIST
+   list_msg="dumpmb: ERROR: neither LIST nor HOMEbufr_util is set."
+  list_msg2="dumpmb: Must specify obsproc bufr_dumplist package location or \
+bufr_dumplist file - exiting (89)"
+
+  if [[ -z "$LIST" && -z "$HOMEbufr_util" ]] ; then 
+    echo ; echo "$list_msg" ; echo "$list_msg2" ; exit 89 ; RC_ARG=89
+  fi # LIST nor HOMEbufr_util
+  LIST=${LIST:-"${HOMEbufr_util}/fix/bufr_dumplist"}
+
+# -- TANK DCOMROOT
+   tank_msg="dumpmb: ERROR: neither TANK nor DCOMROOT is set."
+  tank_msg2="dumpmb: Must specify location of data tanks - exiting (89)"
+
+  userTANK=''
+  [ -n "$TANK" ] && userTANK=$TANK
+
+  if [[ -z "$TANK" && -z "$DCOMROOT" ]] ; then 
+    echo ; echo "$tank_msg" ; echo "$tank_msg2" ; exit 89 ; RC_ARG=89
+  fi # TANK nor HOMEobsproc
+
+  envir=${envir:-'prod'}
+  env_msg="ERROR: envir variable not set - exiting"
+  
+  if [[ "$DCOMROOT" =~ "dell" ]] ; then 
+    # dfix=${envir:?"$env_msg"}                  # phase 3
+    dfix=prod                  # phase 3
+  else
+    dfix=us007003                              # phase 1
+  fi # DCOMROOT contains 'dell'
+  TANK=${TANK:-"${DCOMROOT}/$dfix"}
+
+
+  if [ skip = it ] ; then        # debug
+    echo "dmb: db BTAB='$BTAB'"
+    echo "dmb: db MODX='$MODX'"
+    echo "dmb: db LIST='$LIST'"
+    echo "dmb: db DUMP='$DUMP'"
+    echo "dmb: db DCOMROOT='$DCOMROOT'"
+    echo "dmb: db TANK='$TANK'"
+  fi # skip it
+#echo 'dmb: debug exit' ; exit
+
+  TIME_CENTER=${TIME_CENTER:-"12"}
+  TIME_RADIUS=${TIME_RADIUS:-"11.999"}
+
+  pgm=`basename $MODX`
+
+# ---report User-specified values (if any)
+  if [ -n "$UVARs" ] ; then 
+    echo 'dumpmb: ------------------------------------------------------------'
+    echo 'dumpmb:  User supplied environment variables:'
+  fi # UVARs not blank
+  for UVAR in $UVARs ; do 
+    eval var=\$$UVAR
+    echo "dumpmb:     $UVAR == $var"
+  done # for UVAR
+  
+
+# ---trap errors in directory settings
+#set -x
+  for eVAR in DATA TANK ; do
+    eval var=\$$eVAR
+    if [ -n "$var" -a ! -d "$var" ] ; then 
+      echo ; echo "dumpmb: ! Directory '$var' not found"
+      echo "dumpmb: ERROR: - Bad value ($var) for env variable $eVAR"
+      echo "dumpmb: Exiting with RC=88" ; echo
+      RC_ARG=88 
+    fi # dir not exist
+  done # for eVAR
+
+  if [ $TIME_CENTER -lt 0 ] ; then 
+    echo ; echo "dumpmb: ERROR: TC='$TIME_CENTER' must not be negative." 
+    echo "dumpmb: Exiting with RC=88" ; echo
+    RC_ARG=88 
+  fi # TIME_CENTER < 0
+
+fi # RC_ARG = 0
+
+#echo "debug exit" ; exit
+
+
+if [ $RC_ARG -eq 0 ] ; then 
+
+# Set up working dir
+# ------------------
+  uid=$(echo "$USER" | cut -c1-6)
+  if [ .$uid = .nwprod -o .$uid = .climpr ] ; then     # for production runs
+    TMPDIR=$DATA
+  else # prod vs chkout                                 # for checkout runs
+#
+    if [ -z "${TMPDIR}" ]; then
+      case "$SITE" in 
+        VENUS|MARS) TMPDIR=/gpfs/dell1/stmp/$USER ;;
+        SURGE|LUNA) TMPDIR=/gpfs/hps3/stmp/$USER;;
+         GYRE|TIDE) TMPDIR=/stmpd1/$USER;;
+      esac # SITE
+    fi # tmpdir not preset by user
+  fi # prod vs chkout
+
+  WRKDIR=$TMPDIR/dumpmb_`date -u +%H%M`.$$
+  [ -d $WRKDIR ] && /bin/rm -rf $WRKDIR
+  mkdir -p $WRKDIR || \
+    { echo "ERROR: mkdir $WRKDIR -- exiting (66)" ; RC_ARG=66 ; }
+  cd $WRKDIR || { echo "ERROR: cd $WRKDIR -- exiting (66)" ; RC_ARG=66 ; }
+
+#echo " debug: DATA='$DATA'  TMPDIR='$TMPDIR'" #; RC_ARG=45
+
+fi # RC_ARG = 0
+
+
+if [ $RC_ARG -eq 0 ] ; then 
+
+RC_MAX=0   # Global return code
+
+# Loop over input dates & valid data types
+# ----------------------------------------
+cymd=$cymd1
+while [ $cymd -le $cymd2 ] ; do 
+#echo "dmb debug: dtypes='$dtypes'" ; echo "debug exit" ; exit
+#d echo "dm2: c='$cymd' c2='$cymd2'" ; if [ skip = it ] ; then 
+  for DTYP in $dtypes ; do 
+
+    mfile=$DTYP.$cymd
+
+    ftype=DUMP
+    if [ -z "`echo \" $ntypes \" | grep \" $DTYP \"`" ] ; then ftype=MODS ; fi
+
+    echo
+    echo "dumpmb: =========== Creating $ftype file $mfile ==========="
+
+
+# Get source data file
+#  Look first in dcom
+# -------------------
+
+#--Build dcom file spec
+
+    DCOM=${DCOMROOT}
+    [ -n "$userTANK" ] && TANK=$userTANK
+
+
+    MTSTs=''
+    MTSTs=`grep "_$DTYP " $LIST|cut -c 16-500|cut -f 1 -d#`
+    if [ -z "$MTSTs" ] ; then 
+      echo "dumpmb:  ! dType '$DTYP' not found in dumplist file ($LIST)"
+      echo "dumpmb:  ...skipping processing of $DTYP.$cymd"
+      [ $RC_MAX -lt 33 ] && RC_MAX=33
+      echo "dumpmb: ======= Finished creating $ftype file $mfile ======="
+      echo 
+      continue
+    fi # MTSTs blank (DTYP not found)
+
+#echo "dmb debug: MTSTs='$MTSTs'" ; echo "debug exit" ; exit
+
+#--cycle thru multiple msg/sub types (for group dump types)
+    dcom_src_missing='yes'
+    for mtst in $MTSTs ; do 
+      mtyp="`echo $mtst | cut -c1-3`"
+      styp="`echo $mtst | cut -c4-6`"
+
+      date_spec=$cymd
+      if [ $mtyp = '031' -a $styp -lt 100 ] ; then 
+        date_spec=`echo $cymd | cut -c1-6` 
+      fi
+
+      DSUB=$date_spec/b$mtyp
+      dspec=$TANK/$DSUB/xx$styp
+
+#--Check if dcom file exists
+      if [ -s $dspec ] ; then 
+        echo "dumpmb: ! Found dType '$DTYP' source as $DCOM type b$mtyp-$styp"
+        dcom_src_missing='no'
+        
+      else # dspec exists
+        echo "dumpmb: ! Missing dType '$DTYP' source as $DCOM type b$mtyp-$styp"
+      fi # dspec exists
+
+    done # for mtst
+
+
+#--Build MODS file spec
+
+    YYYY=`echo $cymd | cut -c1-4`
+      MM=`echo $cymd | cut -c5-6`
+    mspec=$TANK/mods/$YYYY/$MM/$DTYP/$mfile
+
+
+#--Check if dcom file exists
+#echo "dmb debug: dspec='$dspec'" ; ls -log $dspec #; echo 'debug exit' ; exit
+
+    if [ .$dcom_src_missing = .no ] ; then  # dspec exists
+
+      echo "dumpmb: ...generating MODS $mfile from this $DCOM source"
+
+# echo 'debug exit - pre gen MODS' ; exit
+
+#---Generate MODS file from dcom source
+
+#  --Run DUMPJB
+      echo
+      echo "dumpmb: Running DUMPJB script w/ args:  ${cymd}12 11.999 $DTYP"
+
+#  ----save value of DATA then set to blank; this allows dumpjb 
+#       to use the current, MODS tmp working dir (pwd) so that the 
+#       following bufr_prepmods step will be able to find the dump 
+#       files as input.
+
+      userDATA=$DATA
+      export DATA=''          ### this allows dumpjb to use its own WRKDIR
+
+
+#  ----run dump script
+
+      TIME_CENTER=$(printf "%2.2d" ${TIME_CENTER:-"12"})
+#db echo "dmb dbg: TCTR='$TIME_CENTER'  TRAD='$TIME_RADIUS'" 
+
+      [ -f $DTYP.ibm ] && /bin/rm $DTYP.ibm > /dev/null 2>&1
+      echo "time -p $DUMP ${cymd}$TIME_CENTER $TIME_RADIUS $DTYP"
+      time -p $DUMP ${cymd}$TIME_CENTER $TIME_RADIUS $DTYP  >/dev/null 2>&1
+      rc_dump=$?
+      DATA=$userDATA
+
+      echo "dumpmb: DUMPJB finished  $DTYP $cymd - RC=$rc_dump"
+
+#     if [ $rc_dump -gt 0 ] ; then 
+      if [ $rc_dump -gt 0 -a $rc_dump -ne 11 ] ; then 
+
+# ...... don't let this lead to a non-zero rc coming out of thius script!!
+##################################### if [ $rc_dump -gt $RC_MAX ] ; then RC_MAX=$rc_dump ; fi
+        if [ $rc_dump -eq 22 ] ; then 
+          msg="dumpmb: ...Dump ERROR (rc=$rc_dump):  empty source for $DTYP $cymd"
+        else
+          msg="dumpmb: ...Dump FAILED (rc=$rc_dump) for $DTYP $cymd"
+        fi # dump rc = 22
+        echo $msg
+        echo "dumpmb:   (see $WRKDIR/$DTYP.out)"
+        dcom_src_missing='yes'
+
+      else # rc_dump either = 0 or = 11
+
+#  ---Report partial dump information (cases w/ some dump types empty)
+        if [ $rc_dump -eq 11 ] ; then 
+          typ0=`grep 'HAS        0' $DTYP.out | cut -c1-7`
+          for t in $typ0 ; do
+            msg="dumpmb: ! $dtyp dump is INCOMPLETE (rc=$rc_dump) for type(s) $t"
+            echo $msg
+          done # t in typ0
+        fi # errret = 0 or = 11
+
+        msg="dumpmb: DUMPJB completed successfully - $DTYP $cymd"
+        echo $msg
+
+
+#  --Run converter program (bufr_prepmods)
+        echo
+        echo "dumpmb: Running $pgm program to create MODS file $mfile"
+        if [ -s $mfile ] ; then 
+          echo "dumpmb: !!! MODS file already exists - skipping"
+
+        else # mfile not already exist
+
+          if [ .$ftype = .MODS ] ; then 
+
+          unset FORT00 `env | grep "^FORT[0-9]\{1,\}=" | awk -F= '{print $1}'`
+          export FORT20="$DTYP.ibm"
+          export FORT21="$BTAB"
+          export FORT50="$DTYP.$cymd"
+
+          echo "dumpmb:   exec = '$MODX'"
+          echo "dumpmb:   BUFR table = '$FORT21'"
+
+          if [ ! -s $DTYP.ibm -o ! -s $BTAB ] ; then 
+            echo 
+            echo "dumpmb: ERROR: - bufr_prepmods input ($DTYP.ibm) missing"
+            echo "dumpmb: Skipping creation of MODS file $mfile"
+            rc_modx=55
+          else # modx inputs not found
+
+            echo "time -p $MODX"
+            time -p $MODX
+            rc_modx=$?
+            echo "dumpmb: $pgm finished  $DTYP $cymd - RC=$rc_modx"
+          fi # modx inputs not found
+
+#  --skip converter exec & simply copy dump file to final file name
+          else # ftype != MODS
+            if [ ! -s $DTYP.ibm ] ; then 
+              echo 
+              echo "dumpmb: ERROR: - dump output file ($DTYP.ibm) missing"
+              echo "dumpmb: Skipping creation of $ftype file $mfile"
+              rc_modx=55
+            else # DTYP.ibm exists
+              echo "dumpmb: ! *** NOT! Skipping exec of $pgm program ***"
+              echo "dumpmb: !    Copying dump file directly to $mfile"
+              echo "  cp $DTYP.ibm $mfile"
+              cp $DTYP.ibm $mfile
+              rc_modx=0
+            fi # DTYP.ibm missing
+          fi # ftype = MODS
+
+          if [ $rc_modx -ne 0 ] ; then
+
+            if [ $rc_modx -gt $RC_MAX ] ; then RC_MAX=$rc_modx ; fi
+
+            msg="dumpmb: $pgm FAILED for $DTYP $cymd"
+            echo $msg
+            msg="dumpmb: ...saving output as `pwd`/$mfile.err"
+            echo $msg
+            mv $mfile $mfile.err
+
+
+          else # rc_modx = 0
+            msg="dumpmb: $pgm completed successfully - $DTYP $cymd"
+            echo $msg
+            echo
+
+
+#---Save MODS file to user space
+            echo "dumpmb: Copying $ftype file to user dir"
+            if [ -s $DATA/$mfile ] ; then 
+              echo "dumpmb: ...overwriting local file ($DATA/$mfile)"
+            fi # local mfile exists
+            echo "  cp $mfile $DATA/"
+            cp $mfile $DATA/
+#           chmod 644 $DATA/$mfile
+
+          fi # mfile exists
+        fi # rc_modx != 0
+      fi # rc_dump > 0
+
+    fi # .$dcom_src_missing = .no (dspec exists)
+
+    if [ .$dcom_src_missing != .no ] ; then  # dspec does not exist
+      echo "dumpmb: ! dType '$DTYP' ($cymd) not found as $DCOM type b$mtyp-$styp"
+
+
+# With no dcom file available, look in MODS
+# -----------------------------------------
+
+#--Check if MODS file exists
+
+      if [ -s $mspec ] ; then 
+        echo "dumpmb: ! Found MODS file ($mfile) in online archive"
+        echo "dumpmb: ...copying this archive file to user dir"
+        if [ -s $DATA/`basename $mspec` ] ; then 
+          echo "dumpmb: ...overwriting local file ($DATA/`basename $mspec`)"
+        fi # local basename mfile exists
+        echo "  cp -p $mspec $DATA/"
+        cp -p $mspec $DATA/
+        chmod 644 $DATA/$mfile
+
+      else # MODS file not exist
+        echo "dumpmb: ! MODS file ($mfile) not found in archive"
+
+
+# Data not found in dcom nor MODS holdings
+# ----------------------------------------
+
+        echo "dumpmb: !!! No online data available for dType '$DTYP' on $cymd"
+        if [ 32 -gt $RC_MAX ] ; then RC_MAX=32 ; fi
+      fi # MODS file exists
+    fi # .$dcom_src_missing ~= .no (dspec exists)
+
+    echo "dumpmb: ======= Finished creating $ftype file $mfile ======="
+    echo 
+  done # for DTYP 
+
+#d fi # skip it
+
+  cymd=`$NDATE 24 ${cymd}12 | cut -c1-8`
+# cymd=`$FDATE ${cymd}12 P+1`
+# sh /nwprod/util/ush/finddate.sh `today` P+1 
+done # while in date range
+
+
+echo
+echo "dumpmb: MODS Dump processing done w/ highest ret code RC=$RC_MAX"
+
+if [ $RC_MAX -eq 0 ] ; then 
+  cd $userDATA
+  [ -n "$WRKDIR" ] && /bin/rm -rf $WRKDIR
+else
+# echo "dumpmb:  Error Return was non-zero somewhere in job."
+  echo "dumpmb:  ...keeping Working Dir ($WRKDIR)."
+  echo 
+fi # RC_MAX = 0
+
+
+# Pass error return from argument parsing
+# ---------------------------------------
+else # RC_ARG != 0
+  RC_MAX=$RC_ARG
+
+  echo "dumpmb: ERROR - MODS Dump processing aborted w/ highest ret code RC=$RC_MAX"
+fi # RC_ARG = 0
+
+
+# Close script
+# ------------
+echo 'dumpmb: ============================================================'
+echo 'dumpmb:             This execution of dumpmb is finished'
+echo "dumpmb:            End time: `date`"
+echo 'dumpmb: ============================================================'
+
+exit $RC_MAX
+#---end of dumpmb.ksh

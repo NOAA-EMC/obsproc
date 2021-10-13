@@ -1,0 +1,160 @@
+
+ THESE CARDS VALID FOR GSI/NAM DATA PREPROCESSOR
+
+ &RGRID
+   POLA  = FALSE, NORTH =  TRUE, ALONVT=-90.00, POLEI =  5.00,
+   POLEJ =360.00, XMESHL=  5.00,
+ /
+ &LDTA
+   IRNMRK    =    6,
+   PG4243    =FALSE,
+   UWINDO    = 150., RWINDO    = 150., DWINDO    = 150.,
+   FLDMGS    =FALSE, FLDMAF    =FALSE, FLDMFR    = TRUE,
+   KTEMP     = TRUE, AWINDO    = 6*325., 2*325., 10*325.,
+   JAMASS    = 6*0, 6*0, 6*0, 3*0, 3*0, 6*0, 6*0, 6*0, 6*0, 6*0,
+   JAWIND    = 6*0, 6*0, 6*0, 3*0, 3*0, 6*0, 6*0, 6*0, 6*0, 6*0,
+   IACFTL    =  100,-200,-200,-200,-200,-200,-200,-200,-200,
+   AIFNOW    =9*TRUE,
+   FLACMS    = TRUE, TRUE, TRUE,FALSE, FALSE, TRUE, TRUE, TRUE, TRUE,
+
+             !goes-o/e  insat   jma    eumt-o/e aqua/terra
+             !-------- ------- ------- -------- ----------
+   SWINDO_e = 12*-200.,6*-200.,6*-200.,12*-075.,12*-200., ! conventional IR/LW
+              12*-200.,6*-200.,6*-200.,12*-075.,12*-200., ! conventional WV
+              12*-200.,6*-200.,6*-200.,12*-075.,12*-200., ! conventional VIS
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! hi-density IR/LW
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! hi-density VIS
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! hi-den imgr c-top WV
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! hi-den imgr d-lyr WV
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! hi-den sndr c-top WV
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! hi-den sndr d-lyr WV
+              12*-150.,6*-150.,6*-150.,12*-150.,12*-200., ! picture triplet
+
+             !goes-o/e  insat   jma    eumt-o/e aqua/terra
+             !-------- ------- ------- -------- ----------
+   SWINDO_l = 12*+200.,6*+200.,6*+200.,12*+025.,12*+200., ! conventional IR/LW
+              12*+200.,6*+200.,6*+200.,12*+025.,12*+200., ! conventional WV
+              12*+200.,6*+200.,6*+200.,12*+025.,12*+200., ! conventional VIS
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! hi-density IR/LW
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! hi-density VIS
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! hi-den imgr c-top WV
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! hi-den imgr d-lyr WV
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! hi-den sndr c-top WV
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! hi-den sndr d-lyr WV
+              12*+150.,6*+150.,6*+150.,12*+150.,12*+200., ! picture triplet
+
+           !goes-odd goes-evn insat jma eumt-odd eumt-evn aqua terra
+           !-------- -------- ---  ---  -------  -------  ---  ---
+   SWNLND = 4*T,2*F, 4*T,2*F, 6*F, 6*F, 4*T,2*F, 4*T,2*F, 6*T, 6*T,! cnvl IR/LW
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 4*T,2*F, 4*T,2*F, 6*T, 6*T,! cnvl WV
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 4*T,2*F, 4*T,2*F, 6*T, 6*T,! cnvl VIS
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! hd IR/LW
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! hd VIS
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! hd im ct WV
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! hd im dl WV
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! hd sn ct WV
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! hd sn dl WV
+            4*T,2*F, 4*T,2*F, 6*F, 6*F, 6*F,     6*F,     6*T, 6*T,! pic triplet
+
+           !goes-o goes-e  insat   jma  eumt-o eumt-e  aqua  terra
+           !------ ------ ------ ------ ------ ------ ------ ------
+   JSMASS = 6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! cnvl IR/LW
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! cnvl WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! cnvl VIS
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd IR/LW
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd VIS
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd i ct WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd i dl WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd s ct WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd s dl WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! pic trplet
+
+           !goes-o goes-e  insat   jma  eumt-o eumt-e  aqua  terra
+           !------ ------ ------ ------ ------ ------ ------ ------
+   JSWIND = 6*9999,6*9999,6*9999,6*0000,6*0099,6*0199,6*9999,6*9999,! cnvl IR/LW
+            6*9999,6*9999,6*9999,6*0000,6*0000,6*0000,6*9999,6*9999,! cnvl WV
+            6*9999,6*9999,6*9999,6*0000,6*0099,6*0199,6*9999,6*9999,! cnvl VIS
+            6*0000,6*0000,6*9999,6*9999,6*9999,6*9999,6*0000,6*0000,! hd IR/LW
+            6*0000,6*0000,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd VIS
+            6*0000,6*0000,6*9999,6*9999,6*9999,6*9999,6*0000,6*0000,! hd i ct WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*0000,6*0000,! hd i dl WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd s ct WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd s dl WV
+            6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! pic trplet
+
+   PRFLER    = TRUE, TRUE, TRUE,FALSE,  PWINDO    = 4*250.,
+   VADWIN    = TRUE, VWINDO    = 150., IVADFL    =5,     IVADSP    =2,
+   RASS      = TRUE, TWINDO    = 150.,
+
+   TOVEDS    =FALSE,FALSE,               ! TOVS eds     rtovs/atovs
+   TOVBFR    =FALSE,FALSE,               ! TOVS bufr    rtovs/atovs
+     TOVRAD    =FALSE,                   ! TOVS rad
+     TOVRTV    =FALSE,                   ! TOVS sndg
+   TR80KM    = TRUE,                     ! TOVS resolution (full or 250km)
+
+   GOESND    =FALSE,FALSE,               ! GOES sndg 5x5/1x1
+   GOESPW    =FALSE,FALSE,               ! GOES PW   5x5/1x1
+   GOESRD    =FALSE,FALSE,               ! GOES rad  5x5/1x1
+   GOESCT    =FALSE,TRUE,                ! GOES CT   5x5/1x1
+
+   IWINDO_e  = 20*-2,                    ! TOVS (all types/sats)
+               5*-150, 5*-150,           ! GOES sndg/rad   even1/odd1
+               5*-150, 5*-150,           ! GOES sndg/rad   even2/odd2
+               5*-150, 5*-150,           ! GOES PW         even1/odd1
+               5*-150, 5*-150,           ! GOES PW         even2/odd2
+               5*-325, 5*-300,           ! GOES CT         even1/odd1
+               5*-300, 5*-300,           ! GOES CT         even2/odd2
+
+   IWINDO_l  = 20*+2,                    ! TOVS (all types/sats)
+               5*+150, 5*+150,           ! GOES sndg/rad   even1/odd1
+               5*+150, 5*+150,           ! GOES sndg/rad   even2/odd2
+               5*+150, 5*+150,           ! GOES PW         even1/odd1
+               5*+150, 5*+150,           ! GOES PW         even2/odd2
+               5*-025, 5*-001,           ! GOES CT         even1/odd1
+               5*-001, 5*-001,           ! GOES CT         even2/odd2
+
+   SATMST    = 80*FALSE,                 ! TOVS & GOES sndg (all sats)
+
+   ISATLS    =  5*2, 5*2,                ! TOVS sndg/rad   even/odd
+                10*2,                    !   -- meaningless --
+                5*2, 5*2,                ! GOES sndg/rad   even1/odd1
+                5*2, 5*2,                ! GOES sndg/rad   even2/odd2
+                5*1, 5*1,                ! GOES PW         even1/odd1
+                5*1, 5*1,                ! GOES PW         even2/odd2
+                5*0, 5*0,                ! GOES CT         even1/odd1
+                5*0, 5*0,                ! GOES CT         even2/odd2
+
+   IRTRV     =  5*9999, 0,0,544,0,0,     ! TOVS sndg       even/odd
+               10*9999,                  !   -- meaningless --
+                5*9999, 5*9999,          ! GOES sndg       even1/odd1
+                5*9999, 5*9999,          ! GOES sndg       even2/odd2
+                5*9999, 5*9999,          ! GOES PW         even1/odd1
+                5*9999, 5*9999,          ! GOES PW         even2/odd2
+                5*9999, 5*0,             ! GOES CT         even1/odd1
+                5*9999, 5*0,             ! GOES CT         even2/odd2
+
+   KTOP      = 20*23,                    ! TOVS sndg
+               60*0,                     ! GOES sndg
+
+   NPKRPT    = 12*TRUE,
+   FWINDO    = 12*150.,
+   JSURFM(3) = 9999, JSURFM(7) = 9999, JSURFM(11) = 9999,
+   JSURFW    = 0,0,9999,0,9999,0,9999,0,0,0,9999,0,
+   PFRALT    = TRUE,
+   JPSSMI    =  6*9999, 6*9999, 6*9999, 6*9999, XWINDO = 24*150.,
+   JPERSD    =  6*9999,
+   JPQKSD    =  6*9999,
+   JPWDSD    =  6*0,
+   JPASCD    =  6*0,
+   JPGPSD    =  6*0, GWINDO    = 150.,
+   LFMAXI    =    0, LEVPM     =   21, LEVST     =   21,
+   LEVQQ     =   21, TDLIM     = 215., MODPRT    =  500,
+   IPRINT    =    0
+ /
+ &PARM
+ /
+
+ &PREVDATA
+   DOVTMP= TRUE, DOFCST= FALSE, DOBERR= TRUE
+ /
+

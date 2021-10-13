@@ -1,0 +1,236 @@
+# This file specifies the directories to be transfered and, optionally, the files within
+# those directories to include or exclude.  If one directory is specified per line, it
+# will be used as both the source and destination.  If two directories are specified per
+# line, separated by one or more spaces, the first will be used as the source and the
+# second the destination.  Directories that begin with "com/" will be resolved using
+# the compath.py utility.  Rules may be placed below each directory or directory pair
+# and must begin with one of the following characters:
+#  -  exclude, specifies an exclude pattern
+#  +  include, specifies an include pattern
+#  .  merge, specifies a merge-file to read for more rules
+#  :  dir-merge, specifies a per-directory merge-file
+#  H  hide, specifies a pattern for hiding files from the transfer
+#  S  show, files that match the pattern are not hidden
+#  P  protect, specifies a pattern for protecting files from deletion
+#  R  risk, files that match the pattern are not protected
+#  !  clear, clears the current include/exclude list (takes no arg)
+#  B  bytes, relative size of the path in relation to the other paths in the list
+#  D  delete, delete extraneous files from destination directories (takes no arg)
+#  E  encrypt, enables data encryption [two cores should be allocated] (takes no arg)
+#  T  two-way syncronization will update both sides with latest changes (takes no arg)
+#  Z  compress data as it is sent, accepts optional compression level argument (1-9)
+# Rules higher in the list take precedence over lower ones.  By default, all files in a
+# directory are included, so if no exclude patterns match that file, it will be
+# transferred.
+
+com/hourly/_ENVIR_/hourly._PDY_/
+B 1100
+Z
+
+com/hourly/_ENVIR_/radar._PDY_/
+B 2600
+Z
+
+com/hourly/_ENVIR_/nesdis._PDY_/
+B 8
+Z
+
+com/hourly/_ENVIR_/uv._PDY_/
+B 226
+E
+Z
+
+com/hourly/_ENVIR_/gaugeqc/
++ /_PDYm1_.eval*
+- /????????.eval*
++ /_PDYm1_.good*
+- /????????.good*
++ /_PDYm1_.precip
+- /????????.precip
++ /_PDYm1__day.neigh
+- /????????_day.neigh
++ /_PDYm1__hour.neigh
+- /????????_hour.neigh
++ /z_PDYm1_.tar.gz
+- /z????????.tar.gz
++ usa-dlyprcp-_PDYm1_
+- usa-dlyprcp-????????
++ hrly.prcp.day._PDYm1_
+- hrly.prcp.day.????????
+B 2430
+Z
+
+com/dump/_ENVIR_/dump._PDY_/
+B 3
+Z
+
+com/nawips/_ENVIR_/gpspw._PDY_/
+B 65
+Z
+
+# Phase 1
+/com/gfs/_ENVIR_/sst._PDY_/
+B 289
+E
+Z
+
+com/gfs/_ENVIR_/sst._PDY_/
+B 289
+E
+Z
+
+com/accounting/_ENVIR_/tracker._PDY_/
+B 1
+Z
+
+com/realtime/_ENVIR_/hourly._PDY_/
+B 1
+Z
+
+com/hourly/_ENVIR_/radar._PDYm1_18/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDYm1_19/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDYm1_20/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDYm1_21/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDYm1_22/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDYm1_23/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_00/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_01/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_02/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_03/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_04/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_05/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_06/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_07/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_08/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_09/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_10/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_11/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_12/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_13/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_14/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_15/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_16/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_17/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_18/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_19/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_20/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_21/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_22/
+B 17070
+# This directory is a good candidate for compression
+#Z
+com/hourly/_ENVIR_/radar._PDY_23/
+B 17070
+# This directory is a good candidate for compression
+#Z
+
+/dcom/us007003/nexrad_level2/
++ radar_mosaic.history
+- *
+B 1
+Z
+
+com/hourly/_ENVIR_/hourly._PDYm1_/
+B 1100
+Z
+
+com/hourly/_ENVIR_/radar._PDYm1_/
+B 2600
+Z
+
+# Phase 1
+/com/gfs/_ENVIR_/sst._PDYm1_/
+B 289
+E
+Z
+
+com/gfs/_ENVIR_/sst._PDYm1_/
+B 289
+E
+Z
+
+

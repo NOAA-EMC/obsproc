@@ -1,0 +1,224 @@
+#!/bin/bash
+# JMODS
+#  job script to trigger MODBUFR file processing
+#
+# modification history
+# 26 Feb 2019 JWhiting cp'd fr /nwprod/jobs/JMODS of 17 Jun 2014
+#              config'd for phase 3 (versioned utils, etc)
+#               rm'd RUN_ENVIR var; added KEEPDATA var
+#               rm'd refs to SENDDBN
+#----
+
+echo : echo "JMODS: welcome to j-job script ($(date -u))" ; echo
+
+set -xa                                                                         
+
+###################################################################
+# Set DEBUG LEVEL - modifies info in execution trace prompt string
+###################################################################
+export DEBUG_LEVEL=${DEBUG_LEVEL=1}
+case $DEBUG_LEVEL in
+  1) export PS4='+ ${SECONDS}s + ' ;;       # add seconds (this is typical case)
+  0) export PS4='+ ';;                      # don't include seconds (useful if
+                                            #  want to diff output from 2 runs)
+  2) export PS4='+ ${SECONDS}s:L$LINENO + ';;         # add script line #
+  3) export PS4='+ ${SECONDS}s:${0##*/}:L$LINENO + ';;# add script name & line #
+  4) export PS4='+ ${0##*/}:L$LINENO + ';;  # script name & line (no seconds)
+  *) echo "Unrecognized DEBUG_LEVEL.  Stay with current PS4 setting";;
+esac
+
+########################################
+# Check that required variables are set
+########################################
+set +x
+echo
+echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
+echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
+echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
+echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
+echo "DCOMROOT is ${DCOMROOT:?"###FATAL ERROR 'DCOMROOT' is not set"}"
+echo
+set -x
+
+################################
+# Print out version information
+################################
+set +x
+echo
+echo "####################################################################"
+echo
+echo "OBSPROC version used by this job is ${obsproc_ver:-not set}"
+echo "BUFR_UTIL version used by this job is ${bufr_util_ver:-not set}"
+echo
+echo "####################################################################"
+echo
+set -x
+
+#####################################################################
+# List modules loaded for this job
+#   On luna/surge may need to initialize the Modules package to find
+#   the module command.  Will do so for either system.
+#####################################################################
+if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
+  . /opt/modules/default/init/sh 2>/dev/null
+elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
+  . /usrx/local/Modules/default/init/sh 2>/dev/null
+fi
+set +x
+echo
+echo "####################################################################"
+echo
+      module list
+echo
+echo "####################################################################"
+echo
+set -x
+
+# ####  5/26/2004 #############################
+# SETUP MODSBUFR DUMP PROCESSING VARIABLES
+# #############################################
+
+##########################
+# Specify NET and RUN Name
+##########################
+export NET=${NET:-mods}
+export RUN=${RUN:-mods}
+
+###################################################
+# obtain unique process id (pid) and make temp directory
+###################################################
+export pid=$$
+#export DATA=${DATA:-/tmpnwprd1/$job.$pid}
+jobid=${jobid:-${job}.$(hostname -s).$$}
+export DATA=${DATA:-$DATAROOT/${jobid}}
+mkdir -p $DATA
+cd $DATA
+
+export cycle=t${cyc}z
+
+####################################
+# Determine Job Output Name on System
+####################################
+export outid="LL$job"
+[ $envir != prod ]  && export outid="LL${job}_${envir}"
+export jobid="${outid}.o${pid}"
+export pgmout="OUTPUT.${pid}"
+
+######################################
+# Set job log file for postmsg output
+######################################
+jlogfile=${jlogfile:-${DATA}/jlogfile}
+
+
+#################################################
+# SENDCOM      - Copy files to $COMOUT directory
+# SENDECF      - Flag Events on ECFLOW
+#################################################
+export SENDCOM=${SENDCOM:-YES}
+export SENDECF=${SENDECF:-YES}
+
+
+####################################
+# Specify Execution Areas
+####################################
+
+# -------------------------------
+# Paths for obsproc items
+# -------------------------------
+export HOMEobsproc=${HOMEobsproc:\
+-${NWROOT:?}/obsproc.${obsproc_ver:?\
+"###FATAL ERROR \"obsproc_ver\" is not set"}}
+
+# ---------------------------------------
+# Paths for dump and bufr_dumplist items
+# ---------------------------------------
+export HOMEbufr_util=${HOMEbufr_util:\
+-${NWROOT:?}/bufr_util.${bufr_util_ver:?\
+"###FATAL ERROR \"bufr_util_ver\" is not set"}}
+
+export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
+export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+
+# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
+
+# directory path to data dump script executed in model script
+# -----------------------------------------------------------
+export ushscript_dump=${ushscript_dump:-$USHbufr_util}
+
+export EXECmods=${EXECmods:-$HOMEobsproc/exec}
+export USHmods=${USHmods:-$HOMEobsproc/ush}
+export BTABdir=${BTABDIR:-$HOMEobsproc/fix}
+
+export DUMP=${DUMP:-$HOMEbufr_util/ush/dumpjb}
+
+#########################################################################
+# Add some prod utilities to working directory (replaces obsolete setup.sh)
+#########################################################################
+echo "step ############# break ##############################" > ./break
+cp $UTILROOT/ush/err_chk   .; chmod +x err_chk
+cp $UTILROOT/ush/err_exit  .; chmod +x err_exit
+cp $UTILROOT/ush/prep_step .; chmod +x prep_step
+cp $UTILROOT/ush/postmsg   .; chmod +x postmsg
+cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
+
+##############################
+# Run setpdy and initialize PDY variables
+##############################
+setpdy.sh
+. PDY
+
+##################################################
+# Define COMOUT directory  (no COMIN for this job)
+##################################################
+
+export COMOUT=${COMOUT:-${COMROOT:?}/obsproc/${NET}.${PDY}}
+mkdir -m 775 -p $COMOUT
+
+##############################################
+# Define location of MODS tanks
+##############################################
+# -- need to set DCOMROOT subdir (dfix) per system
+
+if [[ "$DCOMROOT" =~ "dell" ]] ; then
+    # export dfix=${dfix:-${envir:?"$env_msg"}}             # phase 3
+    export dfix=${dfix:-prod}             # phase 3
+  else
+    export dfix=${dfix:-us007003}                         # phase 1
+  fi # DCOMROOT contains 'dell'
+
+# export MODSDIR=${MODSDIR:-${DCOMROOT}/$dfix/mods}
+export MODSDIR=${MODSDIR:-${DCOMROOT}/${envir}/mods}
+
+
+env ; echo "JMODS: end of env listing" ; echo 
+ set -x
+
+###################################################
+# Execute the script
+###################################################
+$HOMEobsproc/scripts/exmods.sh.ecf
+err_exmods=$?
+[[ $err_exmods -ne 0 ]] && $DATA/err_exit
+
+
+# -- write out job & version info to COMOUT files
+
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_ran
+
+> $COMOUT/obsproc_version_for_${cycle}_${RUN}_run
+[ -n "$obsproc_ver" ]  &&  \
+ echo "OBSPROC version is $obsproc_ver" >> \
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_run
+[ -n "$bufr_util_ver" ]  &&  \
+ echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_run
+
+
+if [ "$KEEPDATA" != YES ]; then
+   cd $DATAROOT
+   rm -rf $DATA
+fi
+date -u
+
+exit $err_exmods
+

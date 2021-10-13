@@ -1,0 +1,59 @@
+#%Module1.0 ###################################################################
+##
+##                                                        Jeff.Whiting@noaa.gov
+##                                                        NOAA/NWS/NCEP/EMC
+## dumpmb modulefile
+##
+## 2019/02/26 JWhiting - original file, created w/ obsproc_mods.v1.0.0;
+##                       cp'd fr dumpjb/v5.0.1 ; adjusted for dumpmb/v1.0.0
+## 2020/03/26 NCO SPA  - removed all references to ph1/ph2; increment to v1.0.1
+##
+proc ModulesHelp { } {
+	puts stderr "Set up environment for bufr utility script dumpmb\n"
+}
+
+module-whatis   "Sets environment variables to find & run dumpmb utility"
+
+set envir     prod
+set ver       1.0.1
+
+conflict     dumpmb
+if { [regexp {^/gpfs/hps} [file normalize $ModulesCurrentModulefile]] } {
+  # Cray-XC40
+  set base    /gpfs/hps/nco/ops/nw${envir}/obsproc_mods
+} elseif { [regexp {^/gpfs/del} [file normalize $ModulesCurrentModulefile]] } {
+  # Dell-p3
+  set base    /gpfs/dell1/nco/ops/nw${envir}/obsproc_mods
+} else {
+  # IBM-p1/2
+  set base    /nw${envir}2/obsproc_mods
+}
+
+set        obsproc_mods_ver    v$ver
+set        HOMEobsproc_mods    $base.${obsproc_mods_ver}
+
+setenv        obsproc_mods_ver    ${obsproc_mods_ver}
+setenv        HOMEobsproc_mods    ${HOMEobsproc_mods}
+setenv        DUMPMB              ${HOMEobsproc_mods}/ush/dumpmb
+prepend-path  PATH                ${HOMEobsproc_mods}/ush
+
+if { [module-info mode load] } {
+   if { ![info exists env(LIST)] 
+     && ![info exists env(HOMEobsproc_shared_bufr_dumplist)]
+     && ![info exists env(obsproc_shared_bufr_dumplist_ver)]} {
+	puts stderr "\n  The dumpmb utility requires that the bufr_dumplist file be specified."
+	puts stderr "  You may get this by invoking 'module load bufr_dumplist'"
+        puts stderr "                    -OR- "
+	puts stderr "  set one of the following environment variables in order for dumpmb to find the"
+	puts stderr "  bufr_dumplist file you want to use:"
+	puts stderr "     * LIST (pointer to specific bufr_dumplist file)"
+	puts stderr "     * DFIX (pointer to directory containing bufr_dumplist file)"
+	puts stderr "     * HOMEobsproc_shared_bufr_dumplist (directory containing fix/bufr_dumplist)"
+	if { [regexp {^/gpfs/hps} [file normalize $ModulesCurrentModulefile]] } {
+	   puts stderr "     * obsproc_shared_bufr_dumplist_ver (a production version available on luna/surge)"
+	} else {
+	   puts stderr "     * obsproc_shared_bufr_dumplist_ver (a production version available on tide/gyre)"
+	}
+	puts stderr ""
+   }
+}

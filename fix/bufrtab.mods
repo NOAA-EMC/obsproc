@@ -1,0 +1,406 @@
+.------------------------------------------------------------------------------.
+* bufrtab.mods -  7 Mar 2011                                                   |
+*   5 Oct 2007 - copied from mods.buftable of 27 Sep 2005 09:24, renamed       |
+*              - added Envisat altimeter (NC031109, envsal)                    |
+*   8 Mar 2011 - added SHIPSU entry                                            |
+*              - added restriction fields (RSRD, EXPRSRD) to SHIPS             |
+*                                                                              |
+| ------------   USER DEFINITIONS FOR TABLE-A TABLE-B TABLE D   -------------- |
+|------------------------------------------------------------------------------|
+| MNEMONIC | NUMBER | DESCRIPTION                                              |
+|----------|--------|----------------------------------------------------------|
+|          |        |                                                          |
+*                                                                              |
+* TABLE A ENTRIES FOR MODS MESSAGE TYPES                                       |
+*   -- DATATYPES FROM OPERATIONAL DATA STREAMS (/DCOM)                         |
+*                                                                              |
+| METAR    | A50100 | TYPE 000-007 METAR SURFACE DATA                          |
+| SHIPS    | A50101 | 001001 Surface Marine Ship, Restricted                   |
+| DBUOY    | A50102 | TYPE 001-002 SURFACE MARINE BUOY (FM 18)                 |
+| DBUOYSUB | A50103 | TYPE 031-??? SUB-SURFACE MARINE BUOY (FM 18)             |
+| MBUOY    | A50104 | TYPE 001-003 SURFACE MARINE BUOY (FM 13)                 |
+| LCMAN    | A50105 | TYPE 001-004 SURFACE MARINE CMAN STATION                 |
+| TIDEG    | A50106 | TYPE 001-005 SURFACE TIDE GAUGE DATA (CREX)              |
+| SLPBG    | A50107 | TYPE 001-006 MEAN SEA LEVEL PRESSURE BOGUS               |
+| CSTGD    | A50108 | TYPE 001-007 SURFACE MARINE COAST GUARD STATION          |
+| SSTNV    | A50109 | TYPE 012-010 NAVY/POES Lo-Res. Sea Surface Temp          |
+| SSTNS    | A50110 | TYPE 012-011 NESDIS/POES Sea Surface Temperatures        |
+| SSTNVH   | A50111 | TYPE 012-012 NAVY/POES Hi-Res. Sea Surface Temp          |
+| SSMIPN   | A50112 | TYPE 012-103 DMSP/SSM/I - Neural Net 3 Products          |
+| BATHY    | A50113 | TYPE 031-001 OCEANOGRAPHIC -- BATHYTHERMAL               |
+| TESAC    | A50114 | TYPE 031-002 OCEANOGRAPHIC -- TESAC                      |
+| TRKOB    | A50115 | TYPE 031-003 OCEANOGRAPHIC -- TRACKOB                    |
+| ERSHAL   | A50116 | TYPE 031-011 NLSA ERS2 ALTIMETER HIGH-RES REGIONAL       |
+| TOPHAL   | A50117 | TYPE 031-012 NLSA TOPEX ALTIMETER HIGH-RES REGIONAL      |
+| TOPLAL   | A50118 | TYPE 031-013 NLSA TOPEX ALTIMETER LOW-RES GLOBAL         |
+| GFOHAL   | A50119 | TYPE 031-014 NLSA GFO ALTIMETER HIGH-RES REGIONAL        |
+| NERSAL   | A50120 | TYPE 031-101 NAVOCEANO ALPS ERS2 ALTIMETER HI-RES GLBL   |
+| NGFOAL   | A50121 | TYPE 031-102 NAVOCEANO ALPS GFO ALTIMETER HI-RES GLBL    |
+| NTPXAL   | A50122 | TYPE 031-103 NAVOCEANO ALPS TOPEX ALTIMETER HI-RES GLBL  |
+| NJSNAL   | A50123 | TYPE 031-104 NAVOCEANO ALPS JASON ALTIMETER HI-RES GLBL  |
+| ENVSAL   | A50124 | 031109 ENVISAT/NAVOCEANO ALPS SSHA hi-res gbl altimeter  |
+| SHIPSU   | A50125 | 001013 SURFACE MARINE SHIP                               |
+*                                                                              |
+*                                                                              |
+*   TABLE D ENTRIES FOR SEQUENCES DEFINED IN TABLE A ENTRIES                   |
+*                                                                              |
+| STMP3    | 350024 | Sea-temperature at specified depth (increased precision) |
+| SALN3    | 350025 | Salnity (increased precision)                            |
+| OB_TIME  | 350026 | Observation Date & Time                                  |
+| RC_TIME  | 350027 | Report Receipt Time Data                                 |
+| SEA_AIR  | 350028 | Sfc Air Parms (Pres, Temp, Winds) & Quality Marks        |
+| SUB_SFC  | 350029 | Sub surface Depth, Temp, Salinity, Current               |
+| STMP_WFB | 350030 | Sea-temperature at specified depth with feedback         |
+| SALN_WFB | 350031 | Salinity with feedback                                   |
+| CRNT_WFB | 350032 | Current with feedback                                    |
+| SST1_WFB | 350033 | Sea surface Temperature with feedback                    |
+| TERC_WFB | 350034 | Tidal elevation (local chart) with feedback              |
+| TIDE_WFB | 350035 | Meteological residual tidal elevation with feedback      |
+| SLHD_WFB | 350036 | Sea-level hgt dev (3yr mean, 1993-1995) with feedback    |
+| SLH1_WFB | 350037 | Sea-level hgt dev (8yr mean, 1993-2000) with feedback    |
+| WSOS_WFB | 350038 | Ocean surface wind speed with feedback                   |
+| AVGPERD  | 350039 | AVERAGING PERIODS FOR TRACKOB PARAMETERS                 |
+*                                                                              |
+*                                                                              |
+*   TABLE B ENTRIES                                                            |
+*                                                                              |
+| RPID     | 001198 | Report identifier                                        |
+| CLONH    | 006001 | Longitude (high accuracy)                                |
+| CLATH    | 005001 | Latitude (high accuracy)                                 |
+| SELV     | 007001 | Height of station                                        |
+| SEQNUM   | 035195 | Channel sequence number                                  |
+| CORN     | 033215 | Corrected report indicator                               |
+| TOST     | 002001 | Type of station                                          |
+| TIWM     | 002002 | Type of instrument for wind measurement                  |
+| MSST     | 002038 | Method of sea-surface temperature measurement            |
+| ASMP     | 001200 | Speed of motion of ship during last 3 hours              |
+| QMST     | 033218 | SDMEDIT quality mark for sea-surface temperature         |
+| QCLS     | 033027 | Location quality class (range of radius of               |
+| QDEP     | 025086 | Depth correction indicator                               |
+| QCTSP    | 033239 | Quality control indicator for temp/salinity profil       |
+| QCCUR    | 033240 | Quality control indicator for current profile            |
+| QBST     | 033022 | Quality of buoy satellite transmission                   |
+| QCIL     | 033023 | Quality of buoy location                                 |
+| PSYR     | 004195 | Year   - last known position of buoy                     |
+| PSMN     | 004196 | Month  - last known position of buoy                     |
+| PSDY     | 004197 | Day    - last known position of buoy                     |
+| PSHR     | 004198 | Hour   - last known position of buoy                     |
+| PSMI     | 004199 | Minute - last known position of buoy                     |
+| PLDS     | 001014 | Platform drift speed (high precision)                    |
+| DOMO     | 001012 | Direction of motion of moving observing platform         |
+| DLATH    | 027001 | Latitude (high accuracy)                                 |
+| DLONH    | 028001 | Longitude (high accuracy)                                |
+| DROT     | 002034 | Drogue type                                              |
+| DROD     | 007070 | Drogue depth                                             |
+| HPLE     | 002168 | Hydrostatic pressure at lower end of cable               |
+| CALT     | 002035 | Cable length                                             |
+| BUYT     | 002149 | Type of data buoy                                        |
+| ANHT     | 007204 | Anemometer height                                        |
+| AHAC     | 007064 | Height above station (sensor height artificially         |
+| ANTP     | 002169 | Anemometer type                                          |
+| MSDM     | 002033 | Method of salinity/depth measurement                     |
+| MRMV     | 002040 | Method of removing velocity and motion of platform       |
+| DTCC     | 002031 | Duration and time of current code measure                |
+| AWCK     | 022120 | Tide station automated water level check                 |
+| MWCK     | 022121 | Tide station manual water level check                    |
+| AMCK     | 022122 | Tide station automated meteorological data check         |
+| MMCK     | 022123 | Tide station manual meteorological data check            |
+| PMSL     | 010051 | Pressure reduced to mean sea level                       |
+| SECO     | 004006 | Second                                                   |
+| SSTYPE   | 006193 | SST obs type                                             |
+| SSTSRC   | 006194 | SST obs source                                           |
+| SAID     | 001007 | Satellite identifier                                     |
+| ORBN     | 005040 | Orbit number                                             |
+| SCNN     | 005201 | Scan number                                              |
+| SFTG     | 020217 | SSM/I surface tag                                        |
+| POSN     | 005202 | Position number                                          |
+| PH2O     | 013193 | Total precipitable water                                 |
+| CH2O     | 013192 | Cloud water                                              |
+| QMAT     | 033193 | SDMEDIT/QUIPS quality mark for air temperature           |
+| TMDB     | 012101 | Temperature/dry-bulb temperature                         |
+| QMWN     | 033195 | SDMEDIT/QUIPS quality mark for wind                      |
+| WDIR     | 011001 | Wind direction                                           |
+| WSPD     | 011002 | Wind speed                                               |
+| TOWD     | 022063 | Total water depth                                        |
+| IDGT     | 002032 | Indicator for digitization                               |
+| IWTEMP   | 022067 | Instrument type for water temperature profile            |
+| WTEMPR   | 022068 | Water temperature profile recorder types                 |
+| MCMS     | 002030 | Method of current measurement                            |
+| AVGPER   | 022194 | Averaging period for TRACKOB parameters                  |
+| ECLN     | 006196 | Longitude at which satellite track crosses equator       |
+| STKO     | 008075 | Ascending/descending orbit qualifier                     |
+| NSLR     | 022198 | Number of altimeter records averaged to obtain           |
+| SACYLN   | 005044 | Satellite cycle number                                   |
+| SCLF     | 002020 | Satellite classification                                 |
+| OBQL     | 025053 | Observation quality                                      |
+| STMP     | 022193 | Sea-temperature at specified depth                       |
+| SALN     | 022062 | Salinity                                                 |
+| YEAR     | 004001 | Year                                                     |
+| MNTH     | 004002 | Month                                                    |
+| DAYS     | 004003 | Day                                                      |
+| HOUR     | 004004 | Hour                                                     |
+| MINU     | 004005 | Minute                                                   |
+| RCYR     | 004200 | Year   - time of receipt                                 |
+| RCMO     | 004201 | Month  - time of receipt                                 |
+| RCDY     | 004202 | Day    - time of receipt                                 |
+| RCHR     | 004203 | Hour   - time of receipt                                 |
+| RCMI     | 004204 | Minute - time of receipt                                 |
+| QMPR     | 033207 | SDMEDIT/QUIPS quality mark for pressure                  |
+| PRES     | 010004 | Pressure                                                 |
+| QMDD     | 033194 | SDMEDIT/QUIPS quality mark for moisture                  |
+| TMDP     | 012103 | Dew-point temperature                                    |
+| REHU     | 013003 | Relative Humidity                                        |
+| DBSS     | 007062 | Depth below sea/water surface                            |
+| PCCF     | 033007 | Per cent confidence                                      |
+| MQCF     | 033219 | MODS QC results flags                                    |
+| TSIG     | 008021 | Time significance                                        |
+| DROC     | 022004 | Direction of current                                     |
+| SPOC     | 022031 | Speed of current                                         |
+| SST1     | 022043 | Sea/water temperature                                    |
+| TERC     | 022038 | Tidal elevation with respect to local chart datum        |
+| TIDER    | 022040 | Meteological residual tidal elevation                    |
+| SLHD     | 022197 | Sea-level height deviation from 3yr mean of 1993-1995    |
+| SLHD1    | 022199 | Sea-level height deviation from 8yr mean of 1993-2000    |
+| WSOS     | 011230 | Ocean surface wind speed                                 |
+|          |        |                                                          |
+| RSRD     | 035200 | RESTRICTIONS ON REDISTRIBUTION                           |
+| EXPRSRD  | 035201 | EXPIRATION OF RESTRICTIONS ON REDISTRIBUTION             |
+|          |        |                                                          |
+|------------------------------------------------------------------------------|
+| MNEMONIC | SEQUENCE                                                          |
+*----------|-------------------------------------------------------------------|
+| METAR    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| METAR    | SEA_AIR    CORN       QMST       SST1_WFB                         |
+*----------|-------------------------------------------------------------------|
+| SHIPS    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| SHIPS    | RSRD       EXPRSRD                                                |
+| SHIPS    | SEA_AIR               CORN       TOST       TIWM       MSST       |
+| SHIPS    | ASMP       QMST       SST1_WFB                                    |
+*------------------------------------------------------------------------------|
+| DBUOY    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| DBUOY    | QCLS       QDEP       QCTSP      QCCUR      QBST       QCIL       |
+| DBUOY    | PSYR       PSMN       PSDY       PSHR       PSMI       PLDS       |
+| DBUOY    | DOMO       DLATH      DLONH      DROT       DROD       HPLE       |
+| DBUOY    | CALT       BUYT       ANHT       AHAC       ANTP       MSDM       |
+| DBUOY    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
+* DBUOY    | MRMV       DTCC       QMST       SST1_WFB                         |
+| DBUOY    | MRMV       DTCC       QMST       SST1_WFB   {SUB_SFC}             |
+*------------------------------------------------------------------------------|
+| DBUOYSUB | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| DBUOYSUB | QCLS       QDEP       QCTSP      QCCUR      QBST       QCIL       |
+| DBUOYSUB | PSYR       PSMN       PSDY       PSHR       PSMI       PLDS       |
+| DBUOYSUB | DOMO       DLATH      DLONH      DROT       DROD       HPLE       |
+| DBUOYSUB | CALT       BUYT       ANHT       AHAC       ANTP       MSDM       |
+| DBUOYSUB | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
+| DBUOYSUB | MRMV       DTCC       QMST       SST1_WFB   {SUB_SFC}             |
+*------------------------------------------------------------------------------|
+| MBUOY    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| MBUOY    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
+| MBUOY    | SST1_WFB                                                          |
+*------------------------------------------------------------------------------|
+| LCMAN    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| LCMAN    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
+| LCMAN    | SST1_WFB                                                          |
+*------------------------------------------------------------------------------|
+| TIDEG    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| TIDEG    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
+| TIDEG    | AWCK       MWCK       AMCK       MMCK       QMST                  |
+| TIDEG    | SST1_WFB   TERC_WFB   TIDE_WFB                                    |
+*------------------------------------------------------------------------------|
+| SLPBG    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| SLPBG    | SEQNUM     CORN       PMSL                                        |
+*------------------------------------------------------------------------------|
+| CSTGD    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| CSTGD    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
+| CSTGD    | QMST       SST1_WFB   TERC_WFB                                    |
+*------------------------------------------------------------------------------|
+| SSTNV    | OB_TIME   SECO   CLONH   CLATH   SSTYPE   SSTSRC   SST1_WFB       |
+*------------------------------------------------------------------------------|
+| SSTNS    | OB_TIME   SECO   CLONH   CLATH   SSTYPE   SSTSRC   SST1_WFB       |
+*------------------------------------------------------------------------------|
+| SSTNVH   | OB_TIME   SECO   CLONH   CLATH   SSTYPE   SSTSRC   SST1_WFB       |
+*------------------------------------------------------------------------------|
+| SSMIPN   | SAID       OB_TIME    SECO      CLONH      CLATH      ORBN        |
+| SSMIPN   | SCNN       SFTG       POSN      PH2O       CH2O                   |
+| SSMIPN   | WSOS_WFB   SST1_WFB                                               |
+*------------------------------------------------------------------------------|
+| BATHY    | RPID       OB_TIME    RC_TIME    CLONH      CLATH      SELV       |
+| BATHY    | QMAT       TMDB       QMWN       WDIR       WSPD       TOWD       |
+| BATHY    | IDGT       IWTEMP     WTEMPR     MCMS                             |
+| BATHY    | SEQNUM     CORN       TIWM       (SUB_SFC)                        |
+*------------------------------------------------------------------------------|
+| TESAC    | RPID       OB_TIME    RC_TIME    CLONH      CLATH      SELV       |
+| TESAC    | QMAT       TMDB       QMWN       WDIR       WSPD       TOWD       |
+| TESAC    | IDGT       IWTEMP     WTEMPR     MSDM       MRMV       DTCC       |
+| TESAC    | SEQNUM     CORN       TIWM       (SUB_SFC)                        |
+*------------------------------------------------------------------------------|
+| TRKOB    | RPID       OB_TIME    RC_TIME    CLONH      CLATH      SELV       |
+| TRKOB    | SEQNUM     CORN      {AVGPERD}  {SUB_SFC}                         |
+| AVGPERD  | AVGPER                                                            |
+*------------------------------------------------------------------------------|
+| ERSHAL   | OB_TIME    RC_TIME    CLONH      CLATH      CORN                  |
+| ERSHAL   | ECLN       STKO       NSLR       SLHD_WFB                         |
+*------------------------------------------------------------------------------|
+| TOPHAL   | OB_TIME    RC_TIME    CLONH      CLATH      CORN                  |
+| TOPHAL   | ECLN       STKO       NSLR       SLHD_WFB                         |
+*------------------------------------------------------------------------------|
+| TOPLAL   | OB_TIME    RC_TIME    CLONH      CLATH      CORN                  |
+| TOPLAL   | ECLN       STKO       NSLR       SLHD_WFB                         |
+*------------------------------------------------------------------------------|
+| GFOHAL   | OB_TIME    RC_TIME    CLONH      CLATH      CORN                  |
+| GFOHAL   | ECLN       STKO       NSLR       SLHD_WFB                         |
+*------------------------------------------------------------------------------|
+* NTOPAL   | OB_TIME    SECO       CLONH      CLATH      WSPD                  |
+* NTOPAL   | TTSM       TTSA       TSSH       TMSS       TGEO                  |
+* NTOPAL   | TSWK       TSWC       TSRK       TSRC       TSWA                  |
+* NTOPAL   | TSSH_WFB                                                          |
+*------------------------------------------------------------------------------|
+| NERSAL   | SAID       OB_TIME    SECO       RC_TIME    CLONH      CLATH      |
+| NERSAL   | SACYLN     SCLF       ORBN       OBQL       SLH1_WFB              |
+*------------------------------------------------------------------------------|
+| NGFOAL   | SAID       OB_TIME    SECO       RC_TIME    CLONH      CLATH      |
+| NGFOAL   | SACYLN     SCLF       ORBN       OBQL       SLH1_WFB              |
+*------------------------------------------------------------------------------|
+| NTPXAL   | SAID       OB_TIME    SECO       RC_TIME    CLONH      CLATH      |
+| NTPXAL   | SACYLN     SCLF       ORBN       OBQL       SLH1_WFB              |
+*------------------------------------------------------------------------------|
+| NJSNAL   | SAID       OB_TIME    SECO       RC_TIME    CLONH      CLATH      |
+| NJSNAL   | SACYLN     SCLF       ORBN       OBQL       SLH1_WFB              |
+*------------------------------------------------------------------------------|
+| ENVSAL   | SAID       OB_TIME    SECO       RC_TIME    CLONH      CLATH      |
+| ENVSAL   | SACYLN     SCLF       ORBN       OBQL       SLH1_WFB              |
+*------------------------------------------------------------------------------|
+| SHIPSU   | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
+| SHIPSU   | SEA_AIR               CORN       TOST       TIWM       MSST       |
+| SHIPSU   | ASMP       QMST       SST1_WFB                                    |
+*------------------------------------------------------------------------------|
+* miscellaneous component sequences and operator sequences                     |
+*------------------------------------------------------------------------------|
+| STMP3    | 201132 202129 STMP 201000 202000                                  |
+| SALN3    | 201132 202129 SALN 201000 202000                                  |
+| OB_TIME  | YEAR MNTH DAYS HOUR MINU                                          |
+| RC_TIME  | RCYR RCMO RCDY RCHR RCMI                                          |
+| SEA_AIR  | QMPR PRES PMSL QMDD TMDP REHU QMAT TMDB QMWN WDIR WSPD            |
+| SUB_SFC  | DBSS  <STMP_WFB> <SALN_WFB> <CRNT_WFB>                            |
+*------------------------------------------------------------------------------|
+* observation w/feed back sequences                                            |
+*------------------------------------------------------------------------------|
+*----------| ob    qc             forecast       analysis       cancel         |
+*----------| |     |              |              |              |              |
+*------------------------------------------------------------------------------|
+| STMP_WFB | STMP3 PCCF MQCF      TSIG STMP3     TSIG STMP3     TSIG           |
+| SALN_WFB | SALN3 PCCF MQCF      TSIG SALN3     TSIG SALN3     TSIG           |
+| CRNT_WFB | DROC  PCCF MQCF SPOC TSIG DROC SPOC TSIG DROC SPOC TSIG           |
+| SST1_WFB | SST1  PCCF MQCF      TSIG SST1      TSIG SST1      TSIG           |
+| TERC_WFB | TERC  PCCF MQCF      TSIG TERC      TSIG TERC      TSIG           |
+| TIDE_WFB | TIDER PCCF MQCF      TSIG TIDER     TSIG TIDER     TSIG           |
+| SLHD_WFB | SLHD  PCCF MQCF      TSIG SLHD      TSIG SLHD      TSIG           |
+| SLH1_WFB | SLHD1 PCCF MQCF      TSIG SLHD1     TSIG SLHD1     TSIG           |
+| WSOS_WFB | WSOS  PCCF MQCF      TSIG WSOS      TSIG WSOS      TSIG           |
+*------------------------------------------------------------------------------|
+|------------------------------------------------------------------------------|
+| MNEMONIC | SCAL | REFERENCE   | BIT | UNITS                    |-------------|
+|----------|------|-------------|-----|--------------------------|-------------|
+|          |      |             |     |                          |-------------|
+| RPID     |    0 |           0 |  64 | CCITT IA5                |-------------|
+| CLONH    |    5 |   -18000000 |  26 | Degree                   |-------------|
+| CLATH    |    5 |    -9000000 |  25 | Degree                   |-------------|
+| SELV     |    0 |        -400 |  15 | m                        |-------------|
+| RSRD     |    0 |           0 |   9 | FLAG TABLE               |-------------|
+| EXPRSRD  |    0 |           0 |   8 | HOURS                    |-------------|
+| SEQNUM   |    0 |           0 |  32 | CCITT IA5                |-------------|
+| CORN     |    0 |           0 |   3 | Code table               |-------------|
+| TOST     |    0 |           0 |   2 | Code table               |-------------|
+| TIWM     |    0 |           0 |   4 | Flag table               |-------------|
+| MSST     |    0 |           0 |   4 | Code table               |-------------|
+| ASMP     |    0 |           0 |   4 | Code table               |-------------|
+| QMST     |    0 |           0 |   4 | Code table               |-------------|
+| QCLS     |    0 |           0 |   3 | Code table               |-------------|
+| QDEP     |    0 |           0 |   2 | Code table               |-------------|
+| QCTSP    |    0 |           0 |   3 | Code Table               |-------------|
+| QCCUR    |    0 |           0 |   3 | Code Table               |-------------|
+| QBST     |    0 |           0 |   2 | Code table               |-------------|
+| QCIL     |    0 |           0 |   2 | Code table               |-------------|
+| PSYR     |    0 |           0 |  12 | Year                     |-------------|
+| PSMN     |    0 |           0 |   4 | Month                    |-------------|
+| PSDY     |    0 |           0 |   6 | Day                      |-------------|
+| PSHR     |    0 |           0 |   5 | Hour                     |-------------|
+| PSMI     |    0 |           0 |   6 | Minute                   |-------------|
+| PLDS     |    2 |           0 |  10 | m/s                      |-------------|
+| DOMO     |    0 |           0 |   9 | Degree true              |-------------|
+| DLATH    |    5 |    -9000000 |  25 | Degree                   |-------------|
+| DLONH    |    5 |   -18000000 |  26 | Degree                   |-------------|
+| DROT     |    0 |           0 |   5 | Code table               |-------------|
+| DROD     |    0 |           0 |  10 | m                        |-------------|
+| HPLE     |   -3 |           0 |  16 | Pa                       |-------------|
+| CALT     |    0 |           0 |   9 | m                        |-------------|
+| BUYT     |    0 |           0 |   6 | Code table               |-------------|
+| ANHT     |    2 |           0 |  12 | m                        |-------------|
+| AHAC     |    0 |           0 |   4 | m                        |-------------|
+| ANTP     |    0 |           0 |   4 | Code table               |-------------|
+| MSDM     |    0 |           0 |   3 | Code table               |-------------|
+| MRMV     |    0 |           0 |   4 | Code table               |-------------|
+| DTCC     |    0 |           0 |   5 | Code table               |-------------|
+| AWCK     |    0 |           0 |   5 | Code table               |-------------|
+| MWCK     |    0 |           0 |   5 | Code table               |-------------|
+| AMCK     |    0 |           0 |   5 | Code table               |-------------|
+| MMCK     |    0 |           0 |   5 | Code table               |-------------|
+| PMSL     |   -1 |           0 |  14 | Pa                       |-------------|
+| SECO     |    0 |           0 |   6 | Second                   |-------------|
+| SSTYPE   |    0 |           0 |   8 | Code table               |-------------|
+| SSTSRC   |    0 |           0 |   7 | Code table               |-------------|
+| SAID     |    0 |           0 |  10 | Code table               |-------------|
+| ORBN     |    0 |           0 |  24 | Numeric                  |-------------|
+| SCNN     |    0 |           0 |  14 | Numeric                  |-------------|
+| SFTG     |    0 |           0 |   3 | Code table               |-------------|
+| POSN     |    0 |           0 |  10 | Numeric                  |-------------|
+| PH2O     |    1 |           0 |  11 | kg/m**2                  |-------------|
+| CH2O     |    2 |           0 |  12 | kg/m**2                  |-------------|
+| QMAT     |    0 |           0 |   4 | Code table               |-------------|
+| TMDB     |    2 |           0 |  16 | K                        |-------------|
+| QMWN     |    0 |           0 |   4 | Code table               |-------------|
+| WDIR     |    0 |           0 |   9 | Degree true              |-------------|
+| WSPD     |    1 |           0 |  12 | m/s                      |-------------|
+| TOWD     |    0 |           0 |  14 | m                        |-------------|
+| IDGT     |    0 |           0 |   2 | Code table               |-------------|
+| IWTEMP   |    0 |           0 |  10 | Code table               |-------------|
+| WTEMPR   |    0 |           0 |   7 | Code table               |-------------|
+| MCMS     |    0 |           0 |   3 | Code table               |-------------|
+| AVGPER   |    0 |           0 |   4 | Code table               |-------------|
+| ECLN     |    2 |      -18000 |  16 | Degree                   |-------------|
+| STKO     |    0 |           0 |   2 | Code table               |-------------|
+| NSLR     |    0 |           0 |   6 | Numeric                  |-------------|
+| SACYLN   |    0 |           0 |  11 | Numeric                  |-------------|
+| SCLF     |    0 |           0 |   9 | Code table               |-------------|
+| OBQL     |    0 |           0 |  12 | Flag table               |-------------|
+| STMP     |    2 |           0 |  15 | K                        |-------------|
+| SALN     |    2 |           0 |  14 | Part per thousand        |-------------|
+| YEAR     |    0 |           0 |  12 | Year                     |-------------|
+| MNTH     |    0 |           0 |   4 | Month                    |-------------|
+| DAYS     |    0 |           0 |   6 | Day                      |-------------|
+| HOUR     |    0 |           0 |   5 | Hour                     |-------------|
+| MINU     |    0 |           0 |   6 | Minute                   |-------------|
+| RCYR     |    0 |           0 |  12 | Year                     |-------------|
+| RCMO     |    0 |           0 |   4 | Month                    |-------------|
+| RCDY     |    0 |           0 |   6 | Day                      |-------------|
+| RCHR     |    0 |           0 |   5 | Hour                     |-------------|
+| RCMI     |    0 |           0 |   6 | Minute                   |-------------|
+| QMPR     |    0 |           0 |   4 | Code table               |-------------|
+| PRES     |   -1 |           0 |  14 | Pa                       |-------------|
+| QMDD     |    0 |           0 |   4 | Code table               |-------------|
+| TMDP     |    2 |           0 |  16 | K                        |-------------|
+| REHU     |    0 |           0 |   7 | %                        |-------------|
+| DBSS     |    1 |           0 |  17 | m                        |-------------|
+| PCCF     |    0 |           0 |   7 | %                        |-------------|
+| MQCF     |    0 |           0 |   8 | Flag table               |-------------|
+| TSIG     |    0 |           0 |   5 | Code table               |-------------|
+| DROC     |    0 |           0 |   9 | Degree true              |-------------|
+| SPOC     |    2 |           0 |  13 | m/s                      |-------------|
+| SST1     |    2 |           0 |  15 | K                        |-------------|
+| TERC     |    3 |      -10000 |  15 | m                        |-------------|
+| TIDER    |    3 |       -5000 |  14 | m                        |-------------|
+| SLHD     |    4 |      -30000 |  16 | m                        |-------------|
+| SLHD1    |    6 |    -4200000 |  23 | m                        |-------------|
+| WSOS     |    1 |           0 |  12 | m/s                      |-------------|
+|          |      |             |     |                          |-------------|
+`------------------------------------------------------------------------------'

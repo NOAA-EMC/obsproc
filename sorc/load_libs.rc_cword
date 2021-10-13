@@ -1,0 +1,28 @@
+
+#  this will only work well if all codes in package need same version of each lib below
+
+# available versions as of 7/26/18 (vers in parenthesis not used):
+#               phase2           cray             phase3
+#      w3nco:    2.0.6            2.0.6            2.0.6
+#       bufr:   11.1.0 (11.2.0)  11.1.0 (11.2.0)  11.3.0 
+
+w3nco_ver=2.0.6
+bufr_ver=11.3.0
+
+if [[ "$sys_tp" =~ IBM-p[12] ]]; then
+  module load w3nco/v$w3nco_ver
+  module load bufr/v$bufr_ver
+elif [[ "$sys_tp" =~ Dell-p3 ]]; then
+  module load w3nco/$w3nco_ver
+  module load bufr/$bufr_ver
+elif [[ "$sys_tp" =~ Cray-XC40 ]]; then
+  module load w3nco-${lib_build}/$w3nco_ver
+  module load bufr-${lib_build}/$bufr_ver
+elif [[ -n "$sys_tp" ]]; then
+  echo " **** UNEXEPECTED PLATFORM: $sys_tp ***** "
+  return 9
+else
+  echo " **** variable sys_tp is not set ***** "
+  return 9
+fi
+

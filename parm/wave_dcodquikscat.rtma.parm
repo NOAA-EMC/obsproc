@@ -1,0 +1,25 @@
+
+  Cards for RTMA Version of WAVE_DCODQUIKSCAT for processing QuikSCAT data
+
+              NO SUPEROBING
+
+ &RDATA
+  ITYPE  = 1,      ! Report type (1 for QUIKSCAT, 2 for ASCAT; here 1)
+  IPRINT = 0,      ! Toggle (0=off,1=on) for text listing of all reprocessed
+                   !  reports in unit 51
+  ISUPOB = 0,      ! Superob the reports
+  DELAT  = 0.5,    !  - latitude  spacing (degrees) of superob grid box
+  DELON  = 0.5,    !  - longitude spacing (degrees) of superob grid box
+  LIMCNT = 2,      !  - minimum number of reports per superob box required to
+                   !    make superob
+  IQCPOR = 1,      ! Perform probability of rain q.c.
+  PORLIM = 0.10,   !  - all reports with p.o.r. .gt. 10% are tossed
+  IQCEDG = 1,      ! Perform orbital swath edge q.c.
+  IEDLLM = 8,      !  - all reports with cell # .le.  8 are tossed
+  IEDULM = 64,     !  - all reports with cell # .ge. 64 are tossed
+  LATS   =-90,     ! Southernmost lat boundary (deg) for accepting rpts (N+; S-)
+  LATN   =+90,     ! Northernmost lat boundary (deg) for accepting rpts (N+; S-)
+  LONW   =360,     ! Westernmost  lon boundary (deg) for accepting rpts (0-360W)
+  LONE   =  0      ! Easternmost  lon boundary (deg) for accepting rpts (0-360W)
+ /
+

@@ -1,0 +1,49 @@
+ &INPUT IDATEZ=-99999,IUTCZ=-999,
+        OKNBGR=T,ERPOS0=150.E3,IDTTRK=12,
+        IHRMXT=72,OUTFIL=T,RUNID='16MRFO',RLATMN=20.0,RLATMX=27.0,
+        QCFILE=T,IVFLTP=3,IVOTYP=2,FRACST=1.0,PTOPAZ=-99.,ADVORT=T,
+        APPREP=T,MODNAM=1,VORDIV=F,SP1DWL=1.0,MNIBOG=T,DELTA=0.75,
+        SPCIFH=T,RMXMNB=300.,MWAVEZ=126,IHRWIN=6,PREVEN=T,FLMASS=T
+ /
+ &COMPRM  DELTAR=100.E3,
+ /
+ 1-D FILTERED SPLINE FITTING TO RADIAL DATA
+ 2-D SPLINE FILTER: MANDATORY LEVELS, 2.5 DEG. LAT. FILTER TYPE 2 BC
+ &DATDEF PART2=F,KPLV= F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,T,T, T,T,T,T,
+                       F,F,T,T, T,T,T,T,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+                       F,F,F,F, F,F,F,F,
+  RHANL=F,JPD=2,ITYPMX=51,ITYPMN=1,WRDTPT=F,WRSPLD=F,WRSPLV=F,
+  SELECT=T,TIMWIN=F,NSWLN=1,WRCHAR=F,SAMPLD=T,DXSPD=1.0,DYSPD=1.0,
+  BOGVOR=T,IMSKDA=T,PRTBOG=F
+ /
+ &DOMAIN  MX=30,NX=30,XML=56.0,XMR=46.,YNB=7.,YNT=17.,
+  ISRCD=0,JDAY0=-99,UTC0=-99.0,DUTCMN=10.,DUTCMX=50.,DPRX=5.0
+ /
+ &DCBC  KXBC1=2,KYBC1=2,KXBC2=2,KYBC2=2,XBCWL1=6.,XBCWL2=6.,
+  YBCWL1=6.,YBCWL2=6.,XDCWL=2.5,YDCWL=2.5,LLWL=T
+ /
+ &DSKVAL
+      MSKEF =70,MSKEZ =71,MSKDA1=72,MSKDA2=16,MSKDA3=74,
+      MSKDA4=75,MSKDA5=76,MSKDA6=77,MSKDA7=78,MSKDA8=79,
+      MSKDA9=22,MSKD10=81,MSKD11=82,MSKD12=83,MSKD13=84,
+      MSKD14=85,MSKD15=40,MSKD16=87,MSKD17=88,MSKD18=89
+ /
+ &PREVDATA
+ /

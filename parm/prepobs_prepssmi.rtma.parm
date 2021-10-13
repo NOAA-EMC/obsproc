@@ -1,0 +1,25 @@
+
+  Cards for RTMA Version of PREPSSMI
+
+              NO SUPEROBING
+
+++++++++++++++++
+Special changes to handle dumps within expanded NAM domain:
+       LATS, LATN, LONW, LONE outputs SSM/I reprocessed dumps globally
+          (a superset of dump domain)
+Incr. time window from +/- 1.5 hours to +/- 2.0 hours, since dump window
+    is set to -2.0 to 0.0 hours
+++++++++++++++++
+
+
+ &SWTCH
+   IVAR   =    0,9999,9999,9999,9999,9999,9999,9999,9999,9999,
+   IQM    =    0,  QMPW   =FALSE, IALG    =   0,
+   DELAT  =  1.0,  DELON  = 1.0,  ISUPOB =    0,
+   IYEAR  = 0000,  IMONTH =  00,  IDAY   =   00, IHOUR = 00, IMIN   =  00,
+   IWINDO =  200,
+   LATS   =  -90,  LATN   =  90,  LONW   =  360, LONE  =  0, LIMCNT =   3,
+   LSAT   = 2*FALSE, FALSE, FALSE, FALSE, FALSE,  TRUE, FALSE, FALSE, FALSE
+ /
+LSAT---               F-09   F-10   F-11   F-12   F-13   F-14   F-15   F-16
+
