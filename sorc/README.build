@@ -11,8 +11,6 @@ To build select software units:
 For example:
   avgdata:
     ./build.sh_avgdata bufr_avgdata.fd
-  cword:
-    ./build.sh_cword bufr_cword.fd
   dump_post:
     ./build.sh_dump_post bufr_datacount.fd bufr_listdumps.fd
   mods:
