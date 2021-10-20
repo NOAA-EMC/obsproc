@@ -16,10 +16,14 @@
 *                                                                              |
 | METAR    | A50100 | TYPE 000-007 METAR SURFACE DATA                          |
 | SHIPS    | A50101 | 001001 Surface Marine Ship, Restricted                   |
+| SHIPSB   | A51004 | TYPE 001-101 SURFACE MARINE SHIP,RESTRICTED (BUFR)       |
 | DBUOY    | A50102 | TYPE 001-002 SURFACE MARINE BUOY (FM 18)                 |
+| DBUOYB   | A51005 | TYPE 001-102 SURFACE MARINE BUOY DRIFTING (BUFR)         |
 | DBUOYSUB | A50103 | TYPE 031-??? SUB-SURFACE MARINE BUOY (FM 18)             |
 | MBUOY    | A50104 | TYPE 001-003 SURFACE MARINE BUOY (FM 13)                 |
+| MBUOYB   | A51006 | TYPE 001-103 SURFACE MARINE MOORED BUOY (BUFR)           |
 | LCMAN    | A50105 | TYPE 001-004 SURFACE MARINE CMAN STATION                 |
+| CMANB    | A51008 | TYPE 001-104 SURFACE MARINE CMAN (BUFR)                  |
 | TIDEG    | A50106 | TYPE 001-005 SURFACE TIDE GAUGE DATA (CREX)              |
 | SLPBG    | A50107 | TYPE 001-006 MEAN SEA LEVEL PRESSURE BOGUS               |
 | CSTGD    | A50108 | TYPE 001-007 SURFACE MARINE COAST GUARD STATION          |
@@ -40,6 +44,7 @@
 | NJSNAL   | A50123 | TYPE 031-104 NAVOCEANO ALPS JASON ALTIMETER HI-RES GLBL  |
 | ENVSAL   | A50124 | 031109 ENVISAT/NAVOCEANO ALPS SSHA hi-res gbl altimeter  |
 | SHIPSU   | A50125 | 001013 SURFACE MARINE SHIP                               |
+| SHIPUB   | A51007 | TYPE 001-113 SURFACE MARINE SHIP (BUFR)                  |
 *                                                                              |
 *                                                                              |
 *   TABLE D ENTRIES FOR SEQUENCES DEFINED IN TABLE A ENTRIES                   |
@@ -60,6 +65,39 @@
 | SLH1_WFB | 350037 | Sea-level hgt dev (8yr mean, 1993-2000) with feedback    |
 | WSOS_WFB | 350038 | Ocean surface wind speed with feedback                   |
 | AVGPERD  | 350039 | AVERAGING PERIODS FOR TRACKOB PARAMETERS                 |
+| PRESSQ03 | 302001 | Pressure and 3-hour pressure change                      |
+| DBUOYWND | 306042 | Wind measurement from drifting buoy                      |
+| BBYSSTS  | 361007 | Buoy report sea surface temperature and salinity         |
+| IDMSMDBS | 306004 | Depth, temperature, salinity                             |
+| BBYSTSL  | 361004 | BUOY REPORT SEA TEMPERATURES/SALINITY DATA (BUFR)        |
+| RCPTIM   | 352003 | REPORT RECIPT TIME DATA                                  |
+| GENCLOUD | 302004 | General cloud information                                |
+| CLOUDSQ1 | 302005 |                                                          |
+| MBUOYID  | 301126 | Sequence for representation of moored buoy identificati  |
+| LTLONH   | 301021 | HIGH ACCURACY LATITUDE/LONGITUDE POSITION                |
+| YYMMDD   | 301011 | DATE -- YEAR, MONTH, DAY                                 |
+| HHMM     | 301012 | TIME -- HOUR, MINUTE                                     |
+| MBUOYOB2 | 306038 | Sequence for representation of standard surface marine   |
+| BASICWAV | 306039 | Sequence for representation of basic wave measurements   |
+| SHIPINST | 302054 | Ship "instantaneous" data                                |
+| VISBDAT2 | 302053 | Ship visibility data                                     |
+| TEHUDAT2 | 302052 | Ship temperature and humidity data                       |
+| PRECIP24 | 302034 | Precipitation past 24 hours                              |
+| SHIPDATA | 302057 | Ship marine data                                         |
+| SEATEMPM | 302056 | Sea/water temperature                                    |
+| WINDSWAV | 302024 |                                                          |
+| DPHGTWAV | 302021 |                                                          |
+| DPHGTWWV | 302022 |                                                          |
+| DPHGTSWV | 302023 |                                                          |
+| SHPIDENT | 301093 | Ship identification, movement, date/time, horizontal an  |
+| SHIPSEQ1 | 301036 | Ship                                                     |
+| SHIPCSDS | 301003 |                                                          |
+| LTLONC   | 301023 |                                                          |
+| SHIPPERD | 302060 | Ship "period" data                                       |
+| WINDDAT3 | 302059 | Ship wind data                                           |
+| SFIDTIME | 301090 | SURFACE STATION IDENTIFICATION, TIME AND LOCATION        |
+| SFCSTNID | 301004 | SURFACE STATION IDENTIFICATION                           |
+| PRESDATA | 302031 | PRESSURE INFORMATION                                     |
 *                                                                              |
 *                                                                              |
 *   TABLE B ENTRIES                                                            |
@@ -140,6 +178,7 @@
 | DAYS     | 004003 | Day                                                      |
 | HOUR     | 004004 | Hour                                                     |
 | MINU     | 004005 | Minute                                                   |
+| RCTS     | 008202 | Receipt time significance                                |
 | RCYR     | 004200 | Year   - time of receipt                                 |
 | RCMO     | 004201 | Month  - time of receipt                                 |
 | RCDY     | 004202 | Day    - time of receipt                                 |
@@ -162,9 +201,60 @@
 | SLHD     | 022197 | Sea-level height deviation from 3yr mean of 1993-1995    |
 | SLHD1    | 022199 | Sea-level height deviation from 8yr mean of 1993-2000    |
 | WSOS     | 011230 | Ocean surface wind speed                                 |
+| 3HPC     | 010061 | 3-hour pressure change                                   |
+| CHPT     | 010063 | Characteristic of pressure tendency                      |
+| TPMI     | 004025 | Time period or displacement                              |
+| HSAWS    | 007033 | Height of sensor above water surface                     |
+| PCAT     | 002005 | PRECISION OF TEMPERATURE OBSERVATION                     |
+| SST0     | 022049 | Sea surface temperature                                  |
+| SSS0     | 022059 | Sea surface salinity                                     |
+| DOWR     | 022078 | Duration of wave record                                  |
+| AVWP     | 022074 | Average wave period                                      |
+| SGWH     | 022070 | Significant wave height                                  |
+| SPWP     | 022071 | Spectral peak wave period                                |
+| DDWC     | 022076 | Direction from which dominant waves are coming           |
+| DSDW     | 022077 | Directional spread of dominant wave                      |
+| HSALG    | 007032 | Height of sensor above local ground (or deck of marine   |
+| HOVI     | 020001 | HORIZONTAL VISIBILITY                                    |
+| TP24     | 013023 | TOTAL PRECIPITATION PAST 24 HOURS                        |
+| TOCC     | 020010 | CLOUD COVER (TOTAL)                                      |
+| VSSO     | 008002 | VERTICAL SIGNIFICANCE (SFC OBSERVATION)                  |
+| CLAM     | 020011 | CLOUD AMOUNT                                             |
+| CLTP     | 020012 | CLOUD TYPE                                               |
+| HOCB     | 020013 | HEIGHT OF BASE OF CLOUD                                  |
+| BPID     | 001005 | BUOY/PLATFORM IDENTIFIER                                 |
+| MXGS     | 011041 | MAXIMUM WIND SPEED (GUSTS)                               |
+| DBSSX    | 007063 | Depth below sea/water surface (cm)                       |
+| MXWH     | 022073 | MAXIMUM WAVE HEIGHT                                      |
+| MWBT     | 002039 | METHOD OF WET BULB TEMPERATURE MEASUREMENT               |
+| TMWB     | 012102 | WET BULB TEMPERATURE                                     |
+| DOWA     | 022001 | Direction of waves                                       |
+| DOWW     | 022002 | Direction of wind waves                                  |
+| DOSW     | 022003 | DIRECTION OF SWELL WAVES                                 |
+| POWV     | 022011 | PERIOD OF WAVES                                          |
+| POWW     | 022012 | PERIOD OF WIND WAVES                                     |
+| POSW     | 022013 | PERIOD OF SWELL WAVES                                    |
+| HOWV     | 022021 | HEIGHT OF WAVES                                          |
+| HOWW     | 022022 | HEIGHT OF WIND WAVES                                     |
+| HOSW     | 022023 | HEIGHT OF SWELL WAVES                                    |
+| CLAT     | 005002 | LATITUDE (COARSE ACCURACY)                               |
+| CLON     | 006002 | LONGITUDE (COARSE ACCURACY)                              |
+| HSMSL    | 007030 | HEIGHT OF STATION GROUND ABOVE MSL                       |
+| HBMSL    | 007031 | Height of barometer above mean sea level                 |
+| SMID     | 001011 | Ship or mobile land station identifier                   |
+| SMMO     | 001013 | Speed of motion of moving observing platform             |
+| WMOS     | 001002 | WMO STATION NUMBER                                       |
+| WMOB     | 001001 | WMO BLOCK NUMBER                                         |
+| 24PC     | 010062 | 24 HOUR PRESSURE CHANGE                                  |
+| PRLC     | 007004 | PRESSURE                                                 |
+| GPH10    | 010009 | GEOPOTENTIAL HEIGHT                                      |
 |          |        |                                                          |
 | RSRD     | 035200 | RESTRICTIONS ON REDISTRIBUTION                           |
 | EXPRSRD  | 035201 | EXPIRATION OF RESTRICTIONS ON REDISTRIBUTION             |
+| WMOP     | 001087 | WMO marine observing platform extended identifier        |
+| STSN     | 001015 | Station or site name                                     |
+| WMOR     | 001003 | WMO REGION NUMBER                                        |
+| WMORS4   | 001020 | WMO Region sub-area                                      |
 |          |        |                                                          |
 |------------------------------------------------------------------------------|
 | MNEMONIC | SEQUENCE                                                          |
@@ -177,6 +267,16 @@
 | SHIPS    | SEA_AIR               CORN       TOST       TIWM       MSST       |
 | SHIPS    | ASMP       QMST       SST1_WFB                                    |
 *------------------------------------------------------------------------------|
+*| SHIPSB   | RPID       SHIPINST   SHIPDATA   PRESSQ03   RCPTIM                |
+*| SHIPSB   | SHPIDENT   WDIR WSPD                                              |
+*| SHIPSB   | RPID  YEAR  MNTH  DAYS  HOUR  MINU  CLATH  CLONH  TOST            |
+*| SHIPSB   | RCYR  RCMO  RCDY  RCHR  RCMI                                      |
+| SHIPSB   | RPID  YYMMDD HHMM  CLATH  CLONH  TOST                             |
+| SHIPSB   | RCPTIM      CORN                                                  |
+| SHIPSB   | TMDB  TMWB  TMDP  REHU                                            |
+| SHIPSB   | WDIR  WSPD  HSMSL  HBMSL                                          |
+| SHIPSB   | PRES  PMSL  3HPC  CHPT  MSST  SST1                                |
+*------------------------------------------------------------------------------|
 | DBUOY    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
 | DBUOY    | QCLS       QDEP       QCTSP      QCCUR      QBST       QCIL       |
 | DBUOY    | PSYR       PSMN       PSDY       PSHR       PSMI       PLDS       |
@@ -185,6 +285,10 @@
 | DBUOY    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
 * DBUOY    | MRMV       DTCC       QMST       SST1_WFB                         |
 | DBUOY    | MRMV       DTCC       QMST       SST1_WFB   {SUB_SFC}             |
+*------------------------------------------------------------------------------|
+| DBUOYB   | RPID       YEAR       MNTH       DAYS       HOUR       MINU       |
+| DBUOYB   | CLONH      CLATH                                                  |
+| DBUOYB   | IDMSMDBS   <BBYSSTS>  PRESSQ03   DBUOYWND   RCPTIM     CORN       |
 *------------------------------------------------------------------------------|
 | DBUOYSUB | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
 | DBUOYSUB | QCLS       QDEP       QCTSP      QCCUR      QBST       QCIL       |
@@ -198,9 +302,15 @@
 | MBUOY    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
 | MBUOY    | SST1_WFB                                                          |
 *------------------------------------------------------------------------------|
+| MBUOYB   | RPID       BPID      MBUOYID     WMOR       WMORS4                |
+| MBUOYB   | MBUOYOB2   3HPC      CHPT        QMST       PCAT       CORN       |
+| MBUOYB   | CLONH      CLATH     RCPTIM     CORN      {BBYSTSL}               |
+*------------------------------------------------------------------------------|
 | LCMAN    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
 | LCMAN    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
 | LCMAN    | SST1_WFB                                                          |
+*------------------------------------------------------------------------------|
+| CMANB    | RPID       SFIDTIME   PRESDATA   CORN       RCPTIM                |
 *------------------------------------------------------------------------------|
 | TIDEG    | RPID       OB_TIME   {RC_TIME}   CLONH      CLATH      SELV       |
 | TIDEG    | SEA_AIR    SEQNUM     CORN       TOST       TIWM       MSST       |
@@ -274,6 +384,52 @@
 | SHIPSU   | SEA_AIR               CORN       TOST       TIWM       MSST       |
 | SHIPSU   | ASMP       QMST       SST1_WFB                                    |
 *------------------------------------------------------------------------------|
+*| SHIPUB   | RPID  SHIPINST  SHIPDATA                                          |
+| SHIPUB   | RPID  YYMMDD  HHMM  CLATH  CLONH                                  |
+| SHIPUB   | RCPTIM    CORN                                                    |
+| SHIPUB   | TEHUDAT2  SEATEMPM  PRESSQ03                                      |
+*------------------------------------------------------------------------------|
+| LTLONH   | CLATH      CLONH                                                  |
+*------------------------------------------------------------------------------|
+| MBUOYID  | WMOP       BUYT       YYMMDD     HHMM       LTLONH                |
+*------------------------------------------------------------------------------|
+| YYMMDD   | YEAR       MNTH       DAYS                                        |
+*------------------------------------------------------------------------------|
+| HHMM     | HOUR       MINU                                                   |
+*------------------------------------------------------------------------------|
+| PRECIP24 | HSALG  TP24                                                       |
+*------------------------------------------------------------------------------|
+| MBUOYOB2 | PRES  PMSL  HSAWS  TMDB  TMDP  REHU  HSAWS  TSIG  TPMI  WDIR      |
+| MBUOYOB2 | WSPD  TSIG  TPMI  MXGS  TPMI  HSAWS  PCAT  DBSSX  SST0            |
+*------------------------------------------------------------------------------|
+| SHIPDATA | SEATEMPM  DPHGTWAV  WINDSWAV                                      |
+*------------------------------------------------------------------------------|
+| DPHGTWAV | DOWA  POWV  HOWV                                                  |
+*------------------------------------------------------------------------------|
+| DPHGTWWV | DOWW  POWW  HOWW                                                  |
+*------------------------------------------------------------------------------|
+| DPHGTSWV | DOSW  POSW  HOSW                                                  |
+*------------------------------------------------------------------------------|
+| WINDSWAV | DPHGTWWV  "DPHGTSWV"2                                             |
+*------------------------------------------------------------------------------|
+| SEATEMPM | MSST  DBSSX  SST1  DBSSX                                          |
+*------------------------------------------------------------------------------|
+| SHIPPERD | WINDDAT3                                                          |
+*------------------------------------------------------------------------------|
+| WINDDAT3 | WDIR  WSPD                                                        |
+*------------------------------------------------------------------------------|
+| SHIPSEQ1 | SHIPCSDS  TOST  YYMMDD  HHMM  LTLONC                              |
+*------------------------------------------------------------------------------|
+| LTLONC   | CLAT  CLON                                                        |
+*------------------------------------------------------------------------------|
+| SHIPCSDS | SMID  DOMO  SMMO                                                  |
+*------------------------------------------------------------------------------|
+| SFIDTIME | SFCSTNID  YYMMDD  HHMM  LTLONH  HSMSL  HBMSL                      |
+*------------------------------------------------------------------------------|
+| SFCSTNID | WMOB   WMOS   STSN  TOST                                          |
+*------------------------------------------------------------------------------|
+| PRESDATA | PRESSQ03  24PC  PRLC  GPH10                                       |
+*------------------------------------------------------------------------------|
 * miscellaneous component sequences and operator sequences                     |
 *------------------------------------------------------------------------------|
 | STMP3    | 201132 202129 STMP 201000 202000                                  |
@@ -282,6 +438,20 @@
 | RC_TIME  | RCYR RCMO RCDY RCHR RCMI                                          |
 | SEA_AIR  | QMPR PRES PMSL QMDD TMDP REHU QMAT TMDB QMWN WDIR WSPD            |
 | SUB_SFC  | DBSS  <STMP_WFB> <SALN_WFB> <CRNT_WFB>                            |
+| PRESSQ03 | PRES PMSL 3HPC CHPT                                               |
+| DBUOYWND | ANTP HSAWS TSIG TPMI WDIR WSPD                                    |
+| RCPTIM   | RCTS RCYR RCMO RCDY RCHR RCMI                                     |
+| BBYSSTS  | PCAT SST0 MSDM SSS0                                               |
+| IDMSMDBS | IDGT MSDM {BBYSTSL}                                               |
+| BBYSTSL  | DBSS SST1 SALN                                                    |
+| GENCLOUD | TOCC  VSSO  CLAM  HOCB  CLTP  CLTP  CLTP                          |
+| CLOUDSQ1 | VSSO  CLAM  CLTP  HOCB                                            |
+| BASICWAV | DOWR  SGWH  MXWH  AVWP  SPWP  DDWC  DSDW                          |
+| SHIPINST | TEHUDAT2  VISBDAT2  HSAWS  PRECIP24  HSALG  GENCLOUD  {CLOUDSQ1}  |
+| TEHUDAT2 | HSALG  HSAWS  TMDB  MWBT  TMWB  TMDP  REHU                        |
+| VISBDAT2 | HSALG  HSAWS  HOVI                                                |
+| SHPIDENT | SHIPSEQ1  HSMSL  HBMSL                                            |
+| SHIPSEQ1 | TOST  YYMMDD  HHMM  LTLONC                                        |
 *------------------------------------------------------------------------------|
 * observation w/feed back sequences                                            |
 *------------------------------------------------------------------------------|
@@ -380,6 +550,7 @@
 | DAYS     |    0 |           0 |   6 | Day                      |-------------|
 | HOUR     |    0 |           0 |   5 | Hour                     |-------------|
 | MINU     |    0 |           0 |   6 | Minute                   |-------------|
+| RCTS     |    0 |           0 |   6 | CODE TABLE               |-------------|
 | RCYR     |    0 |           0 |  12 | Year                     |-------------|
 | RCMO     |    0 |           0 |   4 | Month                    |-------------|
 | RCDY     |    0 |           0 |   6 | Day                      |-------------|
@@ -402,5 +573,56 @@
 | SLHD     |    4 |      -30000 |  16 | m                        |-------------|
 | SLHD1    |    6 |    -4200000 |  23 | m                        |-------------|
 | WSOS     |    1 |           0 |  12 | m/s                      |-------------|
+| 3HPC     |   -1 |        -500 |  10 | PA                       |-------------|
+| CHPT     |    0 |           0 |   4 | CODE TABLE               |-------------|
+| TPMI     |    0 |       -2048 |  12 | MINUTE                   |-------------|
+| HSAWS    |    1 |           0 |  12 | MINUTE                   |-------------|
+| PCAT     |    2 |           0 |   7 | DEGREES KELVIN           |-------------|
+| SST0     |    2 |           0 |  15 | K                        |-------------|
+| SSS0     |    2 |           0 |  14 | PART PER THOUSAND        |-------------|
+| DOWR     |    0 |           0 |  12 | S                        |-------------|
+| AVWP     |    1 |           0 |   9 | S                        |-------------|
+| SGWH     |    2 |           0 |  13 | M                        |-------------|
+| SPWP     |    1 |           0 |   9 | S                        |-------------|
+| DDWC     |    0 |           0 |   9 | DEGREE TRUE              |-------------|
+| DSDW     |    0 |           0 |   9 | DEGREE                   |-------------|
+| HSALG    |    2 |           0 |  16 | METERS                   |-------------|
+| HOVI     |   -1 |           0 |  13 | METERS                   |-------------|
+| TP24     |    1 |          -1 |  14 | KG/METER**2              |-------------|
+| TOCC     |    0 |           0 |   7 | %                        |-------------|
+| VSSO     |    0 |           0 |   6 | CODE TABLE               |-------------|
+| CLAM     |    0 |           0 |   4 | CODE TABLE               |-------------|
+| CLTP     |    0 |           0 |   6 | CODE TABLE               |-------------|
+| HOCB     |   -1 |         -40 |  11 | METERS                   |-------------|
+| BPID     |    0 |           0 |  17 | NUMERIC                  |-------------|
+| WMOP     |    0 |           0 |  23 | NUMERIC                  |-------------|
+| STSN     |    0 |           0 | 160 | CCITT IA5                |-------------|
+| WMOR     |    0 |           0 |   3 | CODE TABLE               |-------------|
+| WMORS4   |    0 |           0 |   4 | NUMERIC                  |-------------|
+| MXGS     |    1 |           0 |  12 | METERS/SECOND            |-------------|
+| DBSSX    |    2 |           0 |  20 | METERS                   |-------------|
+| MXWH     |    2 |           0 |  13 | METERS                   |-------------|
+| TMWB     |    2 |           0 |  16 | DEGREES KELVIN           |-------------|
+| MWBT     |    0 |           0 |   3 | CODE TABLE               |-------------|
+| DOWA     |    0 |           0 |   9 | DEGREE TRUE              |-------------|
+| DOWW     |    0 |           0 |   9 | DEGREE TRUE              |-------------|
+| DOSW     |    0 |           0 |   9 | DEGREES TRUE             |-------------|
+| POWV     |    0 |           0 |   6 | SECONDS                  |-------------|
+| POWW     |    0 |           0 |   6 | SECONDS                  |-------------|
+| POSW     |    0 |           0 |   6 | SECONDS                  |-------------|
+| HOWV     |    1 |           0 |  10 | METERS                   |-------------|
+| HOWW     |    1 |           0 |  10 | METERS                   |-------------|
+| HOSW     |    1 |           0 |  10 | METERS                   |-------------|
+| CLAT     |    2 |       -9000 |  15 | DEGREES                  |-------------|
+| CLON     |    2 |      -18000 |  16 | DEGREES                  |-------------|
+| HSMSL    |    1 |       -4000 |  17 | METERS                   |-------------|
+| HBMSL    |    1 |       -4000 |  17 | METERS                   |-------------|
+| SMID     |    0 |           0 |  72 | CCITT IA5                |-------------|
+| SMMO     |    0 |           0 |  10 | METERS/SECOND            |-------------|
+| WMOS     |    0 |           0 |  10 | NUMERIC                  |-------------|
+| WMOB     |    0 |           0 |   7 | NUMERIC                  |-------------|
+| 24PC     |   -1 |       -1000 |  11 | PASCALS                  |-------------|
+| GPH10    |    0 |       -1000 |  17 | GPM                      |-------------|
+| PRLC     |   -1 |           0 |  14 | PASCALS                  |-------------|
 |          |      |             |     |                          |-------------|
 `------------------------------------------------------------------------------'

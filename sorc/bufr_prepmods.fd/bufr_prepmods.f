@@ -39,6 +39,8 @@ c 2019-02-22  JWhiting  Port to WCOSS (Dell) phase 3 platforms;
 c                       Added NRPT_NCO to tideg() args, supports 
 c                        fix to handle poorly time-tagged tideg 
 c                        reports.
+c 2021-10-19  JSmith    Added logic to process BUFR format moored
+c                       buoy data.
 C
 C USAGE:
 C   INPUT FILES:
@@ -87,11 +89,11 @@ C$$$
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
  
-      CALL W3TAGB('BUFR_PREPMODS',2019, 57,50,'EMC')
+      CALL W3TAGB('BUFR_PREPMODS',2021, 292,50,'EMC')
  
       print *
-      print * ,'-> Welcome to BUFR_PREPMODS of  2/26/2019',
-     &           ' (port to WCOSS ph3 & tideg bad time tags fix)'
+      print * ,'-> Welcome to BUFR_PREPMODS of  10/19/2021',
+     &           ' (include BUFR format marine data)'
 
       print *
 
@@ -160,6 +162,13 @@ C  --------------------------------------------
          NRPT_MOD = NRPT_MOD + NRPT_SSMI
          GOTO 2
       ENDIF
+
+      IF(SUBSET.EQ.'MBUOYB') THEN
+         NRPT_MB = 0
+         CALL MBUOYB(LUBFR,LUBFO,SUBSET,IDATE,NRPT_MB)
+         NRPT_MOD = NRPT_MOD + NRPT_MB
+         GOTO 2
+      ENDIF	
  
 C  CASES WHERE REPORTS ARE JUST COPIES INTO MODSBUFR
 C  -------------------------------------------------

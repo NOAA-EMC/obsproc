@@ -13,7 +13,7 @@
 # ----
 #
 # Source files & objects
-SRCS	= bufr_prepmods.f clonlat.f mnemonics.f obname.f raddate.f ssmipn.f tideg.f
+SRCS	= bufr_prepmods.f clonlat.f mnemonics.f obname.f raddate.f ssmipn.f tideg.f mbuoyb.f
 OBJS	= $(SRCS:.f=.o) 
 
 
