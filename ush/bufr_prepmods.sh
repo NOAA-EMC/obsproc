@@ -108,7 +108,7 @@ set -x
 #  list of datatypes to dump a day into the mods database
 #  ------------------------------------------------------
  typ000=' metar'
- typ001=' ships  shipsu dbuoy  mbuoy  lcman  tideg  slpbg  cstgd'
+ typ001=' ships  shipsb  shipsu  shipub  dbuoy  dbuoyb  mbuoy  mbuoyb  lcman  cmanb  tideg  slpbg  cstgd'
  typ012='               sstns  sstnvh ssmipn'  # ersal
  typ031=' ' #'bathy  tesac  trkob'
  typHAlt='    nersal ngfoal ntpxal njsnal  envsal'
@@ -152,7 +152,18 @@ for dtyp in $dtypes ; do
 
 #  run the dumpjb script for this datatype  
 #  ---------------------------------------
+    # turn off duplicate removal for mbuoyb
+    if [ $dtyp = 'mbuoyb' ];
+    then
+	export DUPC_TAC=off
+	export DUPC=off
+    else
+	export DUPC_TAC=on
+	export DUPC=on
+    fi
+
     > $dtyp.ibm
+
     time -p $DUMP ${cymd}12 $dhr $dtyp >> $pgmout 2> errfile
     errret=$?
     cat errfile >> $pgmout
