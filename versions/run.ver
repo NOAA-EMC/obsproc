@@ -4,19 +4,20 @@ export PrgENV-intel_ver=v8.1.0
 export craype_ver=2.7.8
 export intel_ver=v19.1.3.304
 export cray-mpich_ver=v8.1.4
-export prod_util_ver=v
-export prod_envir_ver=v
+export prod_util_ver=v2.0.8
+export prod_envir_ver=v2.0.5
 export cfp_ver=v2.0.4
 
 export dictionaries_ver=v
 export grib_util_ver=v1.2.2
 export util_shared_ver=v1.4.0
-export hdf5_ver=1.10.6
+export hdf5_ver=v1.10.6
 export netcdf_ver=v4.7.4
-export w3nco_ver=2.4.1
-export w3emc_ver=2.7.3
-export bacio_ver=2.4.1
-export bufr_dump_ver=2.0.0
+export w3nco_ver=v2.4.1
+export w3emc_ver=v2.7.3
+export bacio_ver=v2.4.1
+export bufr_dump_ver=v2.0.0
+export bufr_ver=v11.5.0
 
 export PROCESS_MASTER_SHIP_STNLIST=NO
 export BACK=off

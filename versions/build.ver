@@ -1,0 +1,9 @@
+export w3nco_ver=v2.4.6
+export w3emc_ver=v2.7.3
+export bufr_ver=v11.5.0
+export bacio_ver=v2.4.1
+export hdf5_ver=v1.10.6
+export netcdf_ver=v4.7.4
+export nemsio_ver=v2.5.2
+export sigio_ver=v2.3.2
+export sp_ver=v2.3.3
