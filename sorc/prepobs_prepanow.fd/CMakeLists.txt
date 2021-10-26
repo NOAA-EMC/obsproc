@@ -2,7 +2,7 @@ list(APPEND fortran_src
   prepanow.f
 )
 
-set(exe_name prepobs_prepanow.x)
+set(exe_name prepobs_prepanow)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

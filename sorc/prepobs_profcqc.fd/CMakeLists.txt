@@ -8,7 +8,7 @@ list(APPEND fortran_src
   profcqc.f
 )
 
-set(exe_name prepobs_profcqc.x)
+set(exe_name prepobs_profcqc)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

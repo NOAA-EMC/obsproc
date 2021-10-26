@@ -8,7 +8,7 @@ list(APPEND fortran_src
   syndata.f
 )
 
-set(exe_name syndat_syndata.x)
+set(exe_name syndat_syndata)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

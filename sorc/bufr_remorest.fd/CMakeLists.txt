@@ -8,7 +8,7 @@ list(APPEND fortran_src
   remorest.f
 )
 
-set(exe_name bufr_remorest.x)
+set(exe_name bufr_remorest)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

@@ -8,7 +8,7 @@ list(APPEND fortran_src
   prepacpf.f
 )
 
-set(exe_name prepobs_prepacpf.x)
+set(exe_name prepobs_prepacpf)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

@@ -8,7 +8,7 @@ list(APPEND fortran_src
   avgdata.f
 )
 
-set(exe_name bufr_avgdata.x)
+set(exe_name bufr_avgdata)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

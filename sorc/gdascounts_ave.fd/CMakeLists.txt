@@ -8,7 +8,7 @@ list(append fortran_src
   build_new.f
 )
 
-set(exe_name gdascounts_ave.x)
+set(exe_name gdascounts_ave)
 add_executable(${exe_name} ${fortran_src})
 
 install(TARGETS ${exe_name} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

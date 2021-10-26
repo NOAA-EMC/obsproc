@@ -14,7 +14,7 @@ list(APPEND fortran_src
   uzl.f
 )
 
-set(exe_name prepobs_glerladj.x)
+set(exe_name prepobs_glerladj)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

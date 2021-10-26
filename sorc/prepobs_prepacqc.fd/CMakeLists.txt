@@ -22,7 +22,7 @@ list(APPEND fortran_src
   pkind.f90
 )
 
-set(exe_name prepobs_prepacqc.x)
+set(exe_name prepobs_prepacqc)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

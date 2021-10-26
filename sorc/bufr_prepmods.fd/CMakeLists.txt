@@ -9,7 +9,7 @@ list(APPEND fortran_src
   mbuoyb.f
 )
 
-set(exe_name .x)
+set(exe_name )
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

@@ -8,7 +8,7 @@ list(APPEND fortran_src
   mpcopybufr.f90
 )
 
-set(exe_name prepobs_mpcopybufr.x)
+set(exe_name prepobs_mpcopybufr)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

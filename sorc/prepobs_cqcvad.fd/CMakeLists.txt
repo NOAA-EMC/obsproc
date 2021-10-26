@@ -8,7 +8,7 @@ list(APPEND fortran_src
   cqcvad.f
 )
 
-set(exe_name prepobs_cqcvad.x)
+set(exe_name prepobs_cqcvad)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

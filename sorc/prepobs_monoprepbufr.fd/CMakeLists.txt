@@ -8,7 +8,7 @@ list(APPEND fortran_src
   monoprepbufr.f90
 )
 
-set(exe_name prepobs_monoprepbufr.x)
+set(exe_name prepobs_monoprepbufr)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

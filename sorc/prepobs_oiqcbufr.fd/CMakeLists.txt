@@ -8,7 +8,7 @@ list(APPEND fortran_src
   oiqcbufr.f
 )
 
-set(exe_name prepobs_oiqcbufr.x)
+set(exe_name prepobs_oiqcbufr)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

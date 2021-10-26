@@ -8,7 +8,7 @@ list(APPEND fortran_src
   prevents.f gblevents_cdas.f
 )
 
-set(exe_name prepobs_prevents.x)
+set(exe_name prepobs_prevents)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

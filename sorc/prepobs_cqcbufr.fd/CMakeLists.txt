@@ -8,7 +8,7 @@ list(APPEND fortran_src
   cqcbufr.f radcor.f
 )
 
-set(exe_name prepobs_cqcbufr.x)
+set(exe_name prepobs_cqcbufr)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

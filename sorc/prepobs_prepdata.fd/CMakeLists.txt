@@ -16,7 +16,7 @@ list(APPEND fortran_src
   w3xtovseds.f
 )
 
-set(exe_name .x)
+set(exe_name )
 add_executable(${exe_name} ${fortran_src})
 target_include_directories(${exe_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
