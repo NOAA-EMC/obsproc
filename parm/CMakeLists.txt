@@ -35,5 +35,5 @@ list(APPEND parm_files
   wave_dcodquikscat.rtma.parm
   )
 
-install(PROGRAMS ${parm_files}
+install(FILES ${parm_files}
         DESTINATION "parm")
