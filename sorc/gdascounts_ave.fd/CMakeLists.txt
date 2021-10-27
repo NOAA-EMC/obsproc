@@ -4,7 +4,7 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdefault-real-8 -fdefault-integer-8")
 endif()
 
-list(append fortran_src
+list(APPEND fortran_src
   build_new.f
 )
 

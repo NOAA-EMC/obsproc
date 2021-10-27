@@ -14,19 +14,20 @@ list(APPEND fortran_src
   w3rtovsunp.f
   w3atovsunp.f
   w3xtovseds.f
+  ${CMAKE_CURRENT_SOURCE_DIR}/../glbevents.fd/gblevents.f
 )
 
-set(exe_name )
+set(exe_name prepobs_prepdata)
 add_executable(${exe_name} ${fortran_src})
 target_include_directories(${exe_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
   ${exe_name}
   bufr::bufr_4
-  bacio::bacio_4
   w3emc::w3emc_4
+  bacio::bacio_4
   nemsio::nemsio
   sp::sp_4
-  sigio::sigio_4
+  sigio::sigio
   NetCDF::NetCDF_Fortran)
 
 if(MKL_FOUND)

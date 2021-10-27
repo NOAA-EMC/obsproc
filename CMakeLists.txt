@@ -8,6 +8,8 @@ project(
   VERSION ${pVersion}
   LANGUAGES Fortran)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 include(GNUInstallDirs)
 
 # Build type.

@@ -9,7 +9,7 @@ list(APPEND fortran_src
   mbuoyb.f
 )
 
-set(exe_name )
+set(exe_name bufr_prepmods)
 add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}

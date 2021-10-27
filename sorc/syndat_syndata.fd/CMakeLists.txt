@@ -17,7 +17,7 @@ target_link_libraries(
   w3emc::w3emc_4
   nemsio::nemsio
   sp::sp_4
-  sigio::sigio_4
+  sigio::sigio
   NetCDF::NetCDF_Fortran)
 
 if(MKL_FOUND)
