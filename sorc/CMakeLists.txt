@@ -29,7 +29,7 @@ endif()
 # Build code.
 add_subdirectory(bufr_avgdata.fd)
 add_subdirectory(bufr_datacount.fd)
-#add_subdirectory(bufr_listdumps.fd)
+add_subdirectory(bufr_listdumps.fd)
 add_subdirectory(bufr_prepmods.fd)
 add_subdirectory(bufr_remorest.fd)
 add_subdirectory(gdascounts_ave.fd)
