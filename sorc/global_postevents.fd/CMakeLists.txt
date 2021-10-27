@@ -14,11 +14,12 @@ add_executable(${exe_name} ${fortran_src})
 target_link_libraries(
   ${exe_name}
   bufr::bufr_4
-  w3emc::w3emc_4
-  bacio::bacio_4
   nemsio::nemsio
+  w3emc::w3emc_4
+  w3nco::w3nco_4
   sp::sp_4
   sigio::sigio
+  bacio::bacio_4
   NetCDF::NetCDF_Fortran)
 
 if(MKL_FOUND)
