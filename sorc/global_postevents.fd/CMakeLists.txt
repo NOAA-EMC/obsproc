@@ -6,21 +6,16 @@ endif()
 
 list(APPEND fortran_src
   postevents.f
-  ${CMAKE_CURRENT_SOURCE_DIR}/../glbevents.fd/gblevents.f
 )
 
 set(exe_name global_postevents)
 add_executable(${exe_name} ${fortran_src})
+add_dependencies(${exe_name} gblevents)
 target_link_libraries(
   ${exe_name}
+  gblevents
   bufr::bufr_4
-  nemsio::nemsio
-  w3emc::w3emc_4
-  w3nco::w3nco_4
-  sp::sp_4
-  sigio::sigio
-  bacio::${bacio_name}
-  NetCDF::NetCDF_Fortran)
+)
 
 if(MKL_FOUND)
   target_link_libraries(

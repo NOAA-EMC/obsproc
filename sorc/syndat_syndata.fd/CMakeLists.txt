@@ -6,21 +6,15 @@ endif()
 
 list(APPEND fortran_src
   syndata.f
-  ${CMAKE_CURRENT_SOURCE_DIR}/../glbevents.fd/gblevents.f
 )
 
 set(exe_name syndat_syndata)
 add_executable(${exe_name} ${fortran_src})
+add_dependencies(${exe_name} gblevents)
 target_link_libraries(
   ${exe_name}
-  bufr::bufr_4
-  nemsio::nemsio
-  w3emc::w3emc_4
-  w3nco::w3nco_4
-  sp::sp_4
-  sigio::sigio
-  bacio::${bacio_name}
-  NetCDF::NetCDF_Fortran)
+  gblevents
+  bufr::bufr_4)
 
 if(MKL_FOUND)
   target_link_libraries(
