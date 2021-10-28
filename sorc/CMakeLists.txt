@@ -23,6 +23,12 @@ find_package(nemsio REQUIRED)
 find_package(bufr REQUIRED)
 find_package(MKL)
 
+if(bacio_VERSION GREATER_EQUAL 2.5.0)
+  set(bacio_name bacio)
+else()
+  set(bacio_name bacio_4)
+endif()
+
 # Build code.
 add_subdirectory(bufr_avgdata.fd)
 add_subdirectory(bufr_datacount.fd)

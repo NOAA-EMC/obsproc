@@ -19,7 +19,7 @@ target_link_libraries(
   w3nco::w3nco_4
   sp::sp_4
   sigio::sigio
-  bacio::bacio_4
+  bacio::${bacio_name}
   NetCDF::NetCDF_Fortran)
 
 if(MKL_FOUND)
