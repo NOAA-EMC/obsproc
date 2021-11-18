@@ -15,3 +15,5 @@ export bufr_ver=11.5.0
 
 export PROCESS_MASTER_SHIP_STNLIST=NO
 export BACK=off
+
+module load cray-pals/1.0.12

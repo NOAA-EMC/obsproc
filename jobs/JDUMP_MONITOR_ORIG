@@ -20,9 +20,9 @@ set +x
 echo
 echo "####################################################################"
 echo
-echo "OBSPROC version is ${obsproc_ver:-not set}" #Set at trigger script level,outside of obsproc code
-echo "BUFR_DUMP version used by this job, for dump and dumplist, is " \
-       "${bufr_dump_ver:-not set}"        #Set at trigger script level like obsproc_ver
+echo "OBSPROC version is ${obsproc_ver:-not set}" 
+echo "BUFR_UTIL version used by this job, for dump and dumplist, is " \
+       "${bufr_util_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
 echo
 echo "####################################################################"
@@ -108,8 +108,8 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
-"###FATAL ERROR \"obsproc_ver\" is not set"}} #doesn't matter if HOMEobsproc set
+-${NWROOT:?}/obsproc.${obsproc_ver:?\
+"###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
@@ -118,25 +118,18 @@ export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items
 # ---------------------------------------
-#export HOMEbufr_util=${HOMEbufr_util:\
-#-${PACKAGEROOT:?}/bufr_util.${bufr_util_ver:?\
-#"###FATAL ERROR \"bufr_util_ver\" is not set"}}
+export HOMEbufr_util=${HOMEbufr_util:\
+-${NWROOT:?}/bufr_util.${bufr_util_ver:?\
+"###FATAL ERROR \"bufr_util_ver\" is not set"}}
 
-export HOMEbufr_dump=${HOMEbufr_dump:\
--${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
-"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
-
-#export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush} #Don't technically need this because already loaded
-#export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
-export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix} #Anything defined in the module doesn't need to be loaded
+export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
+export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
 
 # NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-#export ushscript_dump=${ushscript_dump:-$USHbufr_util} 
-export ushscript_dump=${ushscript_dump:-$USHbufr_dump} #Needed to be changed 
+export ushscript_dump=${ushscript_dump:-$USHbufr_util}
 
 ###############################################
 # Add some prod utilities to working directory
@@ -162,7 +155,6 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
   export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
-#  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
@@ -173,13 +165,11 @@ else
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
   export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
-#  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 755 -p $COMOUT
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
 export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
-#  export comin=${comin:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
 export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
 
 # ---------------------------
@@ -188,23 +178,21 @@ export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
 
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom} 
-#export TANK=${TANK:-${DCOMROOT}/prod}
-export TANK=${TANK:-${DCOMROOT}}
+export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
+export TANK=${TANK:-${DCOMROOT}/prod}
 
 # directory path to data count averaging executed in model script and in
 #  bufr_avgdata.sh
 # ----------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-${COMROOT:?}/${NET}/${envir}/sdm_rtdm} ###NOT RIGHT. Need to talk to NCO
+export HOMEarch=${HOMEarch:-${COMROOT:?}/${NET}/${envir}/sdm_rtdm}
 
-export HOMEarch=${HOMEarch:-${COMROOT:?}/${NET}/${obsproc_ver}/sdm_rtdm} #might end up being something like this  ## I define how I want it to be for testing
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export AVGDarch_OUT=$HOMEarch/avgdata  #### TALK TO NCO Steven Earle
+  export AVGDarch_OUT=$HOMEarch/avgdata
   mkdir -p $AVGDarch_OUT
 else
-  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${NET}/${envir}/sdm_rtdm/avgdata} ### SE
+  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${NET}/${envir}/sdm_rtdm/avgdata}
   mkdir -p $AVGDarch_OUT
 fi
 
@@ -248,7 +236,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exdump_monitor.sh.ecf #ALL ECF extensions have to be removed. Rename all the files (ec flow)
+$SCRIPTSobsproc/exdump_monitor.sh.ecf
 eval err_${RUN}_monitor=$?
 eval [[ \$err_${RUN}_monitor -ne 0 ]] && $DATA/err_exit
 
@@ -258,7 +246,7 @@ echo "`hostname`  --  `date -u`" > $COMOUT/where_${cycle}_dump_monitor_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_dump_monitor_run
-[ -n "$bufr_util_ver" ]  &&  \    #### CHANGE to bufr_dump. defined in run.ver too
+[ -n "$bufr_util_ver" ]  &&  \
  echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_dump_monitor_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
