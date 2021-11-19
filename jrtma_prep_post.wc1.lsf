@@ -1,0 +1,79 @@
+#BSUB -J %JTYP%_prep_post_%DESC%_%CC%%CCM%
+#BSUB -o /gpfs/dell2/ptmp/Praveen.Kumar/%JTYP%_prep_post_%PDY%_%CC%%CCM%_%DESC%.o%J
+#BSUB -L /bin/sh
+#BSUB -cwd /gpfs/dell2/ptmp/%U
+#BSUB -W 00:10
+#BSUB -P OBSPROC-T2O
+#BSUB -q dev
+##BSUB -M 3000
+#BSUB -R rusage[mem=1000]
+
+#####################################################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=rtma cyc=00 tmmark=tm00 PDY=20170126 desc=somethingfun cycbsub jrtma_*.ph3.lsf
+# For latest/current PDY:
+# > jtyp=rtma cyc=00 tmmark=tm00 cycbsub jrtma_*.ph3.lsf
+# cycbsub location: /u/Diane.Stokes/bin
+# cycbsub location: /u/Praveen.Kumar/bin
+#####################################################################
+
+set -xu
+
+sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+echo "begin source"
+. $sourcedir/devprodtest.sh $$
+echo "end source"
+
+export envir=prod
+export cyc=%CC%
+export cycM=%CCM%
+DESC=%DESC%
+JTYP=%JTYP%
+# Test if this is an hourly RTMA run or a Rapid Update RTMA run; assign job accordingly
+if [ -z "$cycM" ]; then
+  export job=${JTYP}_dump_$cyc
+else
+  export job=${JTYP}_ru_dump_${cyc}${cycM}
+fi
+export jobid=$job.$LSB_JOBID
+
+export PDY=%PDY%
+
+userROOT=/gpfs/dell2/emc/obsproc/noscrub/$USER
+userROOT1=/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior
+
+# source moduleload file
+. $userROOT/gitstatic/fix/moduleload
+
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+VERSION_FILE=${userROOT}/gitstatic/obsproc_rtma.ver
+
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+ echo Need version info...  Exiting...
+ exit 7
+fi
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+
+export DATAROOT=/gpfs/dell2/ptmp/$USER
+export jlogfile=/gpfs/dell2/ptmp/$USER/${JTYP}.$PDY.jlogfile
+
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2 
+export HOMEobsproc=${userROOT}/gitwkspc/EMC_obsproc_wcoss2
+
+export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/com
+export KEEPDATA=YES
+
+export COMOUT_ROOT=/gpfs/dell2/ptmp/$USER/com
+
+$HOMEobsproc/jobs/JRTMA_PREP_POST
+
+exit
+
