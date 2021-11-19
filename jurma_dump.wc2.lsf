@@ -1,0 +1,143 @@
+# modification history
+# 11 Nov 2021 PKumar modified for Cactus
+
+#!/bin/bash
+#PBS -N first_urma_dump
+##PBS -N %JTYP%_dump_%DESC%_%CC%
+#PBS -o /lfs/h2/ptmp/Praveen.Kumar/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+##PBS -j /lfs/h2/ptmp/Praveen.Kumar/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -A OBSPROC-DEV
+#PBS -l select=1:ncpus=2:mem=4gb
+##PBS -l place=vscatter,select=1:ncpus=32:mem=4gb
+#PBS -q dev 
+#PBS -l walltime=1:00:00
+
+## :PK? and more PBS
+echo "Master Host: $PBS_O_HOST"
+echo "Nodes:"; cat $PBS_NODEFILE
+##cd $PBS_O_WORKDIR
+##mpiexec –n 16 –ppn 16 ./mpihello
+
+## Old WCOSS 
+##BSUB -J %JTYP%_dump_%DESC%_%CC%
+##BSUB -o /gpfs/dell2/ptmp/Praveen.Kumar/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+##BSUB -L /bin/sh
+##BSUB -cwd /gpfs/dell2/ptmp/%U
+##BSUB -q dev
+##BSUB -R "span[ptile=3]"
+##BSUB -n 3
+##BSUB -R rusage[mem=3000]
+##BSUB -R affinity[core]
+##BSUB -W 00:15
+##BSUB -P OBSPROC-T2O
+
+##############################################
+## Submit notes:
+## For specific PDY:
+## > jtyp=urma cyc=00 PDY=20190520 desc=somethingfun cycbsub jurma_*.wc2.lsf
+## For latest/current PDY:
+## > jtyp=urma cyc=00 desc=somethingfun cycbsub jurma_*.wc2.lsf
+## cycbsub location: /u/Diane.Stokes/bin
+## cycbsub location: /u/Praveen.Kumar/bin
+###############################################
+
+set -xa
+
+#sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+#echo "begin source"
+#. $sourcedir/devprodtest.sh $$
+#echo "end source"
+
+export NODES=1
+
+export envir=prod
+export cyc=12
+#export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_dump_$cyc
+export jobid=$job.$LSB_JOBID
+
+export PDY=20210823
+#export PDY=%PDY%
+
+#export DUMPJBprocdate=1900123100
+export KEEPDATA=YES
+
+userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
+
+# source moduleload file
+#. $userROOT/gitstatic/fix/moduleload
+
+
+#VERSION_FILE=$NWROOT/versions/obsproc_urma.ver
+VERSION_FILE=${userROOT}/gitwkspc/obsproc/versions/run.ver
+
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+export bufr_dump_ver=1.0.0
+module unload bufr_dump # 2.0.0
+module use ${userROOT}/bufr-dump-cmake/modulefiles
+module load bufr_dump/$bufr_dump_ver  # use 1.0.0 for now 
+##module use ${NWROOT}/obsproc_shared/bufr_dumplist.${obsproc_shared_bufr_dumplist_ver}/modulefiles
+##module load bufr_dumplist/2.3.0
+#module use ${userROOT1}/gitstatic/EMC_obsproc_bufr_util/modulefiles
+#module load bufr_dumplist/2.3.1
+##module use ${NWROOT}/obsproc_dump.${obsproc_dump_ver}/modulefiles
+##module load dumpjb/5.1.0
+#module load dumpjb/5.1.1
+#module load grib_util/1.1.1  # need in trigger!
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+
+
+#export HOMEobsproc=${NWROOT}/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2
+#export HOMEobsproc=${userROOT}/gitstatic/EMC_obsproc_wcoss2 # Shelley
+export HOMEobsproc=${userROOT}/obsproc-cmake
+
+#export HOMEbufr_util=$NWROOT/bufr_util.${bufr_util_ver}
+# !!! git branch EMC_obsproc: bufr_util
+# Already defined at module level, NO neeed to define here, comment below
+#export HOMEbufr_dump=${userROOT}/bufr-dump-cmake
+
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export DATAROOT=/lfs/h2/emc/ptmp/${USER}  
+export COMOUT=$DATAROOT/com/obsproc/$obsproc_ver/${JTYP}.${PDY} # Pay attention to version 
+export jlogfile=$DATAROOT/${JTYP}_dump.$PDY.jlogfile
+
+
+export LOUD=on
+export DEBUG_LEVEL=3
+#export DUPC_TAC=on
+
+$HOMEobsproc/jobs/JURMA_DUMP
+
+exit
+
+######################## Ask Shelley about the bottom part and a/c change USER
+# Kick off dump_post job
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycbsub \
+  /gpfs/dell2/emc/obsproc/noscrub/Praveen.Kumar/Notes/jobsWCOSS/URMA/jurma_dump_post.wc2.lsf
+  #/gpfs/dell2/emc/obsproc/noscrub/Praveen.Kumar/gitstatic/EMC_obsproc_melchior/jobs/jurma_dump_post.wc2.lsf
+fi
+
+# Kick off prep job
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycbsub \
+  /gpfs/dell2/emc/obsproc/noscrub/Praveen.Kumar/Notes/jobsWCOSS/URMA/jurma_prep.wc2.lsf
+  #/gpfs/dell2/emc/obsproc/noscrub/Praveen.Kumar/gitstatic/EMC_obsproc_melchior/jobs/jurma_prep.wc2.lsf
+fi
+#exit

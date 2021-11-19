@@ -1,0 +1,106 @@
+#BSUB -J %JTYP%_prep_%DESC%_%CC%
+#BSUB -o /gpfs/dell2/ptmp/Praveen.Kumar/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%J
+#BSUB -L /bin/sh
+#BSUB -cwd /gpfs/dell2/ptmp/%U
+#BSUB -q dev
+# adding 2 lines below (which are in prod) causes job to wait to run
+#BSUB -R affinity[core]
+#BSUB -R rusage[mem=1000]
+#BSUB -W 00:10
+#BSUB -P OBSPROC-T2O
+
+##############################################
+### Submit notes:
+### For specific PDY:
+### > jtyp=urma cyc=00 PDY=20190520 desc=somethingfun cycbsub jurma_*.wc2.lsf
+### For latest/current PDY:
+### > jtyp=urma cyc=00 desc=somethingfun cycbsub jurma_*.wc2.lsf
+### cycbsub location: /u/Diane.Stokes/bin
+### cycbsub location: /u/Praveen.Kumar/bin
+################################################
+
+set -xu
+
+sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+echo "begin source"
+. $sourcedir/devprodtest.sh $$
+echo "end source"
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_dump_$cyc
+export jobid=$job.$LSB_JOBID
+
+export PDY=%PDY%
+
+export KEEPDATA=YES
+
+userROOT=/gpfs/dell2/emc/obsproc/noscrub/$USER
+userROOT1=/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior
+
+# source moduleload file
+. $userROOT/gitstatic/fix/moduleload
+
+# Temporary -- module loads for GFSv16
+module use -a /usrx/local/nceplibs/dev/NCEPLIBS/modulefiles
+module load w3emc_para/2.4.0
+module load hdf5_parallel/1.10.6
+module load netcdf_parallel/4.7.4
+
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+VERSION_FILE=${userROOT}/gitstatic/obsproc_urma.ver
+
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+
+export DATAROOT=/gpfs/dell2/ptmp/${USER}
+export jlogfile=/gpfs/dell2/ptmp/$USER/${JTYP}_dump.$PDY.jlogfile
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2
+export HOMEobsproc=${userROOT}/gitwkspc/EMC_obsproc_wcoss2
+
+
+export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/com
+#export COMIN=/gpfs/dell2/ptmp/$USER/com/${JTYP}/${envir}/${JTYP}.${PDY}
+export COMINgdas=$COMROOT/gdas/${envir}/gdas.${PDY}/${cyc}/atmos
+export COMINgfs=$COMROOT/gfs/${envir}/gfs.${PDY}/${cyc}/atmos
+#export COMINgdas=/gpfs/dell3/ptmp/emc.glopara/ROTDIRS/v16rt2/gfs/para/gdas.${PDY}/${cyc}/atmos  # GFSv16 para
+#export COMINgfs=/gpfs/dell3/ptmp/emc.glopara/ROTDIRS/v16rt2/gfs/para/gfs.${PDY}/${cyc}/atmos  # GFSv16 para
+#export COMINgdas=/gpfs/dell1/nco/ops/com/gfs/para/gdas.${PDY}/${cyc}/atmos  # GFSv16 para
+#export COMINgfs=/gpfs/dell1/nco/ops/com/gfs/para/gfs.${PDY}/${cyc}/atmos  # GFSv16 para
+#export tstsp=/gpfs/dell2/ptmp/$USER/urma_eprm/com/${JTYP}/${envir}/${JTYP}.${PDY}/${JTYP}.t${cyc}z.
+export COMOUT_ROOT=/gpfs/dell2/ptmp/$USER/com
+
+export envir_getges=${envir}
+#export GETGES_COM=/gpfs/dell3/ptmp/emc.glopara/ROTDIRS/v16rt2    # GFSv16 para
+export GETGES_COM=/gpfs/dell1/nco/ops/com    # GFSv16 para
+export NEMSIO_IN=.false.        # GFSv16 para
+export NETCDF_IN=.true.         # GFSv16 para
+
+export launcher_PREP=mpirun
+#export POE=NO
+
+export DEBUG_LEVEL=3
+
+$HOMEobsproc/jobs/JURMA_PREP
+
+
+# Kick off prep_post job
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycbsub \
+  /gpfs/dell2/emc/obsproc/noscrub/Praveen.Kumar/Notes/jobsWCOSS/URMA/jurma_prep_post.wc2.lsf
+  #/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_melchior/jobs/jurma_prep_post.wc2.lsf
+fi
