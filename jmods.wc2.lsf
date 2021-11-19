@@ -1,0 +1,99 @@
+# modification history
+# 11 Nov 2021 PKumar modified for Cactus
+
+#!/bin/bash
+#PBS -N first_mod
+##PBS -N %JTYP%_%DESC%_%CC%
+#PBS -o /lfs/h2/stmp/Praveen.Kumar/%JTYP%_%PDY%_%CC%_%DESC%.o%J
+##PBS -j /lfs/h2/stmp/Praveen.Kumar/%JTYP%_%PDY%_%CC%_%DESC%.o%J
+#PBS -A OBSPROC-DEV
+#PBS -l select=1:ncpus=2:mem=4gb
+##PBS -l place=vscatter,select=1:ncpus=32:mem=4gb
+#PBS -q dev 
+#PBS -l walltime=1:00:00
+##PBS -cwd /lfs/h2/emc/stmp/%U
+
+## :PK? and more PBS
+echo "Master Host: $PBS_O_HOST"
+echo "Nodes:"; cat $PBS_NODEFILE
+##cd $PBS_O_WORKDIR
+##mpiexec –n 16 –ppn 16 ./mpihello
+
+## Old :PK? What else need to be moved up
+##BSUB -L /bin/sh
+##BSUB -cwd /lfs/h2/stmp/%U
+##BSUB -q dev_transfer ## Change the name 
+##BSUB -M 5000
+##BSUB -R rusage[mem=5000]
+##BSUB -R affinity[core]
+
+##############################################
+## Submit notes:
+## For specific PDY:
+## > jtyp=mods cyc=14 PDY=20170126 desc=somethingfun cycbsub jmods.wc2.lsf
+## For latest/current PDY:
+## > jtyp=mods cyc=14 desc=somethingfun cycbsub jmods.wc2.lsf
+## cycbsub location: /u/Diane.Stokes/bin
+## cycbsub location: /u/Shelley.Melchior/bin
+###############################################
+
+
+set -xa
+userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
+
+# source moduleload file :PK? NO NEED
+# . $userROOT/gitstatic/fix/moduleload
+
+envir=prod # scripts point to production files as default
+export cyc=12
+#export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_${cyc} # normally not changed, but needs $cyc
+export PDY=20210823 # Add this to force in a different date than in $COMROOT/date
+#export PDY=%PDY% # Add this to force in a different date than in $COMROOT/date
+
+export obsproc_ver=1.0.0
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+#VERSION_FILE=${userROOT}/gitstatic/obsproc.ver
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/gitwkspc/obsproc/versions/run.ver
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+export bufr_dump_ver=1.0.0
+module unload bufr_dump # 2.0.0
+module use ${userROOT}/bufr-dump-cmake/modulefiles
+module load bufr_dump/$bufr_dump_ver  # use 1.0.0 for now 
+#module use ${NWROOT}/obsproc_shared/bufr_dumplist.${obsproc_shared_bufr_dumplist_ver}/modulefiles
+#module load bufr_dump/$bufr_dump_ver
+#module load bufr_dumplist/2.3.1
+#module load dumpjb/5.1.1
+
+
+export SENDECF=NO
+export SENDDBN=NO
+
+#export HOMEobsproc=$PACKAGEROOT/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2
+export HOMEobsproc=${userROOT}/obsproc-cmake
+
+#export HOMEbufr_util=$NWROOT/bufr_util.${bufr_util_ver}
+# !!! git branch EMC_obsproc: bufr_util
+# Already defined at module level, NO neeed to define here, comment below
+#export HOMEbufr_dump=${userROOT}/bufr-dump-cmake
+
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export DATAROOT=/lfs/h2/emc/stmp/${USER}
+export COMOUT=$DATAROOT/com/obsproc/$obsproc_ver/${JTYP}.${PDY} # Pay attention to version 
+export MODSDIR=$DATAROOT/mods/dcom/prod/${JTYP}
+
+export DEBUG_LEVEL=3
+#export LOUD=on
+export KEEPDATA=YES
+
+$HOMEobsproc/jobs/JMODS
+
