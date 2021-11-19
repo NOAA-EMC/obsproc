@@ -1,0 +1,90 @@
+#BSUB -J %JTYP%_prep2_post_%DESC%_%CC%
+#BSUB -o /gpfs/dell2/ptmp/Praveen.Kumar/%JTYP%_prep2_post_%PDY%_%CC%_%DESC%.o%J
+#BSUB -L /bin/sh
+#BSUB -cwd /gpfs/dell2/ptmp/%U
+#BSUB -W 00:10
+#BSUB -P OBSPROC-T2O
+#BSUB -q dev
+##BSUB -M 3000
+#BSUB -R rusage[mem=1000]
+
+#####################################################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=cdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jcdas_*.ph3.lsf
+# For latest/current PDY:
+# > jtyp=cdas cyc=00 cycbsub jcdas_*.ph3.lsf
+# cycbsub location: /u/Diane.Stokes/bin
+# cycbsub location: /u/Praveen.Kumar/bin
+#####################################################################
+
+set -xu
+
+sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+echo "begin source"
+. $sourcedir/devprodtest.sh $$ 
+echo "end source"
+
+export envir=prod
+export cyc=%CC%
+export cycle=t${cyc}z
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_prep2_post_$cyc
+
+export PDY=%PDY%
+
+userROOT=/gpfs/dell2/emc/obsproc/noscrub/$USER
+userROOT1=/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior
+
+# source moduleload file
+. $userROOT/gitstatic/fix/moduleload
+
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+VERSION_FILE=${userROOT}/gitstatic/obsproc.ver
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+ echo Need version info...  Exiting...
+ exit 7
+fi
+
+#export util_shared_ver=1.0.3
+
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+#export DBNROOT="echo dcs test "; export SENDDBN=YES
+export DEBUG_LEVEL=3
+export KEEPDATA=YES
+
+export DATAROOT=/gpfs/dell2/ptmp/$USER
+export DATA=/gpfs/dell2/ptmp/pdy
+mkdir -p $DATA
+export jlogfile=/gpfs/dell2/ptmp/$USER/${JTYP}.$PDY.jlogfile
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2
+export HOMEobsproc=${userROOT}/gitwkspc/EMC_obsproc_wcoss2
+
+export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/com
+
+#export DATCOMIN=$COMROOT/gfs/prod/gdascounts
+#export SATCOMIN=$COMROOT/gfs/prod/gdascounts
+#export ARCHCOMIN=$COMROOT/gfs/prod/gdascounts
+#export DATCOM1_IN=$COMROOT/gfs/prod/gdascounts
+# comout and comin need to be PDYm1; use setpdy
+pwd=$(pwd)
+cd $DATA
+/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.3/ush/setpdy.sh 2
+cd $pwd
+. $DATA/PDY
+export COMIN=${COMIN_ROOT}/obsproc/${JTYP}.${PDYm1}
+export COMOUT_ROOT=/gpfs/dell2/ptmp/$USER/com
+export COMOUT=${COMOUT_ROOT}/obsproc/${JTYP}.${PDYm1}
+
+$HOMEobsproc/jobs/JCDAS_PREP2_POST
+
+err=$?
+echo $err

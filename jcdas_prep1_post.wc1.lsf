@@ -1,0 +1,93 @@
+#BSUB -J %JTYP%_prep1_post_%DESC%_%CC%
+#BSUB -o /gpfs/dell2/ptmp/Praveen.Kumar/%JTYP%_prep1_post_%PDY%_%CC%_%DESC%.o%J
+#BSUB -L /bin/sh
+#BSUB -cwd /gpfs/dell2/ptmp/%U
+#BSUB -W 00:15
+#BSUB -P OBSPROC-T2O
+##BSUB -q dev
+#BSUB -q dev_shared
+#BSUB -n 1
+##BSUB -M 3000
+##BSUB -R rusage[mem=1000]
+#BSUB -R "rusage[mem=1500]" -R "affinity[core]"
+
+#####################################################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=cdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jcdas_*.ph3.lsf
+# For latest/current PDY:
+# > jtyp=cdas cyc=00 cycbsub jcdas_*.ph3.lsf
+# cycbsub location: /u/Diane.Stokes/bin
+# cycbsub location: /u/Praveen.Kumar/bin
+#####################################################################
+
+set -xu
+
+sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+echo "begin source"
+. $sourcedir/devprodtest.sh $$ 
+echo "end source"
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_prep1_post_$cyc
+
+export PDY=%PDY%
+
+userROOT=/gpfs/dell2/emc/obsproc/noscrub/$USER
+userROOT1=/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior
+
+# source moduleload file
+ . $userROOT/gitstatic/fix/moduleload
+
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+VERSION_FILE=${userROOT}/gitstatic/obsproc.ver
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+ echo Need version info...  Exiting...
+ exit 7
+fi
+
+#export util_shared_ver=1.0.3
+
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+#export DBNROOT="echo dcs test "; export SENDDBN=YES
+export DEBUG_LEVEL=3
+export KEEPDATA=YES
+
+export DATAROOT=/gpfs/dell2/ptmp/$USER
+export jlogfile=/gpfs/dell2/ptmp/$USER/${JTYP}.$PDY.jlogfile
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2
+export HOMEobsproc=${userROOT}/gitwkspc/EMC_obsproc_wcoss2
+
+export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/com
+
+export DATCOMIN=$COMROOT/gfs/prod/gdascounts
+export SATCOMIN=$COMROOT/gfs/prod/gdascounts
+export ARCHCOMIN=$COMROOT/gfs/prod/gdascounts
+export DATCOM1_IN=$COMROOT/gfs/prod/gdascounts
+
+export COMOUT_ROOT=/gpfs/dell2/ptmp/$USER/com
+#export COMOUT=/gpfs/hps3/ptmp/$USER/com/comout.${job}%_PDY%.$$
+#export COMOUT=/gpfs/dell2/stmp/$USER/cdas_T2B/com/${JTYP}/prod/${JTYP}.${PDY}
+
+$HOMEobsproc/jobs/JCDAS_PREP1_POST
+
+err=$?
+
+exit
+
+# Kick off prep2_post job
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycbsub \
+  /gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_melchior/jobs/jcdas_prep2.ph3.lsf.T2B
+fi
