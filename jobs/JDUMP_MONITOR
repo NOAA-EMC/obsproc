@@ -160,27 +160,27 @@ setpdy.sh
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}${RUN}.${PDY}
+  export COMOUT=${COMROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
 #  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
 #  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 755 -p $COMOUT
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
-#  export comin=${comin:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
-export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
+#export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+export comin=${comin:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}  #To be used in the future
+export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDYm1}}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -248,7 +248,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exdump_monitor.sh.ecf #ALL ECF extensions have to be removed. Rename all the files (ec flow)
+$SCRIPTSobsproc/exdump_monitor.sh 
 eval err_${RUN}_monitor=$?
 eval [[ \$err_${RUN}_monitor -ne 0 ]] && $DATA/err_exit
 
@@ -258,8 +258,8 @@ echo "`hostname`  --  `date -u`" > $COMOUT/where_${cycle}_dump_monitor_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_dump_monitor_run
-[ -n "$bufr_util_ver" ]  &&  \    #### CHANGE to bufr_dump. defined in run.ver too
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_dump_monitor_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
  >> $COMOUT/obsproc_version_for_${cycle}_dump_monitor_run
