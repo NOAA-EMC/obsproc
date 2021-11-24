@@ -37,8 +37,8 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_UTIL version used by this job, for dump and dumplist, is" \
-       "${bufr_util_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
+       "${bufr_dump_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
 echo
 echo "####################################################################"
@@ -48,11 +48,11 @@ set -x
 #####################################################################
 # List modules loaded for this job
 #####################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
+#if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
+#  . /usrx/local/Modules/default/init/sh 2>/dev/null
+#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
+#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
+#fi
 set +x
 echo
 echo "####################################################################"
@@ -119,7 +119,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
@@ -128,18 +128,18 @@ export SCRIPTSobsproc=${SCRIPTSobsproc:\
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items
 # ---------------------------------------
-export HOMEbufr_util=${HOMEbufr_util:\
--${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-"###FATAL ERROR \"bufr_util_ver\" is not set"}}
+export HOMEbufr_dump=${HOMEbufr_dump:\
+-${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
+"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
-export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
-# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
+# NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-export ushscript_dump=${ushscript_dump:-$USHbufr_util}
+export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
 
 # ---------------------------------------------------------
 # Paths for combined obsproc and dump items
@@ -147,23 +147,23 @@ export ushscript_dump=${ushscript_dump:-$USHbufr_util}
 
 # directory paths to SSMI dump re-processing executed in bufr_dump_obs
 # --------------------------------------------------------------------
-export EXECPREP=${EXECPREP:-$HOMEbufr_util/exec}
+export EXECPREP=${EXECPREP:-$HOMEbufr_dump/exec}
 export PARMPREP=${PARMPREP:-$HOMEobsproc/parm}
-export FIXPREP=${FIXPREP:-$HOMEbufr_util/fix} # also path to expanded NAM
+export FIXPREP=${FIXPREP:-$HOMEbufr_dump/fix} # also path to expanded NAM
                                               #  domain mask file
 
 # directory paths to ERS, QuikSCAT & ASCAT dump re-processing executed in
 #  bufr_dump_obs
 # -----------------------------------------------------------------------
-export EXECWAVE=${EXECWAVE:-$HOMEbufr_util/exec}
+export EXECWAVE=${EXECWAVE:-$HOMEbufr_dump/exec}
 export PARMWAVE=${PARMWAVE:-$HOMEobsproc/parm}
-export FIXWAVE=${FIXWAVE:-$HOMEbufr_util/fix}
+export FIXWAVE=${FIXWAVE:-$HOMEbufr_dump/fix}
 
 # directory paths to SSMI & WindSAT dump re-processing executed in bufr_dump_obs
 # ------------------------------------------------------------------------------
-export EXECbufr=${EXECbufr:-$HOMEbufr_util/exec}
+export EXECbufr=${EXECbufr:-$HOMEbufr_dump/exec}
 export PARMbufr=${PARMbufr:-$HOMEobsproc/parm}
-export FIXbufr=${FIXbufr:-$HOMEbufr_util/fix}
+export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -171,7 +171,7 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_util/fix}
 
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
+export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
 export TANK=${TANK:-${DCOMROOT}/prod}
 
 # TANK_GRIBFLDS is root directory path to imssnow grib file used in
@@ -288,7 +288,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exnam_dump.sh.ecf
+$SCRIPTSobsproc/exnam_dump.sh
 eval err_${RUN}_dump2=$?
 eval [[ \$err_${RUN}_dump2 -ne 0 ]] && $DATA/err_exit
 
@@ -299,8 +299,8 @@ echo "$SITE `hostname`  --  `date -u`" > \
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
  >> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run

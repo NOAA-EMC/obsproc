@@ -44,8 +44,8 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_UTIL version used by this job, for dumplist, is" \
-       "${bufr_util_post_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dumplist, is" \
+       "${bufr_dump_post_ver:-not set}"
 echo
 echo "####################################################################"
 echo
@@ -56,11 +56,11 @@ set -x
 #   On luna/surge may need to initialize the Modules package to find
 #   the module command.  Will do so for either system.
 #####################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
+#if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
+#  . /usrx/local/Modules/default/init/sh 2>/dev/null
+#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
+#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
+#fi
 set +x
 echo
 echo "####################################################################"
@@ -126,7 +126,7 @@ fi
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
@@ -136,11 +136,11 @@ export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 # --------------------------------------------
 # Paths for bufr_dumplist items
 # --------------------------------------------
- export HOMEbufr_util=${HOMEbufr_util:\
--${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-"###FATAL ERROR \"bufr_util_ver\" is not set"}}
+ export HOMEbufr_dump=${HOMEbufr_dump:\
+-${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
+"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
-export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -229,8 +229,8 @@ fi
 if [ "$tmmark" = 'tm00' ]; then
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-  export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
-  export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
+  export comin=${comin:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
+  export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDYm1}}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -306,7 +306,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exdump_post.sh.ecf
+$SCRIPTSobsproc/exdump_post.sh
 eval err_${RUN}_dump_post=$?
 eval [[ \$err_${RUN}_dump_post -ne 0 ]] && $DATA/err_exit
 
@@ -318,8 +318,8 @@ echo "$SITE `hostname`  --  `date -u`" > \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_post_run
 
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_post_run
 
 if [ "$KEEPDATA" != YES ]; then
