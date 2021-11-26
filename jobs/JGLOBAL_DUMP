@@ -195,14 +195,14 @@ export TANK=${TANK:-${DCOMROOT}}
 #export COMINgdas=${COMINgdas:-$(compath.py ${envir}/com/gfs/${gfs_ver}/gdas)}
 #export VOSarch_IN=${VOSarch_IN:-$(compath.py ${envir}/com/${NET}/${sfcship_ver}/VOS)}
 #export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${sfcship_ver}/${RUN}.${PDY})}
-
+# WCOSS2
 #set the path for WC2 live, but overwrite in trigger with canned paths
-export COM_ENGICE=${COM_ENGICE:- $(compath.py $envir/com/omb/$omb_ver/sice} # ? IG
-export COM_ICE5MIN=${COM_ICE5MIN:-$COMROOTp3/omb/prod/sice}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py gfs/prod/sst)}
-export COM_SSTRTG=${COM_SSTRTG:-$(compath.py gfs/prod/sst)}
+export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)} # envir=prod OR canned
+export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/$omb_ver/sice)}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} #?? IG
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/${PDY}/sst)} #?? IG
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
-
+# WCOSS
 #export COM_ENGICE=${COM_ENGICE:-$COMROOTp3/omb/prod/sice}
 #export COM_ICE5MIN=${COM_ICE5MIN:-$COMROOTp3/omb/prod/sice}
 #export COM_SSTOI=${COM_SSTOI:-$(compath.py gfs/prod/sst)}
@@ -237,9 +237,11 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
-# hardwired for testing in trigger - do it!
+ ## hardwire for testing in trigger or HERE ? IG
  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
-# same below IG
+ ## COMROOT is already set to /lfs/h1/ops/prod/com 
+ # export COMIN=/lfs/h1/ops/$envir}/dcom # canned
+
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle

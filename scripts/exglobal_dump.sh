@@ -1611,49 +1611,54 @@ set -x
 
 #  determine local system name and type if available
 #  -------------------------------------------------
-SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   set +u
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   set -u
-fi
-echo sys_tp is set to: $sys_tp
 
-if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-   launcher=${launcher:-"aprun_cfp"}
-else
-   launcher=${launcher:-"cfp"}
-fi
-if [ "$launcher" = aprun_cfp ]; then
-   #  Get compute node count:  Subtract one from the total number of unique
-   #  hosts to account for the MAMU node that runs serial portion of job
-   typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
-   typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
-   if [ $ncnodes -lt 1 ]; then
-      set +x
-      echo
-      echo " ######################################################## "
-      echo " --> Could not get positive compute node count for aprun! "
-      echo " --> Check that BSUB directives included a reservation    "
-      echo "                   request for one or more compute nodes. "
-      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT      "
-      echo " ######################################################## "
-      echo
-      set -x
-      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
-   fi
-elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then
-   set +x
-   echo
-   echo "You requested the cfp poe launcher but are not running under LSF!!"
-   echo "You must run under LSF to use cfp option on IBM.  Exiting..."
-   echo
-   set -x
-   $DATA/err_exit
-fi
+SITE=${SITE:-""}
+#sys_tp=${sys_tp:-$(getsystem.pl -tp)}
+#getsystp_err=$?
+#if [ $getsystp_err -ne 0 ]; then
+#   msg="***WARNING: error using getsystem.pl to determine system type and phase"
+#   set +u
+#   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+#   set -u
+#fi
+#echo sys_tp is set to: $sys_tp
+
+#if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
+#   launcher=${launcher:-"aprun_cfp"}
+#else
+#   launcher=${launcher:-"cfp"}
+#fi
+
+#if [ "$launcher" = aprun_cfp ]; then
+#   #  Get compute node count:  Subtract one from the total number of unique
+#   #  hosts to account for the MAMU node that runs serial portion of job
+#   typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
+#   typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
+#   if [ $ncnodes -lt 1 ]; then
+#      set +x
+#      echo
+#      echo " ######################################################## "
+#      echo " --> Could not get positive compute node count for aprun! "
+#      echo " --> Check that BSUB directives included a reservation    "
+#      echo "                   request for one or more compute nodes. "
+#      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT      "
+#      echo " ######################################################## "
+#      echo
+#      set -x
+#      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
+#   fi
+#elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then # IG 
+#   set +x
+#   echo
+#   echo "You requested the cfp poe launcher but are not running under LSF!!"
+#   echo "You must run under LSF to use cfp option on IBM.  Exiting..."
+#   echo
+#   set -x
+#   $DATA/err_exit
+#fi
+
+launcher=${launcher:-"cfp"}
+
 if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
    > $DATA/poe.cmdfile
 
@@ -1674,6 +1679,7 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
  # IG
    if [ -s $DATA/poe.cmdfile ]; then
       nthreads=$(cat $DATA/poe.cmdfile | wc -l)
+      echo "nthreads= ${nthreads}" #IG
       if [ $nthreads -eq 1 ]; then   # don't expect to need this, but just in case
          echo "do not need cfp for 1 thread"
          if [ "$launcher" = aprun_cfp ]; then
@@ -1684,8 +1690,9 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
       elif [ "$launcher" = cfp ]; then  # iDataPlex #IG
          export MP_CSS_INTERRUPT=yes
          launcher_DUMP=${launcher_DUMP:-mpiexec} #IG
-         $launcher_DUMP cfp $DATA/poe.cmdfile 2>&1 #IG
-         # more from Nick
+         #$launcher_DUMP cfp $DATA/poe.cmdfile 2>&1 #IG
+         $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
+         # took this from Nick; 14, 8, exceed limit
 
  elif [ "$launcher" = aprun_cfp ]; then
          if [[ -z ${DUMPStpn:-""} ]]; then   # pes per node
