@@ -1,7 +1,7 @@
 #!/bin/ksh
 ################################################################################
 echo "------------------------------------------------------------------------ "
-echo "exrap_dump.sh.ecf - Rapid Refresh Full and Partial Cycle Dump processing "
+echo "exrap_dump.sh     - Rapid Refresh Full and Partial Cycle Dump processing "
 echo "------------------------------------------------------------------------ "
 echo "History: Oct 13 2011 - Original script.                                  "
 echo "         Sep 10 2014 - Use parallel scripting to process dump groups.    "
@@ -50,6 +50,7 @@ echo "         Jun 22 2021 - Incremented subsets for sfcshp dump groups to     "
 echo "                       match bufr_dumplist.  Removed tideg from sfcshp   "
 echo "                       dump group to make individual dump file.          "
 echo "                     - Copy bufr_dumplist to COMOUT.                     "
+echo "         Dec 09 2021 - Updated to run on WCOSS2                          "
 ################################################################################
 
 set -xau
@@ -1254,49 +1255,8 @@ set -x
 # determine local system name and type if available
 # -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   set +u
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   set -u
-fi
-echo sys_tp is set to: $sys_tp
-
-if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-   launcher=${launcher:-"aprun_cfp"}
-else
-   launcher=${launcher:-"cfp"}  # iDataPlex
-fi
-if [ "$launcher" = aprun_cfp ]; then
-   #  Get compute node count:  Subtract one from the total number of unique
-   #  hosts to account for the MAMU node that runs serial portion of job
-   typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
-   typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
-   if [ $ncnodes -lt 1 ]; then
-      set +x
-      echo
-      echo " ######################################################## "
-      echo " --> Could not get positive compute node count for aprun! "
-      echo " --> Check that BSUB directives included a reservation    "
-      echo "                   request for one or more compute nodes. "
-      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT      "
-      echo " ######################################################## "
-      echo
-      set -x
-      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
-   fi
-elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then
-   set +x
-   echo
-   echo "You requested the cfp poe launcher but are not running under LSF!!"
-   echo "You must run under LSF to use cfp option on IBM.  Exiting..."
-   echo
-   set -x
-   $DATA/err_exit
-fi
-if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
+launcher=${launcher:-"cfp"}
+if [ "$launcher" = cfp ]; then #-o "$launcher" = aprun_cfp ]; then
    > $DATA/poe.cmdfile
 
 # To better take advantage of cfp, execute the longer running commands first.
@@ -1313,35 +1273,7 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
 
 
    if [ -s $DATA/poe.cmdfile ]; then
-      nthreads=$(cat $DATA/poe.cmdfile | wc -l)
-      if [ $nthreads -eq 1 ]; then   # don't expect to need this, but just in case
-         echo "do not need cfp for 1 thread"
-         if [ "$launcher" = aprun_cfp ]; then
-           aprun -n 1 -N 1 -d 1 sh $DATA/poe.cmdfile
-         else
-           sh $DATA/poe.cmdfile
-         fi
-      elif [ "$launcher" = cfp ]; then  # iDataPlex
-#        module load cfp
-         export MP_CSS_INTERRUPT=yes
-         launcher_DUMP=${launcher_DUMP:-mpirun.lsf}
-         if [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-           launcher_DUMP='mpirun -l'
-         fi
-         $launcher_DUMP cfp $DATA/poe.cmdfile 2>&1
-      elif [ "$launcher" = aprun_cfp ]; then
-         if [[ -z ${DUMPStpn:-""} ]]; then   # pes per node
-            # cfp is faster with extra thread so add one if there is room.
-            #   For now, going with 20 as default max rather than 24.
-            if [ $nthreads -lt 20 ]; then
-               DUMPStpn=$(($nthreads+1))
-            else
-               DUMPStpn=20
-            fi
-         fi
-         NPROCS=$(($ncnodes*$DUMPStpn))  # concurrent processes
-         aprun -j 1 -n${NPROCS} -N${DUMPStpn} -d 1 --cc depth cfp $DATA/poe.cmdfile
-      fi
+      mpiexec -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1352,17 +1284,6 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
       echo
    fi
 else
-   if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-      set +x
-      echo
-      echo " ############################################################# "
-      echo " --> Option to use background threads is disabled on Cray-XC40."
-      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
-      echo " ############################################################# "
-      echo
-      set -x
-      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
-   else
       echo "Runing threads serially"
       [ $DUMP_group1 = YES ]  &&  ./thread_1
       [ $DUMP_group2 = YES ]  &&  ./thread_2
@@ -1373,8 +1294,6 @@ else
       [ $DUMP_group7 = YES ]  &&  ./thread_7
       [ $DUMP_group8 = YES ]  &&  ./thread_8
       [ $DUMP_group9 = YES ]  &&  ./thread_9
-#     wait
-   fi
 fi
 
 cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out
