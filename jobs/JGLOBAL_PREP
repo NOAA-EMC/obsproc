@@ -31,8 +31,8 @@ set -x
 # Force prepobs_makeprepbufr.sh to use prepobs_errtable.global from
 # gfs.v*/fix/fix_gsi instead of from obsproc_global.v*/fix
 # -----> Ask NCO if they want this in driver script?
-VERSION_FILE_gfs=$NWROOT/versions/gfs.ver
-[ -f $VERSION_FILE_gfs ] && . $VERSION_FILE_gfs
+#VERSION_FILE_gfs=$PACKAGEROOT/versions/gfs.ver #?? IG
+#[ -f $VERSION_FILE_gfs ] && . $VERSION_FILE_gfs
 
 ################################
 # Print out version information
@@ -53,14 +53,16 @@ set -x
 #   On luna/surge may need to initialize the Modules package to find
 #   the module command.  Will do so for either system.
 #####################################################################
-if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-  . /opt/modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
+#
+#if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
+#  . /opt/modules/default/init/sh 2>/dev/null
+#elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
+#  . /usrx/local/Modules/default/init/sh 2>/dev/null
+#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
+#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
+#fi
 set +x
+# THEY SHOULD BE ALREDY set in trigger script ?? IG
 echo
 echo "####################################################################"
 echo
@@ -123,7 +125,7 @@ export SENDDBN=${SENDDBN:-YES}
 ##########################
 # Specify Execution Areas
 ##########################
-
+# CONTINUE HERE IG
 # -------------------------------
 # Paths for obsproc items
 # -------------------------------
@@ -165,6 +167,7 @@ export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
 export DICTPREP=${DICTPREP:-${NWROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
+# look for  metar table !! IG
 
 # HOMEgfs is directory path to prepobs_errtable.global (PRVT), used in
 # prepobs_makeprepbufr.sh and its child scripts prepobs_syndata.sh and
@@ -195,18 +198,18 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -216,6 +219,7 @@ export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
 export envir_getges=${envir_getges:-$envir}
 export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
 export GETGES_NWG=${GETGES_NWG:-$GESROOT}
+#/lfs/h1/ops/canned/com/gfs what would be here - see other compath.py ?? IG
 export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges})/gdas.$PDY/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges})/gfs.$PDY/${cyc}/${COMPONENT}}
 
@@ -311,7 +315,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_makeprepbufr.sh.ecf
+$SCRIPTSobsproc/exglobal_makeprepbufr.sh # IG .ecf
 eval err_${RUN}_makeprepbufr=$?
 eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
 

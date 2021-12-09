@@ -237,7 +237,7 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
- ## hardwire for testing in trigger or HERE ? IG
+ ## hardwire for testing in trigger  IG
  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
  ## COMROOT is already set to /lfs/h1/ops/prod/com 
  # export COMIN=/lfs/h1/ops/$envir}/dcom # canned
