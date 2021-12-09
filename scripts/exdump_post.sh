@@ -58,6 +58,7 @@ echo "----------------------------------------------------------"
 #                        restricted reports in BUFR_REMOREST processing, but
 #                        whose reports are retained and instead station IDs
 #                        are masked.
+# 09 Dec 2021 Esposito - Updated for use on WCOSS2.
 #####################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
@@ -578,7 +579,6 @@ EOFthread
       echo
 
       ntasks=$(wc -l $DATA/mpmd.cmdfile | awk '{print $1}')
-      echo "The number of ntasks is ${ntasks}"
       if [ $ntasks -eq 1 ]; then
          # no need for overhead of aprun or mpirun.lsf and cfp if only one thread
          chmod +x $DATA/mpmd.cmdfile
@@ -586,10 +586,7 @@ EOFthread
       else
          which cfp
          which_cfp_err=$?
-         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-#      fi
-   
-
+         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
 #      if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
 #         if [ $which_cfp_err -ne 0 ]; then
 #            set +x
