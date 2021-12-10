@@ -130,7 +130,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
@@ -166,14 +166,16 @@ export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-${NWROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
-# look for  metar table !! IG
+export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_v${dictionaries_ver}}    ## there was no "v" in _v${dictionaries_ver}} originally IG 
+# it looks for  metar table !! IG
+# /lfs/h1/ops/prod/decoders/decod_shared/dictionaries_v3.4.0/
 
 # HOMEgfs is directory path to prepobs_errtable.global (PRVT), used in
 # prepobs_makeprepbufr.sh and its child scripts prepobs_syndata.sh and
 # prepobsp_prevents.sh.
 # ---------------------------------------------------------------------------
-export HOMEgfs=${HOMEgfs:-${NWROOT:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
+# will this stay like it is? overwritten in wrapper ? IG
+export HOMEgfs=${HOMEgfs:-${PACKAGES:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -213,8 +215,11 @@ else
   mkdir -m 755 -p $COMOUT
 fi
 
-export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
-export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
+export NEMSIO_IN=.false.        # GFSv16 para
+export NETCDF_IN=.true.         # GFSv16 para
+# shall I make it: set to .**. if not set previoully ? IG
+#export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
+#export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
                                               # NOTE: only NEMSIO_IN or NETCDF_IN can be .true.
 export envir_getges=${envir_getges:-$envir}
 export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
@@ -222,6 +227,8 @@ export GETGES_NWG=${GETGES_NWG:-$GESROOT}
 #/lfs/h1/ops/canned/com/gfs what would be here - see other compath.py ?? IG
 export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges})/gdas.$PDY/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges})/gfs.$PDY/${cyc}/${COMPONENT}}
+
+
 
 ###################################################
 # SETUP GDAS AND GFS PREPBUFR PROCESSING VARIABLES
