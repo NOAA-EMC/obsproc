@@ -1,0 +1,263 @@
+#!/bin/sh  
+#PBS -N %JTYP%_prep_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
+#PBS -q dev               
+#PBS -l walltime=00:35:00 
+#PBS -A OBSPROC-DEV
+## FOR SERIAL RUN
+##PBS -l place=vscatter,select=1:ncpus=8:mem=40gb
+## FOR PARALEL RUN
+#PBS -l place=vscatter,select=1:ncpus=8:mem=32gb
+# Original card in :
+#  /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/gitstatic/EMC_obsproc_genkova/jobs/jglobal_prep.wc2.lsf
+
+##############################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_prep.ph3.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_prep.ph3.lsf
+# cycbsub location: /u/Diane.Stokes/bin
+# cycbsub location: /u/Shelley.Melchior/bin
+# cycbsub location: /u/Iliana.Genkova/bin #from Nick
+##############################################
+
+#set -xu
+echo 'ILIANA' 
+
+# we don't need this IG
+##sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+#sourcedir="/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior/gitstatic/ush" #until my own exists !IG
+#echo "begin source"
+#. $sourcedir/devprodtest.sh $$
+#echo "end source"
+
+export NODES=1
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_prep_$cyc
+export jobid=$job.$LSB_JOBID
+
+export PDY=%PDY%
+
+echo START ILIANA
+export obsproc_ver=1.0.0 # IG
+echo $obsproc_ver
+
+# from Nick, do I need these? IG
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export TANK=/lfs/h1/ops/canned/dcom
+
+#userROOT=/gpfs/dell2/emc/obsproc/noscrub/$USER
+#userROOT=/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior #until my own exists !IG
+userROOT=/u/Iliana.Genkova/INSTALL
+
+
+# May be I need these? IG
+#module load w3emc/2.4.0
+#module load HDF5-parallel/1.10.6
+#module load NetCDF-parallel/4.7.4
+
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+#VERSION_FILE=${userROOT}/gitstatic/obsproc.ver
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/Nicks_expanded_run.ver #run.ver
+# think if the order of Versioni file and moduleloads is logical IG
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+ echo Need version info...  Exiting...
+ exit 7
+fi
+
+echo ILIANA $prod_util_ver
+
+# source moduleload file
+#. $userROOT/gitstatic/fix/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+###
+#########################################
+#Now load the modules
+#########################################
+module load prod_util/${prod_util_ver}
+module load prod_envir/${prod_envir_ver}
+
+module load grib_util/${grib_util_ver}
+module load util_shared/${util_shared_ver}
+module load hdf5/${hdf5_ver}
+module load netcdf/${netcdf_ver}
+module load w3nco/${w3nco_ver}
+module load w3emc/${w3emc_ver}
+module load bacio/${bacio_ver}
+module load bufr_dump/${bufr_dump_ver}
+module load bufr/${bufr_ver}
+
+module load envvar/${envvar_ver}
+module load PrgEnv-intel/${PrgEnv_intel_ver}
+module load intel/${intel_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
+
+##
+module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
+module load bufr_dump/1.0.0
+
+module list
+echo 'ILIANA'
+
+# Force prepobs_makeprepbufr.sh to use prepobs_errtable.global from
+# gfs.v*/fix/fix_gsi instead of from obsproc_global.v*/fix
+# Do we still need this? Check contents on WCOSS 1 IG
+#VERSION_FILE_gfs=$NWROOT/versions/gfs.ver
+#if [ -f $VERSION_FILE_gfs ]; then
+#   . $VERSION_FILE_gfs
+#else
+# echo Need version info...  Exiting...
+# exit 7
+#fi
+## IG ALREADY exported gfs_ver in run.ver gfs_ver=16.2 
+
+#export util_shared_ver=1.0.5  # ???????????
+
+export SENDECF=NO   # developer
+export SENDSDM=NO   # developer
+export SENDDBN=NO   # developer
+
+#export DATAROOT=/gpfs/dell2/ptmp/$USER
+#export jlogfile=/gpfs/dell2/ptmp/$USER/%JTYP%.$PDY.jlogfile
+export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_prep.$PDY.jlogfile
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+# git branch EMC_obsproc: wcoss2
+#export HOMEobsproc=${userROOT}/gitstatic/EMC_obsproc_wcoss2
+#export HOMEobsproc=/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_wcoss2 # !IG
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc
+# HOMEgfs on Dell
+#export HOMEgfs=$NWROOT/gfs.${gfs_ver} # ?? IG
+#export HOMEgfs=/lfs/h1/ops/prod/packages/gfs.${gfs_ver}
+#export HOMEgfs=/lfs/h1/ops/para/packages/gfs.${gfs_ver} # ?? IG ??? NOT THERE YET!!!
+export HOMEgfs=/lfs/h1/ops/canned/packages/dell1/gfs.v16.1.2/ #not 16.2 but ok IG
+
+# WILL I NEED THESE (from Nick's _prep step) ?? IG
+export GETGES_COM=/lfs/h1/ops/canned/com/gfs/v16.2/
+export GESROOT=/lfs/h1/ops/canned/com/gfs/v16.2/
+
+export COMPONENT=atmos
+#export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/global_wcoss2/com
+export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com
+# COMROOT is se to /lfs/h1/ops/prod/com
+
+#export COMINgdas=${COMROOT}/gfs/${envir}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+#export COMINgfs=${COMROOT}/gfs/${envir}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export COMINgdas=/lfs/h1/ops/canned/com/gfs/v16.2/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export COMINgfs=/lfs/h1/ops/canned/com/gfs/v16.2/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+
+#export tstsp=/gpfs/dell2/ptmp/$USER/com/gfs/prod/${JTYP}.${PDY}/${cyc}/${JTYP}.t${cyc}z.
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/global_wcoss2/com #output location for prep and prep_post
+
+export envir_getges=${envir} # now it's set to  prod  IG
+#export PRVT=${HOMEgfs}/fix/fix_gsi/prepobs_errtable.global
+# point to proper HOMEgfs IG  - TEMPORARY HARDWIRED prepobs_errtable.global
+export PRVT=/lfs/h1/ops/canned/packages/dell1/gfs.v16.1.2/fix/fix_gsi/prepobs_errtable.global
+#export launcher_PREP=mpiexec #or cfp??  IG - it was mpirun
+#export POE=NO
+export DEBUG_LEVEL=3
+
+#SUNDAY IG
+#export BACK=NO
+#export PARALLEL=NO
+#export NSPLIT=1
+#export POE=NO
+
+#export NSPLIT=4
+#export NPROCS=3
+
+$HOMEobsproc/jobs/JGLOBAL_PREP
+
+exit # temporary for testing
+     # below is UNCHANGED IG ??
+echo ILIANA_PREPisDone
+echo JTYP= $JTYP
+echo job= $job
+echo PDY= $PDY
+echo cyc= $cyc
+echo
+
+# exit # for learning purposes !IG
+# Code below is unchanged !IG
+
+# Kick off prep_post job
+#
+# To run prep_post for gdas, need to pre-stage previous cycle's
+# upa_his_twinwind.* and gdas.t${cyc}z.gsistat files in $COMOUT
+
+if [ $JTYP = "gdas" ]; then
+  ppdy=$PDY
+  if [ "$cyc" = "00" ]; then
+    pcyc=18
+    ppdy=$(date +%Y\%m\%d -d "${PDY} -1 day")
+  elif [ "$cyc" = "06" ]; then
+    pcyc=00
+  elif [ "$cyc" = "12" ]; then
+    pcyc=06
+  elif [ "$cyc" = "18" ]; then
+    pcyc=12
+  else
+    echo "not a valid cycle time"
+  fi
+  pCOMOUT=/gpfs/dell2/ptmp/$USER/global_shipsb/com/gfs/prod/gdas.${ppdy}/${pcyc}/atmos
+  comin_prod=$COMROOT/gfs/prod/gdas.${ppdy}/${pcyc}/atmos
+
+  cd $pCOMOUT
+  for f in $(ls $comin_prod/upa_his_twinwind.*)  # link upa files
+  do
+    echo "$f"
+    if [ ! -f "${pCOMOUT}/$(basename $f)" ]; then
+      ln -s $f
+    fi
+  done
+
+  for f in $(ls $comin_prod/*gsistat)            # link gsistat file
+  do
+    echo "$f"
+    if [ ! -f "${pCOMOUT}/$(basename $f)" ]; then
+      ln -s $f
+    fi
+  done
+fi
+err=$?
+if [ $err -eq 0 ]; then
+  echo ILIANA_before_unset
+echo JTYP= $JTYP
+echo job= $job
+echo PDY= $PDY
+echo cyc= $cyc
+echo
+  unset LSB_SUB_RES_REQ
+
+echo ILIANA_after_unset
+echo JTYP= $JTYP
+echo job= $job
+echo PDY= $PDY
+echo cyc= $cyc
+echo
+
+  jtyp=$JTYP desc=$DESC bash -l /u/Shelley.Melchior/bin/cycbsub \
+  /gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_genkova/jobs/jglobal_prep_post.wc2.lsf
+
+echo ILIANA_after_prep_post
+echo JTYP= $JTYP
+echo job= $job
+echo PDY= $PDY
+echo cyc= $cyc
+echo
+
+fi
+

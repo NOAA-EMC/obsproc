@@ -1,0 +1,145 @@
+#!/bin/sh  
+#PBS -N %JTYP%_dump_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -q dev
+#PBS -l walltime=00:30:00
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=14:mem=12gb
+
+##OLD on WCOSS
+#BSUB -J %JTYP%_dump_%DESC%_%CC%
+#BSUB -o /gpfs/dell2/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#BSUB -L /bin/sh
+#BSUB -cwd /gpfs/dell2/stmp/%U
+#BSUB -q dev
+##BSUB -R "span[ptile=3]"
+##BSUB -n 3
+#BSUB -R "span[ptile=14]"
+#BSUB -n 14
+##BSUB -R rusage[mem=9000]
+##BSUB -R affinity[core]
+#BSUB -R affinity[core(1):distribute=balance]
+#BSUB -W 00:30
+#BSUB -P OBSPROC-T2O
+
+
+# NOTE: IG
+# In orger to run this script, changes needed in:
+# /jobs/JGLOBAL_DUMP
+# /scripts/exglobal_dump.sh
+# may be some /ush files too depenidng on the job
+
+##############################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# cycqsub location: /u/Iliana.Genkova/bin/cycqsub
+##############################################
+
+set -xu
+
+##Do we need this? 
+##sourcedir="/u/Iliana.Genkova/INSTALL/obsproc/ush" #?? IG
+#sourcedir="/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior/gitstatic/ush"
+#echo "begin source"
+#. $sourcedir/devprodtest.sh $$
+#echo "end source"
+
+export NODES=1
+
+
+export envir=prod # IG
+
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_dump_$cyc
+export jobid=$job.$PBS_JOBID
+
+export PDY=%PDY%
+
+export DUMPJBprocdate=1900123100
+export KEEPDATA=YES
+
+export obsproc_ver=1.0.0 # IG
+#export bufr_dump_ver=1.0.0 # IG 
+
+# from Nick, do I need these? YES IG
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export TANK=/lfs/h1/ops/canned/dcom
+
+#path to executables (where /jobs and /scripts exist too!)
+userROOT=/u/Iliana.Genkova/INSTALL
+
+# IG  I am not grasping something here...Nick has /1.0.0 and multiple EMC_*/versions/run.ver HOW??? IG
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
+# VERSION_FILE=$PACKAGEROOT/obsproc/v1.0.0/verisons/run.ver #for operations! KEEP THE LINES BELOW!! IG
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+# source moduleload file
+# . /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/gitstatic/fix/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
+module load bufr_dump/1.0.0
+#module load dumpjb/5.1.1
+#module load bufr_dumplist/2.3.1
+#module load grib_util/1.2.2
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+
+export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump.$PDY.jlogfile
+
+export DEBUG_LEVEL=3
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc #or userROOT/obsproc IG 
+#/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc #  IG
+                     
+export HOMEbufr_dump="${HOMEbufr_dump:-"/u/Iliana.Genkova/INSTALL/bufr-dump"}"
+# !! ADD  check in the JOB  for HOMEbufr_dump existance - if not set EXIT, do not set in JOB
+
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com  # if unspecified, defaults to DATAROOT
+export COMPONENT=atmos
+# COMROOT is already set to /lfs/h1/ops/prod/com 
+#export COMIN=$COMROOT/obsproc/${JTYP}.${PDY}/${cyc}/${COMPONENT} #this doesn't add up IG 
+#export COMIN=/lfs/h1/ops/$envir}/dcom # canned ## NEEDED? IG 
+
+$HOMEobsproc/jobs/JGLOBAL_DUMP
+
+exit #for learning purposes !IG
+     # CONTINUE FIXING the part below!!!
+
+# Kick off dump_post job #UPDATE with my paths when ready !IG
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+   jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycbsub \
+   /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_dump_post.wc2.lsf # IG
+fi
+
+#exit #for learning purposes !IG
+
+# Kick off prep job #UPDATE with my paths when ready !IG
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+   jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycbsub \
+   /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_prep.wc2.lsf # IG
+fi
+
+
+exit
+
+

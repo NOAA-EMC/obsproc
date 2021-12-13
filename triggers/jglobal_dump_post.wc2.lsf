@@ -1,0 +1,146 @@
+#!/bin/sh  
+#PBS -N %JTYP%_dump_post_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -q debug
+#PBS -l walltime=00:15:00
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=1:mem=4gb
+
+##OLD on WCOSS
+#BSUB -J %JTYP%_dump_post_%DESC%_%CC%
+#BSUB -o /gpfs/dell2/ptmp/Iliana.Genkova/%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
+#BSUB -L /bin/sh
+#BSUB -cwd /gpfs/dell2/ptmp/%U
+#BSUB -W 00:15
+#BSUB -P OBSPROC-T2O
+##BSUB -q dev
+#BSUB -q debug
+#BSUB -M 3000
+##BSUB -extsched 'CRAYLINUX[]'
+
+##NOTE: In order for this trigger/wrapper script to work
+## changes are also needed in 
+## /jobs/JGLOBAL_DUMP_POST
+## /scripts/exglobal_dump_post.sh
+
+#####################################################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 cycbsub jglobal_*.wc2.lsf
+# cycbsub location: /u/Diane.Stokes/bin
+# cycbsub location: /u/Shelley.Melchior/bin
+# cycbsub location: /u/Iliana.Genkova/bin (copy of Nick's)
+#####################################################################
+
+set -xu
+
+#IG
+##sourcedir="/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/ush"
+#sourcedir="/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior/gitstatic/ush" # until my own exists !IG
+#echo "begin source"
+#. $sourcedir/devprodtest.sh $$
+#echo "end source"
+
+export NODES=1
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_dump_post_$cyc
+export jobid=$job.$PBS_JOBID
+
+export DUMPJBprocdate=190001010000
+export KEEPDATA=YES
+#export MPMD=NO  # uncomment if you do not provide poe BSUB cards
+
+#IG
+export obsproc_ver=1.0.0 # IG
+# from Nick,I need these? IG
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export TANK=/lfs/h1/ops/canned/dcom
+
+export PDY=%PDY%
+PDYm1=$(date -d "${PDY} 1 day ago" +%Y%m%d)
+
+userROOT=/u/Iliana.Genkova/INSTALL
+#userROOT=/gpfs/dell2/emc/obsproc/noscrub/$USER
+
+## source moduleload file
+#. $userROOT/gitstatic/fix/moduleload
+
+# IG  from Nick
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+ echo Need version info...  Exiting...
+ exit 7
+fi
+
+# source moduleload file
+#. /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/gitstatic/fix/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
+module load bufr_dump/1.0.0
+
+export SENDECF=NO  # developer
+export SENDDBN=NO  # developer
+export SENDSDM=NO  # developer
+
+export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump_post.$PDY.jlogfile
+
+export DEBUG_LEVEL=3
+
+#export HOMEobsproc=${userROOT}/gitstatic/EMC_obsproc_wcoss2
+#export HOMEobsproc=/gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_wcoss2 # !IG
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc # from jglobal_dump.wcv2.lsf IG
+
+#IG
+export HOMEbufr_dump="${HOMEbufr_dump:-"/u/Iliana.Genkova/INSTALL/bufr-dump"}"
+
+# ASK SHELLEY OR CHECK IN NICK's IG
+# Need these settings only when cyc=18 and have local set of dump status 
+# files to process
+export COPY=YES
+#export HOMEarch=/gpfs/gd1/emc/meso/noscrub/$USER/HOMEarch/com/gfs/prod/sdm_rtdm
+#export HOMEarch=/gpfs/dell1/nco/ops/com/gfs/prod/sdm_rtdm
+# IS THIS WHAT WE TRY TO achieve? /lfs/h1/ops/canned/com/gfs/v16.2/sdm_rtdm/avgdata/ IG?
+export HOMEarch=/lfs/h2/emc/stmp/$USER/com/${JTYP}/prod/sdm_rtdm # from Nick IG
+export AVGDarch_IN=$HOMEarch/avgdata
+#export AVGDarch_OUT=$HOMEarch/avgdata
+#export AVGDarch_OUT=/gpfs/dell2/stmp/$USER/com/gfs/prod/sdm_rtdm/avgdata
+export AVGDarch_OUT=$HOMEarch/avgdata
+export OBCNTarch=$HOMEarch/obcount_30day
+#export OBCNTarch=/gpfs/dell2/stmp/$USER/com/gfs/prod/sdm_rtdm/obcount_30day
+
+
+export COMPONENT=atmos
+export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com 
+#export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/global_wcoss2/com
+#export COMIN=/gpfs/dell1/nco/ops/com/gfs/para/${JTYP}.${PDY}/${cyc}
+#export COMIN=$COMROOT/gfs/${envir}/${JTYP}.${PDY}/${cyc}
+#export comin_m1=/gpfs/gp1/stmp/Shelley.Melchior/rap/prod/rap_e.20170903
+#export comin_m1=/gpfs/dell2/ptmp/$USER/com/gfs/prod/${JTYP}.${PDYm1}/${cyc}
+#export COMIN=/gpfs/dell1/nco/ops/com/gfs/para/${JTYP}.${PDYm1}/${cyc}
+#export COMIN=$COMROOT/com/gfs/${envir}/${JTYP}.${PDYm1}/${cyc}
+#export COMOUT=/gpfs/hps3/ptmp/Shelley.Melchior/com/comout.${job}%_PDY%.$$
+export COMOUT=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+# add obsproc_ver
+
+$HOMEobsproc/jobs/JGLOBAL_DUMP_POST
+
+exit # Is this one for learning purposes or intended?
+
+# Kick off prep job
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+  jtyp=$JTYP desc=$DESC bash -l /u/Shelley.Melchior/bin/cycbsub \
+  /gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_genkova/jobs/jglobal_prep.ph3.lsf.GFSv16
+fi

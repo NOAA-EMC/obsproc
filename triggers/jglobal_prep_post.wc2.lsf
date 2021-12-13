@@ -1,0 +1,147 @@
+#!/bin/sh  
+#PBS -N %JTYP%_prep_post_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -q debug
+#PBS -l walltime=00:15:00
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=1:mem=4gb
+
+#OLD HPC card
+##BSUB -J %JTYP%_prep_post_%DESC%_%CC%
+##BSUB -o /gpfs/dell2/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+##BSUB -L /bin/sh
+##BSUB -cwd /gpfs/dell2/ptmp/%U
+##BSUB -W 00:15
+##BSUB -P OBSPROC-T2O
+##BSUB -q dev
+###BSUB -M 3000
+###BSUB -extsched 'CRAYLINUX[]'
+##BSUB -R rusage[mem=1000]
+
+#####################################################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 cycbsub jglobal_*.wc2.lsf
+# cycbsub location: /u/Diane.Stokes/bin
+# cycbsub location: /u/Shelley.Melchior/bin
+#####################################################################
+
+set -xu
+
+#IG
+#sourcedir="/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior/gitstatic/ush"
+#echo "begin source"
+#. $sourcedir/devprodtest.sh $$
+#echo "end source"
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_prep_post_$cyc
+
+export PDY=%PDY%
+
+userROOT=/u/Iliana.Genkova/INSTALL
+#userROOT=/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior
+
+#Do I need these? IG
+#IG
+export obsproc_ver=1.0.0 # IGi :)
+
+# from Nick,I need these? IG
+#export DCOMROOT=/lfs/h1/ops/canned/dcom
+#export TANK=/lfs/h1/ops/canned/dcom
+
+#VERSION_FILE=$NWROOT/versions/obsproc.ver
+#==from Nick
+#userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
+#export obsproc_ver=1.0.0
+##export bufr_dump_ver=1.0.0
+#export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jnam
+##export HOMEbufr_util=${userROOT}/bufr_dump_cmake/$bufr_dump_ver/jnam
+#
+#VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jnam/versions/run.ver
+#==
+
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+ echo Need version info...  Exiting...
+ exit 7
+fi
+
+export util_shared_ver=1.0.3
+
+# source moduleload file
+#. $userROOT/gitstatic/fix/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+#export DBNROOT="echo dcs test "; export SENDDBN=YES
+
+#export DATAROOT=/gpfs/dell2/ptmp/$USER
+#export jlogfile=/gpfs/dell2/ptmp/$USER/${JTYP}.$PDY.jlogfile
+export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump_post.$PDY.jlogfile
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+# !!! git branch EMC_obsproc: wcoss2
+#export HOMEobsproc=${userROOT}/gitstatic/EMC_obsproc_wcoss2
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc # from jglobal_dump.wcv2.lsf IG
+
+#export COMIN_ROOT=/gpfs/dell2/ptmp/$USER/global_wcoss2/com
+#/lfs/h1/ops/canned/com/gfs/v16.2/
+export COMIN_ROOT=/lfs/h1/ops/canned/com # IG
+export DEBUG_LEVEL=3
+export KEEPDATA=YES
+
+#LOG /lfs/h1/ops/canned/com/obsproc/1.0.0/gfs.20210824/12/atmos
+export COMIN=${COMIN_ROOT}/gfs/v16.2/$JTYP.${PDY}/${cyc}/atmos
+
+####COMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdas.20210824/12/atmos/gdas.t12z.prepbufr
+#Where are these on WCOSS2 atm ? msg-ed KateF. IG
+#OLD:/gpfs/$fs/nco/ops/com/$NET/$envir/$RUN.$PDY
+#NEW:/lfs/h1/ops/$envir/com/$NET/$ver/$RUN.PDY, where $ver is a two-digit version
+#-- Use compath.py for all incoming and outgoing data! - REVIEW IG
+#/lfs/h1/ops/prod/com/gfs/v16.2/gdas.20210824/ ??
+#/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts SPA Simon
+
+#export DATCOMIN=/gpfs/dell1/nco/ops/com/gfs/prod/gdascounts
+export DATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+#export SATCOMIN=/gpfs/dell1/nco/ops/com/gfs/prod/gdascounts
+export SATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+#export ARCHCOMIN=/gpfs/dell1/nco/ops/com/gfs/prod
+ARCHCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2 
+#export DATCOM1_IN=/gpfs/dell1/nco/ops/com/gfs/prod/gdascounts
+export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+
+#export COMINGFS=$COMROOT/gfs/prod/${JTYP}.${PDY}/${cyc}/atmos
+#export COMIN1=$COMROOT/gfs/prod/${JTYP}.
+
+#export COMOUT=/gpfs/hps3/ptmp/$USER/com/comout.${job}%_PDY%.$$
+#export COMOUT=/gpfs/dell2/ptmp/$USER/GFSv16/com/gfs/prod/${JTYP}.${PDY}/${cyc}/atmos
+#export COMOUT_ROOT=/gpfs/dell2/ptmp/$USER/global_wcoss2/com
+export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
+
+#Need this IG??
+
+#export VERSION_FILE_gfs=${userROOT}/gitstatic/gfs.ver.GFSv16-atmos
+#export VERSION_FILE_gfs=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/gfs.ver.GFSv16-atmos #IG temp
+#if [ -f $VERSION_FILE_gfs ]; then
+#   . $VERSION_FILE_gfs
+#else
+# echo Need version info...  Exiting...
+# exit 7
+#fi
+
+$HOMEobsproc/jobs/JGLOBAL_PREP_POST
+
+err=$?
+echo $err
