@@ -1033,20 +1033,9 @@ echo
    PARALLEL=NO
    [ "$POE" != 'NO' -o "$BACK" = 'YES' ]  &&  PARALLEL=YES
    if [ "$POE" != 'NO' ] ; then
-      #if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-      #  launcher_PREP=${launcher_PREP:-aprun}
-      #elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-      #  launcher_PREP=${launcher_PREP:-mpirun}
-      #else
-        launcher_PREP=${launcher_PREP:-mpiexec} #IG
-      #fi
+      launcher_PREP=${launcher_PREP:-mpiexec} 
       if [ "$launcher_PREP" != 'cfp' -a "$launcher_PREP" != aprun ]; then 
-         #if [ -n ${LSB_HOSTS:-""} ]; then
-         #   NPROCS=$(echo $LSB_HOSTS|wc -w)
-         #   set +x; echo "Setting NPROCS based on LSB_HOSTS count"; set -x
-         #else
-            NPROCS=${NPROCS:-$NSPLIT}
-         #fi
+         NPROCS=${NPROCS:-$NSPLIT}
          if [ $NPROCS -lt $NSPLIT ]; then 
             set +x
 echo "********************************************************************"
@@ -2121,11 +2110,9 @@ set -x
             export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure
 
-         elif [ "$launcher_PREP" = mpiexec ]; then #added Sunday IG :
+         elif [ "$launcher_PREP" = mpiexec ]; then
 	    chmod 755 $DATA/prep_exec.cmd
-            #mpirun -l cfp $DATA/prep_exec.cmd
-	    #mpiexec -np 6 --cpu-bind verbose,core  $DATA/prep_exec.cmd # ?? IG
-            #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd
+            #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
              mpiexec -n 6 $DATA/prep_exec.cmd
 	    export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure	 
@@ -2181,16 +2168,8 @@ set -x
             [ $err != 0 ] && exit 55  # for extra measure
          fi
       elif [ $BACK = 'YES' ] ; then
-         #if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-         #   aprun -n 1 -d $NSPLIT $DATA/prepthrds.sh
-         #elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-         #   launcher_PREP=${launcher_PREP:-mpirun}
-         #   $launcher_PREP -n 1 $DATA/prepthrds.sh
-         #else
-            echo 'if back =yes ILIANA'		 
-            #$DATA/prepthrds.sh
-	    mpiexec -np 6 --cpu-bind verbose,core $DATA/prepthrds.sh # 6 so it's > NSPLIT=4 in job card
-         #fi
+         echo 'BACK=YES'		 
+	 mpiexec -np 6 --cpu-bind verbose,core $DATA/prepthrds.sh # Keep '-np 6' > NSPLIT=4
       fi
       totalt=$NSPLIT
    else
@@ -2198,11 +2177,7 @@ set -x
 #  In the serial environment, just fire off a single thread of MP_PREPDATA
 #  -----------------------------------------------------------------------
       multi=0
-      #if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-      #   aprun -n 1 -N 1 ksh $DATA/MP_PREPDATA $multi
-      #else
-         $DATA/MP_PREPDATA $multi
-      #fi
+      $DATA/MP_PREPDATA $multi
       totalt=1
 
    # fi for $PARALLEL = YES
