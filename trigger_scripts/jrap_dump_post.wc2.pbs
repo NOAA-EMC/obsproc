@@ -34,10 +34,7 @@ echo PBS: current home directory is $PBS_O_HOME
 echo PBS: PATH = $PBS_O_PATH
 echo ------------------------------------------------------
 
-cat /etc/motd
 set -xa
-
-
 set -xu
 
 export NODES=1

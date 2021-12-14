@@ -3,7 +3,6 @@
 #PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
 #PBS -q dev
-#BSUB -M 3000
 #PBS -l place=vscatter,select=1:ncpus=1
 
 #####################################################################
@@ -34,7 +33,6 @@ echo PBS: current home directory is $PBS_O_HOME
 echo PBS: PATH = $PBS_O_PATH
 echo ------------------------------------------------------
 
-cat /etc/motd
 set -xa
 
 set -xu
@@ -54,8 +52,6 @@ fi
 export jobid=$job.$PBS_JOBID
 
 export PDY=%PDY%
-
-
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
@@ -139,9 +135,6 @@ export KEEPDATA=YES
 export POE=NO
 export BACK=NO
 export NSPLIT=1
-#export PREPDATAtpn=1
-#export PREPDATAprocs=3
-#export PREPDATAprocs=4
 
 $HOMEobsproc/jobs/JRAP_PREP
 
