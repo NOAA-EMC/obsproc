@@ -1,3 +1,4 @@
+#!/bin/bash
 set -xa
 date -u
 
@@ -160,12 +161,12 @@ setpdy.sh
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}${RUN}.${PDY}
+  export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
   export COMOUT=${COMROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
 #  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
