@@ -51,13 +51,6 @@ set -x
 # List modules loaded for this job
 #   May need to initialize Modules package to find the module command.
 #####################################################################
-#if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-#  . /opt/modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-#  . /usrx/local/Modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-#fi
 set +x
 echo
 echo "####################################################################"
@@ -138,15 +131,9 @@ export HOMEobsproc=${HOMEobsproc:\
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 
 # ---------------------------------------
-# Paths for dump and bufr_dumplist items - no longer needed, defined in bufr_dump module IG
+# Paths for dump and bufr_dumplist items  
 # ---------------------------------------
-#export HOMEbufr_util=${HOMEbufr_util:\
-#-${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-#"###FATAL ERROR \"bufr_util_ver\" is not set"}}
-#
-#export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-#export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
-
+# NOTE: defined in bufr_dump module 
 # NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
 
 # directory path to data dump script executed in model script
@@ -188,26 +175,11 @@ export TANK=${TANK:-${DCOMROOT}}
 # directory paths to ice, sst & snowdepth grib files used in model script
 # -----------------------------------------------------------------------
 
-#from Steve
-#export COMIN=${COMIN:-$(compath.py ${envir}/com/${NET}/${sfcship_ver}/${RUN}.${PDY})}
-#export COMINm1=${COMINm1:-$(compath.py ${envir}/com/${NET}/${sfcship_ver}/${RUN}.${PDYm1})}
-#export COMINgfs=${COMINgfs:-$(compath.py ${envir}/com/gfs/${gfs_ver}/gfs)}
-#export COMINgdas=${COMINgdas:-$(compath.py ${envir}/com/gfs/${gfs_ver}/gdas)}
-#export VOSarch_IN=${VOSarch_IN:-$(compath.py ${envir}/com/${NET}/${sfcship_ver}/VOS)}
-#export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${sfcship_ver}/${RUN}.${PDY})}
-# WCOSS2
-#set the path for WC2 live, but overwrite in trigger with canned paths
-export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)} # envir=prod OR canned
+export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)}
 export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} #?? IG
-export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/${PDY}/sst)} #?? IG
+export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} 
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/${PDY}/sst)}
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
-# WCOSS
-#export COM_ENGICE=${COM_ENGICE:-$COMROOTp3/omb/prod/sice}
-#export COM_ICE5MIN=${COM_ICE5MIN:-$COMROOTp3/omb/prod/sice}
-#export COM_SSTOI=${COM_SSTOI:-$(compath.py gfs/prod/sst)}
-#export COM_SSTRTG=${COM_SSTRTG:-$(compath.py gfs/prod/sst)}
-#export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -231,16 +203,12 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
-# use compath.py IG and hardwired for testing IG
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
   export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
- ## hardwire for testing in trigger  IG
  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
- ## COMROOT is already set to /lfs/h1/ops/prod/com 
- # export COMIN=/lfs/h1/ops/$envir}/dcom # canned
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
@@ -264,16 +232,16 @@ export prepssmi=NO # "spssmi" reprocessed dump no longer generated
                    # since SSM/I instrument on F-13 has failed (11/2009)
 export KEEP_NEARDUP_ACFT=${KEEP_NEARDUP_ACFT:-NO} # toss near-dupl. acft rpts
 
-# During the period where both Goodberlet and NN3 SSM/I products are
+#  During the period where both Goodberlet and NN3 SSM/I products are
 #  being dumped, switch PREPSSMI_PROD_TYPE will direct the PREPSSMI
 #  program to process from SSM/I data dumps that are either all GOODBERLET,
 #  all NEURAL_NET3 or some COMBINATION of these two
-#   -- rendered meaningless after 11/2009 since prepssmi now set to "no" (above)
+#  -- rendered meaningless after 11/2009 since prepssmi now set to "no" (above)
 
 export PREPSSMI_PROD_TYPE=COMBINATION
 
 # POE must be set to on if running poe
-###export POE=on
+##export POE=on
 
 # -- or -- BACK must be set to on if running background shells
 export BACK=on # "on" is default
@@ -284,7 +252,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_dump.sh #renamed IG
+$SCRIPTSobsproc/exglobal_dump.sh
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
