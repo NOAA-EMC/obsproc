@@ -7,76 +7,39 @@
 #PBS -A OBSPROC-DEV
 #PBS -l place=vscatter,select=1:ncpus=14:mem=12gb
 
-##OLD on WCOSS
-#BSUB -J %JTYP%_dump_%DESC%_%CC%
-#BSUB -o /gpfs/dell2/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
-#BSUB -L /bin/sh
-#BSUB -cwd /gpfs/dell2/stmp/%U
-#BSUB -q dev
-##BSUB -R "span[ptile=3]"
-##BSUB -n 3
-#BSUB -R "span[ptile=14]"
-#BSUB -n 14
-##BSUB -R rusage[mem=9000]
-##BSUB -R affinity[core]
-#BSUB -R affinity[core(1):distribute=balance]
-#BSUB -W 00:30
-#BSUB -P OBSPROC-T2O
-
-
-# NOTE: IG
-# In orger to run this script, changes needed in:
-# /jobs/JGLOBAL_DUMP
-# /scripts/exglobal_dump.sh
-# may be some /ush files too depenidng on the job
-
 ##############################################
 # Submit notes:
 # For specific PDY:
 # > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
 # For latest/current PDY:
 # > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_*.wc2.lsf
-# cycqsub location: /u/Iliana.Genkova/bin/cycqsub
+# cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
 ##############################################
 
 set -xu
 
-##Do we need this? 
-##sourcedir="/u/Iliana.Genkova/INSTALL/obsproc/ush" #?? IG
-#sourcedir="/gpfs/dell2/emc/obsproc/noscrub/Shelley.Melchior/gitstatic/ush"
-#echo "begin source"
-#. $sourcedir/devprodtest.sh $$
-#echo "end source"
-
-export NODES=1
-
-
-export envir=prod # IG
+#export NODES=1
+export envir=prod
 
 export cyc=%CC%
 DESC=%DESC%
 JTYP=%JTYP%
 export job=${JTYP}_dump_$cyc
 export jobid=$job.$PBS_JOBID
-
 export PDY=%PDY%
 
 export DUMPJBprocdate=1900123100
 export KEEPDATA=YES
 
-export obsproc_ver=1.0.0 # IG
-#export bufr_dump_ver=1.0.0 # IG 
+export obsproc_ver=1.0.0
+#export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
+#export TANK=/lfs/h1/ops/canned/dcom
 
-# from Nick, do I need these? YES IG
-export DCOMROOT=/lfs/h1/ops/canned/dcom
-export TANK=/lfs/h1/ops/canned/dcom
-
-#path to executables (where /jobs and /scripts exist too!)
+#path to executables
 userROOT=/u/Iliana.Genkova/INSTALL
 
-# IG  I am not grasping something here...Nick has /1.0.0 and multiple EMC_*/versions/run.ver HOW??? IG
 VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
-# VERSION_FILE=$PACKAGEROOT/obsproc/v1.0.0/verisons/run.ver #for operations! KEEP THE LINES BELOW!! IG
+#VERSION_FILE=$PACKAGEROOT/obsproc/${obsproc_ver}/versions/run.ver # when /obsproc goes live
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
@@ -85,14 +48,12 @@ else
 fi
 
 # source moduleload file
-# . /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/gitstatic/fix/moduleload
+# GitHub location: release/obsproc.v1.0.0/triggers/moduleload
 . /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
 
+# load correct version bufr_dump for WCOSS2
 module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
 module load bufr_dump/1.0.0
-#module load dumpjb/5.1.1
-#module load bufr_dumplist/2.3.1
-#module load grib_util/1.2.2
 
 export SENDECF=NO   # developer
 export SENDDBN=NO   # developer
