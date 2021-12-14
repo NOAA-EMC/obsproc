@@ -918,16 +918,6 @@ set -x
 
 set +u
 launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
-#if [ "$launcher" = "cfp" -a -z "$PBS_NODES" ]; then
-#   set +x
-#   echo
-#   echo "You requested the cfp poe launcher but are not running under LSF!!"
-#   echo "You must run under LSF to use cfp option.  Exiting..."
-#   echo
-#   set -x
-#   exit 99
-#fi
-#set -u
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
 ## To better take advantage of cfp, execute the longer running commands first.
@@ -942,18 +932,6 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_4 >> $DATA/poe.cmdfile
    #
 
- ##  if [ -s $DATA/poe.cmdfile ]; then
-##      if [ -f /usrx/local/Modules/default/init/ksh ]; then        # IBM p1/2
-##         . /usrx/local/Modules/default/init/ksh # in ksh, need this for next line
-##         module load cfp
-##         export MP_CSS_INTERRUPT=yes
-##         mpirun.lsf cfp $DATA/poe.cmdfile 2>&1
-##      elif [ -f /usrx/local/prod/lmod/lmod/init/profile ]; then   # Dell-p3
-##         . /usrx/local/prod/lmod/lmod/init/profile > /dev/null
-##         . /usrx/local/prod/modulefiles/.defaultmodules > /dev/null
-##         export MP_CSS_INTERRUPT=yes
-##         mpirun -l cfp $DATA/poe.cmdfile 2>&1
-##      fi
    mpiexec -np 7 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
    errpoe=$?
    if [ $errpoe -ne 0 ]; then
@@ -1125,7 +1103,6 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-#cp ${FIXbufr_util}/bufr_dumplist $LIST_cp
 cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
