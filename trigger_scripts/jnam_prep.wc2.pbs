@@ -4,7 +4,7 @@
 #PBS -l walltime=00:20:00
 #PBS -A OBSPROC-DEV
 #PBS -q dev
-#PBS -l place=vscatter,select=1:ncpus=3
+#PBS -l place=vscatter,select=1:ncpus=3:mem=55000MB
 
 ##############################################
 # Submit notes:
@@ -33,9 +33,7 @@ echo PBS: current home directory is $PBS_O_HOME
 echo PBS: PATH = $PBS_O_PATH
 echo ------------------------------------------------------
 
-cat /etc/motd
 set -xa
-
 
 set -xu
 
@@ -127,12 +125,9 @@ export SENDSDM=NO   # developer
 export DATAROOT=/lfs/h2/emc/ptmp/$USER
 export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}_prep.$PDY.jlogfile
 
-export DCOMROOT=/lfs/h1/ops/canned/dcom
-export TANK=/lfs/h1/ops/canned/dcom
-
 export DEBUG_LEVEL=3
 
-export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com   #ORIG
+export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com
 export COMINgdas=/lfs/h1/ops/canned/com/gfs/v16.2/gdas.${PDY}/${cyc}/atmos
 export COMINgfs=/lfs/h1/ops/canned/com/gfs/v16.2/gfs.${PDY}/${cyc}/atmos
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/

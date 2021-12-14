@@ -35,7 +35,6 @@ echo PBS: current home directory is $PBS_O_HOME
 echo PBS: PATH = $PBS_O_PATH
 echo ------------------------------------------------------
 
-cat /etc/motd
 set -xa
 
 set -xu
@@ -122,7 +121,6 @@ if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is 
 
 ##################
 module unload bufr_dump  #sourced as 2.0.0
-#module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake
 module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake/$obsproc_ver/jnam/modulefiles
 module load bufr_dump/$bufr_dump_ver
 ###################
