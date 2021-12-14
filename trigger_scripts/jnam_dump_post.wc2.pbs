@@ -138,7 +138,7 @@ export DEBUG_LEVEL=3
 # Need these settings only when cyc=18, tmmark=tm00, and have local set of dump status
 # files to process
 export COPY=YES
-export HOMEarch=/lfs/h2/emc/ptmp/$USER/com/${JTYP}/prod/sdm_rtdm
+export HOMEarch=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}/prod/sdm_rtdm
 export AVGDarch_IN=$HOMEarch/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day
@@ -148,7 +148,7 @@ export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
 
 $HOMEobsproc/jobs/JNAM_DUMP_POST
-
+exit
 # Kick off prep job
 err=$?
 if [ $err -eq 0 ]; then
