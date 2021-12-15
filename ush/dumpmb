@@ -84,8 +84,8 @@ vertxt=' (WCOSS ph3)'
 #  BTAB - path to MODS bufrtable              [ $HOMEobsproc/fix/bufrtab.mods ]
 #  DATA - directory path for MODS output      [ pwd ]
 #  MODX - path to bufr_prepmods exec          [ $HOMEobsproc/exec/bufr_prepmods ]
-#  DUMP - path to general dump script         [ $HOMEbufr_dump/ush/dumpjb ]
-#  LIST - path to dumplist file               [ $HOMEbufr_dump/fix/bufr_dumplist ]
+#  DUMP - path to general dump script         [ $HOMEbufr_util/ush/dumpjb ]
+#  LIST - path to dumplist file               [ $HOMEbufr_util/fix/bufr_dumplist ]
 #
 #
 # Exit conditions:
@@ -313,25 +313,25 @@ if [ $RC_ARG -eq 0 ] ; then
   fi # MODX nor HOMEobsproc
   MODX=${MODX:-"${HOMEobsproc:?"$modx_msg"}/exec/bufr_prepmods"}
 
-# -- DUMP DUMPJB HOMEbufr_dump
-   dump_msg="dumpmb: ERROR: neither DUMP nor HOMEbufr_dump is set."
+# -- DUMP DUMPJB HOMEbufr_util
+   dump_msg="dumpmb: ERROR: neither DUMP nor HOMEbufr_util is set."
   dump_msg2="dumpmb: Must specify obsproc dump package location or dumpjb file - exiting (89)"
 
-  if [[ -z "$DUMP" && -z "$DUMPJB" && -z "$HOMEbufr_dump" ]] ; then 
+  if [[ -z "$DUMP" && -z "$DUMPJB" && -z "$HOMEbufr_util" ]] ; then 
     echo ; echo "$dump_msg" ; echo "$dump_msg2" ; exit 89 ; RC_ARG=89
-  fi # DUMP nor HOMEbufr_dump
-  DUMPJB=${DUMPJB:-"${HOMEbufr_dump:?"$dump_msg"}/ush/dumpjb"}
+  fi # DUMP nor HOMEbufr_util
+  DUMPJB=${DUMPJB:-"${HOMEbufr_util:?"$dump_msg"}/ush/dumpjb"}
   DUMP=$DUMPJB
 
 # -- LIST
-   list_msg="dumpmb: ERROR: neither LIST nor HOMEbufr_dump is set."
+   list_msg="dumpmb: ERROR: neither LIST nor HOMEbufr_util is set."
   list_msg2="dumpmb: Must specify obsproc bufr_dumplist package location or \
 bufr_dumplist file - exiting (89)"
 
-  if [[ -z "$LIST" && -z "$HOMEbufr_dump" ]] ; then 
+  if [[ -z "$LIST" && -z "$HOMEbufr_util" ]] ; then 
     echo ; echo "$list_msg" ; echo "$list_msg2" ; exit 89 ; RC_ARG=89
-  fi # LIST nor HOMEbufr_dump
-  LIST=${LIST:-"${HOMEbufr_dump}/fix/bufr_dumplist"}
+  fi # LIST nor HOMEbufr_util
+  LIST=${LIST:-"${HOMEbufr_util}/fix/bufr_dumplist"}
 
 # -- TANK DCOMROOT
    tank_msg="dumpmb: ERROR: neither TANK nor DCOMROOT is set."
