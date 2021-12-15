@@ -119,25 +119,19 @@ export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items
 # ---------------------------------------
-#export HOMEbufr_util=${HOMEbufr_util:\
-#-${PACKAGEROOT:?}/bufr_util.${bufr_util_ver:?\
-#"###FATAL ERROR \"bufr_util_ver\" is not set"}}
 
 export HOMEbufr_dump=${HOMEbufr_dump:\
 -${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
 "###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
-#export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush} #Don't technically need this because already loaded
-#export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
-export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix} #Anything defined in the module doesn't need to be loaded
+export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 # NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-#export ushscript_dump=${ushscript_dump:-$USHbufr_util} 
-export ushscript_dump=${ushscript_dump:-$USHbufr_dump} #Needed to be changed 
+export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
 
 ###############################################
 # Add some prod utilities to working directory
@@ -163,7 +157,6 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
   export COMOUT=${COMROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
-#  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
@@ -174,12 +167,10 @@ else
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
   export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
-#  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}  #To be used in the future
   mkdir -m 755 -p $COMOUT
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-#export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
 export comin=${comin:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}  #To be used in the future
 export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDYm1}}
 
@@ -190,7 +181,6 @@ export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDYm
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
 export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom} 
-#export TANK=${TANK:-${DCOMROOT}/prod}
 export TANK=${TANK:-${DCOMROOT}}
 
 # directory path to data count averaging executed in model script and in
