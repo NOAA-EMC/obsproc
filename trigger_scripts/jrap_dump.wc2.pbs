@@ -1,12 +1,14 @@
 #!/bin/bash
 #################################
-#PBS -N %JTYP%_dump_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/stmp/Nicholas.Esposito/%JTYP%_dump_%PDY%_%CC%_%DESC%.o
+#PBS -N obsproc_%JTYP%_dump_%DESC%_%CC%
+#PBS -j oe
+#PBS -S /bin/bash
 #PBS -q dev
+#PBS -A OBSPROC-DEV
+#PBS -l walltime=00:30:00
 #PBS -l place=vscatter,select=1:ncpus=3:mem=6000MB
 #PBS -l walltime=00:30:00
-#PBS -A OBSPROC-DEV
-
+#PBS -l debug=TRUE
 #####################################################################
 # Submit notes:
 # For specific PDY:
@@ -62,7 +64,7 @@ export KEEPDATA=YES
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jrap
 export HOMEbufr_util=${userROOT}/bufr_dump_cmake/$bufr_dump_ver/jrap
@@ -141,12 +143,7 @@ export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 mkdir -p $COMOUT_ROOT
 
 
-$HOMEobsproc/jobs/JRAP_DUMP
-
-# Kick off dump_post job
+$HOMEobsproc/jobs/JOBSPROC_RAP_DUMP
 err=$?
 echo "the err is $err"
-if [ $err -eq 0 ]; then
-  jtyp=$JTYP cyc=$cyc PDY=${PDY} desc=$DESC bash -l /u/$USER/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/cron_project/jrap_dump_post.wc2.pbs
-fi
 

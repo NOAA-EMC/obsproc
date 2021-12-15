@@ -284,8 +284,8 @@
 #        If .true., processing will obtain the NetCDF format first guess fields.
 # 2021-04-05  S. Melchior -- Added diagnostic information just after the cp of
 #        the global first guess file to sgesprep.
-# 2021-11-30  N. Esposito -- Modified for use on WCOSS2.
-# 
+# 2021-12-12  S. Melchior
+#             I. Genkova -- Prepared for transition to WCOSS2
 #
 #
 # Usage:  prepobs_makeprepbufr.sh YYYYMMDDHH <mm>
@@ -1034,22 +1034,9 @@ echo
    PARALLEL=NO
    [ "$POE" != 'NO' -o "$BACK" = 'YES' ]  &&  PARALLEL=YES
    if [ "$POE" != 'NO' ] ; then
-#      if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-#        launcher_PREP=${launcher_PREP:-aprun}
-#      elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-#        launcher_PREP=${launcher_PREP:-mpirun}
-#      else
-#        launcher_PREP=${launcher_PREP:-mpirun.lsf}
-#      fi
-      launcher_PREP=${launcher_PREP:-'cfp'}
+      launcher_PREP=${launcher_PREP:-mpiexec} 
       if [ "$launcher_PREP" != 'cfp' -a "$launcher_PREP" != aprun ]; then 
-#         if [ -n ${PBS_HOSTS:-""} ]; then
-#            NPROCS=$(echo $PBS_HOSTS|wc -w)
-            NPROCS=3
-#            set +x; echo "Setting NPROCS based on PBS_HOSTS count"; set -x
-#         else
-#            NPROCS=${NPROCS:-$NSPLIT}
-#         fi
+         NPROCS=${NPROCS:-$NSPLIT}
          if [ $NPROCS -lt $NSPLIT ]; then 
             set +x
 echo "********************************************************************"
@@ -1753,9 +1740,10 @@ backup AFWA ACARS into PREPBUFR"
 ##                          HEREFILE MP_PREPDATA                             ##
 ##VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV##
 
+# think of adding a line with "#!/bin/ksh" after the "{ echo" below IG
+
 set +x
 cat <<\EOFmpp > MP_PREPDATA
-
 { echo
 
 # This herefile script performs the "prepdata" processing.  It is designed to
@@ -2088,6 +2076,7 @@ set -x
 #   fire off each MP_PREPDATA thread as a background process
 #  -----------------------------------------------------------------------
       if [ "$POE" != 'NO' ]; then
+         echo "#!/bin/ksh"|tee -a $DATA/prep_exec.cmd
          multi=-1
          while [ $((multi+=1)) -lt $NSPLIT ] ; do
             echo "ksh $DATA/MP_PREPDATA $multi "|tee -a $DATA/prep_exec.cmd
@@ -2116,74 +2105,72 @@ set -x
 #   to kick off background processes and wait for them to complete
 #  --------------------------------------------------------------------------
       if [ "$POE" != 'NO' ]; then
-#         if [ "$launcher_PREP" = mpirun ]; then
-#            chmod 755 $DATA/prep_exec.cmd
-#            mpirun -l cfp $DATA/prep_exec.cmd
-#            export err=$?; $DATA/err_chk
-#            [ $err != 0 ] && exit 55  # for extra measure
-#         elif [ "$launcher_PREP" = mpirun.lsf ]; then
-#            export MP_CMDFILE=$DATA/prep_exec.cmd
-#            export MP_PGMMODEL=mpmd
-#            export MP_PULSE=0
-#            export MP_DEBUG_NOTIMEOUT=yes
-#            export MP_LABELIO=yes
-#            export MP_STDOUTMODE=ordered
-#            mpirun.lsf
-#            export err=$?; $DATA/err_chk
-#            [ $err != 0 ] && exit 55  # for extra measure
-#         elif [ "$launcher_PREP" = cfp ]; then
-         if [ "$launcher_PREP" = cfp ]; then
+         if [ "$launcher_PREP" = mpirun ]; then
+            chmod 755 $DATA/prep_exec.cmd
+            mpirun -l cfp $DATA/prep_exec.cmd
+            export err=$?; $DATA/err_chk
+            [ $err != 0 ] && exit 55  # for extra measure
+
+         elif [ "$launcher_PREP" = mpiexec ]; then
+	    chmod 755 $DATA/prep_exec.cmd
+            #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
+             mpiexec -n 6 $DATA/prep_exec.cmd
+	    export err=$?; $DATA/err_chk
+            [ $err != 0 ] && exit 55  # for extra measure	 
+         elif [ "$launcher_PREP" = mpirun.lsf ]; then
+            export MP_CMDFILE=$DATA/prep_exec.cmd
+            export MP_PGMMODEL=mpmd
+            export MP_PULSE=0
+            export MP_DEBUG_NOTIMEOUT=yes
+            export MP_LABELIO=yes
+            export MP_STDOUTMODE=ordered
+            mpirun.lsf
+            export err=$?; $DATA/err_chk
+            [ $err != 0 ] && exit 55  # for extra measure
+         elif [ "$launcher_PREP" = cfp ]; then
             export MP_CSS_INTERRUPT=yes
             export MP_LABELIO=yes
             export MP_STDOUTMODE=ordered
-#            mpirun.lsf cfp $DATA/prep_exec.cmd
-            mpiexec -np 3 --cpu-bind verbose,core cfp $DATA/prep_exec.cmd
+            mpirun.lsf cfp $DATA/prep_exec.cmd
             export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure
-#         elif [ "$launcher_PREP" = aprun ]; then
-#            ## Determine tasks per node (PREPDATAtpn) and
-#            ##    max number of concurrent procs (PREPDATAprocs) for cfp
-#            typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
-#            typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
-#            if [ $ncnodes -lt 1 ]; then
-#               set +x
-#               echo
-#               echo " ** Could not get positive compute node count for aprun **"
-#               echo " ** Are we using LSF queue with compute node access? **"
-#               echo
-#               echo "ABNORMAL EXIT!!!!!!!!!!!"
-#               echo
-#               set -x
-#               $DATA/err_exit
-#               exit 55  # for extra measure
-#            fi
-#            if [[ -z ${PREPDATAtpn:-""} ]]; then
-#               PREPDATAtpn=$((($NSPLIT+$ncnodes-1)/$ncnodes))
-#               # cfp is faster with extra thread so add one if there is room.
-#               #  (this logic needs an update to avoid hardwired 24)
-#               [ $PREPDATAtpn -lt 24 ] && PREPDATAtpn=$(($PREPDATAtpn+1))
-#            fi
-#            if [[ -z ${PREPDATAprocs:-""} ]]; then
-#              PREPDATAprocs=$(($ncnodes*$PREPDATAtpn))  # max concurrent processes
-#            fi
-#            aprun -j 1 -n${PREPDATAprocs} -N${PREPDATAtpn} -d1 cfp $DATA/prep_exec.cmd
-#            export err=$?; $DATA/err_chk
-#            [ $err != 0 ] && exit 55  # for extra measure
-#         else  # unknown launcher and options (eg, for use on R&D system) 
-#            $launcher_PREP
-#            export err=$?; $DATA/err_chk
-#            [ $err != 0 ] && exit 55  # for extra measure
+         elif [ "$launcher_PREP" = aprun ]; then
+            ## Determine tasks per node (PREPDATAtpn) and
+            ##    max number of concurrent procs (PREPDATAprocs) for cfp
+            typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
+            typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
+            if [ $ncnodes -lt 1 ]; then
+               set +x
+               echo
+               echo " ** Could not get positive compute node count for aprun **"
+               echo " ** Are we using LSF queue with compute node access? **"
+               echo
+               echo "ABNORMAL EXIT!!!!!!!!!!!"
+               echo
+               set -x
+               $DATA/err_exit
+               exit 55  # for extra measure
+            fi
+            if [[ -z ${PREPDATAtpn:-""} ]]; then
+               PREPDATAtpn=$((($NSPLIT+$ncnodes-1)/$ncnodes))
+               # cfp is faster with extra thread so add one if there is room.
+               #  (this logic needs an update to avoid hardwired 24)
+               [ $PREPDATAtpn -lt 24 ] && PREPDATAtpn=$(($PREPDATAtpn+1))
+            fi
+            if [[ -z ${PREPDATAprocs:-""} ]]; then
+              PREPDATAprocs=$(($ncnodes*$PREPDATAtpn))  # max concurrent processes
+            fi
+            aprun -j 1 -n${PREPDATAprocs} -N${PREPDATAtpn} -d1 cfp $DATA/prep_exec.cmd
+            export err=$?; $DATA/err_chk
+            [ $err != 0 ] && exit 55  # for extra measure
+         else  # unknown launcher and options (eg, for use on R&D system) 
+            $launcher_PREP
+            export err=$?; $DATA/err_chk
+            [ $err != 0 ] && exit 55  # for extra measure
          fi
       elif [ $BACK = 'YES' ] ; then
-#         if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-#            aprun -n 1 -d $NSPLIT $DATA/prepthrds.sh
-#         elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-#            launcher_PREP=${launcher_PREP:-mpirun}
-#            $launcher_PREP -n 1 $DATA/prepthrds.sh
-         mpiexec -np 3 --cpu-bind verbose,core cfp $DATA/prepthrds.sh
-	 else
-            $DATA/prepthrds.sh
-         fi
+         echo 'BACK=YES'		 
+	 mpiexec -np 6 --cpu-bind verbose,core $DATA/prepthrds.sh # Keep '-np 6' > NSPLIT=4
       fi
       totalt=$NSPLIT
    else
@@ -2191,11 +2178,7 @@ set -x
 #  In the serial environment, just fire off a single thread of MP_PREPDATA
 #  -----------------------------------------------------------------------
       multi=0
-#      if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-#         aprun -n 1 -N 1 ksh $DATA/MP_PREPDATA $multi
-#      else
-         $DATA/MP_PREPDATA $multi
-#      fi
+      $DATA/MP_PREPDATA $multi
       totalt=1
 
    # fi for $PARALLEL = YES

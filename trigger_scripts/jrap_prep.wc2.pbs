@@ -1,6 +1,6 @@
 #!/bin/bash
 ####################################################################
-#PBS -N %JTYP%_prep_%DESC%_%CC%
+#PBS -N obsproc_%JTYP%_prep_%DESC%_%CC%
 #PBS -j oe 
 #PBS -S /bin/bash
 #PBS -q dev
@@ -58,7 +58,7 @@ export PDY=%PDY%
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jrap
 
 VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jrap/versions/run.ver
@@ -139,11 +139,6 @@ export POE=NO
 export BACK=NO
 export NSPLIT=1
 
-$HOMEobsproc/jobs/JRAP_PREP
-
-
+$HOMEobsproc/jobs/JOBSPROC_RAP_PREP
 err=$?
-if [ $err -eq 0 ]; then
-  jtyp=$JTYP cyc=$cyc PDY=${PDY} desc=$DESC bash -l /u/$USER/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/cron_project/jrap_prep_post.wc2.pbs
-fi
 

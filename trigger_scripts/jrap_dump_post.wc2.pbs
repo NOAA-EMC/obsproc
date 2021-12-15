@@ -1,12 +1,13 @@
 #!/bin/bash
 ###################################
-#PBS -N %JTYP%_dump_post_%CC%
-#PBS -o /gpfs/dell2/stmp/Nicholas.Esposito/%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o
+#PBS -N obsproc_%JTYP%_dump_post_%CC%
+#PBS -j oe
+#PBS -S /bin/bash
 #PBS -q dev
-#PBS -l place=vscatter,select=1:ncpus=1:mem=3000MB
-#PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
-
+#PBS -l walltime=00:15:00
+#PBS -l place=vscatter,select=1:ncpus=1:mem=3000MB
+#PBS -l debug=TRUE
 #####################################################################
 # Submit notes:
 # For specific PDY:
@@ -62,7 +63,7 @@ export KEEPDATA=YES
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jrap
 export HOMEbufr_util=${userROOT}/bufr_dump_cmake/$bufr_dump_ver/jrap
@@ -140,20 +141,13 @@ export DEBUG_LEVEL=3
 # Need these settings only when cyc=23 and have local set of dump status
 # files to process
 export COPY=YES
-export HOMEarch=/lfs/h2/emc/stmp/$USER/HOMEarch/com/rap/prod/sdm_rtdm
+export HOMEarch=/lfs/h2/emc/ptmp/$USER/HOMEarch/com/rap/prod/sdm_rtdm
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com/
 export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
-$HOMEobsproc/jobs/JRAP_DUMP_POST
-
-
-# Kick off prep job
+$HOMEobsproc/jobs/JOBSPROC_RAP_DUMP_POST
 err=$?
 echo "the err is $err"
-if [ $err -eq 0 ]; then
-  jtyp=$JTYP cyc=${cyc} PDY=${PDY} desc=${JTYP}_prep bash -l /u/$USER/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/cron_project/jrap_prep.wc2.pbs
-fi
-
