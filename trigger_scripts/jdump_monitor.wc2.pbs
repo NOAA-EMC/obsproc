@@ -1,12 +1,13 @@
 #!/bin/bash
 ##############################################
-#PBS -N %JTYP%_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/stmp/Nicholas.Esposito/%JTYP%_%PDY%_%CC%_%DESC%.o
-#PBS -e /lfs/h2/emc/stmp/Nicholas.Esposito/%JTYP%_%PDY%_%CC%_%DESC%.o
+#PBS -N obsproc_%JTYP%_%DESC%_%CC%
+#PBS -j oe 
+#PBS -S /bin/bash
 #PBS -q dev
-#PBS -l walltime=00:30:00
 #PBS -A OBSPROC-DEV
+#PBS -l walltime=00:30:00
 #PBS -l place=vscatter,select=1:ncpus=7:mem=12GB
+#PBS -l debug=TRUE
 
 ##############################################
 ## Submit notes:
@@ -39,7 +40,7 @@ set -xa
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jdumpmonitor/versions/run.ver
 [ -f $VERSION_FILE ]  &&  . $VERSION_FILE
 
@@ -147,7 +148,7 @@ export comin_m1=/lfs/h1/ops/canned/com/dump/v2.5/dump.${PDYm1}
 
 # Execute the Environmental Equivalence form of the job-script
 # ------------------------------------------------------------
-$HOMEobsproc/jobs/JDUMP_MONITOR
+$HOMEobsproc/jobs/JOBSPROC_DUMP_MONITOR
 
 exit
 
