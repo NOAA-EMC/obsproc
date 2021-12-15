@@ -1,12 +1,13 @@
 #!/bin/bash
 ###########################################
-#PBS -N %JTYP%_prep_post_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/stmp/Nicholas.Esposito/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o
-#PBS -l walltime=00:10:00
-#PBS -A OBSPROC-DEV
+#PBS -N obsproc_%JTYP%_prep_post_%DESC%_%CC%
+#PBS -j oe
+#PBS -S /bin/bash
 #PBS -q dev
+#PBS -A OBSPROC-DEV
+#PBS -l walltime=00:10:00
 #PBS -l place=vscatter,select=1:ncpus=1:mem=1000MB
-#
+#PBS -l debug=TRUE
 #####################################################################
 # Submit notes:
 # For specific PDY:
@@ -50,7 +51,7 @@ export PDY=%PDY%
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jnam
 
 VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jnam/versions/run.ver
@@ -110,7 +111,7 @@ export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
 export DATAROOT=/lfs/h2/emc/ptmp/$USER
-export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
+export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}_prep_post.$PDY.jlogfile
 
 export DEBUG_LEVEL=3
 
@@ -121,7 +122,7 @@ export KEEPDATA=YES
 
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
 
-$HOMEobsproc/jobs/JNAM_PREP_POST
+$HOMEobsproc/jobs/JOBSPROC_NAM_PREP_POST
 
 err=$?
 echo $err

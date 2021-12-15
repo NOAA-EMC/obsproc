@@ -1,12 +1,13 @@
 #!/bin/bash
 #########################
-#PBS -N %JTYP%_dump_%DESC%_%CC%_%TMMARK%
-#PBS -o /lfs/h2/emc/stmp/Nicholas.Esposito/%JTYP%_dump_%PDY%_%CC%_%TMMARK%_%DESC%.o
+#PBS -N obsproc_%JTYP%_dump_%DESC%_%CC%_%TMMARK%
+#PBS -j oe
+#PBS -S /bin/bash
 #PBS -q dev
-#PBS -l place=vscatter,select=1:ncpus=7:mem=6000MB
-#PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
-
+#PBS -l walltime=00:15:00
+#PBS -l place=vscatter,select=1:ncpus=7:mem=6000MB
+#PBS -l debug=TRUE
 ##############################################
 # Submit notes:
 # For specific PDY:
@@ -58,7 +59,7 @@ export KEEPDATA=YES
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jnam
 export HOMEbufr_dump=${userROOT}/bufr_dump_cmake/$bufr_dump_ver/jnam
@@ -140,11 +141,6 @@ export DEBUG_LEVEL=3
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com  
 export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
-$HOMEobsproc/jobs/JNAM_DUMP
-
-# Kick off dump2 job
+$HOMEobsproc/jobs/JOBSPROC_NAM_DUMP
 err=$?
-if [ $err -eq 0 ]; then
-  jtyp=$JTYP PDY=$PDY cyc=$cyc tmmark=$tmmark desc=$DESC bash -l /u/$USER/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/cron_project/jnam_dump2.wc2.pbs
-fi
-
+echo $err

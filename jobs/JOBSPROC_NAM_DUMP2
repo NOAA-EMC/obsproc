@@ -38,11 +38,11 @@ echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
 echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
-     "${bufr_dump_ver:-not set}"
+       "${bufr_dump_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; 
-     then echo "bufr_dump is required but not loaded! Exiting..."; 
-     exit; 
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
 fi
 echo
 echo "####################################################################"
@@ -65,11 +65,13 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -115,7 +117,7 @@ export SENDDBN=${SENDDBN:-YES}
 ##########################
 
 # -------------------------------
-# Paths for obsproc items
+# Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
 -${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
@@ -132,7 +134,7 @@ export HOMEbufr_dump=${HOMEbufr_dump:\
 "###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
 export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
-export FIXbufr_dump=${FIXbufr_dump:=$HOMEbufr_dump/fix}
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 # NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
@@ -175,6 +177,7 @@ export TANK=${TANK:-${DCOMROOT}/prod}
 
 # TANK_GRIBFLDS is root directory path to imssnow grib file used in
 #  model script
+#  (below included even though not processed in DUMP2 jobs)
 # ---------------------------------------------------------------------------
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}/prod}
 
@@ -262,37 +265,24 @@ else
   mkdir -m 755 -p $COMOUT
 fi
 
-###########################################
-# SETUP NAM DATA DUMP PROCESSING VARIABLES
-###########################################
+###################################################
+# SETUP NAM DATA DUMP PROCESSING VARIABLES (Job 2)
+###################################################
 
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
-export JOB_NUMBER=1
-
-# The grib fields are copied in the tm06 job only
-#  (done here, not in DUMP2 job)
-# (Note: It is believed these are now used only by the RCDAS, via a file copy.
-#        Once the RCDAS is modified to copy these files itself from /dcom, this
-#        prcessing can be removed here.)
-
-if [ "$tmmark" = 'tm06' ]; then
-   export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-YES}
-else
-   export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO}
-fi
-
+export JOB_NUMBER=2
+export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO} # not here, done in DUMP job
 export PROCESS_DUMP=${PROCESS_DUMP:-YES}
 export prepssmi=NO # "spssmi" reprocessed dump no longer generated
                    # since SSM/I instrument on F-13 has failed (11/2009)
-export KEEP_NEARDUP_ACFT=${KEEP_NEARDUP_ACFT:-NO} # toss near-dupl. acft rpts
 
 # LALO is set if doing geographic dumping
 #  Expanded NAM domain: 0.5 degree mask nam_expdomain_halfdeg_imask.gbl
 export LALO=${LALO:-"F$FIXPREP/nam_expdomain_halfdeg_imask.gbl"}
 
-export BACK=off # background threads not allowed
+export BACK=off    # background threads not allowed
 
 env
 
@@ -300,21 +290,21 @@ env
 # Execute the script
 #####################
 $SCRIPTSobsproc/exnam_dump.sh
-eval err_${RUN}_dump=$?
-eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
+eval err_${RUN}_dump2=$?
+eval [[ \$err_${RUN}_dump2 -ne 0 ]] && $DATA/err_exit
 
 echo "$SITE `hostname`  --  `date -u`" > \
- $COMOUT/where_${tmmark}_${cycle}_${RUN}_dump_ran
+ $COMOUT/where_${tmmark}_${cycle}_${RUN}_dump2_ran
 
-> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run
 [ -n "$bufr_dump_ver" ]  &&  \
  echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
- $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
- >> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+ >> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump2_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

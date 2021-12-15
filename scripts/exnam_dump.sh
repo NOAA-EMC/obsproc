@@ -316,7 +316,7 @@ else
   done
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 1bamua 1bmhs gpsro mtiasi \
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 1bamua 1bmhs gpsro mtiasi \
  esamua eshrs3 sevcsr atms
 error1=$?
 echo "$error1" > $DATA/error1
@@ -413,7 +413,7 @@ else
   DTIM_latest_005019=${DTIM_latest_005019:-"-0.01"}
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 vadwnd satwnd
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 vadwnd satwnd
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -492,7 +492,7 @@ export SKIP_002013=YES
 
 export SKIP_000002=YES
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 proflr rassda sfcshp tideg \
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 proflr rassda sfcshp tideg \
  adpsfc ascatt
 error3=$?
 echo "$error3" > $DATA/error3
@@ -569,7 +569,7 @@ fi
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c NAM is frozen; no new data.
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet gpsipw
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet gpsipw
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -690,7 +690,7 @@ DTIM_latest_003002=${DTIM_latest_003002:-"-0.01"}
 
 export SKIP_003003=YES
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.25 1 aircft aircar goesnd
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 3.25 1 aircft aircar goesnd
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -841,7 +841,7 @@ if [ "$tmhr" = "00" ]; then
   DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+1.50"}
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 nexrad
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 nexrad
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -900,7 +900,7 @@ if [ "$tmhr" = "00" ]; then
   DTIM_latest_goesfv=${DTIM_latest_goesfv:-"+1.50"}
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 goesfv lgycld
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 goesfv lgycld
 error7=$?
 echo "$error7" > $DATA/error7
 
@@ -962,7 +962,7 @@ else
   done
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 1bhrs4 airsev osbuv8 esmhs \
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 1bhrs4 airsev osbuv8 esmhs \
  ssmisu cris lghtng
 error8=$?
 echo "$error8" > $DATA/error8
@@ -1025,7 +1025,7 @@ if [ "$tmhr" = "00" ]; then
   DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.50"}
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 adpupa
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.5 1 adpupa
 error9=$?
 echo "$error9" > $DATA/error9
 
@@ -1118,7 +1118,7 @@ set -x
 
 export STATUS=YES
 export DUMP_NUMBER=10
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
+$USHbufr_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 
 #  endif test for existence of status file
