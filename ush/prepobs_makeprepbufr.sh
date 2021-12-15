@@ -284,8 +284,7 @@
 #        If .true., processing will obtain the NetCDF format first guess fields.
 # 2021-04-05  S. Melchior -- Added diagnostic information just after the cp of
 #        the global first guess file to sgesprep.
-# 2021-12-12  S. Melchior
-#             I. Genkova -- Prepared for transition to WCOSS2
+# 
 #
 #
 # Usage:  prepobs_makeprepbufr.sh YYYYMMDDHH <mm>
@@ -1745,7 +1744,7 @@ backup AFWA ACARS into PREPBUFR"
 set +x
 cat <<\EOFmpp > MP_PREPDATA
 { echo
-
+#!/bin/ksh
 # This herefile script performs the "prepdata" processing.  It is designed to
 #  run in either a parallel (e.g., poe/mpi or background threads) or serial
 #  environment. In the parallel environment, it first splits the input BUFR

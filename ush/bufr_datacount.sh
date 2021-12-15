@@ -64,7 +64,8 @@ set -aux
 #               - formerly EXECobsproc_dump_post prior to WCOSS2.  Path to
 #                 obsproc executable directory containing bufr_datacount.
 #                 (invoked only if $DTCX is not imported)
-#   FIXbufr_util
+#   FIXbufr_dump
+#               - formerly FIXbufr_util
 #               - formerly FIXobsproc_shared_bufr_dumplist prior to WCOSS2
 #               - path to obsproc fix directory containing the
 #                 bufr_dumplist file
@@ -74,12 +75,12 @@ set -aux
 #   DTCX        - path to bufr_datacount executable
 #                  (defaults to $EXECobsproc/bufr_datacount if not passed in)
 #   LIST_CNT    - path to the bufr_dumplist file
-#                  (defaults to $FIXbufr_util/bufr_dumplist
+#                  (defaults to $FIXbufr_dump/bufr_dumplist
 #                   if not passed in)
 
 
 DTCX=${DTCX:-$EXECobsproc/bufr_datacount}
-LIST_CNT=${LIST_CNT:-$FIXbufr_util/bufr_dumplist}
+LIST_CNT=${LIST_CNT:-$FIXbufr_dump/bufr_dumplist}
 
 cd $DATA
 

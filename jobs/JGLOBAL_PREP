@@ -217,14 +217,10 @@ fi
 
 export NEMSIO_IN=.false.        # GFSv16 para
 export NETCDF_IN=.true.         # GFSv16 para
-# shall I make it: set to .**. if not set previoully ? IG
-#export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
-#export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
-                                              # NOTE: only NEMSIO_IN or NETCDF_IN can be .true.
+
 export envir_getges=${envir_getges:-$envir}
 export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
 export GETGES_NWG=${GETGES_NWG:-$GESROOT}
-#/lfs/h1/ops/canned/com/gfs what would be here - see other compath.py ?? IG
 export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges})/gdas.$PDY/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges})/gfs.$PDY/${cyc}/${COMPONENT}}
 

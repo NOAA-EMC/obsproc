@@ -134,7 +134,7 @@ export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 # Paths for dump and bufr_dumplist items  
 # ---------------------------------------
 # NOTE: defined in bufr_dump module 
-# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
+# NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
@@ -174,7 +174,6 @@ export TANK=${TANK:-${DCOMROOT}}
 
 # directory paths to ice, sst & snowdepth grib files used in model script
 # -----------------------------------------------------------------------
-
 export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)}
 export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/$omb_ver/sice)}
 export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} 

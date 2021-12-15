@@ -48,13 +48,6 @@ set -x
 ##   On luna/surge may need to initialize the Modules package to find
 ##   the module command.  Will do so for all systems.
 ######################################################################
-if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-  . /opt/modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -103,11 +96,10 @@ export SENDECF=${SENDECF:-YES}
 # Paths for obsproc_dump_alert items
 # ----------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:\
--$HOMEobsproc/scripts}
+export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 
 ##########################################
 # Run setpdy and initialize PDY variables
@@ -123,15 +115,15 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
+    export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}
   else
-    export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
+    export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
   fi
 else
   if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}/${cyc}/${COMPONENT}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
   fi
 fi
 
@@ -140,7 +132,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exdump_alert.sh.ecf
+$SCRIPTSobsproc/exdump_alert.sh
 err_dump_alert=$?
 [[ $err_dump_alert -ne 0 ]] && $DATA/err_exit
 

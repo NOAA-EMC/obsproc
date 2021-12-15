@@ -212,7 +212,6 @@ elif [ $RUN = gdas ]; then
       export DATCOM1_OUT=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts
       mkdir -m 775 -p $DATCOMOUT_dir $SATCOMOUT_dir $ARCHCOMOUT $DATCOM1_OUT
     else
-	    #use compath.py
       export DATCOMIN=${DATCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
       export SATCOMIN=${SATCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
       export ARCHCOMIN=${ARCHCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}}

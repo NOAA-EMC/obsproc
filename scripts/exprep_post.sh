@@ -380,18 +380,10 @@ EOH
 
    while [ $error = FALSE ]; do
 
-      #  Determine directory structure based on GFS version
-      #  GFSv15* uses ${COMIN1}${DATE_HIS}/${CYC_HIS}
-      #  GFSv16* uses ${COMIN1}${DATE_HIS}/${CYC_HIS}/$COMPONENT
-      GFSver_base=`echo $gfs_ver | awk -F'v' '{print $2}' | awk -F'.' '{print $1}'`
       prevgoodcyc=`$NDATE -$THR ${PDY}${cyc}`
       DATE_HIS=`echo $prevgoodcyc | cut -c1-8`
       CYC_HIS=`echo $prevgoodcyc | cut -c9-10`
-      if [ $GFSver_base = 15 ]; then
-         path="${COMIN1}${DATE_HIS}/${CYC_HIS}"
-      elif [ $GFSver_base > 15 ]; then
-         path="${COMIN1}${DATE_HIS}/${CYC_HIS}/${COMPONENT}"
-      fi
+      path="${COMIN1}${DATE_HIS}/${CYC_HIS}/${COMPONENT}"
 
       . $DATA/prep_step
       export FORT10="$BUFFILE"

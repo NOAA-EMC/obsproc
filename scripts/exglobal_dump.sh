@@ -1623,11 +1623,6 @@ SITE=${SITE:-""}
 #fi
 #echo sys_tp is set to: $sys_tp
 
-#if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-#   launcher=${launcher:-"aprun_cfp"}
-#else
-#   launcher=${launcher:-"cfp"}
-#fi
 
 #if [ "$launcher" = aprun_cfp ]; then
 #   #  Get compute node count:  Subtract one from the total number of unique
@@ -1647,7 +1642,7 @@ SITE=${SITE:-""}
 #      set -x
 #      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
 #   fi
-#elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then # IG 
+#elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then  
 #   set +x
 #   echo
 #   echo "You requested the cfp poe launcher but are not running under LSF!!"
@@ -1676,7 +1671,7 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
 
- # IG
+
    if [ -s $DATA/poe.cmdfile ]; then
       nthreads=$(cat $DATA/poe.cmdfile | wc -l)
       echo "nthreads= ${nthreads}" #IG
@@ -1687,12 +1682,10 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
          else
            sh $DATA/poe.cmdfile
          fi
-      elif [ "$launcher" = cfp ]; then  # iDataPlex #IG
+      elif [ "$launcher" = cfp ]; then 
          export MP_CSS_INTERRUPT=yes
-         launcher_DUMP=${launcher_DUMP:-mpiexec} #IG
-         #$launcher_DUMP cfp $DATA/poe.cmdfile 2>&1 #IG
+         launcher_DUMP=${launcher_DUMP:-mpiexec} 
          $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
-         # took this from Nick; 14, 8, exceed limit
 
  elif [ "$launcher" = aprun_cfp ]; then
          if [[ -z ${DUMPStpn:-""} ]]; then   # pes per node
