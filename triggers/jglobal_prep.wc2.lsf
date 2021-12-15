@@ -118,17 +118,6 @@ export DEBUG_LEVEL=3
 $HOMEobsproc/jobs/JGLOBAL_PREP
 
 exit # temporary for testing
-     # below is UNCHANGED IG ??
-
-echo ILIANA_PREPisDone
-echo JTYP= $JTYP
-echo job= $job
-echo PDY= $PDY
-echo cyc= $cyc
-echo
-
-# exit # for learning purposes !IG
-# Code below is unchanged !IG
 
 # Kick off prep_post job
 #
@@ -149,8 +138,9 @@ if [ $JTYP = "gdas" ]; then
   else
     echo "not a valid cycle time"
   fi
-  pCOMOUT=/gpfs/dell2/ptmp/$USER/global_shipsb/com/gfs/prod/gdas.${ppdy}/${pcyc}/atmos
-  comin_prod=$COMROOT/gfs/prod/gdas.${ppdy}/${pcyc}/atmos
+
+  pCOMOUT=$COMOUT_ROOT/obsproc/${obsproc_ver}/gdas.${ppdy}/${pcyc}/atmos
+  comin_prod=/lfs/h1/ops/canned/com/gfs/v16.2/gdas.${ppdy}/${pcyc}/atmos
 
   cd $pCOMOUT
   for f in $(ls $comin_prod/upa_his_twinwind.*)  # link upa files
@@ -170,31 +160,10 @@ if [ $JTYP = "gdas" ]; then
   done
 fi
 err=$?
+
 if [ $err -eq 0 ]; then
-  echo ILIANA_before_unset
-echo JTYP= $JTYP
-echo job= $job
-echo PDY= $PDY
-echo cyc= $cyc
-echo
   unset LSB_SUB_RES_REQ
-
-echo ILIANA_after_unset
-echo JTYP= $JTYP
-echo job= $job
-echo PDY= $PDY
-echo cyc= $cyc
-echo
-
-  jtyp=$JTYP desc=$DESC bash -l /u/Shelley.Melchior/bin/cycbsub \
-  /gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_genkova/jobs/jglobal_prep_post.wc2.lsf
-
-echo ILIANA_after_prep_post
-echo JTYP= $JTYP
-echo job= $job
-echo PDY= $PDY
-echo cyc= $cyc
-echo
-
+  jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_prep_post.wc2.lsf
 fi
 
