@@ -2,12 +2,11 @@
 # JMODS
 #  job script to trigger MODBUFR file processing
 #
-# modification history
-# 11 Nov 2021 PKumar modified for Cactus 
 # 26 Feb 2019 JWhiting cp'd fr /nwprod/jobs/JMODS of 17 Jun 2014
 #              config'd for phase 3 (versioned utils, etc)
 #               rm'd RUN_ENVIR var; added KEEPDATA var
 #               rm'd refs to SENDDBN
+# 23 Nov 2021 Praveen Kumar modified for Dogwood
 #----
 
 echo : echo "JMODS: welcome to j-job script ($(date -u))" ; echo
@@ -55,17 +54,9 @@ echo "####################################################################"
 echo
 set -x
 
-# Comment machine specific lines below 
 #####################################################################
 # List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
 #####################################################################
-#if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-#  . /opt/modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-#  . /usrx/local/Modules/default/init/sh 2>/dev/null
-#fi
 set +x
 echo
 echo "####################################################################"
@@ -139,10 +130,9 @@ export HOMEobsproc=${HOMEobsproc:\
 # Paths for dump and bufr_dumplist items
 # ---------------------------------------
 #export HOMEbufr_dump=${HOMEbufr_dump:\
-#-${NWROOT:?}/bufr_dump.${bufr_dump_ver:?\
+#-${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
 #"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
-# Below is predefined in bufr_dump module 
 #export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
 #export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
@@ -182,23 +172,13 @@ setpdy.sh
 export COMOUT=${COMOUT:-${COMROOT:?}/obsproc/$obsproc_ver/${NET}.${PDY}}
 mkdir -m 775 -p $COMOUT
 
-# Comment machine specific lines below
 ##############################################
 # Define location of MODS tanks
 ##############################################
 # -- need to set DCOMROOT subdir (dfix) per system
 
-#if [[ "$DCOMROOT" =~ "dell" ]] ; then
-#    # export dfix=${dfix:-${envir:?"$env_msg"}}             # phase 3
-#    export dfix=${dfix:-prod}             # phase 3
-#  else
-#    export dfix=${dfix:-us007003}                         # phase 1
-#  fi # DCOMROOT contains 'dell'
-
-#export DCOMROOT=/lfs/h1/ops/canned/dcom
 export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/${envir}/dcom}
 echo $DCOMROOT
-# export MODSDIR=${MODSDIR:-${DCOMROOT}/$dfix/mods}
 export MODSDIR=${MODSDIR:-${DCOMROOT}/mods}
 
 
