@@ -1,10 +1,13 @@
+#!/bin/bash
+####################################################################
 #PBS -N %JTYP%_prep_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/stmp/Nicholas.Esposito/%JTYP%_prep_%PDY%_%CC%_%DESC%.o
-#PBS -l walltime=00:15:00
-#PBS -A OBSPROC-DEV
+#PBS -j oe 
+#PBS -S /bin/bash
 #PBS -q dev
+#PBS -A OBSPROC-DEV
+#PBS -l walltime=00:15:00
 #PBS -l place=vscatter,select=1:ncpus=1
-
+#PBS -l debug=TRUE
 #####################################################################
 # Submit notes:
 # For specific PDY:
@@ -119,15 +122,15 @@ export SENDSDM=NO  # developer
 export DEBUG_LEVEL=3
 
 export DATAROOT=/lfs/h2/emc/ptmp/$USER
-export jlogfile=/lfs/h2/emc/ptmp/$USER/rap.${PDY}.jlogfile
+export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}_prep.${PDY}.jlogfile
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com
 export tstsp=/lfs/h2/emc/ptmp/$USER/com/obsproc/${JTYP}.${PDY}/${JTYP}.t${cyc}z.
 
-export COMINgdas=/lfs/h1/ops/canned/com/gfs/v16.2/gdas.${PDY}/${cyc}/atmos
-export COMINgfs=/lfs/h1/ops/canned/com/gfs/v16.2/gfs.${PDY}/${cyc}/atmos
-export GETGES_COM=/lfs/h1/ops/canned/com/gfs/v16.2/
-export GESROOT=/lfs/h1/ops/canned/com/gfs/v16.2/
+export COMINgdas=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/gdas.${PDY}/${cyc}/atmos
+export COMINgfs=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/gfs.${PDY}/${cyc}/atmos
+export GETGES_COM=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/
+export GESROOT=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/
 
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
 
