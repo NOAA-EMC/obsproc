@@ -324,7 +324,7 @@ echo "$error1" > $DATA/error1
 if [ "$SENDDBN" = 'YES' ]; then
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_1bamua $job ${COMSP}1bamua.$tmmark.bufr_d
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_1bmhs  $job ${COMSP}1bmhs.$tmmark.bufr_d
-# gpsro dump file has nr version which is alerted from exdump_post.sh.ecf
+# gpsro dump file has nr version which is alerted from exdump_post.sh
 # $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_gpsro  $job ${COMSP}gpsro.$tmmark.bufr_d
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_mtiasi $job ${COMSP}mtiasi.$tmmark.bufr_d
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_esamua $job ${COMSP}esamua.$tmmark.bufr_d
