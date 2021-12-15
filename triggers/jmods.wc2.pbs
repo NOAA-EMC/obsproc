@@ -1,6 +1,7 @@
 #!/bin/bash
-#PBS -N %obsproc_JTYP%_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/stmp/Praveen.Kumar/%obsproc_JTYP%_%PDY%_%CC%_%DESC%.o%J
+#PBS -N obsproc_%JTYP%_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/stmp/Praveen.Kumar/obsproc_%JTYP%_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/stmp/Praveen.Kumar/obsproc_%JTYP%_%PDY%_%CC%_%DESC%.o%J
 #PBS -l walltime=1:00:00
 #PBS -A OBSPROC-DEV
 #PBS -q dev 
@@ -52,7 +53,7 @@ export PDY=%PDY% # Add this to force in a different date than in $COMROOT/date
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake
 
@@ -128,5 +129,5 @@ export launcher_PREP=cfp
 export DEBUG_LEVEL=3
 export KEEPDATA=YES
 
-$HOMEobsproc/jobs/JMODS
+$HOMEobsproc/jobs/JOBSPROC_MODS
 
