@@ -118,16 +118,17 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/${obsNET}.${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}} 
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 
-# ---------------------------------------
+# ----------------------------------------------------------------------
 # Paths for dump and bufr_dumplist items
-# ---------------------------------------
+# Default variables are pre-defined when the bufr_dump module is loaded.
+# ----------------------------------------------------------------------
 
 export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
 export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
