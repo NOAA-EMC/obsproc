@@ -58,9 +58,7 @@ userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 
 export obsproc_ver=v1.0.0
-export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jnam
-export HOMEbufr_dump=${userROOT}/bufr_dump_cmake/$bufr_dump_ver/jnam
 
 VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jnam/versions/run.ver
 
@@ -92,6 +90,13 @@ module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
 
+module unload bufr_dump
+#export bufr_dump_ver=1.0.0
+module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake/${bufr_dump_ver}/jdumpmonitor/modulefiles
+module load bufr_dump/$bufr_dump_ver
+export HOMEbufr_dump=${userROOT}/bufr_dump_cmake/${bufr_dump_ver}/jnam
+
+
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_util/") -eq 0 ]]; then echo "prod_util is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_envir/") -eq 0 ]]; then echo "prod_envir is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)util_shared/") -eq 0 ]]; then echo "util_shared is not loaded!"; fi
@@ -112,11 +117,6 @@ if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)craype/") -eq 0 ]]; then echo "cray
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "cray-mpich is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
-
-
-module unload bufr_dump 
-module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake/$obsproc_ver/jnam/modulefiles
-module load bufr_dump/$bufr_dump_ver
 
 
 export SENDECF=NO   # developer

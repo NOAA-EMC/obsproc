@@ -57,9 +57,7 @@ export KEEPDATA=YES
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsproc_ver=v1.0.0
-#export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jnam
-#export HOMEbufr_util=${userROOT}/bufr_dump_cmake/$bufr_dump_ver/jnam
 
 VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jnam/versions/run.ver
 if [ -f $VERSION_FILE ]; then

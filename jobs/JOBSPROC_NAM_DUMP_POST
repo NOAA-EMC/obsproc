@@ -131,20 +131,17 @@ fi
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 
-# --------------------------------------------
+# ---------------------------------------------------------------------
 # Paths for bufr_dumplist items
-# --------------------------------------------
- export HOMEbufr_dump=${HOMEbufr_dump:\
--${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
-"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
-
+# Default variables are pre-defined when the bufr_dump module is loaded.
+# ----------------------------------------------------------------------
 export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 #########################################################################
@@ -237,7 +234,7 @@ if [ "$tmmark" = 'tm00' ]; then
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
   export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -254,14 +251,11 @@ export HOMEARCH=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_r
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------
   if [[ "$RUN_ENVIR" == nco ]]; then
-    export AVGDarch_IN=$HOMEarch/avgdata
-    export AVGDarch_OUT=$HOMEarch/avgdata
+    export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
+    export AVGDarch_OUT=${AVGDarch_OUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
   else
     [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
-#    export AVGDarch_IN=\
-${AVGDarch_IN:-${HOMEarch_avgdata:-${COMIN_ROOT:?}/$NET/$envir/sdm_rtdm/avgdata}}
     export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
-#    export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/$NET/$envir/sdm_rtdm/avgdata}
     export AVGDarch_OUT=${AVGDarch_OUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
     mkdir -p $AVGDarch_OUT
   fi
