@@ -6,7 +6,7 @@
 #              config'd for phase 3 (versioned utils, etc)
 #               rm'd RUN_ENVIR var; added KEEPDATA var
 #               rm'd refs to SENDDBN
-# 23 Nov 2021 Praveen Kumar modified for Dogwood
+# 23 Nov 2021 Praveen Kumar modified for WCOSS2
 #----
 
 echo : echo "JMODS: welcome to j-job script ($(date -u))" ; echo
@@ -140,9 +140,6 @@ export HOMEobsproc=${HOMEobsproc:\
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items
 # ---------------------------------------
-export HOMEbufr_dump=${HOMEbufr_dump:\
--${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
-"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
 export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
 export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
@@ -157,9 +154,7 @@ export EXECmods=${EXECmods:-$HOMEobsproc/exec}
 export USHmods=${USHmods:-$HOMEobsproc/ush}
 export BTABdir=${BTABDIR:-$HOMEobsproc/fix}
 
-export DUMP=$DUMPJB
-#export DUMP=${DUMP:-$HOMEbufr_dump/ush/dumpjb}
-
+export DUMP=${DUMP:-$DUMPJB}
 #########################################################################
 # Add some prod utilities to working directory (replaces obsolete setup.sh)
 #########################################################################
@@ -180,7 +175,8 @@ setpdy.sh
 # Define COMOUT directory  (no COMIN for this job)
 ##################################################
 
-export COMOUT=${COMOUT:-${COMROOT:?}/obsproc/$obsproc_ver/${NET}.${PDY}}
+#export COMOUT=${COMOUT:-${COMROOT:?}/obsproc/$obsproc_ver/${NET}.${PDY}}
+export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
 mkdir -m 775 -p $COMOUT
 
 ##############################################
