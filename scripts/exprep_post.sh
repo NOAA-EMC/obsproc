@@ -1,7 +1,7 @@
 #!/bin/sh
 ######################################################################
 echo "-------------------------------------------------------------"
-echo "exprep_post.sh.ecf - Runs various post-analysis processing   "
+echo "exprep_post.sh     - Runs various post-analysis processing   "
 echo "                     steps on the PREPBUFR files (removes or "
 echo "                     masks restricted data)                  "
 echo "                   - GDAS only: Identify TimeTwin duplicate  "

@@ -3,7 +3,7 @@
 
 #############################################################################
 echo "----------------------------------------------------------------------"
-echo "exrtma_makeprepbufr.sh.ecf - RTMA model prepbufr processing"
+echo "exrtma_makeprepbufr.sh - RTMA model prepbufr processing"
 echo "----------------------------------------------------------------------"
 echo "History: Mar  1 2013 - Original script.                               "
 echo "         July   2017 - enabled potential for minute-precison cycles   "
