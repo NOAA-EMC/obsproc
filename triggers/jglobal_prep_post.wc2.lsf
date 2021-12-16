@@ -1,0 +1,82 @@
+#!/bin/sh  
+#PBS -N %JTYP%_prep_post_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -q debug
+#PBS -l walltime=00:15:00
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=1:mem=4gb
+
+#####################################################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 cycbsub jglobal_*.wc2.lsf
+# cycbsub location: /u/Iliana.Genkova/bin
+# cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
+#####################################################################
+
+set -xu
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_prep_post_$cyc
+
+export PDY=%PDY%
+
+userROOT=/u/Iliana.Genkova/INSTALL
+
+export obsproc_ver=1.0.0 
+export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
+export TANK=/lfs/h1/ops/canned/dcom
+
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
+#VERSION_FILE=$PACKAGEROOT/obsproc/${obsproc_ver}/versions/run.ver # when /obsproc goes live
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+# source moduleload file
+# GitHub location: release/obsproc.v1.0.0/triggers/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+# load correct version bufr_dump for WCOSS2
+module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
+module load bufr_dump/1.0.0
+
+export util_shared_ver=1.0.3 #1.0.4 in run.ver
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+
+export DATAROOT=/lfs/h2/emc/ptmp/$USER 
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump_post.$PDY.jlogfile
+
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc
+
+export COMIN_ROOT=/lfs/h1/ops/canned/com 
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
+export DEBUG_LEVEL=3
+export KEEPDATA=YES
+
+export COMIN=${COMIN_ROOT}/gfs/v16.2/$JTYP.${PDY}/${cyc}/atmos
+
+export DATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+export SATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+export ARCHCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2 
+export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
+export COMIN1=/lfs/h1/ops/canned/com/gfs/v16.2/$JTYP.
+
+$HOMEobsproc/jobs/JGLOBAL_PREP_POST
+
+err=$?
+echo $err
+

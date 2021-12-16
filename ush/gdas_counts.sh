@@ -27,21 +27,12 @@
 #
   cd $DATA 
 
-#  Determine directory structure based on GFS version
-#  GFSv15* uses ${COMIN1}${PDY}/${cycdir}
-#  GFSv16* uses ${COMIN1}${PDY}/${cycdir}/$COMPONENT 
-   GFSver_base=`echo $gfs_ver | awk -F'v' '{print $2}' | awk -F'.' '{print $1}'`
-
 #  Loop through each cycle and create reformatted files
 
    for d_cyc in t00z t06z t12z t18z
      do
-       cycdir=$(echo ${d_cyc} | sed 's/^.\(.*\).$/\1/')
-       if [ $GFSver_base = 15 ]; then
-          INFILE="${COMIN1}${PDY}/${cycdir}/$RUN.${d_cyc}.status.tm00.bufr_d"
-       elif [ $GFSver_base > 15 ]; then
-          INFILE="${COMIN1}${PDY}/${cycdir}/$COMPONENT/$RUN.${d_cyc}.status.tm00.bufr_d"
-       fi
+      cycdir=$(echo ${d_cyc} | sed 's/^.\(.*\).$/\1/')
+      INFILE="${COMIN1}${PDY}/${cycdir}/$COMPONENT/$RUN.${d_cyc}.status.tm00.bufr_d"
       if [ ! -f $INFILE ]; then
             echo -e "\n\n  INFILE:  $INFILE  does not exist \n\n"
             break
@@ -62,11 +53,7 @@
     for d_cyc in t00z t06z t12z t18z
     do
       cycdir=$(echo ${d_cyc} | sed 's/^.\(.*\).$/\1/')
-      if [ $GFSver_base = 15 ]; then
-         INFILE=${COMIN1}${PDY}/${cycdir}/$RUN.${d_cyc}.gsistat        
-      elif [ $GFSver_base > 15 ]; then
-         INFILE=${COMIN1}${PDY}/${cycdir}/$COMPONENT/$RUN.${d_cyc}.gsistat        
-      fi
+      INFILE=${COMIN1}${PDY}/${cycdir}/$COMPONENT/$RUN.${d_cyc}.gsistat        
       if [ ! -f $INFILE ]; then
             echo -e "\n\n  INFILE:  $INFILE  does not exist \n\n"
             break
