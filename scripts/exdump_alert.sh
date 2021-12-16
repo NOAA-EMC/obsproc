@@ -14,7 +14,7 @@
 #                        file is not available or cannot be printed via cat.
 #                      - Modified to check dump_alert_flags with $tmmark suffix.
 # 19 Sep 2018 SMelchior- Removed temporary logic to handle gdas1 prefix.
-# 14 Dec 2021 NEsposito- Updated for use on WCOSS2
+# 14 Dec 2021 NEsposito- Updated for use on WCOSS2; removed .ecf filename extension
 #####################################################################
 echo " "
 
