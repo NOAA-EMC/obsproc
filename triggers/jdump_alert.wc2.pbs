@@ -116,6 +116,7 @@ export cyc=12  # must always be exported (choices are 00, 06, 12, 18)
 ##export RUN=gfs # must always be exported
 export RUN=nam # must always be exported
 
+export obsNET=obsproc
 export NET=$RUN
 [ $RUN = gdas ] && export NET=gfs
 export job=${RUN}_dump_alert_${cyc} # normally not changed, but needs $RUN and $cyc
