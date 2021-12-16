@@ -1,7 +1,7 @@
 #!/bin/sh  
-#PBS -N %JTYP%_prep_post_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -N obsproc_%JTYP%_prep_post_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
 #PBS -q debug
 #PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
@@ -29,6 +29,7 @@ export PDY=%PDY%
 
 userROOT=/u/Iliana.Genkova/INSTALL
 
+export obsNET=obsproc
 export obsproc_ver=1.0.0 
 export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
 export TANK=/lfs/h1/ops/canned/dcom
@@ -75,7 +76,7 @@ export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
 export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 export COMIN1=/lfs/h1/ops/canned/com/gfs/v16.2/$JTYP.
 
-$HOMEobsproc/jobs/JGLOBAL_PREP_POST
+$HOMEobsproc/jobs/JOBSPROC_GLOBAL_PREP_POST
 
 err=$?
 echo $err

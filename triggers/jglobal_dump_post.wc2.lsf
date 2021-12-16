@@ -1,7 +1,7 @@
 #!/bin/sh  
-#PBS -N %JTYP%_dump_post_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -N obsproc_%JTYP%_dump_post_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
 #PBS -q debug
 #PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
@@ -31,6 +31,7 @@ export DUMPJBprocdate=190001010000
 export KEEPDATA=YES
 #export MPMD=NO  # uncomment if you do not provide poe BSUB cards
 
+export obsNET=obsproc
 export obsproc_ver=1.0.0 
 #export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
 #export TANK=/lfs/h1/ops/canned/dcom
@@ -80,14 +81,8 @@ export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com
 #export COMIN=$COMROOT/gfs/${gfs_ver}/${JTYP}.${PDY}/${cyc}
 export COMOUT=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
 
-$HOMEobsproc/jobs/JGLOBAL_DUMP_POST
+$HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP_POST
 
-exit # Is this one for learning purposes or intended?
-
-# Kick off prep job
 err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP desc=$DESC bash -l /u/Shelley.Melchior/bin/cycbsub \
-  /gpfs/dell2/emc/obsproc/noscrub/$USER/gitstatic/EMC_obsproc_genkova/jobs/jglobal_prep.ph3.lsf.GFSv16
-fi
+echo $err
+

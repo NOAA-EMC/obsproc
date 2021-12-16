@@ -25,5 +25,6 @@ export cray_pals_ver=1.0.12
 export PROCESS_MASTER_SHIP_STNLIST=NO
 export BACK=off
 
-export gfs_ver=16.2
+export gfs_ver=v16.2
+export omb=v4.4
 

@@ -1,7 +1,7 @@
 #!/bin/sh  
-#PBS -N %JTYP%_dump_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -N obsproc_%JTYP%_dump_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
 #PBS -q dev
 #PBS -l walltime=00:30:00
 #PBS -A OBSPROC-DEV
@@ -31,6 +31,7 @@ export PDY=%PDY%
 export DUMPJBprocdate=1900123100
 export KEEPDATA=YES
 
+export obsNET=obsproc
 export obsproc_ver=1.0.0
 #export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
 #export TANK=/lfs/h1/ops/canned/dcom
@@ -77,30 +78,8 @@ export COMPONENT=atmos
 #export COMIN=$COMROOT/obsproc/${JTYP}.${PDY}/${cyc}/${COMPONENT} #this doesn't add up IG 
 #export COMIN=/lfs/h1/ops/$envir}/dcom # canned ## NEEDED? IG 
 
-$HOMEobsproc/jobs/JGLOBAL_DUMP
+$HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP
 
-exit #for learning purposes !IG
-     # CONTINUE FIXING the part below!!!
-
-# Kick off dump_post job #UPDATE with my paths when ready !IG
 err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-   jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycbsub \
-   /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_dump_post.wc2.lsf # IG
-fi
-
-#exit #for learning purposes !IG
-
-# Kick off prep job #UPDATE with my paths when ready !IG
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-   jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycbsub \
-   /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_prep.wc2.lsf # IG
-fi
-
-
-exit
-
+echo $err
 

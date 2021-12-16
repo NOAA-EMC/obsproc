@@ -1,7 +1,7 @@
 #!/bin/sh  
-#PBS -N %JTYP%_prep_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
-#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
+#PBS -N obsproc_%JTYP%_prep_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
 #PBS -q dev               
 #PBS -l walltime=00:35:00 
 #PBS -A OBSPROC-DEV
@@ -33,6 +33,7 @@ export jobid=$job.$LSB_JOBID
 
 export PDY=%PDY%
 
+export obsNET=obsproc
 export obsproc_ver=1.0.0
 
 export DCOMROOT=/lfs/h1/ops/canned/dcom
@@ -115,55 +116,8 @@ export DEBUG_LEVEL=3
 #export NSPLIT=1
 #export POE=NO
 
-$HOMEobsproc/jobs/JGLOBAL_PREP
+$HOMEobsproc/jobs/JOBSPROC_GLOBAL_PREP
 
-exit # temporary for testing
-
-# Kick off prep_post job
-#
-# To run prep_post for gdas, need to pre-stage previous cycle's
-# upa_his_twinwind.* and gdas.t${cyc}z.gsistat files in $COMOUT
-
-if [ $JTYP = "gdas" ]; then
-  ppdy=$PDY
-  if [ "$cyc" = "00" ]; then
-    pcyc=18
-    ppdy=$(date +%Y\%m\%d -d "${PDY} -1 day")
-  elif [ "$cyc" = "06" ]; then
-    pcyc=00
-  elif [ "$cyc" = "12" ]; then
-    pcyc=06
-  elif [ "$cyc" = "18" ]; then
-    pcyc=12
-  else
-    echo "not a valid cycle time"
-  fi
-
-  pCOMOUT=$COMOUT_ROOT/obsproc/${obsproc_ver}/gdas.${ppdy}/${pcyc}/atmos
-  comin_prod=/lfs/h1/ops/canned/com/gfs/v16.2/gdas.${ppdy}/${pcyc}/atmos
-
-  cd $pCOMOUT
-  for f in $(ls $comin_prod/upa_his_twinwind.*)  # link upa files
-  do
-    echo "$f"
-    if [ ! -f "${pCOMOUT}/$(basename $f)" ]; then
-      ln -s $f
-    fi
-  done
-
-  for f in $(ls $comin_prod/*gsistat)            # link gsistat file
-  do
-    echo "$f"
-    if [ ! -f "${pCOMOUT}/$(basename $f)" ]; then
-      ln -s $f
-    fi
-  done
-fi
 err=$?
-
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_prep_post.wc2.lsf
-fi
+echo $err 
 
