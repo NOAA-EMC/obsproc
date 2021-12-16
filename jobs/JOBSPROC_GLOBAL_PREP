@@ -34,11 +34,6 @@ fi
 echo
 set -x
 
-# Force prepobs_makeprepbufr.sh to use prepobs_errtable.global from
-# gfs.v*/fix/fix_gsi instead of from obsproc_global.v*/fix
-# -----> Ask NCO if they want this in driver script?
-#VERSION_FILE_gfs=$PACKAGEROOT/versions/gfs.ver #?? IG
-#[ -f $VERSION_FILE_gfs ] && . $VERSION_FILE_gfs
 
 ################################
 # Print out version information
@@ -54,21 +49,7 @@ echo "####################################################################"
 echo
 set -x
 
-#####################################################################
-# List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
-#####################################################################
-#
-#if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-#  . /opt/modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-#  . /usrx/local/Modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-#fi
 set +x
-# THEY SHOULD BE ALREDY set in trigger script ?? IG
 echo
 echo "####################################################################"
 echo
@@ -131,7 +112,7 @@ export SENDDBN=${SENDDBN:-YES}
 ##########################
 # Specify Execution Areas
 ##########################
-# CONTINUE HERE IG
+
 # -------------------------------
 # Paths for obsproc items
 # -------------------------------
@@ -172,15 +153,12 @@ export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_v${dictionaries_ver}}    ## there was no "v" in _v${dictionaries_ver}} originally IG 
-# it looks for  metar table !! IG
-# /lfs/h1/ops/prod/decoders/decod_shared/dictionaries_v3.4.0/
+export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_v${dictionaries_ver}}   
 
 # HOMEgfs is directory path to prepobs_errtable.global (PRVT), used in
 # prepobs_makeprepbufr.sh and its child scripts prepobs_syndata.sh and
 # prepobsp_prevents.sh.
 # ---------------------------------------------------------------------------
-# will this stay like it is? overwritten in wrapper ? IG
 export HOMEgfs=${HOMEgfs:-${PACKAGES:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
 
 #########################################################################
@@ -325,7 +303,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_makeprepbufr.sh # IG .ecf
+$SCRIPTSobsproc/exglobal_makeprepbufr.sh 
 eval err_${RUN}_makeprepbufr=$?
 eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
 

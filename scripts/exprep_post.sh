@@ -1,7 +1,7 @@
 #!/bin/sh
 ######################################################################
 echo "-------------------------------------------------------------"
-echo "exprep_post.sh.ecf - Runs various post-analysis processing   "
+echo "exprep_post.sh     - Runs various post-analysis processing   "
 echo "                     steps on the PREPBUFR files (removes or "
 echo "                     masks restricted data)                  "
 echo "                   - GDAS only: Identify TimeTwin duplicate  "
@@ -21,6 +21,7 @@ echo "                     list from NDBC. The Master Ship Station "
 echo "                     List is read within job JRW1 at 12z on  "
 echo "                     the first day of each month in order to "
 echo "                     generate marine monthly statistics.     "
+echo "Dec 16 2021 - Renamed all *.sh.ecf scripts to .sh            "
 #  -------------------------------------------------------------------------
 
 echo "------------------------------------------------------------------------"

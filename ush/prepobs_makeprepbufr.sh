@@ -1739,10 +1739,9 @@ backup AFWA ACARS into PREPBUFR"
 ##                          HEREFILE MP_PREPDATA                             ##
 ##VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV##
 
-# think of adding a line with "#!/bin/ksh" after the "{ echo" below IG
-
 set +x
 cat <<\EOFmpp > MP_PREPDATA
+
 { echo
 #!/bin/ksh
 # This herefile script performs the "prepdata" processing.  It is designed to
@@ -2112,7 +2111,6 @@ set -x
 
          elif [ "$launcher_PREP" = mpiexec ]; then
 	    chmod 755 $DATA/prep_exec.cmd
-            #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
              mpiexec -n 6 $DATA/prep_exec.cmd
 	    export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure	 

@@ -33,7 +33,9 @@ export KEEPDATA=YES
 
 export obsNET=obsproc
 export obsproc_ver=1.0.0 
-#export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
+
+#use for testing before /dcom goes live
+#export DCOMROOT=/lfs/h1/ops/canned/dcom 
 #export TANK=/lfs/h1/ops/canned/dcom
 
 export PDY=%PDY%
@@ -71,14 +73,13 @@ export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc #before obsproc on WCOSS2
 export HOMEbufr_dump="${HOMEbufr_dump:-"/u/Iliana.Genkova/INSTALL/bufr-dump"}"
 
 export COPY=YES
-export HOMEarch=/lfs/h2/emc/stmp/$USER/com/${JTYP}/prod/sdm_rtdm # from Nick IG
+export HOMEarch=/lfs/h2/emc/stmp/$USER/com/${JTYP}/prod/sdm_rtdm
 export AVGDarch_IN=$HOMEarch/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day
 
 export COMPONENT=atmos
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com 
-#export COMIN=$COMROOT/gfs/${gfs_ver}/${JTYP}.${PDY}/${cyc}
 export COMOUT=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
 
 $HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP_POST

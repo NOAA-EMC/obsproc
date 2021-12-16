@@ -1,7 +1,7 @@
 #!/bin/ksh
 #####################################################################
 echo "----------------------------------------------------------"
-echo "exdump_post.sh.ecf version $obsproc_dump_post_ver - If requested:"
+echo "exdump_post.sh version $obsproc_dump_post_ver - If requested:"
 echo "       1) Generates combined dump STATUS file             "
 echo "       2) Prepares data counts for the SDM                "
 echo "       3) Removes or masks restricted data from dump files"
@@ -10,6 +10,7 @@ echo "          (meaningless on WCOSS)                          "
 echo "       5) Lists the contents of dump files                "
 echo "       6) Updates dump data count average tables          "
 echo "----------------------------------------------------------"
+echo "        Dec 16 2021 - Renamed all *.sh.ecf scripts to *.sh" 
 #####################################################################
 #
 # modification history:

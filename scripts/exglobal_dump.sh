@@ -1,7 +1,7 @@
 #!/bin/ksh
 #############################################################################
 echo "----------------------------------------------------------------------"
-echo "exglobal_dump.sh.ecf - Global (GDAS, GFS) network data dump processing"
+echo "exglobal_dump.sh - Global (GDAS, GFS) network data dump processing"
 echo "----------------------------------------------------------------------"
 echo "History: Jan 18 2000 - Original script.                               "
 echo "         May 16 2007 - Added DBNet alerts for GFS products.           "
@@ -75,6 +75,7 @@ echo "         Sep 21 2020 - Incremented subsets for the sfcshp dump groups "
 echo "                       to match bufr_dumplist. Removed tideg from     "
 echo "                       sfcshp dump group to make individual dump file."
 echo "                     - Copy bufr_dumplist to COMOUT.                  "
+echo "         Dec 16 2021 - Renamed all *.sh.ecf scripts to *.sh           "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -1674,7 +1675,7 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
 
    if [ -s $DATA/poe.cmdfile ]; then
       nthreads=$(cat $DATA/poe.cmdfile | wc -l)
-      echo "nthreads= ${nthreads}" #IG
+      echo "nthreads= ${nthreads}"
       if [ $nthreads -eq 1 ]; then   # don't expect to need this, but just in case
          echo "do not need cfp for 1 thread"
          if [ "$launcher" = aprun_cfp ]; then

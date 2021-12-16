@@ -90,7 +90,7 @@ export SENDECF=NO   # developer
 export SENDSDM=NO   # developer
 export SENDDBN=NO   # developer
 
-export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export DATAROOT=/lfs/h2/emc/ptmp/$USER 
 export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_prep.$PDY.jlogfile
 
 export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc
