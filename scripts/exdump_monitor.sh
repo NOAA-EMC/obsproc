@@ -194,7 +194,7 @@ DTIM_earliest_atmsdb=-1.50
 DTIM_latest_atmsdb=-0.51
 
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 adpupa osbuv8 1bmhs \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 adpupa osbuv8 1bmhs \
  1bhrs4 tesac trkob efclam saphir atmsdb ompsn8 ompst8 ompslp
 error1=$?
 echo "$error1" > $DATA/error1
@@ -280,7 +280,7 @@ DTIM_latest_esiasi=-0.01
 DTIM_earliest_esatms=-1.50
 DTIM_latest_esatms=-0.51
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 sfcshp adpsfc rassda \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 sfcshp adpsfc rassda \
  airsev mtiasi gome avcsam esiasi esatms sevasr tideg
 error2=$?
 echo "$error2" > $DATA/error2
@@ -439,7 +439,7 @@ DTIM_latest_amsr2=-1.01
 DTIM_earliest_crsfdb=-1.50
 DTIM_latest_crsfdb=-0.51
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 satwnd gpsro 1bamua avcspm \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 satwnd gpsro 1bamua avcspm \
  amsr2 crsfdb
 error3=$?
 echo "$error3" > $DATA/error3
@@ -497,7 +497,7 @@ DTIM_latest_geoimr=-0.01
 DTIM_earliest_ascatt=-1.50
 DTIM_latest_ascatt=-0.51
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 aircar aircft proflr vadwnd \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 aircar aircft proflr vadwnd \
  geoimr ascatt hdob
 error4=$?
 echo "$error4" > $DATA/error4
@@ -551,7 +551,7 @@ DTIM_latest_gpsipw=-0.01
 DTIM_earliest_ahicsr=-1.00
 DTIM_latest_ahicsr=-0.01
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 msonet gpsipw \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msonet gpsipw \
  gsrcsr gsrasr ahicsr
 error5=$?
 echo "$error5" > $DATA/error5
@@ -770,7 +770,7 @@ elif [ $cycp -eq 23 ]; then   # (22.50 - 23.49 Z)
    unset SKIP_006063 # reflectivity 23Z
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 nexrad
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 nexrad
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -851,7 +851,7 @@ DTIM_latest_crisf4=-0.51
 DTIM_earliest_iasidb=-1.50
 DTIM_latest_iasidb=-0.51
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 atovs omi esamua \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 atovs omi esamua \
  eshrs3 esmhs ssmisu sevcsr lghtng lgycld atms bathy mls crisf4 iasidb
 error7=$?
 echo "$error7" > $DATA/error7
@@ -898,7 +898,7 @@ export DUMP_NUMBER=8
 DTIM_latest_sstvcw=+0.49
 DTIM_latest_sstvpw=+0.49
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 sstvcw sstvpw 
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 sstvcw sstvpw 
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -974,7 +974,7 @@ err8=`cat $DATA/error8`
 
 export STATUS=YES
 export DUMP_NUMBER=9
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 0.50 1 null
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 null
 
 
 cp -p ${DATA}${COMOUT}/$RUN.${cycle}.status.tm00.bufr_d $COMOUT

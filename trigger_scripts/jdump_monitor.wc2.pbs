@@ -89,7 +89,6 @@ if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is 
 
 
 module unload bufr_dump
-#module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake 
 export bufr_dump_ver=1.0.0
 module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake/$obsproc_ver/jdumpmonitor/modulefiles
 module load bufr_dump/$bufr_dump_ver 
