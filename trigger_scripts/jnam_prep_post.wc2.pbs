@@ -121,6 +121,7 @@ export COMIN=${COMIN_ROOT}/nam/v4.2/nam.${PDY}
 export KEEPDATA=YES
 
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
+export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
 $HOMEobsproc/jobs/JOBSPROC_NAM_PREP_POST
 

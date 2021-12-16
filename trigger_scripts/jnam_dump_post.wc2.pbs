@@ -91,7 +91,7 @@ module load cfp/${cfp_ver}
 
 module unload bufr_dump
 #export bufr_dump_ver=1.0.0
-module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake/${bufr_dump_ver}/jdumpmonitor/modulefiles
+module use /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/bufr_dump_cmake/${bufr_dump_ver}/jnam/modulefiles
 module load bufr_dump/$bufr_dump_ver
 export HOMEbufr_dump=${userROOT}/bufr_dump_cmake/${bufr_dump_ver}/jnam
 
@@ -139,11 +139,12 @@ export DEBUG_LEVEL=3
 # files to process
 export COPY=YES
 export HOMEarch=/lfs/h2/emc/ptmp/$USER/com/${JTYP}/prod/sdm_rtdm
-export AVGDarch_IN=$HOMEarch/avgdata
+export AVGDarch_IN=/lfs/h1/ops/canned/com/nam/v4.2/sdm_rtdm/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com/
+export COMIN=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
 

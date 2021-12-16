@@ -251,8 +251,8 @@ export HOMEARCH=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_r
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------
   if [[ "$RUN_ENVIR" == nco ]]; then
-    export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
-    export AVGDarch_OUT=${AVGDarch_OUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
+     export AVGDarch_IN=$HOMEarch/avgdata
+     export AVGDarch_OUT=$HOMEarch/avgdata
   else
     [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
     export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
