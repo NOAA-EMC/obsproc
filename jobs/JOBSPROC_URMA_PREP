@@ -36,6 +36,13 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
+       "${bufr_dump_ver:-not set}"
+echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
 echo
 echo "####################################################################"
 echo
@@ -43,14 +50,7 @@ set -x
 
 #####################################################################
 ## List modules loaded for this job.
-##   May need to initialize the Modules package to find the module
-##   command.
 ######################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -64,12 +64,15 @@ set -x
 ###########################
 # Specify NET and RUN Name
 ###########################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-urma}
 export RUN=${RUN:-urma}
+
 set +x
 echo
-echo NET is ${NET}
-echo RUN is ${RUN}
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
+echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
 
@@ -113,7 +116,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
@@ -140,6 +143,7 @@ export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
 export DICTPREP=${DICTPREP:-/nwprod/decoders/decod_shared/dictionaries}
+#export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -165,18 +169,20 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
+  export COMOUT=${COMROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
+  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have 
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
+  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -229,12 +235,10 @@ export SYNDATA=NO     # NEVER execute program SYNDAT_SYNDATA
 
 export GLERLBUFR=YES  # Execute program PREPOBS_GLERLADJ (GLERL adjustment
                       #  processing)
-   export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
-   export TANK=${TANK:-$DCOMROOT/prod}
 
 export PREPACQC=NO    # NEVER execute PREPACQC script processing
-   export PROCESS_ACQC=NO  # NEVER execute program PREPOBS_PREPACQC
-   export PROCESS_ACPF=NO  # NEVER execute program PREPOBS_PREPACPF
+export PROCESS_ACQC=NO  # NEVER execute program PREPOBS_PREPACQC
+export PROCESS_ACPF=NO  # NEVER execute program PREPOBS_PREPACPF
 
 export PROFCQC=NO     # NEVER execute program PREPOBS_PROFCQC
 
@@ -272,7 +276,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exurma_makeprepbufr.sh.ecf
+$SCRIPTSobsproc/exurma_makeprepbufr.sh
 eval err_${RUN}_makeprepbufr=$?
 eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
 
