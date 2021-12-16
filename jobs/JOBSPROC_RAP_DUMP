@@ -145,7 +145,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
@@ -154,9 +154,6 @@ export SCRIPTSobsproc=${SCRIPTSobsproc:\
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items
 # ---------------------------------------
-export HOMEbufr_dump=${HOMEbufr_dump:\
--${PACKAGEROOT:?}/bufr_dump.${bufr_dump_ver:?\
-"###FATAL ERROR \"bufr_dump_ver\" is not set"}}
 
 export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
 export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
@@ -198,7 +195,7 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/canned/dcom}
+export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
 export TANK=${TANK:-${DCOMROOT}/prod}
 
 # directory path to imssnow grib files used in model script

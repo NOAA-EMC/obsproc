@@ -362,7 +362,7 @@ else
 
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_1} 1 1bamua \
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_1} 1 1bamua \
  1bmhs esamua esmhs atms mtiasi sevcsr gpsro esiasi iasidb esatms \
  atmsdb sevasr amsr2
 error1=$?
@@ -497,7 +497,7 @@ else
 
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_2} 1 vadwnd \
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_2} 1 vadwnd \
  satwnd adpupa
 error2=$?
 echo "$error2" > $DATA/error2
@@ -586,7 +586,7 @@ else
 
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_3} 1 proflr \
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_3} 1 proflr \
  rassda sfcshp adpsfc ascatt tideg
 error3=$?
 echo "$error3" > $DATA/error3
@@ -676,7 +676,7 @@ fi
 #  (default)
 
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msonet gpsipw
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msonet gpsipw
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -762,7 +762,7 @@ else
 
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 aircft \
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 aircft \
  aircar
 error5=$?
 echo "$error5" > $DATA/error5
@@ -987,7 +987,7 @@ elif [ $cyc -eq 23 ]; then   # (22.50 - 23.49 Z)
 ###unset SKIP_006063 # reflectivity 23Z
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 nexrad
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 nexrad
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -1107,7 +1107,7 @@ else
 
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 1bhrs4 \
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 1bhrs4 \
  airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4
 error7=$?
 echo "$error7" > $DATA/error7
@@ -1178,7 +1178,7 @@ else
 
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_8} 1 gsrasr gsrcsr 
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_8} 1 gsrasr gsrcsr 
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1233,7 +1233,7 @@ else
    def_time_window_9=3.0 # default time window for dump 9 is -3.0 to +3.0 hours
 fi
 
-$USHbufr_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng
 error9=$?
 echo "$error9" > $DATA/error9
 
@@ -1256,7 +1256,7 @@ set -x
 # -------------------------------------------------
 SITE=${SITE:-""}
 launcher=${launcher:-"cfp"}
-if [ "$launcher" = cfp ]; then #-o "$launcher" = aprun_cfp ]; then
+if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
 
 # To better take advantage of cfp, execute the longer running commands first.
@@ -1318,7 +1318,7 @@ set -x
 
 export STATUS=YES
 export DUMP_NUMBER=10
-$USHbufr_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
 fi

@@ -125,14 +125,14 @@ export DATAROOT=/lfs/h2/emc/ptmp/$USER
 export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}_prep.${PDY}.jlogfile
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com
-export tstsp=/lfs/h2/emc/ptmp/$USER/com/obsproc/${JTYP}.${PDY}/${JTYP}.t${cyc}z.
-
 export COMINgdas=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/gdas.${PDY}/${cyc}/atmos
 export COMINgfs=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/gfs.${PDY}/${cyc}/atmos
 export GETGES_COM=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/
 export GESROOT=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/
-
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
+
+export COMIN=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
+export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
 export KEEPDATA=YES
 export POE=NO

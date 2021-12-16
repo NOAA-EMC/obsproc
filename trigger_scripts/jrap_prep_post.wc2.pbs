@@ -122,12 +122,13 @@ export KEEPDATA=YES
 export DATAROOT=/lfs/h2/emc/ptmp/$USER
 export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}_prep_post.${PDY}.jlogfile
 
-
 export COMIN_ROOT=/lfs/h1/ops/canned/com/
 export COMIN=${COMIN_ROOT}/rap/v5.1/${JTYP}.${PDY}
 export DEBUG_LEVEL=3
 
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
+export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
+
 
 $HOMEobsproc/jobs/JOBSPROC_RAP_PREP_POST
 err=$?
