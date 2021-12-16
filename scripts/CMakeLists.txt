@@ -4,13 +4,13 @@ list(APPEND scripts_files
   excdas_makeprepbufr.sh.ecf
   exdump_alert.sh.ecf
   exdump_monitor.sh.ecf
-  exdump_post.sh.ecf
+  exdump_post.sh
   exglobal_dump.sh.ecf
   exglobal_makeprepbufr.sh.ecf
   exmods.sh.ecf
-  exnam_dump.sh.ecf
-  exnam_makeprepbufr.sh.ecf
-  exprep_post.sh.ecf
+  exnam_dump.sh
+  exnam_makeprepbufr.sh
+  exprep_post.sh
   exrap_dump.sh.ecf
   exrap_makeprepbufr.sh.ecf
   exrtma_dump.sh.ecf
