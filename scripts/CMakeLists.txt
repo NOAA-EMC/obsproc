@@ -3,7 +3,7 @@ list(APPEND scripts_files
   excdas_dump.sh.ecf
   excdas_makeprepbufr.sh.ecf
   exdump_alert.sh.ecf
-  exdump_monitor.sh.ecf
+  exdump_monitor.sh
   exdump_post.sh.ecf
   exglobal_dump.sh.ecf
   exglobal_makeprepbufr.sh.ecf
