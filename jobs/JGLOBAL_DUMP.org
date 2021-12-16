@@ -2,7 +2,6 @@
 set -xa
 date -u
 
-
 ###################################################################
 # Set DEBUG LEVEL - modifies info in execution trace prompt string
 ###################################################################
@@ -26,7 +25,6 @@ echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
 echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
-echo HOMEbufr_dump is ${HOMEbufr_dump:?"###FATAL ERROR \"HOMEbufr_dump\" is not set"} 
 echo
 set -x
 
@@ -37,13 +35,12 @@ set +x
 echo
 echo "####################################################################"
 echo
-echo "OBSPROC version is ${obsproc_ver:-not set}" #Set at trigger script level,outside of obsproc code
-echo "BUFR_DUMP version used by this job, for dump and dumplist, is " \
-       "${bufr_dump_ver:-not set}"        #Set at trigger script level like obsproc_ver
+echo "OBSPROC version is ${obsproc_ver:-not set}"
+echo "BUFR_UTIL version used by this job, for dump and dumplist, is" \
+     "${bufr_util_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
 echo
 echo "####################################################################"
-
 echo
 set -x
 
@@ -51,6 +48,13 @@ set -x
 # List modules loaded for this job
 #   May need to initialize Modules package to find the module command.
 #####################################################################
+if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
+  . /opt/modules/default/init/sh 2>/dev/null
+elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
+  . /usrx/local/Modules/default/init/sh 2>/dev/null
+elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
+  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
+fi
 set +x
 echo
 echo "####################################################################"
@@ -125,20 +129,27 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${NWROOT:?}/obsproc.${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+export SCRIPTSobsproc=${SCRIPTSobsproc:\
+-$HOMEobsproc/scripts}
 
 # ---------------------------------------
-# Paths for dump and bufr_dumplist items  
+# Paths for dump and bufr_dumplist items
 # ---------------------------------------
-# NOTE: defined in bufr_dump module 
-# NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
+export HOMEbufr_util=${HOMEbufr_util:\
+-${NWROOT:?}/bufr_util.${bufr_util_ver:?\
+"###FATAL ERROR \"bufr_util_ver\" is not set"}}
+
+export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
+export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+
+# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
+export ushscript_dump=${ushscript_dump:-$USHbufr_util}
 
 # ------------------------------------------
 # Paths for combined obsproc and dump items
@@ -146,22 +157,22 @@ export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
 
 # directory paths to SSMI dump re-processing executed in bufr_dump_obs
 # --------------------------------------------------------------------
-export EXECPREP=${EXECPREP:-$HOMEbufr_dump/exec}
+export EXECPREP=${EXECPREP:-$HOMEbufr_util/exec}
 export PARMPREP=${PARMPREP:-$HOMEobsproc/parm}
-export FIXPREP=${FIXPREP:-$HOMEbufr_dump/fix}
+export FIXPREP=${FIXPREP:-$HOMEbufr_util/fix}
 
 # directory paths to ERS, QuikSCAT & ASCAT dump re-processing executed in
 #  bufr_dump_obs
 # -----------------------------------------------------------------------
-export EXECWAVE=${EXECWAVE:-$HOMEbufr_dump/exec}
+export EXECWAVE=${EXECWAVE:-$HOMEbufr_util/exec}
 export PARMWAVE=${PARMWAVE:-$HOMEobsproc/parm}
-export FIXWAVE=${FIXWAVE:-$HOMEbufr_dump/fix}
+export FIXWAVE=${FIXWAVE:-$HOMEbufr_util/fix}
 
 # directory paths to SSMI & WindSAT dump re-processing executed in bufr_dump_obs
 # ------------------------------------------------------------------------------
-export EXECbufr=${EXECbufr:-$HOMEbufr_dump/exec}
+export EXECbufr=${EXECbufr:-$HOMEbufr_util/exec}
 export PARMbufr=${PARMbufr:-$HOMEobsproc/parm}
-export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
+export FIXbufr=${FIXbufr:-$HOMEbufr_util/fix}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -169,16 +180,16 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
-export TANK=${TANK:-${DCOMROOT}}
+export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
+export TANK=${TANK:-${DCOMROOT}/prod}
 
 # directory paths to ice, sst & snowdepth grib files used in model script
 # -----------------------------------------------------------------------
-export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} 
-export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/${PDY}/sst)}
-export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
+export COM_ENGICE=${COM_ENGICE:-$COMROOTp3/omb/prod/sice}
+export COM_ICE5MIN=${COM_ICE5MIN:-$COMROOTp3/omb/prod/sice}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py gfs/prod/sst)}
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py gfs/prod/sst)}
+export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}/prod}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -199,22 +210,22 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #########################
 # Define COM directories
 #########################
-#
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
+
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
- export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -231,16 +242,16 @@ export prepssmi=NO # "spssmi" reprocessed dump no longer generated
                    # since SSM/I instrument on F-13 has failed (11/2009)
 export KEEP_NEARDUP_ACFT=${KEEP_NEARDUP_ACFT:-NO} # toss near-dupl. acft rpts
 
-#  During the period where both Goodberlet and NN3 SSM/I products are
+# During the period where both Goodberlet and NN3 SSM/I products are
 #  being dumped, switch PREPSSMI_PROD_TYPE will direct the PREPSSMI
 #  program to process from SSM/I data dumps that are either all GOODBERLET,
 #  all NEURAL_NET3 or some COMBINATION of these two
-#  -- rendered meaningless after 11/2009 since prepssmi now set to "no" (above)
+#   -- rendered meaningless after 11/2009 since prepssmi now set to "no" (above)
 
 export PREPSSMI_PROD_TYPE=COMBINATION
 
 # POE must be set to on if running poe
-##export POE=on
+###export POE=on
 
 # -- or -- BACK must be set to on if running background shells
 export BACK=on # "on" is default
@@ -251,7 +262,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_dump.sh
+$SCRIPTSobsproc/exglobal_dump.sh.ecf
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
@@ -261,8 +272,8 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
-[ -n "$bufr_dump_ver" ]  &&  \
- echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
+[ -n "$bufr_util_ver" ]  &&  \
+ echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
  >> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run

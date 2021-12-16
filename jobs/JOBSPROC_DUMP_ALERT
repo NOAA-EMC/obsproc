@@ -98,8 +98,7 @@ export HOMEobsproc=${HOMEobsproc:\
 -${PACKAGEROOT:?}/obsproc.${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:\
--$HOMEobsproc/scripts}
+export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 
 ##########################################
 # Run setpdy and initialize PDY variables

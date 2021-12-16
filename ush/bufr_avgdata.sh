@@ -41,7 +41,8 @@ set -aux
 #               - formerly EXECobsproc_shared_bufr_avgdata prior to WCOSS2
 #               - path to obsproc executable directory containing bufr_avgdata
 #                 (invoked only if $AVGX is not imported)
-#   FIXbufr_util
+#   FIXbufr_dump
+#               - formerly FIXbufr_util
 #               - formerly FIXobsproc_shared_bufr_dumplist prior to WCOSS2
 #               - path to bufr_util fix directory containing the
 #                 bufr_dumplist file
@@ -82,7 +83,7 @@ set -aux
 #   comin_m1   - path to yesterday's dump status and updated status files
 #                (Default: $COMROOT/${qual1}/$(envir}/${qual2}.${PDYm1})
 #   DUMPLIST   - path to the bufr_dumplist file
-#                (Default: $FIXbufr_util/bufr_dumplist)
+#                (Default: $FIXbufr_dump/bufr_dumplist)
 #   AVGX       - path to bufr_avgdata executable
 #                (Default: $EXECobsproc/bufr_avgdata)
 
@@ -115,7 +116,7 @@ if [ $net = gfs -o $net = gdas ]; then
   comin_m1_noatmos=$(dirname $comin_m1)
   comin_m1_nocyc=$(dirname $comin_m1_noatmos)
 fi
-DUMPLIST=${DUMPLIST:-$FIXbufr_util/bufr_dumplist}
+DUMPLIST=${DUMPLIST:-$FIXbufr_dump/bufr_dumplist}
 AVGX=${AVGX:-$EXECobsproc/bufr_avgdata}
 jlogfile=${jlogfile:=""}
 
