@@ -1,7 +1,7 @@
 #!/bin/ksh
 #####################################################################
 echo "----------------------------------------------------------"
-echo "exdump_post.sh version $obsproc_dump_post_ver - If requested:"
+echo "exdump_post.sh version $obsproc_ver - If requested:       "
 echo "       1) Generates combined dump STATUS file             "
 echo "       2) Prepares data counts for the SDM                "
 echo "       3) Removes or masks restricted data from dump files"
@@ -58,7 +58,7 @@ echo "----------------------------------------------------------"
 #                        restricted reports in BUFR_REMOREST processing, but
 #                        whose reports are retained and instead station IDs
 #                        are masked.
-# 16 Dec 2021 Kumar    - Updated for WCOSS2
+# 09 Dec 2021 Esposito - Updated for use on WCOSS2.
 #####################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
@@ -578,7 +578,7 @@ EOFthread
       else
          which cfp
          which_cfp_err=$?
-   
+         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
    fi
 else
    echo
@@ -603,6 +603,7 @@ fi
 
 #  endif loop $PROCESS_LISTERS
 fi
+
 
 
 if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
