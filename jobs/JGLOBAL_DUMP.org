@@ -5,7 +5,7 @@ date -u
 ###################################################################
 # Set DEBUG LEVEL - modifies info in execution trace prompt string
 ###################################################################
-export DEBUG_LEVEL=${DEBUG_LEVEL=1}
+export DEBUG_LEVEL=${DEBUG_LEVEL:-1}
 case $DEBUG_LEVEL in
   1) export PS4='+ ${SECONDS}s + ' ;;       # add seconds (this is typical case)
   0) export PS4='+ ';;                      # don't include seconds (useful if
@@ -22,7 +22,6 @@ esac
 set +x
 echo
 echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
-echo tmmark is ${tmmark:?"###FATAL ERROR \"tmmark\" is not set"}
 echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
@@ -47,8 +46,11 @@ set -x
 
 #####################################################################
 # List modules loaded for this job
+#   May need to initialize Modules package to find the module command.
 #####################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
+if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
+  . /opt/modules/default/init/sh 2>/dev/null
+elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
   . /usrx/local/Modules/default/init/sh 2>/dev/null
 elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
   . /usrx/local/prod/modules/default/init/sh 2>/dev/null
@@ -66,9 +68,16 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
-export NET=${NET:-nam}
-export RUN=${RUN:-nam}
-
+export NET=${NET:-gfs}
+echo $job | grep gfs
+err_gfs=$?
+echo $job | grep gdas
+err_gdas=$?
+if [ $err_gfs = 0 ]; then
+  export RUN=${RUN:-gfs}   # GFS
+elif [ $err_gdas = 0 ]; then
+  export RUN=${RUN:-gdas}  # GDAS
+fi
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
@@ -76,10 +85,11 @@ echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
 
-################
-# Specify cycle
-################
+##############################
+# Specify cycle and time-mark
+##############################
 export cycle=t${cyc}z
+export tmmark=tm00
 
 ###############################
 # Create new working directory
@@ -133,7 +143,7 @@ export HOMEbufr_util=${HOMEbufr_util:\
 "###FATAL ERROR \"bufr_util_ver\" is not set"}}
 
 export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export FIXbufr_util=${FIXbufr_util:=$HOMEbufr_util/fix}
+export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
 
 # NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
 
@@ -141,16 +151,15 @@ export FIXbufr_util=${FIXbufr_util:=$HOMEbufr_util/fix}
 # -----------------------------------------------------------
 export ushscript_dump=${ushscript_dump:-$USHbufr_util}
 
-# ---------------------------------------------------------
+# ------------------------------------------
 # Paths for combined obsproc and dump items
-# ---------------------------------------------------------
+# ------------------------------------------
 
 # directory paths to SSMI dump re-processing executed in bufr_dump_obs
 # --------------------------------------------------------------------
 export EXECPREP=${EXECPREP:-$HOMEbufr_util/exec}
 export PARMPREP=${PARMPREP:-$HOMEobsproc/parm}
-export FIXPREP=${FIXPREP:-$HOMEbufr_util/fix} # also path to expanded NAM
-                                              #  domain mask file
+export FIXPREP=${FIXPREP:-$HOMEbufr_util/fix}
 
 # directory paths to ERS, QuikSCAT & ASCAT dump re-processing executed in
 #  bufr_dump_obs
@@ -174,9 +183,12 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_util/fix}
 export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
 export TANK=${TANK:-${DCOMROOT}/prod}
 
-# TANK_GRIBFLDS is root directory path to imssnow grib file used in
-#  model script
-# ---------------------------------------------------------------------------
+# directory paths to ice, sst & snowdepth grib files used in model script
+# -----------------------------------------------------------------------
+export COM_ENGICE=${COM_ENGICE:-$COMROOTp3/omb/prod/sice}
+export COM_ICE5MIN=${COM_ICE5MIN:-$COMROOTp3/omb/prod/sice}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py gfs/prod/sst)}
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py gfs/prod/sst)}
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}/prod}
 
 #########################################################################
@@ -192,130 +204,79 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 ##########################################
 # Run setpdy and initialize PDY variables
 ##########################################
-set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
-if [ -z "$PDY" ]; then
-  if test "$cyc" = "12"
-  then
-    if test "$tmmark" != "tm00"
-    then
-      # Since the 12Z catch-up cycle (tm06 through tm01) jobs run before the 12 UTC
-      # PROD_SETUP job runs we need to use the ${COMDATEROOT}/date/t00z file for our PDY
-      export cycle=t00z
-      setpdy.sh
-      . $DATA/PDY
-      export cycle=t12z
-      setpdy.sh
-      . $DATA/PDY
-    else
-      # The 12Z on-time cycle (tm00) runs after the 12 UTC PROD_SETUP job
-      setpdy.sh
-      . $DATA/PDY
-    fi
-  elif test "$cyc" = "00"
-  then
-    if test "$tmmark" != "tm00"
-    then
-      # Check to see if we are running a 00Z catch-up cycle (tm06 through tm01) job
-      # prior to run of 00 UTC PROD_SETUP - if so, update PDY by 1-day
-      setpdy.sh
-      . $DATA/PDY
-      edate=`cat ${COMDATEROOT}/date/t12z | cut -c7-14`
-      if [ $edate -eq $PDY ]
-      then
-        export PDY=`$UTILROOT/ush/finddate.sh $PDY d+1`
-        setpdy.sh
-        . $DATA/PDY
-      fi
-    else
-      # The 00Z on-time cycle (tm00) runs after the 00 UTC PROD_SETUP job
-      setpdy.sh
-      . $DATA/PDY
-    fi
-  else
-    # The 06 & 18Z jobs at all cycles after the 00 & 12 UTC PROD_SETUP jobs, resp.
-    setpdy.sh
-    . $DATA/PDY
-  fi
-else
-  # If PDY was previously specified (checkout only) fall through to here
-  setpdy.sh
-  . $DATA/PDY
-fi
+./setpdy.sh
+. PDY
 
 #########################
 # Define COM directories
 #########################
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
+export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
-###########################################
-# SETUP NAM DATA DUMP PROCESSING VARIABLES
-###########################################
+###################################################
+# SETUP GDAS OR GFS DATA DUMP PROCESSING VARIABLES
+###################################################
 
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
-export JOB_NUMBER=1
-
-# The grib fields are copied in the tm06 job only
-#  (done here, not in DUMP2 job)
-# (Note: It is believed these are now used only by the RCDAS, via a file copy.
-#        Once the RCDAS is modified to copy these files itself from /dcom, this
-#        prcessing can be removed here.)
-
-if [ "$tmmark" = 'tm06' ]; then
-   export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-YES}
-else
-   export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO}
-fi
-
-export PROCESS_DUMP=${PROCESS_DUMP:-YES}
+export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-YES} # normally runs
+export PROCESS_DUMP=${PROCESS_DUMP:-YES}         # normally runs
 export prepssmi=NO # "spssmi" reprocessed dump no longer generated
                    # since SSM/I instrument on F-13 has failed (11/2009)
 export KEEP_NEARDUP_ACFT=${KEEP_NEARDUP_ACFT:-NO} # toss near-dupl. acft rpts
 
-# LALO is set if doing geographic dumping
-#  Expanded NAM domain: 0.5 degree mask nam_expdomain_halfdeg_imask.gbl
-export LALO=${LALO:-"F$FIXPREP/nam_expdomain_halfdeg_imask.gbl"}
+# During the period where both Goodberlet and NN3 SSM/I products are
+#  being dumped, switch PREPSSMI_PROD_TYPE will direct the PREPSSMI
+#  program to process from SSM/I data dumps that are either all GOODBERLET,
+#  all NEURAL_NET3 or some COMBINATION of these two
+#   -- rendered meaningless after 11/2009 since prepssmi now set to "no" (above)
 
-export BACK=off # background threads not allowed
+export PREPSSMI_PROD_TYPE=COMBINATION
+
+# POE must be set to on if running poe
+###export POE=on
+
+# -- or -- BACK must be set to on if running background shells
+export BACK=on # "on" is default
 
 env
 
+[ $RUN = gdas ] && export NET=gdas
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exnam_dump.sh.ecf
+$SCRIPTSobsproc/exglobal_dump.sh.ecf
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > \
- $COMOUT/where_${tmmark}_${cycle}_${RUN}_dump_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
 
-> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 [ -n "$bufr_util_ver" ]  &&  \
  echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
- $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
- >> $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_run
+ >> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

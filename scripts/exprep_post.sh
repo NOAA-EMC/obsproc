@@ -1,7 +1,7 @@
 #!/bin/sh
 ######################################################################
 echo "-------------------------------------------------------------"
-echo "exprep_post.sh.ecf - Runs various post-analysis processing   "
+echo "exprep_post.sh     - Runs various post-analysis processing   "
 echo "                     steps on the PREPBUFR files (removes or "
 echo "                     masks restricted data)                  "
 echo "                   - GDAS only: Identify TimeTwin duplicate  "
@@ -48,6 +48,7 @@ echo "                for location of upper air wind files used in timetwin   "
 echo "                processing (Melchior)                                   "
 echo "  Jul 15 2020 - Modified $path variable to include (or exclude)         "
 echo "                $COMPONENT subdir based on GFS version.                 "
+echo "  Dec 09 2021 - Updated for use on WCOSS2 (Esposito)                    " 
 ###############################################################################
 
 # NOTE: NET is gfs for the gdas RUN (as for the gfs RUN)
@@ -380,18 +381,10 @@ EOH
 
    while [ $error = FALSE ]; do
 
-      #  Determine directory structure based on GFS version
-      #  GFSv15* uses ${COMIN1}${DATE_HIS}/${CYC_HIS}
-      #  GFSv16* uses ${COMIN1}${DATE_HIS}/${CYC_HIS}/$COMPONENT
-      GFSver_base=`echo $gfs_ver | awk -F'v' '{print $2}' | awk -F'.' '{print $1}'`
       prevgoodcyc=`$NDATE -$THR ${PDY}${cyc}`
       DATE_HIS=`echo $prevgoodcyc | cut -c1-8`
       CYC_HIS=`echo $prevgoodcyc | cut -c9-10`
-      if [ $GFSver_base = 15 ]; then
-         path="${COMIN1}${DATE_HIS}/${CYC_HIS}"
-      elif [ $GFSver_base > 15 ]; then
-         path="${COMIN1}${DATE_HIS}/${CYC_HIS}/${COMPONENT}"
-      fi
+      path="${COMIN1}${DATE_HIS}/${CYC_HIS}/${COMPONENT}"
 
       . $DATA/prep_step
       export FORT10="$BUFFILE"

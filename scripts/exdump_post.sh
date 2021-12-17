@@ -1,7 +1,7 @@
 #!/bin/ksh
 #####################################################################
 echo "----------------------------------------------------------"
-echo "exdump_post.sh.ecf version $obsproc_dump_post_ver - If requested:"
+echo "exdump_post.sh version $obsproc_ver - If requested:       "
 echo "       1) Generates combined dump STATUS file             "
 echo "       2) Prepares data counts for the SDM                "
 echo "       3) Removes or masks restricted data from dump files"
@@ -58,6 +58,7 @@ echo "----------------------------------------------------------"
 #                        restricted reports in BUFR_REMOREST processing, but
 #                        whose reports are retained and instead station IDs
 #                        are masked.
+# 09 Dec 2021 Esposito - Updated for use on WCOSS2.
 #####################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
@@ -77,14 +78,6 @@ $DATA/postmsg "$jlogfile" "$msg"
 #  determine local system name and type if available
 #  -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   sys_tp=""
-fi
-echo sys_tp is set to: $sys_tp
 
 cat break > $pgmout
 
@@ -585,83 +578,7 @@ EOFthread
       else
          which cfp
          which_cfp_err=$?
-   
-      if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-         if [ $which_cfp_err -ne 0 ]; then
-            set +x
-            echo -e "\n ** cfp command not found.  aprun will instead launch   **"
-            echo -e   " ** up to 24 background tasks on one node.  original    **"
-            echo -e   " ** threads will be grouped into 24 chunks if necessary **\n"
-            set -x
-            if [ $ntasks -gt 24 ]; then  # we need to combine
-               rm -f $DATA/tmpCHUNK*
-               cp -p $DATA/mpmd.cmdfile $DATA/mpmd.cmdfile.orig
-               split --number l/24 -e $DATA/mpmd.cmdfile $DATA/tmpCHUNK
-               chmod +x $DATA/tmpCHUNK*
-               ls -1 $DATA/tmpCHUNK* > $DATA/mpmd.cmdfile
-            fi
-            # append bg control operator (&) to end of each line
-            sed -i.no_bg 's/$/ \&/' $DATA/mpmd.cmdfile
-            echo "wait" >> $DATA/mpmd.cmdfile
-            aprun -n1 -N1 -d24 ksh $DATA/mpmd.cmdfile
-            errmpmd=$?
-         else
-            ## Determine tasks per node (DUMPLISTtpn) and
-            ##    max number of concurrent procs (DUMPLISTprocs) for cfp
-            # timing tests indicated cfp is sometimes faster with a free pe so
-            # the calculation below intentionally results in 1 extra pe per node
-            #  Get compute node count:  Subtract one from the total number of unique
-            #  hosts to account for the MAMU node that runs serial portion of job
-            typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
-            typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
-            if [ $ncnodes -lt 1 ]; then
-               set +x
-               echo
-               echo " ** FATAL ERROR!!                                        **"
-               echo " ** Could not get positive compute node count for aprun! **"
-               echo " ** Was job submitted to queue with compute node access? **"
-               echo
-               set -x
-               msg="***FATAL ERROR:  $ncnodes is invalid node count for aprun"
-               $DATA/postmsg "$jlogfile" "$msg"
-               $DATA/err_exit
-            fi
-            set -u
-            DUMPLISTtpn=${DUMPLISTtpn:-$((($ntasks+$ncnodes)/$ncnodes))}
-            [ $DUMPLISTtpn -gt 24 ] && DUMPLISTtpn=24      # now limit it to 24
-            DUMPLISTprocs=${DUMPLISTprocs:-$(($ncnodes*$DUMPLISTtpn))}  # max concurrent processes
-            aprun -n${DUMPLISTprocs} -N${DUMPLISTtpn} -d1 cfp $DATA/mpmd.cmdfile
-            err=$?; $DATA/err_chk
-            set +u
-         fi
-      elif [ "$sys_tp" = 'Dell-p3' -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-         if [ $which_cfp_err -eq 0 ]; then
-            mpirun -l cfp $DATA/mpmd.cmdfile 2>&1
-            err=$?; $DATA/err_chk
-         else
-            set +x
-            echo -e "\n *** FATAL ERROR:  cfp command not found!    ***"
-            echo -e   " ***   Either load cfp module or set MPMD=NO ***\n"
-            set -x
-            msg="***FATAL ERROR: cfp command not found on Dell-p3"
-            $DATA/postmsg "$jlogfile" "$msg"
-            $DATA/err_exit
-         fi
-      else   # iDataPlex
-         if [ $which_cfp_err -eq 0 ]; then
-            export MP_CSS_INTERRUPT=yes
-            mpirun.lsf cfp $DATA/mpmd.cmdfile 2>&1
-            err=$?; $DATA/err_chk
-         else
-            set +x
-            echo -e "\n *** FATAL ERROR:  cfp command not found!    ***"
-            echo -e   " ***   Either load cfp module or set MPMD=NO ***\n"
-            set -x
-            msg="***FATAL ERROR: cfp command not found for MPMD run on IBM"
-            $DATA/postmsg "$jlogfile" "$msg"
-            $DATA/err_exit
-         fi
-      fi
+         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
    fi
 else
    echo

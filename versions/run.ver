@@ -1,6 +1,9 @@
+#########################################
+#Export module version numbers
+#########################################
+
 export prod_util_ver=2.0.8
 export prod_envir_ver=2.0.5
-export cfp_ver=2.0.4
 
 export dictionaries_ver=3.4.0
 export grib_util_ver=1.2.2
@@ -26,3 +29,4 @@ export omb_ver=v4.4
 
 export PROCESS_MASTER_SHIP_STNLIST=NO
 export BACK=off
+

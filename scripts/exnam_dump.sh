@@ -1,6 +1,6 @@
 ############################################################################
 echo "-----------------------------------------------------------          "
-echo "exnam_dump.sh.ecf - NAM model data dump processing                   "
+echo "exnam_dump.sh     - NAM model data dump processing                   "
 echo "-----------------------------------------------------------          "
 echo "History: Jan 10 2000 - Original script.                              "
 echo "         Sep 10 2014 - Use parallel scripting to process dump groups."
@@ -29,6 +29,7 @@ echo "         Mar 09 2021 - Incremented subsets for the sfcshp dump groups"
 echo "                       to match bufr_dumplist. Removed tideg from    "
 echo "                       sfcshp dump group to make unique dump file.   "
 echo "                     - Copy bufr_dumplist to COMOUT.                 "
+echo "         Dec 09 2021 - Updated for use on WCOSS2                     " 
 ############################################################################
 
 set -xau
@@ -323,7 +324,7 @@ echo "$error1" > $DATA/error1
 if [ "$SENDDBN" = 'YES' ]; then
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_1bamua $job ${COMSP}1bamua.$tmmark.bufr_d
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_1bmhs  $job ${COMSP}1bmhs.$tmmark.bufr_d
-# gpsro dump file has nr version which is alerted from exdump_post.sh.ecf
+# gpsro dump file has nr version which is alerted from exdump_post.sh
 # $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_gpsro  $job ${COMSP}gpsro.$tmmark.bufr_d
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_mtiasi $job ${COMSP}mtiasi.$tmmark.bufr_d
  $DBNROOT/bin/dbn_alert MODEL NAM_BUFR_esamua $job ${COMSP}esamua.$tmmark.bufr_d
@@ -1050,28 +1051,9 @@ set -x
 #  determine local system name and type if available
 #  -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   set +u
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   set -u
-fi
-echo sys_tp is set to: $sys_tp
 
 set +u
 launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
-if [ "$launcher" = "cfp" -a -z "$LSB_HOSTS" ]; then
-   set +x
-   echo
-   echo "You requested the cfp poe launcher but are not running under LSF!!"
-   echo "You must run under LSF to use cfp option.  Exiting..."
-   echo
-   set -x
-   exit 99
-fi
-set -u
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
@@ -1088,21 +1070,10 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
 
-   if [ -s $DATA/poe.cmdfile ]; then
-      export MP_CSS_INTERRUPT=yes
-      launcher_DUMP=${launcher_DUMP:-mpirun.lsf}
-      if [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-        launcher_DUMP='mpirun -l'
-      fi
-      $launcher_DUMP cfp $DATA/poe.cmdfile 2>&1
-      errpoe=$?
-      if [ $errpoe -ne 0 ]; then
-         $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
-      fi
-   else
-      echo
-      echo "==> There are no tasks in POE Command File - POE not run"
-      echo
+   mpiexec -np 7 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+   errpoe=$?
+   if [ $errpoe -ne 0 ]; then
+      $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
    fi
 else
    echo "Run threads serially"
@@ -1209,7 +1180,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_util}/bufr_dumplist $LIST_cp
+cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN
