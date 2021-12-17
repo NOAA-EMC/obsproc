@@ -50,14 +50,7 @@ set -x
 
 #####################################################################
 ### List modules loaded for this job.
-###   May need to initialize the Modules package to find the module
-###   command.
 #######################################################################
-#if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-#  . /usrx/local/Modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-#fi
 set +x
 echo
 echo "####################################################################"
@@ -152,8 +145,7 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
-  #export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
@@ -163,14 +155,13 @@ else
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
-  #export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${RUN}.${PDY})}
   mkdir -m 755 -p $COMOUT
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
-export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
+export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -179,15 +170,17 @@ export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
 # directory path to data count averaging executed in model script and in
 #  bufr_avgdata.sh
 # ----------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-${COMROOT:?}/${NET}/${envir}/sdm_rtdm}
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN})}
 
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------
 if [[ "$RUN_ENVIR" == nco ]]; then
+  export AVGDarch_IN=$HOMEarch/avgdata
   export AVGDarch_OUT=$HOMEarch/avgdata
-  mkdir -p $AVGDarch_OUT
 else
-  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/$NET/${envir}/sdm_rtdm/avgdata}
+  [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
+  export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
+  export AVGDarch_OUT=${AVGDarch_OUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
   mkdir -p $AVGDarch_OUT
 fi
 
