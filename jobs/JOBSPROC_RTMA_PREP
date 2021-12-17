@@ -36,13 +36,6 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
-     "${bufr_dump_ver:-not set}"
-echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
-     then echo "bufr_dump is required but not loaded! Exiting...";
-     exit;
-fi
 echo
 echo "####################################################################"
 echo
@@ -172,7 +165,7 @@ export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-$NWROOT/decoders/decod_shared/dictionaries}
+export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -198,20 +191,18 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
-  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have 
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
-  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -219,8 +210,9 @@ export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
 export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
                                               # NOTE: only NEMSIO_IN or NETCDF_IN can be .true.
 export envir_getges=${envir_getges:-prod}
-export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges}/gdas.$PDY)/${cyc}/${COMPONENT}}
-export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges}/gfs.$PDY)/${cyc}/${COMPONENT}}
+#export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges}/gdas.$PDY)/${cyc}/${COMPONENT}}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gdas.$PDY)/${cyc}/${COMPONENT}}
+export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gfs.$PDY)/${cyc}/${COMPONENT}}
 if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then
   export GETGES_NWG=${GETGES_NWG:-$GESROOT}
   export GETGES_COM=${GETGES_COM:-$COMROOT}
