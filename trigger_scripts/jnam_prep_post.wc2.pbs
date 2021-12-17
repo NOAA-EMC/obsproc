@@ -11,7 +11,7 @@
 #####################################################################
 # Submit notes:
 # For specific PDY:
-# > jtyp=nam cyc=00 tmmark=tm00 PDY=20170126 desc=somethingfun cycbsub jnam_*.wc2.pbs
+# > jtyp=nam cyc=00 tmmark=tm00 PDY=20170126 desc=somethingfun cycqsub jnam_*.wc2.pbs
 # For latest/current PDY:
 # > jtyp=nam cyc=00 tmmark=tm00 cycbsub jnam_*.wc2.pbs
 # cycbsub location: /u/Nicholas.Esposito/bin
