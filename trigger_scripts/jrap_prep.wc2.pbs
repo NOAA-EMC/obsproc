@@ -135,9 +135,9 @@ export COMIN=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
 export KEEPDATA=YES
-export POE=NO
-export BACK=NO
-export NSPLIT=1
+#export POE=NO        # use these settings
+#export BACK=NO       # when want to force
+#export NSPLIT=1      # serial run
 
 $HOMEobsproc/jobs/JOBSPROC_RAP_PREP
 err=$?
