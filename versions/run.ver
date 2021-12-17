@@ -25,6 +25,8 @@ export cray_mpich_ver=8.1.7
 export cray_pals_ver=1.0.12
 export cfp_ver=2.0.4
 
+export omb_ver=v4.4
+
 export PROCESS_MASTER_SHIP_STNLIST=NO
 export BACK=off
 
