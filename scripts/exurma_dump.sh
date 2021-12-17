@@ -298,6 +298,7 @@ set -x
 SITE=${SITE:-""}
 
 set +u
+launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
@@ -308,11 +309,19 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_2 >> $DATA/poe.cmdfile
    echo ./thread_4 >> $DATA/poe.cmdfile
 
-      mpiexec -np 7 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+   if [ -s $DATA/poe.cmdfile ]; then
+      export MP_CSS_INTERRUPT=yes  # ??
+      launcher_DUMP=${launcher_DUMP:-mpiexec}
+      $launcher_DUMP -np 7 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
       fi
+   else
+      echo
+      echo "==> There are no tasks in POE Command File - POE not run"
+      echo
+   fi
 else
    echo "Running serial threads"
    ./thread_1
