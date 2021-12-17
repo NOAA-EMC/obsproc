@@ -44,8 +44,16 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_UTIL version used by this job, for dumplist, is" \
-       "${bufr_util_post_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dumplist, is" \
+       "${bufr_dump_post_ver:-not set}"
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+	then echo "bufr_dump is required but not loaded! Exiting...";
+	exit;
+fi
 echo
 echo "####################################################################"
 echo
@@ -56,11 +64,6 @@ set -x
 #   On luna/surge may need to initialize the Modules package to find
 #   the module command.  Will do so for either system.
 #####################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -74,10 +77,12 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-nam}
 export RUN=${RUN:-nam}
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -126,21 +131,18 @@ fi
 # Paths for obsproc_network items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 
-# --------------------------------------------
+# ---------------------------------------------------------------------
 # Paths for bufr_dumplist items
-# --------------------------------------------
- export HOMEbufr_util=${HOMEbufr_util:\
--${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-"###FATAL ERROR \"bufr_util_ver\" is not set"}}
-
-export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+# Default variables are pre-defined when the bufr_dump module is loaded.
+# ----------------------------------------------------------------------
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -211,26 +213,27 @@ fi
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 755 -p $COMOUT
 fi
 
 if [ "$tmmark" = 'tm00' ]; then
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-  export comin=${comin:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
-  export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDYm1}}
+  export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -239,7 +242,7 @@ if [ "$tmmark" = 'tm00' ]; then
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-  export HOMEarch=${HOMEarch:-${COMROOT:?}/$NET/$envir/sdm_rtdm}
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN})}
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)
@@ -247,13 +250,12 @@ if [ "$tmmark" = 'tm00' ]; then
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------
   if [[ "$RUN_ENVIR" == nco ]]; then
-    export AVGDarch_IN=$HOMEarch/avgdata
-    export AVGDarch_OUT=$HOMEarch/avgdata
+     export AVGDarch_IN=$HOMEarch/avgdata
+     export AVGDarch_OUT=$HOMEarch/avgdata
   else
     [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
-    export AVGDarch_IN=\
-${AVGDarch_IN:-${HOMEarch_avgdata:-${COMIN_ROOT:?}/$NET/$envir/sdm_rtdm/avgdata}}
-    export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/$NET/$envir/sdm_rtdm/avgdata}
+    export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
+    export AVGDarch_OUT=${AVGDarch_OUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
     mkdir -p $AVGDarch_OUT
   fi
 
@@ -306,7 +308,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exdump_post.sh.ecf
+$SCRIPTSobsproc/exdump_post.sh
 eval err_${RUN}_dump_post=$?
 eval [[ \$err_${RUN}_dump_post -ne 0 ]] && $DATA/err_exit
 
@@ -318,8 +320,8 @@ echo "$SITE `hostname`  --  `date -u`" > \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_post_run
 
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${tmmark}_${cycle}_${RUN}_dump_post_run
 
 if [ "$KEEPDATA" != YES ]; then
