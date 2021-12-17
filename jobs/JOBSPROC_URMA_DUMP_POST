@@ -144,7 +144,7 @@ setpdy.sh
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
