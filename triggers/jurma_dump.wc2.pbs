@@ -146,18 +146,3 @@ export DEBUG_LEVEL=3
 $HOMEobsproc/jobs/JOBSPROC_URMA_DUMP
 exit
 
-# Kick off dump_post job
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  ${userROOT}/jobsWCOSS2/URMA/jurma_dump_post.wc2.pbs
-fi
-
-# Kick off prep job
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  ${userROOT}/jobsWCOSS2/URMA/jurma_prep.wc2.pbs
-fi
