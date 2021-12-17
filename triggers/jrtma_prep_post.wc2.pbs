@@ -65,7 +65,6 @@ export PDY=%PDY%
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsproc_ver=v1.0.0
-export bufr_dump_ver=1.0.0
 export HOMEobsproc=${userROOT}/obsproc-cmake
 
 VERSION_FILE=${userROOT}/gitwkspc/obsproc/versions/run.ver
@@ -119,10 +118,6 @@ if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)craype/") -eq 0 ]]; then echo "cray
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "cray-mpich is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
-
-module unload bufr_dump # 2.0.0
-module use ${userROOT}/bufr-dump-cmake/modulefiles
-module load bufr_dump/$bufr_dump_ver  # use 1.0.0 for now
 
 export SENDECF=NO   # developer
 export SENDDBN=NO   # developer

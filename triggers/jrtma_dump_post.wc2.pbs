@@ -155,11 +155,3 @@ export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
 
 $HOMEobsproc/jobs/JOBSPROC_RTMA_DUMP_POST
 exit
-
-# Kick off prep job
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/jobsWCOSS/RTMA/jrtma_prep.ph3.lsf.shipsb
-fi

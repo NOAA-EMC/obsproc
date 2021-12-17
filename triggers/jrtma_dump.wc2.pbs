@@ -151,19 +151,3 @@ export DEBUG_LEVEL=3
 
 $HOMEobsproc/jobs/JOBSPROC_RTMA_DUMP
 exit
-
-# Kick off dump_post job
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/jobsWCOSS/RTMA/jrtma_dump_post.wc2.pbs
-fi
-
-# Kick off prep job
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/jobsWCOSS/RTMA/jrtma_prep.wc2.pbs
-fi
