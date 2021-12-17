@@ -270,7 +270,7 @@ export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_r
     if [[ ${envir} == prod ]]; then
       export ALERTL=${ALERTL:-${COMROOT:?}/logs/alertlog}
     else
-      export ALERTL=${ALERTL:-${COMROOT:?}/logs//alertlog}
+      export ALERTL=${ALERTL:-${COMROOT:?}/logs/alertlog}
     fi
     mkdir -p $ALERTL
   else # developer
