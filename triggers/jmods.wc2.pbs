@@ -125,7 +125,6 @@ export jlogfile=/lfs/h2/emc/stmp/${USER}/${JTYP}.$PDY.jlogfile
 export COMOUT=$DATAROOT/com/obsproc/$obsproc_ver/${JTYP}.${PDY} # Pay attention to version 
 export MODSDIR=$DATAROOT/mods/dcom/prod/${JTYP}
 
-export launcher_PREP=cfp
 export DEBUG_LEVEL=3
 export KEEPDATA=YES
 
