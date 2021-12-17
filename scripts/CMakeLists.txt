@@ -2,12 +2,14 @@ list(APPEND scripts_files
   exairnow_dump.sh.ecf
   excdas_dump.sh.ecf
   excdas_makeprepbufr.sh.ecf
-  exdump_alert.sh.ecf
+  exdump_alert.sh
   exdump_monitor.sh
   exdump_post.sh
+  exglobal_dump.sh
   exglobal_dump.sh.ecf
   exglobal_makeprepbufr.sh.ecf
-  exmods.sh.ecf
+  exglobal_makeprepbufr.sh
+  exmods.sh
   exnam_dump.sh
   exnam_makeprepbufr.sh
   exprep_post.sh
@@ -16,8 +18,8 @@ list(APPEND scripts_files
   exrtma_dump.sh.ecf
   exrtma_dump.sh.ecf.correct
   exrtma_makeprepbufr.sh.ecf
-  exurma_dump.sh.ecf
-  exurma_makeprepbufr.sh.ecf
+  exurma_dump.sh
+  exurma_makeprepbufr.sh
   )
 
 install(PROGRAMS ${scripts_files}
