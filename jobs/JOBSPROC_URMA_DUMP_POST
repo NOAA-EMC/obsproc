@@ -148,14 +148,14 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have 
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -179,8 +179,8 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   export AVGDarch_OUT=$HOMEarch/avgdata
 else
   [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
-  export AVGDarch_IN=${AVGDarch_IN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
-  export AVGDarch_OUT=${AVGDarch_OUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata)}
+  export AVGDarch_IN=${AVGDarch_IN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
+  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
   mkdir -p $AVGDarch_OUT
 fi
 
