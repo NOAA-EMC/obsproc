@@ -1,6 +1,6 @@
 #####################################################################
 echo "----------------------------------------------------------    "
-echo "exrtma_dump.sh.ecf - RTMA model data dump processing          "
+echo "exrtma_dump.sh - RTMA model data dump processing              "
 echo "----------------------------------------------------------    "
 echo "History:                                                      "
 echo " May 19 2006 - Original script.                               "
@@ -25,6 +25,7 @@ echo " Mar 09 2021 - Incremented subsets for the sfcshp dump groups "
 echo "                to match bufr_dumplist. Removed tideg from    "
 echo "                sfcshp dump group to make unique dump file.   "
 echo "             - Copy bufr_dumplist to COMOUT.                  "
+echo " Dec 15 2021 - set for use on WCOSS2.                         "
 #####################################################################
 
 set -x
@@ -288,29 +289,9 @@ set -x
 #  determine local system name and type if available
 #  -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   set +u
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   set -u
-fi
-echo sys_tp is set to: $sys_tp
-
 
 set +u
 launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
-if [ "$launcher" = "cfp" -a -z "$LSB_HOSTS" ]; then
-   set +x
-   echo
-   echo "You requested the cfp poe launcher but are not running under LSF!!"
-   echo "You must run under LSF to use cfp option.  Exiting..."
-   echo
-   set -x
-   $DATA/err_exit
-fi
-set -u
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
@@ -320,14 +301,10 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_1 >> $DATA/poe.cmdfile
    echo ./thread_2 >> $DATA/poe.cmdfile
 
-
    if [ -s $DATA/poe.cmdfile ]; then
-      export MP_CSS_INTERRUPT=yes
-      launcher_DUMP=${launcher_DUMP:-mpirun.lsf}
-      if [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-        launcher_DUMP='mpirun -l'
-      fi
-      $launcher_DUMP cfp $DATA/poe.cmdfile 2>&1
+      export MP_CSS_INTERRUPT=yes  # ??
+      launcher_DUMP=${launcher_DUMP:-mpiexec}
+      $launcher_DUMP -np 7 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -424,7 +401,7 @@ if [ $RUN = 'rtma_ru' ]; then
 else
    LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
 fi
-cp ${FIXbufr_util}/bufr_dumplist $LIST_cp
+cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN
