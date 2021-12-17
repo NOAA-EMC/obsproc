@@ -284,8 +284,7 @@
 #        If .true., processing will obtain the NetCDF format first guess fields.
 # 2021-04-05  S. Melchior -- Added diagnostic information just after the cp of
 #        the global first guess file to sgesprep.
-# 2021-12-12  S. Melchior
-#             I. Genkova -- Prepared for transition to WCOSS2
+# 
 #
 #
 # Usage:  prepobs_makeprepbufr.sh YYYYMMDDHH <mm>
@@ -1034,9 +1033,20 @@ echo
    PARALLEL=NO
    [ "$POE" != 'NO' -o "$BACK" = 'YES' ]  &&  PARALLEL=YES
    if [ "$POE" != 'NO' ] ; then
-      launcher_PREP=${launcher_PREP:-mpiexec} 
+      if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
+        launcher_PREP=${launcher_PREP:-aprun}
+      elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
+        launcher_PREP=${launcher_PREP:-mpirun}
+      else
+        launcher_PREP=${launcher_PREP:-mpirun.lsf}
+      fi
       if [ "$launcher_PREP" != 'cfp' -a "$launcher_PREP" != aprun ]; then 
-         NPROCS=${NPROCS:-$NSPLIT}
+         if [ -n ${LSB_HOSTS:-""} ]; then
+            NPROCS=$(echo $LSB_HOSTS|wc -w)
+            set +x; echo "Setting NPROCS based on LSB_HOSTS count"; set -x
+         else
+            NPROCS=${NPROCS:-$NSPLIT}
+         fi
          if [ $NPROCS -lt $NSPLIT ]; then 
             set +x
 echo "********************************************************************"
@@ -1740,12 +1750,11 @@ backup AFWA ACARS into PREPBUFR"
 ##                          HEREFILE MP_PREPDATA                             ##
 ##VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV##
 
-# think of adding a line with "#!/bin/ksh" after the "{ echo" below IG
-
 set +x
 cat <<\EOFmpp > MP_PREPDATA
+
 { echo
-#!/bin/ksh
+
 # This herefile script performs the "prepdata" processing.  It is designed to
 #  run in either a parallel (e.g., poe/mpi or background threads) or serial
 #  environment. In the parallel environment, it first splits the input BUFR
@@ -2076,7 +2085,6 @@ set -x
 #   fire off each MP_PREPDATA thread as a background process
 #  -----------------------------------------------------------------------
       if [ "$POE" != 'NO' ]; then
-         echo "#!/bin/ksh"|tee -a $DATA/prep_exec.cmd
          multi=-1
          while [ $((multi+=1)) -lt $NSPLIT ] ; do
             echo "ksh $DATA/MP_PREPDATA $multi "|tee -a $DATA/prep_exec.cmd
@@ -2110,13 +2118,6 @@ set -x
             mpirun -l cfp $DATA/prep_exec.cmd
             export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure
-
-         elif [ "$launcher_PREP" = mpiexec ]; then
-	    chmod 755 $DATA/prep_exec.cmd
-            #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
-             mpiexec -n 6 $DATA/prep_exec.cmd
-	    export err=$?; $DATA/err_chk
-            [ $err != 0 ] && exit 55  # for extra measure	 
          elif [ "$launcher_PREP" = mpirun.lsf ]; then
             export MP_CMDFILE=$DATA/prep_exec.cmd
             export MP_PGMMODEL=mpmd
@@ -2169,8 +2170,14 @@ set -x
             [ $err != 0 ] && exit 55  # for extra measure
          fi
       elif [ $BACK = 'YES' ] ; then
-         echo 'BACK=YES'		 
-	 mpiexec -np 6 --cpu-bind verbose,core $DATA/prepthrds.sh # Keep '-np 6' > NSPLIT=4
+         if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
+            aprun -n 1 -d $NSPLIT $DATA/prepthrds.sh
+         elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
+            launcher_PREP=${launcher_PREP:-mpirun}
+            $launcher_PREP -n 1 $DATA/prepthrds.sh
+         else
+            $DATA/prepthrds.sh
+         fi
       fi
       totalt=$NSPLIT
    else
@@ -2178,7 +2185,11 @@ set -x
 #  In the serial environment, just fire off a single thread of MP_PREPDATA
 #  -----------------------------------------------------------------------
       multi=0
-      $DATA/MP_PREPDATA $multi
+      if [ "$sys_tp" = Cray-XC40 -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
+         aprun -n 1 -N 1 ksh $DATA/MP_PREPDATA $multi
+      else
+         $DATA/MP_PREPDATA $multi
+      fi
       totalt=1
 
    # fi for $PARALLEL = YES
