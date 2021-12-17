@@ -170,12 +170,12 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
 export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
-export TANK=${TANK:-${DCOMROOT}/prod}
+export TANK=${TANK:-${DCOMROOT}}
 
 # TANK_GRIBFLDS is root directory path to imssnow grib file used in
 #  model script
 # ---------------------------------------------------------------------------
-export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}/prod}
+export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -251,7 +251,6 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
