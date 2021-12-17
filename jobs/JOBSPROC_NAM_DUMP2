@@ -126,10 +126,10 @@ export HOMEobsproc=${HOMEobsproc:\
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
 -$HOMEobsproc/scripts}
 
-# ---------------------------------------
+# ----------------------------------------------------------------------
 # Paths for dump and bufr_dumplist items
 # Default variables are pre-defined when the bufr_dump module is loaded.
-# ---------------------------------------
+# ----------------------------------------------------------------------
 export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
 export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
@@ -170,13 +170,13 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
 export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
-export TANK=${TANK:-${DCOMROOT}/prod}
+export TANK=${TANK:-${DCOMROOT}}
 
 # TANK_GRIBFLDS is root directory path to imssnow grib file used in
 #  model script
 #  (below included even though not processed in DUMP2 jobs)
 # ---------------------------------------------------------------------------
-export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}/prod}
+export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
 
 #########################################################################
 # Add some prod utilities to working directory
