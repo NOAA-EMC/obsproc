@@ -28,41 +28,23 @@ echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
 echo
 set -x
 
-# Force prepobs_makeprepbufr.sh to use prepobs_errtable.global from
-# gfs.v*/fix/fix_gsi instead of from obsproc_global.v*/fix
-# -----> Ask NCO if they want this in driver script?
-#VERSION_FILE_gfs=$PACKAGEROOT/versions/gfs.ver #?? IG
-#[ -f $VERSION_FILE_gfs ] && . $VERSION_FILE_gfs
-
-################################
+###############################
 # Print out version information
-################################
+###############################
 set +x
 echo
 echo "####################################################################"
 echo
-echo "Current OBSPROC version is ${obsproc_ver:-not set}"
-echo "GFS version used by this job is ${gfs_ver:-not set}"
+echo "OBSPROC version is ${obsproc_ver:-not set}"
 echo
 echo "####################################################################"
 echo
 set -x
 
 #####################################################################
-# List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
-#####################################################################
-#
-#if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-#  . /opt/modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-#  . /usrx/local/Modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-#fi
+## List modules loaded for this job.
+######################################################################
 set +x
-# THEY SHOULD BE ALREDY set in trigger script ?? IG
 echo
 echo "####################################################################"
 echo
@@ -72,21 +54,16 @@ echo "####################################################################"
 echo
 set -x
 
-######################
-# Specify NET and RUN
-######################
-export NET=${NET:-gfs}
-echo $job | grep gfs
-err_gfs=$?
-echo $job | grep gdas
-err_gdas=$?
-if [ $err_gfs = 0 ]; then
-  export RUN=${RUN:-gfs}   # GFS
-elif [ $err_gdas = 0 ]; then
-  export RUN=${RUN:-gdas}  # GDAS
-fi
+###########################
+# Specify NET and RUN Name
+###########################
+export obsNET=${obsNET:-obsproc}
+export NET=${NET:-urma}
+export RUN=${RUN:-urma}
+
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -108,6 +85,8 @@ mkdir -p $DATA
 cd $DATA
 export pgmout=OUTPUT.$$
 
+echo dummy > sgesprep # to avoid copying unnecessary GFS file into $DATA
+
 ######################################
 # Set job log file for postmsg output
 ######################################
@@ -125,7 +104,7 @@ export SENDDBN=${SENDDBN:-YES}
 ##########################
 # Specify Execution Areas
 ##########################
-# CONTINUE HERE IG
+
 # -------------------------------
 # Paths for obsproc items
 # -------------------------------
@@ -133,31 +112,21 @@ export HOMEobsproc=${HOMEobsproc:\
 -${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
-export FIXobsproc=${FIXobsproc:-$HOMEobsproc/fix}
+export SCRIPTSobsproc=${SCRIPTSobsproc:\
+-$HOMEobsproc/scripts}
+
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 
 # directory path to data prep script executed in model script
 # -----------------------------------------------------------
 export ushscript_prep=${ushscript_prep:-$USHobsproc}
 
-# ---------------------------------------------------------
-# Paths for prep items
-# ---------------------------------------------------------
-
 # directory paths to overall PREP processing executed in
 #  prepobs_makeprepbufr.sh and its various child scripts
-#  (other than prepobs_syndata.sh, see below)
-# ------------------------------------------------------
+# -------------------------------------------------------
 export EXECPREP=${EXECPREP:-${HOMEobsproc}/exec}
 export FIXPREP=${FIXPREP:-${HOMEobsproc}/fix}
 export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
-
-# directory paths to SYNDATA processing executed in prepobs_syndata.sh
-# --------------------------------------------------------------------
-export EXECSYND=${EXECSYND:-${HOMEobsproc}/exec}
-export FIXSYND=${FIXSYND:-${HOMEobsproc}/fix}
-export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -166,16 +135,7 @@ export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_v${dictionaries_ver}}    ## there was no "v" in _v${dictionaries_ver}} originally IG 
-# it looks for  metar table !! IG
-# /lfs/h1/ops/prod/decoders/decod_shared/dictionaries_v3.4.0/
-
-# HOMEgfs is directory path to prepobs_errtable.global (PRVT), used in
-# prepobs_makeprepbufr.sh and its child scripts prepobs_syndata.sh and
-# prepobsp_prevents.sh.
-# ---------------------------------------------------------------------------
-# will this stay like it is? overwritten in wrapper ? IG
-export HOMEgfs=${HOMEgfs:-${PACKAGES:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
+export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -190,8 +150,9 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 ##########################################
 # Run setpdy and initialize PDY variables
 ##########################################
-./setpdy.sh
-. PDY
+set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
+setpdy.sh
+. $DATA/PDY
 
 #########################
 # Define COM directories
@@ -200,65 +161,56 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
-#  prevent job from writing into a non-unique directory that might already have
+#  prevent job from writing into a non-unique directory that might already have 
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 755 -p $COMOUT
 fi
 
-export NEMSIO_IN=.false.        # GFSv16 para
-export NETCDF_IN=.true.         # GFSv16 para
+export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
+export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
+                                              # NOTE: only NESMIO_IN or NETCDF_IN can be .true.
+export envir_getges=${envir_getges:-prod}
+export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges}/gdas.$PDY)/${cyc}/${COMPONENT}}
+export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges}/gfs.$PDY)/${cyc}/${COMPONENT}}
+if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then 
+  export GETGES_NWG=${GETGES_NWG:-$GESROOT}
+  export GETGES_COM=${GETGES_COM:-$COMROOT}
+fi
 
-export envir_getges=${envir_getges:-$envir}
-export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
-export GETGES_NWG=${GETGES_NWG:-$GESROOT}
-export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges})/gdas.$PDY/${cyc}/${COMPONENT}}
-export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges})/gfs.$PDY/${cyc}/${COMPONENT}}
-
-
-
-###################################################
-# SETUP GDAS AND GFS PREPBUFR PROCESSING VARIABLES
-###################################################
+###########################################
+# SETUP URMA PREPBUFR PROCESSING VARIABLES
+###########################################
 
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
 
-#  Set POE *or* BACK to YES in order to run this job in a parallel environment
+#  Set both POE and BACK to NO in order to run this job in a serial environment
 
-export POE=${POE:-YES}
-##export BACK=YES  # set BACK to YES for an alternate method of running this
-                   #  job in a parallel environment (in this case POE must be
-                   #  NO)
-
-#  NSPLIT indicates the number of parts into which the PREPDATA
-#         processing will will be split in order to run in parallel
-#         for computational efficiency (either under poe tasks when
-#         POE=YES or in background threads when BACK=YES)
-#   (Applies only when either POE=YES or BACK=YES, and PREPDATA=YES)
-#   Consider the size of the backgrounds fields if using threads. 
-
-export NSPLIT=${NSPLIT:-4}
+export POE=NO
+export BACK=NO
 
 #  BUFRLIST indicates the list of BUFR data dump file names to process
 
-export BUFRLIST=${BUFRLIST:-"adpupa proflr aircar aircft satwnd adpsfc \
- sfcshp vadwnd wdsatr ascatw rassda gpsipw"}
+export BUFRLIST=${BUFRLIST:-"adpsfc sfcshp msonet ascatw wdsatr satwnd"}
 
 export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
                            # center hour (cycle) times if foreground exit
                            # status is 4 (i.e., when either either "ADPUPA" or
                            # "ADPSFC" dump is empty)
+
+export email_GLERL="matthew.t.morris@noaa.gov"   # glerladj.sh alert recipient
+
 
 # VARIABLES THAT CONTROL PROCESSING OF INDIVIDUAL PROGRAMS
 # --------------------------------------------------------
@@ -269,56 +221,52 @@ export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
 #       if job fails in one of these programs, set offending program
 #       to NO and resubmit to "work-around" problem)
 
-export SYNDATA=${SYNDATA:-YES}   # Execute program SYNDAT_SYNDATA   if YES
+export SYNDATA=NO     # NEVER execute program SYNDAT_SYNDATA
 
-export PREPACQC=${PREPACQC:-YES} # Execute PREPACQC script processing if YES
-   export PROCESS_ACQC=${PROCESS_ACQC:-YES} # Execute program PREPOBS_PREPACQC
-                                            #  if YES
-   export PROCESS_ACPF=${PROCESS_ACPF:-NO}  # Execute program PREPOBS_PREPACPF
-                                            #  if YES
+export GLERLBUFR=YES  # Execute program PREPOBS_GLERLADJ (GLERL adjustment
+                      #  processing)
 
-export PROFCQC=${PROFCQC:-YES}   # Execute program PREPOBS_PROFCQC  if YES
+export PREPACQC=NO    # NEVER execute PREPACQC script processing
+export PROCESS_ACQC=NO  # NEVER execute program PREPOBS_PREPACQC
+export PROCESS_ACPF=NO  # NEVER execute program PREPOBS_PREPACPF
 
-export CQCVAD=${CQCVAD:-YES}     # Execute program PREPOBS_CQCVAD   if YES
+export PROFCQC=NO     # NEVER execute program PREPOBS_PROFCQC
 
-export CQCBUFR=${CQCBUFR:-YES}   # Execute program PREPOBS_CQCBUFR  if YES
+export CQCVAD=NO      # NEVER execute program PREPOBS_CQCVAD
 
-export OIQCBUFR=${OIQCBUFR:-NO} # Execute program PREPOBS_OIQCBUFR if YES
+export CQCBUFR=NO     # NEVER execute program PREPOBS_CQCBUFR
 
+export OIQCBUFR=NO    # NEVER execute program PREPOBS_OIQCBUFR
+
+export DO_QC=NO       # NO, programs PREPOBS_PREPACQC, PREPOBS_PREPACPF,
+                      # PREPOBS_PROFCQC, PREPOBS_CQCVAD, PREPOBS_CQCBUFR and
+                      # PREPOBS_OIQCBUFR will NEVER execute regardless of
+                      # switches above
+
+export GETGUESS=${GETGUESS:-YES}
+                      # Encode first guess (background) values interpolated to
+                      # observation locations in the PREPBUFR file for use by
+                      # the q.c. programs.  This guess is always from a global
+                      # sigma guess file valid at the center PREPBUFR
+                      # processing date/time.
+                      # Defaults to "YES" in URMA runs (will only do virt.
+                      #  temp. processing here)
 
 #  -- If any of these are switched to NO it will affect the success of
 #      other programs and the success of the complete job
 #      (these are set-up only for CHECKOUT runs - they should always
 #       be set to YES for operational runs)
 
-export PREPDATA=${PREPDATA:-YES}  
+export PREPDATA=${PREPDATA:-YES}
                       # Execute programs PREPOBS_MPCOPYBUFR, PREPOBS_PREPDATA,
                       # PREPOBS_LISTHEADERS and PREPOBS_MONOPREPBUFR if YES
 
-export GETGUESS=${GETGUESS:-YES}
-                      # Encode first guess (background) values interpolated to
-                      # observation locations in the PREPBUFR file for use by
-                      # the q.c. programs.  This guess is always from a global
-                      # sigmai (legacy) or nemsio or netcdf history guess file 
-                      # valid at the center PREPBUFR processing date/time.
-
-export DO_QC=${DO_QC:-YES}
-                      # IF NO, programs PREPOBS_PREPACQC, PREPOBS_PREPACPF,
-                      # PREPOBS_PROFCQC, PREPOBS_CQCVAD, PREPOBS_CQCBUFR and
-                      # PREPOBS_OIQCBUFR will NEVER execute regardless of
-                      # switches above -
-                      # should be set to NO only as a last resort!!!
-
-export PROCESS_UNBLKBUFR=${PROCESS_UNBLKBUFR:-NO}
-                      # IF YES, create prepbufr.unblok
-
 env
 
-[ $RUN = gdas ] && export NET=gdas
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_makeprepbufr.sh # IG .ecf
+$SCRIPTSobsproc/exurma_makeprepbufr.sh
 eval err_${RUN}_makeprepbufr=$?
 eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
 
@@ -328,6 +276,10 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_run
+
+# Adding time lag to the end of the job to allow PREPBUFR to be copied
+#  completely before the start of the next job in the trigger's sequence
+sleep 10
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

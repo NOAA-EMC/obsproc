@@ -1,0 +1,106 @@
+#!/bin/sh  
+#PBS -N %JTYP%_dump_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -q dev
+#PBS -l walltime=00:30:00
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=14:mem=12gb
+
+##############################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
+##############################################
+
+set -xu
+
+#export NODES=1
+export envir=prod
+
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_dump_$cyc
+export jobid=$job.$PBS_JOBID
+export PDY=%PDY%
+
+export DUMPJBprocdate=1900123100
+export KEEPDATA=YES
+
+export obsproc_ver=1.0.0
+#export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
+#export TANK=/lfs/h1/ops/canned/dcom
+
+#path to executables
+userROOT=/u/Iliana.Genkova/INSTALL
+
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
+#VERSION_FILE=$PACKAGEROOT/obsproc/${obsproc_ver}/versions/run.ver # when /obsproc goes live
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+# source moduleload file
+# GitHub location: release/obsproc.v1.0.0/triggers/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+# load correct version bufr_dump for WCOSS2
+module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
+module load bufr_dump/1.0.0
+
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
+
+export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump.$PDY.jlogfile
+
+export DEBUG_LEVEL=3
+
+#export HOMEobsproc=$NWROOT/obsproc.${obsproc_ver}
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc #or userROOT/obsproc IG 
+#/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc #  IG
+                     
+export HOMEbufr_dump="${HOMEbufr_dump:-"/u/Iliana.Genkova/INSTALL/bufr-dump"}"
+# !! ADD  check in the JOB  for HOMEbufr_dump existance - if not set EXIT, do not set in JOB
+
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com  # if unspecified, defaults to DATAROOT
+export COMPONENT=atmos
+# COMROOT is already set to /lfs/h1/ops/prod/com 
+#export COMIN=$COMROOT/obsproc/${JTYP}.${PDY}/${cyc}/${COMPONENT} #this doesn't add up IG 
+#export COMIN=/lfs/h1/ops/$envir}/dcom # canned ## NEEDED? IG 
+
+$HOMEobsproc/jobs/JGLOBAL_DUMP
+
+exit #for learning purposes !IG
+     # CONTINUE FIXING the part below!!!
+
+# Kick off dump_post job #UPDATE with my paths when ready !IG
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+   jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycbsub \
+   /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_dump_post.wc2.lsf # IG
+fi
+
+#exit #for learning purposes !IG
+
+# Kick off prep job #UPDATE with my paths when ready !IG
+err=$?
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+   jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycbsub \
+   /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_prep.wc2.lsf # IG
+fi
+
+
+exit
+
+
