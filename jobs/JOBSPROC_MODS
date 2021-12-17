@@ -2,11 +2,11 @@
 # JMODS
 #  job script to trigger MODBUFR file processing
 #
-# modification history
 # 26 Feb 2019 JWhiting cp'd fr /nwprod/jobs/JMODS of 17 Jun 2014
 #              config'd for phase 3 (versioned utils, etc)
 #               rm'd RUN_ENVIR var; added KEEPDATA var
 #               rm'd refs to SENDDBN
+# 23 Nov 2021 Praveen Kumar modified for WCOSS2
 #----
 
 echo : echo "JMODS: welcome to j-job script ($(date -u))" ; echo
@@ -48,7 +48,12 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version used by this job is ${obsproc_ver:-not set}"
-echo "BUFR_UTIL version used by this job is ${bufr_util_ver:-not set}"
+echo "BUFR_DUMP version used by this job is ${bufr_dump_ver:-not set}"
+echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
 echo
 echo "####################################################################"
 echo
@@ -56,14 +61,7 @@ set -x
 
 #####################################################################
 # List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
 #####################################################################
-if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-  . /opt/modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -81,8 +79,18 @@ set -x
 ##########################
 # Specify NET and RUN Name
 ##########################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-mods}
 export RUN=${RUN:-mods}
+
+set +x
+echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
+echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+echo
+set -x
+
 
 ###################################################
 # obtain unique process id (pid) and make temp directory
@@ -126,31 +134,28 @@ export SENDECF=${SENDECF:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-# ---------------------------------------
+# ---------------------------------------------------------
 # Paths for dump and bufr_dumplist items
-# ---------------------------------------
-export HOMEbufr_util=${HOMEbufr_util:\
--${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-"###FATAL ERROR \"bufr_util_ver\" is not set"}}
+# Variables are pre-defined when bufr_dump module is loaded
+# ---------------------------------------------------------
 
-export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
-# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
+# NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-export ushscript_dump=${ushscript_dump:-$USHbufr_util}
+export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
 
 export EXECmods=${EXECmods:-$HOMEobsproc/exec}
 export USHmods=${USHmods:-$HOMEobsproc/ush}
 export BTABdir=${BTABDIR:-$HOMEobsproc/fix}
 
-export DUMP=${DUMP:-$HOMEbufr_util/ush/dumpjb}
-
+export DUMP=${DUMP:-$DUMPJB}
 #########################################################################
 # Add some prod utilities to working directory (replaces obsolete setup.sh)
 #########################################################################
@@ -171,7 +176,7 @@ setpdy.sh
 # Define COMOUT directory  (no COMIN for this job)
 ##################################################
 
-export COMOUT=${COMOUT:-${COMROOT:?}/obsproc/${NET}.${PDY}}
+export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
 mkdir -m 775 -p $COMOUT
 
 ##############################################
@@ -179,15 +184,9 @@ mkdir -m 775 -p $COMOUT
 ##############################################
 # -- need to set DCOMROOT subdir (dfix) per system
 
-if [[ "$DCOMROOT" =~ "dell" ]] ; then
-    # export dfix=${dfix:-${envir:?"$env_msg"}}             # phase 3
-    export dfix=${dfix:-prod}             # phase 3
-  else
-    export dfix=${dfix:-us007003}                         # phase 1
-  fi # DCOMROOT contains 'dell'
-
-# export MODSDIR=${MODSDIR:-${DCOMROOT}/$dfix/mods}
-export MODSDIR=${MODSDIR:-${DCOMROOT}/${envir}/mods}
+export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/${envir}/dcom}
+echo $DCOMROOT
+export MODSDIR=${MODSDIR:-${DCOMROOT}/mods}
 
 
 env ; echo "JMODS: end of env listing" ; echo 
@@ -196,7 +195,7 @@ env ; echo "JMODS: end of env listing" ; echo
 ###################################################
 # Execute the script
 ###################################################
-$HOMEobsproc/scripts/exmods.sh.ecf
+$HOMEobsproc/scripts/exmods.sh 
 err_exmods=$?
 [[ $err_exmods -ne 0 ]] && $DATA/err_exit
 
@@ -209,8 +208,8 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_run
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_run
 
 

@@ -3,7 +3,7 @@
 
 ################################################################
 echo "---------------------------------------------------------"
-echo "exnam_makeprepbufr.sh.ecf - NAM model prepbufr processing"
+echo "exnam_makeprepbufr.sh   -   NAM model prepbufr processing"
 echo "---------------------------------------------------------"
 echo "History: Mar 1 2013 - Original script."
 ################################################################

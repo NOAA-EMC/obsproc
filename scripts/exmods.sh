@@ -1,11 +1,12 @@
 ###########################################################################
 echo "--------------------------------------------------------------------"
-echo "exmods.sh.sms - MODSBUFR data dump processing"
+echo "exmods.sh  - MODSBUFR data dump processing                       "
 echo "--------------------------------------------------------------------"
-echo "History: May  7 2004 - Original script."
-echo "         May 25 2004 - run day-10 daily tank only, exit if missing."
-echo "         Mar  6 2012 - parameterized DCOMROOT & TANK env vars."
+echo "History: May  7 2004 - Original script.                             "
+echo "         May 25 2004 - run day-10 daily tank only, exit if missing. "
+echo "         Mar  6 2012 - parameterized DCOMROOT & TANK env vars.      "
 echo "         Feb 26 2019 - set for use on WCOSS phase 3 (Dell) platforms"
+echo "         Dec 15 2021 - set for use on WCOSS2                        "
 echo "--------------------------------------------------------------------"
 ###########################################################################
 
