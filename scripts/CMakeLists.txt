@@ -15,9 +15,8 @@ list(APPEND scripts_files
   exprep_post.sh
   exrap_dump.sh
   exrap_makeprepbufr.sh
-  exrtma_dump.sh.ecf
-  exrtma_dump.sh.ecf.correct
-  exrtma_makeprepbufr.sh.ecf
+  exrtma_dump.sh
+  exrtma_makeprepbufr.sh
   exurma_dump.sh
   exurma_makeprepbufr.sh
   )
