@@ -220,7 +220,6 @@ if [[ "$RUN_ENVIR" == nco ]]; then
 else
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
 
-
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
@@ -243,7 +242,7 @@ if [ "$tmmark" = 'tm00' ]; then
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-export HOMEARCH=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN})}
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN})}
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)
