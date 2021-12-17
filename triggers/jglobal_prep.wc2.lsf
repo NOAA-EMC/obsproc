@@ -1,0 +1,169 @@
+#!/bin/sh  
+#PBS -N %JTYP%_prep_%DESC%_%CC%
+#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
+#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/%JTYP%_prep_%PDY%_%CC%_%DESC%.o%PBS_JOBID
+#PBS -q dev               
+#PBS -l walltime=00:35:00 
+#PBS -A OBSPROC-DEV
+## FOR SERIAL RUN
+##PBS -l place=vscatter,select=1:ncpus=8:mem=40gb
+## FOR PARALEL RUN
+#PBS -l place=vscatter,select=1:ncpus=8:mem=40gb
+# Original card in :
+#  /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/gitstatic/EMC_obsproc_genkova/jobs/jglobal_prep.wc2.lsf
+
+##############################################
+# Submit notes:
+# For specific PDY:
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_prep.ph3.lsf
+# For latest/current PDY:
+# > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_prep.ph3.lsf
+# cycbsub location: /u/Iliana.Genkova/bin 
+# cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
+##############################################
+
+set -x
+
+export envir=prod
+export cyc=%CC%
+DESC=%DESC%
+JTYP=%JTYP%
+export job=${JTYP}_prep_$cyc
+export jobid=$job.$LSB_JOBID
+
+export PDY=%PDY%
+
+export obsproc_ver=1.0.0
+
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export TANK=/lfs/h1/ops/canned/dcom
+
+userROOT=/u/Iliana.Genkova/INSTALL
+
+#VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
+VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/Nicks_expanded_run.ver
+#VERSION_FILE=$PACKAGEROOT/obsproc/${obsproc_ver}/versions/run.ver # when /obsproc goes live
+if [ -f $VERSION_FILE ]; then
+   . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+ exit 7
+fi
+
+# source moduleload file
+# GitHub location: release/obsproc.v1.0.0/triggers/moduleload
+. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+
+# load correct version bufr_dump for WCOSS2
+module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
+module load bufr_dump/1.0.0
+
+###
+#########################################
+#Now load the modules
+#########################################
+module load prod_util/${prod_util_ver}
+module load prod_envir/${prod_envir_ver}
+
+module load grib_util/${grib_util_ver}
+module load util_shared/${util_shared_ver}
+module load hdf5/${hdf5_ver}
+module load netcdf/${netcdf_ver}
+module load w3nco/${w3nco_ver}
+module load w3emc/${w3emc_ver}
+module load bacio/${bacio_ver}
+module load bufr_dump/${bufr_dump_ver}
+module load bufr/${bufr_ver}
+
+module load envvar/${envvar_ver}
+module load PrgEnv-intel/${PrgEnv_intel_ver}
+module load intel/${intel_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
+
+module list
+
+export SENDECF=NO   # developer
+export SENDSDM=NO   # developer
+export SENDDBN=NO   # developer
+
+export DATAROOT=/lfs/h2/emc/ptmp/$USER # good IG
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_prep.$PDY.jlogfile
+
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc
+export HOMEgfs=/lfs/h1/ops/canned/packages/dell1/gfs.v16.1.2/ # v16.2 not available at testing time
+
+export GETGES_COM=/lfs/h1/ops/canned/com/gfs/v16.2/
+export GESROOT=/lfs/h1/ops/canned/com/gfs/v16.2/
+
+export COMPONENT=atmos
+export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com
+
+export COMINgdas=/lfs/h1/ops/canned/com/gfs/v16.2/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export COMINgfs=/lfs/h1/ops/canned/com/gfs/v16.2/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/global_wcoss2/com #output location for prep and prep_post
+
+export envir_getges=${envir} 
+export PRVT=/lfs/h1/ops/canned/packages/dell1/gfs.v16.1.2/fix/fix_gsi/prepobs_errtable.global
+export DEBUG_LEVEL=3
+
+#Uncomment if Serial Run  is desired
+#export BACK=NO
+#export PARALLEL=NO
+#export NSPLIT=1
+#export POE=NO
+
+$HOMEobsproc/jobs/JGLOBAL_PREP
+
+exit # temporary for testing
+
+# Kick off prep_post job
+#
+# To run prep_post for gdas, need to pre-stage previous cycle's
+# upa_his_twinwind.* and gdas.t${cyc}z.gsistat files in $COMOUT
+
+if [ $JTYP = "gdas" ]; then
+  ppdy=$PDY
+  if [ "$cyc" = "00" ]; then
+    pcyc=18
+    ppdy=$(date +%Y\%m\%d -d "${PDY} -1 day")
+  elif [ "$cyc" = "06" ]; then
+    pcyc=00
+  elif [ "$cyc" = "12" ]; then
+    pcyc=06
+  elif [ "$cyc" = "18" ]; then
+    pcyc=12
+  else
+    echo "not a valid cycle time"
+  fi
+
+  pCOMOUT=$COMOUT_ROOT/obsproc/${obsproc_ver}/gdas.${ppdy}/${pcyc}/atmos
+  comin_prod=/lfs/h1/ops/canned/com/gfs/v16.2/gdas.${ppdy}/${pcyc}/atmos
+
+  cd $pCOMOUT
+  for f in $(ls $comin_prod/upa_his_twinwind.*)  # link upa files
+  do
+    echo "$f"
+    if [ ! -f "${pCOMOUT}/$(basename $f)" ]; then
+      ln -s $f
+    fi
+  done
+
+  for f in $(ls $comin_prod/*gsistat)            # link gsistat file
+  do
+    echo "$f"
+    if [ ! -f "${pCOMOUT}/$(basename $f)" ]; then
+      ln -s $f
+    fi
+  done
+fi
+err=$?
+
+if [ $err -eq 0 ]; then
+  unset LSB_SUB_RES_REQ
+  jtyp=$JTYP desc=$DESC bash -l /u/Iliana.Genkova/bin/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/jglobal_prep_post.wc2.lsf
+fi
+

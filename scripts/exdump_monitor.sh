@@ -2,7 +2,7 @@
 # Run under ksh
 ############################################################################
 echo "-------------------------------------------------------------------- "
-echo "exdump_monitor.sh.ecf - Data dump monitor processing                 "
+echo "exdump_monitor.sh - Data dump monitor processing                 "
 echo "-------------------------------------------------------------------- "
 echo "History: Jan 03 2001 - Original script.                              "
 echo "         Sep 10 2014 - Use parallel scripting to process dump groups."
@@ -918,21 +918,10 @@ set -x
 
 set +u
 launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
-if [ "$launcher" = "cfp" -a -z "$LSB_HOSTS" ]; then
-   set +x
-   echo
-   echo "You requested the cfp poe launcher but are not running under LSF!!"
-   echo "You must run under LSF to use cfp option.  Exiting..."
-   echo
-   set -x
-   exit 99
-fi
-set -u
-
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
-# To better take advantage of cfp, execute the longer running commands first.
-# Some reordering was done here based on recent sample runtimes.
+## To better take advantage of cfp, execute the longer running commands first.
+## Some reordering was done here based on recent sample runtimes.
    echo ./thread_6 >> $DATA/poe.cmdfile  # moved up
    echo ./thread_2 >> $DATA/poe.cmdfile  # moved up
    echo ./thread_3 >> $DATA/poe.cmdfile  # moved up
@@ -941,31 +930,19 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_8 >> $DATA/poe.cmdfile  # moved up
    echo ./thread_1 >> $DATA/poe.cmdfile
    echo ./thread_4 >> $DATA/poe.cmdfile
+   #
 
-
-   if [ -s $DATA/poe.cmdfile ]; then
-      if [ -f /usrx/local/Modules/default/init/ksh ]; then        # IBM p1/2
-         . /usrx/local/Modules/default/init/ksh # in ksh, need this for next line
-         module load cfp
-         export MP_CSS_INTERRUPT=yes
-         mpirun.lsf cfp $DATA/poe.cmdfile 2>&1
-      elif [ -f /usrx/local/prod/lmod/lmod/init/profile ]; then   # Dell-p3
-         . /usrx/local/prod/lmod/lmod/init/profile > /dev/null
-         . /usrx/local/prod/modulefiles/.defaultmodules > /dev/null
-         export MP_CSS_INTERRUPT=yes
-         mpirun -l cfp $DATA/poe.cmdfile 2>&1
-      fi
-      errpoe=$?
-      if [ $errpoe -ne 0 ]; then
-         $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
-      fi
-   else
-      echo
-      echo "==> There are no tasks in POE Command File - POE not run"
-      echo
+   mpiexec -np 7 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+   errpoe=$?
+   if [ $errpoe -ne 0 ]; then
+     $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
    fi
+   #else
+   #   echo
+   #   echo "==> There are no tasks in POE Command File - POE not run"
+   #   echo
+   #fi
 else
-   echo "Run threads serially"
    ./thread_1
    ./thread_2
    ./thread_3
@@ -975,7 +952,6 @@ else
    ./thread_7
    ./thread_8
 fi
-
 cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out \
  $DATA/7.out $DATA/8.out
 
@@ -1127,7 +1103,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_util}/bufr_dumplist $LIST_cp
+cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

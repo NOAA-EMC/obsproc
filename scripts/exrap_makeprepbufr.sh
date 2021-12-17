@@ -3,7 +3,7 @@
 
 ################################################################################
 echo "------------------------------------------------------------------------"
-echo "exrap_makeprepbufr.sh.ecf -"
+echo "exrap_makeprepbufr.sh -"
 echo "                Rapid Refresh Full and Partial Cycle PREPBUFR processing"
 echo "------------------------------------------------------------------------"
 echo "History: Mar 1 2013 - Original script."
