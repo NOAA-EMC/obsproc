@@ -36,9 +36,13 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_UTIL version used by this job, for dump and dumplist, is" \
-     "${bufr_util_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
+     "${bufr_dump_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
 echo
 echo "####################################################################"
 echo
@@ -47,11 +51,6 @@ set -x
 #####################################################################
 # List modules loaded for this job
 #####################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -65,10 +64,12 @@ set -x
 ##################################
 # Specify NET and RUN
 ##################################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-cdas}
 export RUN=${RUN:-cdas}
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -118,27 +119,17 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
 -$HOMEobsproc/scripts}
 
-# ---------------------------------------
-# Paths for dump and bufr_dumplist items
-# ---------------------------------------
-export HOMEbufr_util=${HOMEbufr_util:\
--${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-"###FATAL ERROR \"bufr_util_ver\" is not set"}}
-
-export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
-
 # NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-export ushscript_dump=${ushscript_dump:-$USHbufr_util}
+export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
 
 # ------------------------------------------
 # Paths for combined obsproc and dump items
@@ -146,22 +137,22 @@ export ushscript_dump=${ushscript_dump:-$USHbufr_util}
 
 # directory paths to SSMI dump re-processing executed in bufr_dump_obs
 # --------------------------------------------------------------------
-export EXECPREP=${EXECPREP:-$HOMEbufr_util/exec}
+export EXECPREP=${EXECPREP:-$HOMEbufr_dump/exec}
 export PARMPREP=${PARMPREP:-$HOMEobsproc/parm}
-export FIXPREP=${FIXPREP:-$HOMEbufr_util/fix}
+export FIXPREP=${FIXPREP:-$HOMEbufr_dump/fix}
 
 # directory paths to ERS, QuikSCAT & ASCAT dump re-processing executed in
 #  bufr_dump_obs
 # -----------------------------------------------------------------------
-export EXECWAVE=${EXECWAVE:-$HOMEbufr_util/exec}
+export EXECWAVE=${EXECWAVE:-$HOMEbufr_dump/exec}
 export PARMWAVE=${PARMWAVE:-$HOMEobsproc/parm}
-export FIXWAVE=${FIXWAVE:-$HOMEbufr_util/fix}
+export FIXWAVE=${FIXWAVE:-$HOMEbufr_dump/fix}
 
 # directory paths to SSMI & WindSAT dump re-processing executed in bufr_dump_obs
 # ------------------------------------------------------------------------------
-export EXECbufr=${EXECbufr:-$HOMEbufr_util/exec}
+export EXECbufr=${EXECbufr:-$HOMEbufr_dump/exec}
 export PARMbufr=${PARMbufr:-$HOMEobsproc/parm}
-export FIXbufr=${FIXbufr:-$HOMEbufr_util/fix}
+export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -170,14 +161,13 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_util/fix}
 # TANK is root directory path to observational database used in dumpjb
 #  and engice, sst & snowdepth grib files used in model script
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
-export TANK=${TANK:-${DCOMROOT}/prod}
+export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/${envir}/dcom}
+export TANK=${TANK:-${DCOMROOT}}
 
 # directory paths to engice, sst & snowdepth grib files used in model script
 # --------------------------------------------------------------------------
-#export COM_ENGICE=${COM_ENGICE:-/gpfs/dell1/nco/ops/com/omb/prod/sice}
-export COM_ENGICE=${COM_ENGICE:-$(compath.py omb/prod/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py gfs/prod/sst)}
+export COM_ENGICE=${COM_ENGICE:-$(compath.py ${envir}/omb/${omb_ver}/sice)}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py ${envir}/gfs/${gfs_ver}/sst)}
 #export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}/prod} # disabled in obsproc_cdas.v2.5.0
 
 #########################################################################
@@ -239,18 +229,18 @@ fi
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -296,7 +286,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/excdas_dump.sh.ecf
+$SCRIPTSobsproc/excdas_dump.sh
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
@@ -306,8 +296,8 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
  >> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run

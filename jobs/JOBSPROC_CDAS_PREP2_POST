@@ -44,11 +44,6 @@ set -x
 #####################################################################
 # List modules loaded for this job
 #####################################################################
-if [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -62,10 +57,12 @@ set -x
 ##################################
 # Specify NET and RUN
 ##################################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-cdas}
 export RUN=${RUN:-cdas}
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -109,42 +106,17 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:\
--$HOMEobsproc/scripts}
-
-export FIXobsproc=${FIXobsproc:-$HOMEobsproc/fix}
+export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+export EXECobsproc=${EXECobsproc_:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
-export ushscript_prep=${ushscript_prep:-$USHobsproc}
+export FIXobsproc=${FIXobsproc:-$HOMEobsproc/fix}
 
-# directory paths to overall PREP processing executed in
-#  prepobs_makeprepbufr.sh and its various child scripts
-#  (other than prepobs_syndata.sh, see below)
-# -------------------------------------------------------
-export EXECPREP=${EXECPREP:-${HOMEobsproc}/exec}
-export FIXPREP=${FIXPREP:-${HOMEobsproc}/fix}
-export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
-
-# directory paths to SYNDATA processing executed in prepobs_syndata.sh
-# --------------------------------------------------------------------
-export EXECSYND=${EXECSYND:-${HOMEobsproc}/exec}
-export FIXSYND=${FIXSYND:-${HOMEobsproc}/fix}
-export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
-
-# ---------------------------
-# Paths for non-obsproc items
-# ---------------------------
-
-# DICTPREP is directory path to metar.tbl dictionary used in
-#  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
-# ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-${NWROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
-
-##############################################
+###############################################
 # Add some prod utilities to working directory
-##############################################
+###############################################
 echo "step ############# break ##############################" > ./break
 cp $UTILROOT/ush/err_chk   .; chmod +x err_chk
 cp $UTILROOT/ush/err_exit  .; chmod +x err_exit
@@ -153,7 +125,7 @@ cp $UTILROOT/ush/postmsg   .; chmod +x postmsg
 cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 
 ##########################################
-# Run setpdy and initialize PDY variables
+# Run setpdy and initialize PDY variables 
 ##########################################
 set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
 if [ -z "$PDY" ]; then
@@ -195,132 +167,60 @@ else
   . $DATA/PDY
 fi
 
+# Finally, backdate our PDY by 24-hours since model runs 1-day behind
+PDY=$PDYm1
+setpdy.sh
+. $DATA/PDY
+
 #########################
 # Define COM directories
 #########################
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
-#################################################
-# SETUP CDAS PREPBUFR PREP1 PROCESSING VARIABLES
-#################################################
+#################################################################
+# SETUP CDAS POST-ANALYSIS PREPBUFR (PREP2) PROCESSING VARIABLES
+#################################################################
 
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
-export JOB_NUMBER=1
+export JOB_NUMBER=2
 
-#  Set both POE to YES in order to run this job in a parallel environment
-
-export POE=YES
-##export BACK=YES  # set BACK to YES for an alternate method of running this
-                   #  job in a parallel environment (in this case POE must be
-                   #  NO)
-
-#  NPROCS indicates the number of POE tasks to use
-#   (Applies only when POE=YES, launcher!=cfp and PREPDATA=YES)
-
-#####export NPROCS=${NPROCS=$(($(echo $LSB_HOSTS|wc -w)+0))}
-export NPROCS=12 # on WCOSS this is currently hardwired to 12
-
-#  NSPLIT indicates the number of parts into which the PREPDATA
-#         processing will will be split in order to run in parallel
-#         for computational efficiency (either under poe tasks when
-#         POE=YES or in background threads when BACK=YES)
-#   (Applies only when either POE=YES or BACK=YES, and PREPDATA=YES)
-#   A value less than or equal to NPROCS is recommended for POE,
-#   and may be required depending on poe launcher used.
-#   Consider the size of the backgrounds fields if using threads.
-
-export NSPLIT=${NSPLIT:-12}
-
-#  BUFRLIST indicates the list of BUFR data dump file names to process
-
-export BUFRLIST=${BUFRLIST:-"adpupa proflr aircar aircft satwnd adpsfc \
- sfcshp atovs"}
-
-# VARIABLES THAT CONTROL PROCESSING OF INDIVIDUAL PROGRAMS
-# --------------------------------------------------------
-
-export PREPDATA=${PREPDATA:-YES}
-                      # Execute programs PREPOBS_MPCOPYBUFR, PREPOBS_PREPDATA,
-                      # PREPOBS_LISTHEADERS and PREPOBS_MONOPREPBUFR if YES
-
-export GETGUESS=NO    # DO NOT
-                      # encode first guess (background) values interpolated to
-                      # observation locations in the PREPBUFR file for use by
-                      # the q.c. programs.  This guess is always from a global
-                      # sigma guess file valid at the center PREPBUFR
-                      # processing date/time.
-
-#  -- These can individually be switched to NO without affecting the
-#      success of other programs and the success of the complete job
-#       (if job fails in one of these programs, set offending program
-#       to NO and resubmit to "work-around" problem)
-
-export SYNDATA=NO     # NEVER execute program SYNDAT_SYNDATA
-
-export PREVENTS=NO    # NEVER execute program PREPOBS_PREVENTS
-
-export PREPACQC=NO    # NEVER execute PREPACQC script processing
-   export PROCESS_ACQC=NO   # NEVER execute program PREPOBS_PREPACQC
-   export PROCESS_ACPF=NO   # NEVER execute program PREPOBS_PREPACPF
-
-export PROFCQC=NO     # NEVER execute program PREPOBS_PROFCQC
-
-export CQCVAD=NO      # NEVER execute program PREPOBS_CQCVAD
-
-export CQCBUFR=NO     # NEVER execute program PREPOBS_CQCBUFR
-
-export OIQCBUFR=NO    # NEVER execute program PREPOBS_OIQCBUFR
-
-export DO_QC=NO       # NO, programs PREPOBS_PREVENTS, PREPOBS_PREPACQC,
-                      # PREPOBS_PREPACPF, PREPOBS_PROFCQC, PREPOBS_CQCVAD,
-                      # PREPOBS_CQCBUFR and PREPOBS_OIQCBUFR will NEVER execute
-                      # regardless of switches above
-
-export COPY_TO_ARKV=${COPY_TO_ARKV:-YES}
-
-if [ $COPY_TO_ARKV == YES ]; then
-  if [[ "$RUN_ENVIR" == nco ]]; then
-    export COMARC=${COMROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`
-    mkdir -m 775 -p $COMARC
-  else
-    export COMARC=${COMARC:-${COMOUT_ROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`}
-    mkdir -m 755 -p $COMARC
-  fi
-fi
+export PROCESS_REMOREST=${PROCESS_REMOREST:-YES}
+export PROCESS_TIMETWINS=NO  # can never run here
+export PROCESS_ALL_REPORT_COUNTS=NO  # can never run here
 
 env
 
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/excdas_makeprepbufr.sh.ecf
-eval err_${RUN}_prep1=$?
-eval [[ \$err_${RUN}_prep1 -ne 0 ]] && $DATA/err_exit
+$SCRIPTSobsproc/exprep_post.sh
+eval err_${RUN}_prep2_post=$?
+eval [[ \$err_${RUN}_prep2_post -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep1_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep2_post_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep1_run
+> $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep2_post_run
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep1_run
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep2_post_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

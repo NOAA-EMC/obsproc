@@ -3,7 +3,7 @@
 
 ###########################################################################
 echo "--------------------------------------------------------------------"
-echo "excdas_makeprepbufr.sh.ecf - CDAS model prepbufr processing         "
+echo "excdas_makeprepbufr.sh - CDAS model prepbufr processing         "
 echo "--------------------------------------------------------------------"
 echo "History: Dec  3 2014 - Original script, split off from              "
 echo "                       exglobal_makeprepbufr.sh.ecf and tailored    "

@@ -1,6 +1,6 @@
 ###########################################################################
 echo "--------------------------------------------------------------------"
-echo "excdas_dump.sh.ecf - CDAS network data dump processing              "
+echo "excdas_dump.sh - CDAS network data dump processing              "
 echo "--------------------------------------------------------------------"
 echo "History: Dec  3 2014 - Original script, split off from              "
 echo "                       exglobal_dump.sh.ecf and tailored exclusively"
@@ -1042,28 +1042,8 @@ set -x
 # determine local system name and type if available
 # -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   set +u
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   set -u
-fi
-echo sys_tp is set to: $sys_tp
 
 launcher=${launcher:-"cfp"}  # if not "cfp", threads will run serially
-set +u
-if [ "$launcher" = "cfp" -a -z "$LSB_HOSTS" ]; then
-   set +x
-   echo
-   echo "You requested the cfp poe launcher but are not running under LSF!!"
-   echo "You must run under LSF to use cfp option.  Exiting..."
-   echo
-   set -x
-   $DATA/err_exit
-fi
-set -u
 
 if [ "$launcher" = cfp ]; then
    set -u
@@ -1082,12 +1062,9 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
-      export MP_CSS_INTERRUPT=yes
-      launcher_DUMP=${launcher_DUMP:-mpirun.lsf}
-      if [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-           launcher_DUMP='mpirun -l'
-         fi
-      $launcher_DUMP cfp $DATA/poe.cmdfile 2>&1
+      export MP_CSS_INTERRUPT=yes  # ??
+      launcher_DUMP=${launcher_DUMP:-mpiexec}
+      $launcher_DUMP -np 8 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1126,7 +1103,6 @@ set -x
 [ -s $DATA/error7 ] && err7=`cat $DATA/error7`
 [ -s $DATA/error8 ] && err8=`cat $DATA/error8`
 [ -s $DATA/error9 ] && err9=`cat $DATA/error9`
-
 
 #===============================================================================
 
@@ -1218,7 +1194,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_util}/bufr_dumplist $LIST_cp
+cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN
