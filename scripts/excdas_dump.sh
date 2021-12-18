@@ -1061,20 +1061,19 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
 
-      echo "excdas_dump.sh CHECK 1a"
-      mpiexec -np 8 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      echo "excdas_dump.sh CHECK 1b"
+   if [ -s $DATA/poe.cmdfile ]; then
+      export MP_CSS_INTERRUPT=yes  # ??
+      launcher_DUMP=${launcher_DUMP:-mpiexec}
+      $launcher_DUMP -np 8 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
-      echo "excdas_dump.sh CHECK 1c"
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
       fi
-      echo "excdas_dump.sh CHECK 1d"
-#   else
-#      echo
-#      echo "==> There are no tasks in POE Command File - POE not run"
-#      echo
-#   fi
+   else
+      echo
+      echo "==> There are no tasks in POE Command File - POE not run"
+      echo
+   fi
 else
   echo "Running threads serially"
   echo "excdas_dump.sh CHECK 2"
