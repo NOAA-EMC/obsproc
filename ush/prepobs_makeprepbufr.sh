@@ -1745,6 +1745,7 @@ backup AFWA ACARS into PREPBUFR"
 set +x
 cat <<\EOFmpp > MP_PREPDATA
 { echo
+#!/bin/ksh
 # This herefile script performs the "prepdata" processing.  It is designed to
 #  run in either a parallel (e.g., poe/mpi or background threads) or serial
 #  environment. In the parallel environment, it first splits the input BUFR
@@ -1793,14 +1794,20 @@ cat <<\EOFmpp > MP_PREPDATA
 #   PRVT     - path to observation error table file
 #   PRPX     - path to PREPOBS_PREPDATA program executable
 #   LISTHDX  - path to PREPOBS_LISTHEADERS program executable
+
 set -aux
 multi=$1
+
 data=$DATA/multi$multi
+
 if [ ! -d $DATA/multi$multi ] ; then
    mkdir -p $DATA/multi$multi
 fi
+
 status=$data/mstatus ; > $status 
 mp_pgmout=$data/mp_pgmout  ; > $mp_pgmout 
+
+
 { echo
 set +x
 echo
@@ -1811,9 +1818,13 @@ echo "********************************************************************"
 echo
 set -x
 } >> $mp_pgmout
+
 cd $data
+
 if [ "$PARALLEL" = 'YES' ]; then
+
    n=0
+
    pgm=`basename  $MPCOPYX`
 #-----mimics prep_step-----
    set +x
@@ -1828,6 +1839,7 @@ if [ "$PARALLEL" = 'YES' ]; then
    [ -s $DATA/tracer ] && cat $DATA/tracer > errfile
    set -x
 #--------------------------
+
    for name in ${BUFRLIST[*]} ;do
       > $name
       if [ -s $DATA/$name ] ; then
@@ -1836,6 +1848,7 @@ if [ "$PARALLEL" = 'YES' ]; then
          export FORT$((50+n))=$name
       fi
    done
+
    cat<<EOF|$TIMEIT $MPCOPYX >> $mp_pgmout 2>&1
  &namin nfiles=$n /
  &mp nprocs=$NSPLIT,mp_process=$multi /
@@ -1846,12 +1859,19 @@ EOF
    echo "The foreground exit status for PREPOBS_MPCOPYBUFR is " $err
    echo
    set -x
+
    [ "$err" -gt '0' ]  && exit
+
    dump_dir=$data
+
 else
+
    dump_dir=$DATA
+
 # fi for $PARALLEL = YES
 fi
+
+
 pgm=`basename  $PRPX`
 #-----mimics prep_step-----
 set +x
@@ -1866,38 +1886,48 @@ unset FORT00 `env | grep "^FORT[0-9]\{1,\}=" | awk -F= '{print $1}'`
 [ -s $DATA/tracer ] && cat $DATA/tracer > errfile
 set -x
 #--------------------------
+
 set +u
 [ -n "$PREPBUFR_APP" -a "$PARALLEL" = 'NO' ] && \
  cp $PREPBUFR_APP prepda
 set -u
+
 #  Namelist "TASK" with mp_process set to the value of $multi - either the poe/
 #   mpi task number (for POE not equal to "NO") or to the background thread
 #   number (for BACK equal to "YES") in the parallel environment, or hardwired
 #   to zero in the serial environment, is cat'ed to the beginning of the
 #   PREPOBS_PREPDATA program data cards (parm) file - this will allow
 #   PREPOBS_PREPDATA to identify this stream
+
 > prepdata.stdin
 echo " &task mp_process=$multi /" >>prepdata.stdin
 cat $DATA/prepdata.stdin >> prepdata.stdin
+
 BUFRLIST_all="adpupa aircar aircft satwnd proflr vadwnd rassda adpsfc sfcshp \
  sfcbog msonet spssmi erscat qkswnd wdsatr ascatw rtovs atovs goesnd gpsipw"
 ###BUFRLIST_all_array=($BUFRLIST_all) # this does not work on all platforms
 set -A BUFRLIST_all_array `echo $BUFRLIST_all` # this works on all platforms
+
+
 # Any dump file not included in BUFRLIST is "touched" so that it will not
 #  cause a read error in the event that PREPOBS_PREPDATA still tries to read it
+
 for name in $BUFRLIST_all;do
 [ ! -f $dump_dir/$name ]  &&  > $dump_dir/$name
 done
+
 export FORT11=$DATA/cdate10.dat
 export FORT12=$PRPT
 export FORT15=$LANDC
 ##   export FORT18=$SGES
 ##   export FORT19=$SGESA
+
 # The PREPOBS_PREPDATA code opens GFS spectral coefficient guess files using 
 # sigio routines or GFS gaussian grid guess files using nemsio routines (via
 # W3EMC routine GBLEVENTS) or NetCDF routines in a manner that may not recognize
 # the FORTxx variables above.  So, the above statements setting FORTxx vars for
 # $SGES and $SGESA are replaced by the soft links below.
+
 ln -sf $SGES              fort.18
 ln -sf $SGESA             fort.19
 export FORT20=$PRVT
@@ -1923,14 +1953,17 @@ export FORT46=$dump_dir/${BUFRLIST_all_array[18]}
 export FORT48=$dump_dir/${BUFRLIST_all_array[19]}
 export FORT51=prepda
 export FORT52=prevents.filtering.prepdata
+
 #### THE BELOW APPLIED TO THE CCS (IBM AIX)  (kept for reference)
 #If program ever fails, try changing 64000000 to 20000000
 #set +u
 #[ -n "$LOADL_PROCESSOR_LIST" ]  &&  XLSMPOPTS=parthds=2:stack=64000000
 #set -u
+
 # The following improves performance on Cray-XC40 if $PRPX was
 #    linked to the IOBUF i/o buffering library
 export IOBUF_PARAMS='*prevents.filtering.prepdata:verbose'
+
 $TIMEIT $PRPX <prepdata.stdin >>$mp_pgmout 2>&1
 errPREPDATA=$?
 unset IOBUF_PARAMS
@@ -1961,17 +1994,23 @@ echo
 echo "The foreground exit status for PREPOBS_PREPDATA is " $errPREPDATA
 echo
 set -x
+
 [ "$errPREPDATA" -gt '4' -o "$errPREPDATA" -eq '1' ]  && exit
+
 # Will execute PREPOBS_LISTHEADERS even if PARALLEL is "NO", because it will
 #  reorder the monolithic PREPBUFR file to ensure that all messages of the same
 #  subtype will always be grouped together in sequential messages, arranged in
 #  the order found in $PRPT (Note: This is a necessity when PARALLEL is "YES"
 #  because the later program PREPOBS_MONOPREPBUFR must merge the $NSPLIT
 #  individual (partial) PREPBUFR files together in the proper order)
+
+
 # Build listhdx.stdin from bufrtable entries of possible message headers first
 #  line is count, followed by list
+
 grep "| A[0-9]\{5,\} |" $PRPT | awk '{print $2}'|wc -l|tee listhdx.stdin
 grep "| A[0-9]\{5,\} |" $PRPT | awk '{print $2}'|tee -a listhdx.stdin
+
 pgm=`basename  $LISTHDX`
 #-----mimics prep_step-----
 set +x
@@ -1986,9 +2025,11 @@ unset FORT00 `env | grep "^FORT[0-9]\{1,\}=" | awk -F= '{print $1}'`
 [ -s $DATA/tracer ] && cat $DATA/tracer > errfile
 set -x
 #--------------------------
+
 export FORT11=prepda
 export FORT51=prepda.reorder
 export FORT52=prepda.hdrs
+
 $TIMEIT $LISTHDX < listhdx.stdin >>$mp_pgmout 2>&1
 err=$?
 cat prepda.hdrs
@@ -1997,10 +2038,14 @@ echo
 echo "The foreground exit status for PREPOBS_LISTHEADERS is " $err
 echo
 set -x
+
 [ "$err" -gt '0' ]  && exit
+
 mv prepda.reorder prepda
 rm listhdx.stdin
+
 echo "$multi finished -- errPREPDATA = $errPREPDATA" > $status 
+
 { echo
 set +x
 echo
@@ -2011,7 +2056,9 @@ echo "********************************************************************"
 echo
 set -x
 } >> $mp_pgmout
+
 } 1> $DATA/mp_stream${1}.stdout 2> $DATA/mp_stream${1}.errfile
+
 exit 0
 EOFmpp
 set -x
@@ -2254,11 +2301,13 @@ echo
 
 set +x
 cat <<\EOFmrg > MERGE_MSGS
+
 # This herefile script merges the individual partial PREPBUFR files present at
 #  this point into a complete, monolithic PREPBUFR file in the proper message
 #  type order.  It is the last step in the PREPDATA processing.  It runs only
 #  in the parallel environment.
 # ----------------------------------------------------------------------------
+
 # Positional parameters passed in:
 #   1 - Number of input partial PREPBUFR files that are going to be merged
 #       ($nfiles)
@@ -2280,23 +2329,36 @@ cat <<\EOFmrg > MERGE_MSGS
 # Imported variables that can be passed in:
 #   pgmout   - string indicating path to for standard output file (skipped over
 #              by this script if not passed in)
+
+
 if [ $# -ne 6 ] ; then
    echo "Usage: $0 nfiles DATA subdir header_file_name prep_in prep_out"
    exit 1
 fi
+
 set -aux
+
 qid=$$
+
 nfiles=$1;DATA=$2;subdir=$3;header_file_name=$4;prep_in=$5;prep_out=$6
+
+
 #  From all the header files, extract the header counts and names build
 #   namelist input to drive $MONOBFRX program
 #  ---------------------------------------------------------------------
+
 nheaders=`cat $DATA/${subdir}*/$header_file_name|awk '{print $1}'|sort -u|wc -l`
 ((nheaders+=0))
+
 >$DATA/input echo  
 echo " &namin nfiles=$nfiles, nheaders=$nheaders," >>$DATA/input
+
 cd $DATA
+
+
 #  Assign the fort units to the files
 #  -----------------------------------
+
 pgm=`basename  $MONOBFRX`
 if [ -s $DATA/prep_step ]; then
    . $DATA/prep_step
@@ -2304,6 +2366,8 @@ else
    [ -f errfile ] && rm errfile
    unset FORT00 `env | grep "^FORT[0-9]\{1,\}=" | awk -F= '{print $1}'`
 fi
+
+
 n=-1
 while [ $((n+=1)) -lt $nfiles ] ;do 
    [ ! -s $DATA/${subdir}$n/$prep_in ]  &&  exit 1 
@@ -2311,8 +2375,11 @@ while [ $((n+=1)) -lt $nfiles ] ;do
 done
 export FORT51=$prep_out
 set +x
+
+
 #  Extract the total span of headers by searching through all the header files
 #  ---------------------------------------------------------------------------
+
 n=-1
 while [ $((n+=1)) -lt $nfiles ]; do 
    file=$DATA/${subdir}$n/$header_file_name
@@ -2331,8 +2398,11 @@ while [ $((n+=1)) -lt $nfiles ]; do
       break
    fi
 done
+
+
 #  Tranlate the hdrs file contents into namelist array 
 #  ---------------------------------------------------
+
 n=-1
 while [ $((n+=1)) -lt $nfiles ]; do 
    file=$DATA/${subdir}$n/$header_file_name
@@ -2348,9 +2418,11 @@ while [ $((n+=1)) -lt $nfiles ]; do
    done
    echo " $line " >>$DATA/input
 done
+
 echo " &end" >>$DATA/input
 set -x
 cat $DATA/input
+
 $TIMEIT $MONOBFRX <$DATA/input > outout 2> errfile
 export err=$?
 ###cat errfile
@@ -2367,6 +2439,7 @@ echo
 set -x
 $DATA/err_chk
 [ $err != 0 ] && exit 55  # for extra measure
+
 exit 0
 EOFmrg
 set -x
