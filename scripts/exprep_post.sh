@@ -21,7 +21,6 @@ echo "                     list from NDBC. The Master Ship Station "
 echo "                     List is read within job JRW1 at 12z on  "
 echo "                     the first day of each month in order to "
 echo "                     generate marine monthly statistics.     "
-echo "Dec 16 2021 - Renamed all *.sh.ecf scripts to .sh            "
 #  -------------------------------------------------------------------------
 
 echo "------------------------------------------------------------------------"
@@ -49,6 +48,7 @@ echo "                for location of upper air wind files used in timetwin   "
 echo "                processing (Melchior)                                   "
 echo "  Jul 15 2020 - Modified $path variable to include (or exclude)         "
 echo "                $COMPONENT subdir based on GFS version.                 "
+echo "  Dec 09 2021 - Updated for use on WCOSS2 (Esposito)                    " 
 ###############################################################################
 
 # NOTE: NET is gfs for the gdas RUN (as for the gfs RUN)
