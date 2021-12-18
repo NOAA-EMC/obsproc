@@ -41,10 +41,9 @@ set -aux
 #               - formerly EXECobsproc_shared_bufr_avgdata prior to WCOSS2
 #               - path to obsproc executable directory containing bufr_avgdata
 #                 (invoked only if $AVGX is not imported)
-#   FIXbufr_dump
-#               - formerly FIXbufr_util
+#   FIXbufr_dump_
 #               - formerly FIXobsproc_shared_bufr_dumplist prior to WCOSS2
-#               - path to bufr_util fix directory containing the
+#               - path to bufr_dump fix directory containing the
 #                 bufr_dumplist file
 #                 (invoked only if $DUMPLIST is not imported)
 #
