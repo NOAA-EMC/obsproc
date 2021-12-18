@@ -284,7 +284,8 @@
 #        If .true., processing will obtain the NetCDF format first guess fields.
 # 2021-04-05  S. Melchior -- Added diagnostic information just after the cp of
 #        the global first guess file to sgesprep.
-# 
+# 2021-12-12  S. Melchior
+#             I. Genkova -- Prepared for transition to WCOSS2
 #
 #
 # Usage:  prepobs_makeprepbufr.sh YYYYMMDDHH <mm>
@@ -1739,9 +1740,10 @@ backup AFWA ACARS into PREPBUFR"
 ##                          HEREFILE MP_PREPDATA                             ##
 ##VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV##
 
+# think of adding a line with "#!/bin/ksh" after the "{ echo" below IG
+
 set +x
 cat <<\EOFmpp > MP_PREPDATA
-
 { echo
 #!/bin/ksh
 # This herefile script performs the "prepdata" processing.  It is designed to
@@ -2111,6 +2113,7 @@ set -x
 
          elif [ "$launcher_PREP" = mpiexec ]; then
 	    chmod 755 $DATA/prep_exec.cmd
+            #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
              mpiexec -n 6 $DATA/prep_exec.cmd
 	    export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure	 
