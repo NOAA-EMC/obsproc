@@ -45,7 +45,7 @@ echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
 echo "BUFR_DUMP version used by this job, for dumplist, is" \
-       "${bufr_dump_post_ver:-not set}"
+       "${bufr_dump_ver:-not set}"
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
      then echo "bufr_dump is required but not loaded! Exiting...";
      exit;
