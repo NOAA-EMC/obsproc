@@ -1,5 +1,5 @@
 list(APPEND scripts_files
-  exairnow_dump.sh
+  exairnow_dump.sh.ecf
   excdas_dump.sh
   excdas_makeprepbufr.sh
   exdump_alert.sh
@@ -14,7 +14,6 @@ list(APPEND scripts_files
   exrap_dump.sh
   exrap_makeprepbufr.sh
   exrtma_dump.sh
-  exrtma_dump.sh.correct
   exrtma_makeprepbufr.sh
   exurma_dump.sh
   exurma_makeprepbufr.sh
