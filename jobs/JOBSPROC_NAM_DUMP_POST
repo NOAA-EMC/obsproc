@@ -61,8 +61,6 @@ set -x
 
 #####################################################################
 # List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
 #####################################################################
 set +x
 echo
