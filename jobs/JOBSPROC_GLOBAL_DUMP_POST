@@ -2,8 +2,6 @@
 set -xa
 date -u
 
-export obsNET=${obsNET:-obsproc}
-
 ###################################################################
 # Set DEBUG LEVEL - modifies info in execution trace prompt string
 ###################################################################
@@ -28,10 +26,6 @@ echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
 echo HOMEbufr_dump is ${HOMEbufr_dump:?"###FATAL ERROR \"HOMEbufr_dump\" is not set"} 
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; 
-     then echo "bufr_dump is required but not loaded! Exiting..."; 
-     exit; 
-fi
 echo
 set -x
 
@@ -44,6 +38,11 @@ echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
 echo "BUFR_UTIL version used by this job, for dumplist, is" \
        "${bufr_util_ver:-not set}"
+echo
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
 echo
 echo "####################################################################"
 echo
@@ -59,6 +58,7 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
@@ -143,25 +143,26 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #########################
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
+
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN:-$(compath.py ${obsNET}/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT})}
-  export COMOUT=${COMOUT:-$(compath.py ${obsNET}/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
   # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-export comin=${comin:-${COMIN_ROOT:?}/${obsNET}/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
-export comin_m1=${comin_m1:-${COMIN_ROOT:?}/${obsNET}/$obsproc_ver/${RUN}.${PDYm1}/${cyc}/${COMPONENT}}
+export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})/${cyc}/${COMPONENT}}
+export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})/${cyc}/${COMPONENT}}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -170,7 +171,7 @@ export comin_m1=${comin_m1:-${COMIN_ROOT:?}/${obsNET}/$obsproc_ver/${RUN}.${PDYm
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-${COMROOT:?}/$obsNET/${obsproc_ver}/sdm_rtdm} 
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$obsNET/${obsproc_ver})/sdm_rtdm} 
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)

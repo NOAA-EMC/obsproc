@@ -5,7 +5,7 @@
 #PBS -q dev
 #PBS -l walltime=00:30:00
 #PBS -A OBSPROC-DEV
-#PBS -l place=vscatter,select=1:ncpus=14:mem=12gb
+#PBS -l place=vscatter,select=1:ncpus=14:mem=50gb
 
 ##############################################
 # Submit notes:
@@ -32,10 +32,8 @@ export KEEPDATA=YES
 
 export obsNET=obsproc
 export obsproc_ver=1.0.0
-
-#use for testing before /dcom goes live
-#export DCOMROOT=/lfs/h1/ops/canned/dcom
-#export TANK=/lfs/h1/ops/canned/dcom
+export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
+export TANK=/lfs/h1/ops/canned/dcom
 
 #path to executables
 userROOT=/u/Iliana.Genkova/INSTALL
@@ -66,7 +64,7 @@ export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump.$PDY.jlogfile
 
 export DEBUG_LEVEL=3
 
-export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc 
+export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc  
                      
 export HOMEbufr_dump="${HOMEbufr_dump:-"/u/Iliana.Genkova/INSTALL/bufr-dump"}"
 

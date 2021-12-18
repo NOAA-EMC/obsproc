@@ -31,9 +31,7 @@ userROOT=/u/Iliana.Genkova/INSTALL
 
 export obsNET=obsproc
 export obsproc_ver=1.0.0 
-
-# use for testing before /dcom goes live
-export DCOMROOT=/lfs/h1/ops/canned/dcom 
+export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
 export TANK=/lfs/h1/ops/canned/dcom
 
 VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
@@ -64,18 +62,19 @@ export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump_post.$PDY.jlogfile
 
 export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc
 
-export COMIN_ROOT=/lfs/h1/ops/canned/com 
-export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
+#export COMIN_ROOT=/lfs/h1/ops/canned/com 
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com
 export DEBUG_LEVEL=3
 export KEEPDATA=YES
 
-export COMIN=${COMIN_ROOT}/gfs/v16.2/$JTYP.${PDY}/${cyc}/atmos
+#export COMIN=${COMIN_ROOT}/gfs/v16.2/$JTYP.${PDY}/${cyc}/atmos
+export COMIN=/lfs/h2/emc/ptmp/${USER}/global_wcoss2/com/obsproc/${obsproc_ver}/$JTYP.${PDY}/${cyc}/atmos
 
 export DATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
 export SATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
 export ARCHCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2 
 export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
-export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
+export COMOUT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 export COMIN1=/lfs/h1/ops/canned/com/gfs/v16.2/$JTYP.
 
 $HOMEobsproc/jobs/JOBSPROC_GLOBAL_PREP_POST
