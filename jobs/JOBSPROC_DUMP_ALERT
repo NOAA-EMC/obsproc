@@ -24,6 +24,7 @@ echo
 echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
 echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
@@ -45,8 +46,6 @@ set -x
 
 #####################################################################
 ## List modules loaded for this job
-##   On luna/surge may need to initialize the Modules package to find
-##   the module command.  Will do so for all systems.
 ######################################################################
 set +x
 echo
@@ -59,7 +58,7 @@ echo
 set -x
 
 ######################
-# Specify NET and RUN
+# Specify obsNET, NET, and RUN
 ######################
  # no default values - MUST be exported by trigger script
 
@@ -115,15 +114,15 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   else
-    export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   fi
 else
   if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   fi
 fi
 
