@@ -290,8 +290,6 @@ export COPY_TO_ARKV=${COPY_TO_ARKV:-YES}
 
 if [ $COPY_TO_ARKV == YES ]; then
   if [[ "$RUN_ENVIR" == nco ]]; then
-    #WC1 export COMARC=${COMROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`
-    #SE? export COMARC=$(compath.py ${envir}/${RUN}/${cdas_ver}/${RUN}.`echo $PDY | cut -c1-6`)
     export COMARC=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.`echo $PDY | cut -c1-6`)
     mkdir -m 775 -p $COMARC
   else
