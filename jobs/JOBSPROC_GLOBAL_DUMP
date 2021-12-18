@@ -80,6 +80,7 @@ elif [ $err_gdas = 0 ]; then
 fi
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -137,8 +138,11 @@ export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items  
 # ---------------------------------------
-# NOTE: defined in bufr_dump module 
+# NOTE: defaults defined in bufr_dump module 
 # NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
+
+export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
+export FIXbufr_dump=${FIXbufr_dump:=$HOMEbufr_dump/fix}
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
@@ -178,10 +182,10 @@ export TANK=${TANK:-${DCOMROOT}}
 
 # directory paths to ice, sst & snowdepth grib files used in model script
 # -----------------------------------------------------------------------
-export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} 
-export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/${PDY}/sst)}
+export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/omb/$omb_ver/sice)}
+export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/omb/$omb_ver/sice)}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/gfs/${gfs_ver}/sst)} 
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/gfs/${gfs_ver}/sst)}
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
 
 #########################################################################
@@ -203,9 +207,6 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #########################
 # Define COM directories
 #########################
-export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/${omb_ver}/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)}
-
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 if [[ "$RUN_ENVIR" == nco ]]; then
