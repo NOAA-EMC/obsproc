@@ -10,10 +10,10 @@
 #####################################################################
 # Submit notes:
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jglobal_*.wc2.lsf
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 cycbsub jglobal_*.wc2.lsf
-# cycbsub location: /u/Iliana.Genkova/bin
+# > jtyp=gdas cyc=00 cycqsub jglobal_*.wc2.lsf
+# cycqsub location: /u/Iliana.Genkova/bin
 # cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
 #####################################################################
 
@@ -30,7 +30,7 @@ export PDY=%PDY%
 userROOT=/u/Iliana.Genkova/INSTALL
 
 export obsNET=obsproc
-export obsproc_ver=1.0.0 
+export obsproc_ver=v1.0.0 
 export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
 export TANK=/lfs/h1/ops/canned/dcom
 
@@ -46,10 +46,6 @@ fi
 # source moduleload file
 # GitHub location: release/obsproc.v1.0.0/triggers/moduleload
 . /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
-
-# load correct version bufr_dump for WCOSS2
-module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
-module load bufr_dump/1.0.0
 
 export util_shared_ver=1.0.3 #1.0.4 in run.ver
 

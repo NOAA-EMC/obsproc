@@ -34,7 +34,7 @@ export jobid=$job.$LSB_JOBID
 export PDY=%PDY%
 
 export obsNET=obsproc
-export obsproc_ver=1.0.0
+export obsproc_ver=v1.0.0
 
 export DCOMROOT=/lfs/h1/ops/canned/dcom
 export TANK=/lfs/h1/ops/canned/dcom

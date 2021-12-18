@@ -32,7 +32,7 @@ export KEEPDATA=YES
 #export MPMD=NO  # uncomment if you do not provide poe BSUB cards
 
 export obsNET=obsproc
-export obsproc_ver=1.0.0 
+export obsproc_ver=v1.0.0 
 #export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
 #export TANK=/lfs/h1/ops/canned/dcom
 
