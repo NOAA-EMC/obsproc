@@ -36,12 +36,6 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_DUMP version used by this job is ${bufr_dump_ver:-not set}"
-echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
-     then echo "bufr_dump is required but not loaded! Exiting...";
-     exit;
-fi
 echo
 echo "####################################################################"
 echo
@@ -144,7 +138,7 @@ export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
+export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
 
 ##############################################
 # Add some prod utilities to working directory
@@ -211,23 +205,21 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
    # ... COM_IN is path to files possibly read by prepobs_cqcbufr
-  export COM_IN=${COMIN_ROOT:?}/obsproc
-  export COMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}
-  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
+  export COM_IN=$(compath.py ${envir}/${obsNET}/${obsproc_ver})
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
    # ... COM_IN is path to files possibly read by prepobs_cqcbufr
-  export COM_IN=${COM_IN:-${COMIN_ROOT:?}/obsproc}
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
+  export COM_IN=$(compath.py ${envir}/${obsNET}/${obsproc_ver})
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${obsproc_ver}/${RUN}.${PDY}}
-  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
@@ -298,10 +290,12 @@ export COPY_TO_ARKV=${COPY_TO_ARKV:-YES}
 
 if [ $COPY_TO_ARKV == YES ]; then
   if [[ "$RUN_ENVIR" == nco ]]; then
-    export COMARC=${COMROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`
+    #WC1 export COMARC=${COMROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`
+    #SE? export COMARC=$(compath.py ${envir}/${RUN}/${cdas_ver}/${RUN}.`echo $PDY | cut -c1-6`)
+    export COMARC=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.`echo $PDY | cut -c1-6`)
     mkdir -m 775 -p $COMARC
   else
-    export COMARC=${COMARC:-${COMOUT_ROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`}
+    export COMARC=${COMARC:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.`echo $PDY | cut -c1-6`}
     mkdir -m 755 -p $COMARC
   fi
 fi
