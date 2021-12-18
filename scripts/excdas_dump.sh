@@ -1046,7 +1046,7 @@ SITE=${SITE:-""}
 launcher=${launcher:-"cfp"}  # if not "cfp", threads will run serially
 
 if [ "$launcher" = cfp ]; then
-#   set -u
+   set -u
    > $DATA/poe.cmdfile
 
 # To better take advantage of cfp, execute the longer running commands first.
@@ -1076,7 +1076,6 @@ if [ "$launcher" = cfp ]; then
    fi
 else
   echo "Running threads serially"
-  echo "excdas_dump.sh CHECK 2"
   [ $DUMP_group1 = YES ]  &&  ./thread_1
   [ $DUMP_group2 = YES ]  &&  ./thread_2
   [ $DUMP_group3 = YES ]  &&  ./thread_3
@@ -1087,11 +1086,9 @@ else
   [ $DUMP_group8 = YES ]  &&  ./thread_8
   [ $DUMP_group9 = YES ]  &&  ./thread_9
 fi
-echo "excdas_dump.sh CHECK 3"
 
 cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out
 
-echo "excdas_dump.sh CHECK 1"
 set +x
 echo " "
 echo " "
@@ -1106,7 +1103,6 @@ set -x
 [ -s $DATA/error7 ] && err7=`cat $DATA/error7`
 [ -s $DATA/error8 ] && err8=`cat $DATA/error8`
 [ -s $DATA/error9 ] && err9=`cat $DATA/error9`
-echo "excdas_dump.sh CHECK 4"
 
 #===============================================================================
 
