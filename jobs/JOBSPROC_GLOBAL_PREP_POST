@@ -37,15 +37,12 @@ echo "####################################################################"
 echo
 echo "Current OBSPROC version is ${obsproc_ver:-not set}"
 echo "GFS version used by this job is ${gfs_ver:-not set}"
-echo
 echo "####################################################################"
 echo
 set -x
 
 #####################################################################
 # List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
 #####################################################################
 set +x
 echo
@@ -60,6 +57,7 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
@@ -72,6 +70,7 @@ elif [ $err_gdas = 0 ]; then
 fi
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -117,7 +116,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 
@@ -149,25 +148,25 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
 # The following are used by $PROCESS_TIMETWINS in the GDAS when it is YES
 # -----------------------------------------------------------------------
-export COMINGFS=${COMINGFS:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${NET}.${PDY}/${cyc}/${COMPONENT}}
-export COMIN1=${COMIN1:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.}
+export COMINGFS=${COMINGFS:-$(compath.py ${envir}/${NET}/${gfs_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
+export COMIN1=${COMIN1:-$(compath.py ${envir}/${NET}/${gfs_ver}/${RUN}.)}
 
 #################################################################
 # SETUP GDAS AND GFS POST-ANALYSIS PREPBUFR PROCESSING VARIABLES
@@ -202,30 +201,30 @@ elif [ $RUN = gdas ]; then
     MON=${MONS[10#$MM]}   # get month string from array MONS.
     YYYYMM=`echo $PDY  | cut -c1-6`
     if [[ "$RUN_ENVIR" == nco ]]; then 
-      export DATCOMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts
-      export SATCOMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts
-      export ARCHCOMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}
-      export DATCOM1_IN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts
-      export DATCOMOUT_dir=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts/data_counts.$YYYYMM
-      export SATCOMOUT_dir=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts/satcounts.$YYYYMM
-      export ARCHCOMOUT=${COMROOT:?}/obsproc/${obsproc_ver}  # used in gdascounts_archive_pyear.sh
-      export DATCOM1_OUT=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts
+      export DATCOMIN=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
+      export SATCOMIN=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
+      export ARCHCOMIN=$(compath.py ${envir}/${obsNET}/${obsproc_ver})
+      export DATCOM1_IN=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
+      export DATCOMOUT_dir=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts/data_counts.$YYYYMM)
+      export SATCOMOUT_dir=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts/satcounts.$YYYYMM)
+      export ARCHCOMOUT=$(compath.py ${envir}/${obsNET}/${obsproc_ver})  # used in gdascounts_archive_pyear.sh
+      export DATCOM1_OUT=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
       mkdir -m 775 -p $DATCOMOUT_dir $SATCOMOUT_dir $ARCHCOMOUT $DATCOM1_OUT
     else
-      export DATCOMIN=${DATCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
-      export SATCOMIN=${SATCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
-      export ARCHCOMIN=${ARCHCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}}
-      export DATCOM1_IN=${DATCOM1_IN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
-      export DATCOMOUT_dir=${DATCOMOUT_dir:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}/gdascounts/data_counts.$YYYYMM}
-      export SATCOMOUT_dir=${SATCOMOUT_dir:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}/gdascounts/satcounts.$YYYYMM}
-      export ARCHCOMOUT=${ARCHCOMOUT:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}} #proposed location
-      export DATCOM1_OUT=${DATCOM1_OUT:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
+      export DATCOMIN=${DATCOMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts}
+      export SATCOMIN=${SATCOMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts}
+      export ARCHCOMIN=${ARCHCOMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}}
+      export DATCOM1_IN=${DATCOM1_IN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts}
+      export DATCOMOUT_dir=${DATCOMOUT_dir:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts/data_counts.$YYYYMM}
+      export SATCOMOUT_dir=${SATCOMOUT_dir:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts/satcounts.$YYYYMM}
+      export ARCHCOMOUT=${ARCHCOMOUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}} #proposed location
+      export DATCOM1_OUT=${DATCOM1_OUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts}
       mkdir -m 775 -p $DATCOMOUT_dir $SATCOMOUT_dir $ARCHCOMOUT $DATCOM1_OUT
     fi
   fi 
   if [ $PROCESS_MASTER_SHIP_STNLST == YES ]; then
-    export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
-    export SHPNAMDIR_DCOM=${SHPNAMDIR:-${DCOMROOT}/prod/ndbc}
+    export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
+    export SHPNAMDIR_DCOM=${SHPNAMDIR:-${DCOMROOT}/ndbc}
     if [[ "$RUN_ENVIR" == nco ]]; then
       export VOSarch_IN=${COMROOT:?}/arch/VOS
       export VOSarch_OUT=${COMROOT:?}/arch/VOS

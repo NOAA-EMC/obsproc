@@ -36,8 +36,13 @@ set +x
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_UTIL version used by this job, for dumplist, is" \
-       "${bufr_util_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dumplist, is" \
+       "${bufr_dump_ver:-not set}"
+echo
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
 echo
 echo "####################################################################"
 echo
@@ -53,6 +58,7 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
@@ -65,6 +71,7 @@ elif [ $err_gdas = 0 ]; then
 fi
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -110,13 +117,19 @@ export SENDSDM=${SENDSDM:-YES}
 # ------------------------
 # Paths for obsproc items
 # ------------------------
-export HOMEobsproc=${HOMEobsproc:\
--${PACKAGES:?}/obsproc.${obsproc_ver:?\
-"###FATAL ERROR \"obsproc_ver\" is not set"}}
+export HOMEobsproc=${HOMEobsproc:-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver}:?\
+"###FATAL ERROR \"obsproc_ver\" is not set"}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
+
+# ----------------------------------------------------------------------
+# Paths for bufr_dumplist items
+# Default variables are pre-defined when the bufr_dump module is loaded.
+# ----------------------------------------------------------------------
+
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -139,25 +152,26 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #########################
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
+
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
-# COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
+  # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-export comin=${comin:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
-export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDYm1}/${cyc}/${COMPONENT}}
+export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})/${cyc}/${COMPONENT}}
+export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})/${cyc}/${COMPONENT}}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -166,7 +180,7 @@ export comin_m1=${comin_m1:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDYm1}
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-${COMROOT:?}/$NET/$envir/sdm_rtdm} 
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$obsNET/${obsproc_ver})/sdm_rtdm/${RUN}} 
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)
@@ -179,8 +193,8 @@ if [[ "$RUN_ENVIR" == nco ]]; then
 else
   [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
   export AVGDarch_IN=\
-${AVGDarch_IN:-${HOMEarch_avgdata:-${COMIN_ROOT:?}/$NET/$envir/sdm_rtdm/avgdata}}
-  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/$NET/$envir/sdm_rtdm/avgdata}
+${AVGDarch_IN:-${HOMEarch_avgdata:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}}
+  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
   mkdir -p $AVGDarch_OUT
 fi
 
@@ -195,11 +209,11 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   if [[ ${envir} == prod ]]; then
     export ALERTL=${ALERTL:-${COMROOT:?}/logs/alertlog}
   else
-    export ALERTL=${ALERTL:-${COMROOT:?}/logs/${envir}/alertlog}
+    export ALERTL=${ALERTL:-${COMROOT:?}/logs/alertlog}
   fi
   mkdir -p $ALERTL
 else # developer
-  export ALERTL=${ALERTL:-${COMOUT_ROOT:?}/logs/${envir}/alertlog}
+  export ALERTL=${ALERTL:-${COMOUT_ROOT:?}/logs/alertlog}
   mkdir -p $ALERTL
 fi
 
@@ -240,7 +254,7 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_post
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
 
 [ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
 
 if [ "$KEEPDATA" != YES ]; then

@@ -2,7 +2,6 @@
 set -xa
 date -u
 
-
 ###################################################################
 # Set DEBUG LEVEL - modifies info in execution trace prompt string
 ###################################################################
@@ -26,7 +25,6 @@ echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
 echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
-echo HOMEbufr_dump is ${HOMEbufr_dump:?"###FATAL ERROR \"HOMEbufr_dump\" is not set"} 
 echo
 set -x
 
@@ -41,6 +39,11 @@ echo "OBSPROC version is ${obsproc_ver:-not set}" #Set at trigger script level,o
 echo "BUFR_DUMP version used by this job, for dump and dumplist, is " \
        "${bufr_dump_ver:-not set}"        #Set at trigger script level like obsproc_ver
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
+echo
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
 echo
 echo "####################################################################"
 
@@ -64,6 +67,7 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
@@ -76,6 +80,7 @@ elif [ $err_gdas = 0 ]; then
 fi
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -125,7 +130,7 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
@@ -133,8 +138,11 @@ export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 # ---------------------------------------
 # Paths for dump and bufr_dumplist items  
 # ---------------------------------------
-# NOTE: defined in bufr_dump module 
+# NOTE: defaults defined in bufr_dump module 
 # NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
+
+export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
+export FIXbufr_dump=${FIXbufr_dump:=$HOMEbufr_dump/fix}
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
@@ -174,10 +182,10 @@ export TANK=${TANK:-${DCOMROOT}}
 
 # directory paths to ice, sst & snowdepth grib files used in model script
 # -----------------------------------------------------------------------
-export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/com/omb/$omb_ver/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/${PDY}/sst)} 
-export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/${PDY}/sst)}
+export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/omb/$omb_ver/sice)}
+export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/omb/$omb_ver/sice)}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/gfs/${gfs_ver}/sst)} 
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/gfs/${gfs_ver}/sst)}
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
 
 #########################################################################
@@ -199,22 +207,21 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #########################
 # Define COM directories
 #########################
-#
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+	export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+	export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
- export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+ export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 

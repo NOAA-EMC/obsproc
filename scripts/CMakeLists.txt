@@ -6,8 +6,6 @@ list(APPEND scripts_files
   exdump_monitor.sh
   exdump_post.sh
   exglobal_dump.sh
-  exglobal_dump.sh.ecf
-  exglobal_makeprepbufr.sh.ecf
   exglobal_makeprepbufr.sh
   exmods.sh
   exnam_dump.sh

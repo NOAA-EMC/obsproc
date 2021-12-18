@@ -28,11 +28,6 @@ echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
 echo
 set -x
 
-# Force prepobs_makeprepbufr.sh to use prepobs_errtable.global from
-# gfs.v*/fix/fix_gsi instead of from obsproc_global.v*/fix
-# -----> Ask NCO if they want this in driver script?
-#VERSION_FILE_gfs=$PACKAGEROOT/versions/gfs.ver #?? IG
-#[ -f $VERSION_FILE_gfs ] && . $VERSION_FILE_gfs
 
 ################################
 # Print out version information
@@ -48,21 +43,7 @@ echo "####################################################################"
 echo
 set -x
 
-#####################################################################
-# List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
-#####################################################################
-#
-#if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-#  . /opt/modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-#  . /usrx/local/Modules/default/init/sh 2>/dev/null
-#elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-#  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-#fi
 set +x
-# THEY SHOULD BE ALREDY set in trigger script ?? IG
 echo
 echo "####################################################################"
 echo
@@ -75,6 +56,7 @@ set -x
 ######################
 # Specify NET and RUN
 ######################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
@@ -87,6 +69,7 @@ elif [ $err_gdas = 0 ]; then
 fi
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
@@ -125,12 +108,12 @@ export SENDDBN=${SENDDBN:-YES}
 ##########################
 # Specify Execution Areas
 ##########################
-# CONTINUE HERE IG
+
 # -------------------------------
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
@@ -166,16 +149,13 @@ export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
-export DICTPREP=${DICTPREP:-${PACKAGEROOT}/decoders/decod_shared/dictionaries_v${dictionaries_ver}}    ## there was no "v" in _v${dictionaries_ver}} originally IG 
-# it looks for  metar table !! IG
-# /lfs/h1/ops/prod/decoders/decod_shared/dictionaries_v3.4.0/
+export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}   
 
 # HOMEgfs is directory path to prepobs_errtable.global (PRVT), used in
 # prepobs_makeprepbufr.sh and its child scripts prepobs_syndata.sh and
 # prepobsp_prevents.sh.
 # ---------------------------------------------------------------------------
-# will this stay like it is? overwritten in wrapper ? IG
-export HOMEgfs=${HOMEgfs:-${PACKAGES:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
+export HOMEgfs=${HOMEgfs:-${PACKAGEROOT:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -200,29 +180,31 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
-export NEMSIO_IN=.false.        # GFSv16 para
-export NETCDF_IN=.true.         # GFSv16 para
+export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
+export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
+                                              # NOTE: only NEMSIO_IN or NETCDF_IN can be .true.
 
 export envir_getges=${envir_getges:-$envir}
 export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
-export GETGES_NWG=${GETGES_NWG:-$GESROOT}
-export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges})/gdas.$PDY/${cyc}/${COMPONENT}}
-export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges})/gfs.$PDY/${cyc}/${COMPONENT}}
+export GETGES_NWG=${GETGES_NWG:-$GESROOT}   # this needs work for wc2
+export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges})/gfs/${gfs_ver}/gdas.$PDY/${cyc}/${COMPONENT}}
+export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges})/gfs/${gfs_ver}/gfs.$PDY/${cyc}/${COMPONENT}}
 
 
 
@@ -318,7 +300,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_makeprepbufr.sh # IG .ecf
+$SCRIPTSobsproc/exglobal_makeprepbufr.sh 
 eval err_${RUN}_makeprepbufr=$?
 eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
 

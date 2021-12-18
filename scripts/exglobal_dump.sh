@@ -1,7 +1,7 @@
 #!/bin/ksh
 #############################################################################
 echo "----------------------------------------------------------------------"
-echo "exglobal_dump.sh.ecf - Global (GDAS, GFS) network data dump processing"
+echo "exglobal_dump.sh - Global (GDAS, GFS) network data dump processing"
 echo "----------------------------------------------------------------------"
 echo "History: Jan 18 2000 - Original script.                               "
 echo "         May 16 2007 - Added DBNet alerts for GFS products.           "
@@ -75,6 +75,7 @@ echo "         Sep 21 2020 - Incremented subsets for the sfcshp dump groups "
 echo "                       to match bufr_dumplist. Removed tideg from     "
 echo "                       sfcshp dump group to make individual dump file."
 echo "                     - Copy bufr_dumplist to COMOUT.                  "
+echo "         Dec 16 2021 - modified to work on WCOSS2                     "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -1613,50 +1614,12 @@ set -x
 #  -------------------------------------------------
 
 SITE=${SITE:-""}
-#sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-#getsystp_err=$?
-#if [ $getsystp_err -ne 0 ]; then
-#   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-#   set +u
-#   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-#   set -u
-#fi
-#echo sys_tp is set to: $sys_tp
 
+set +u
+launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
 
-#if [ "$launcher" = aprun_cfp ]; then
-#   #  Get compute node count:  Subtract one from the total number of unique
-#   #  hosts to account for the MAMU node that runs serial portion of job
-#   typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
-#   typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
-#   if [ $ncnodes -lt 1 ]; then
-#      set +x
-#      echo
-#      echo " ######################################################## "
-#      echo " --> Could not get positive compute node count for aprun! "
-#      echo " --> Check that BSUB directives included a reservation    "
-#      echo "                   request for one or more compute nodes. "
-#      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT      "
-#      echo " ######################################################## "
-#      echo
-#      set -x
-#      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
-#   fi
-#elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then  
-#   set +x
-#   echo
-#   echo "You requested the cfp poe launcher but are not running under LSF!!"
-#   echo "You must run under LSF to use cfp option on IBM.  Exiting..."
-#   echo
-#   set -x
-#   $DATA/err_exit
-#fi
-
-launcher=${launcher:-"cfp"}
-
-if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
+if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
-
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
@@ -1673,33 +1636,9 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
 
 
    if [ -s $DATA/poe.cmdfile ]; then
-      nthreads=$(cat $DATA/poe.cmdfile | wc -l)
-      echo "nthreads= ${nthreads}" #IG
-      if [ $nthreads -eq 1 ]; then   # don't expect to need this, but just in case
-         echo "do not need cfp for 1 thread"
-         if [ "$launcher" = aprun_cfp ]; then
-           aprun -n 1 -N 1 -d 1 sh $DATA/poe.cmdfile
-         else
-           sh $DATA/poe.cmdfile
-         fi
-      elif [ "$launcher" = cfp ]; then 
-         export MP_CSS_INTERRUPT=yes
-         launcher_DUMP=${launcher_DUMP:-mpiexec} 
-         $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
-
- elif [ "$launcher" = aprun_cfp ]; then
-         if [[ -z ${DUMPStpn:-""} ]]; then   # pes per node
-            # cfp is faster with extra thread so add one if there is room.
-            #   For now, going with 20 as default max rather than 24.
-            if [ $nthreads -lt 20 ]; then
-               DUMPStpn=$(($nthreads+1))
-            else
-               DUMPStpn=20
-            fi
-         fi
-         NPROCS=$(($ncnodes*$DUMPStpn))  # concurrent processes
-         aprun -j 1 -n${NPROCS} -N${DUMPStpn} -d 1 --cc depth cfp $DATA/poe.cmdfile
-      fi
+      export MP_CSS_INTERRUPT=yes
+      launcher_DUMP=${launcher_DUMP:-mpiexec} 
+      $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1710,31 +1649,19 @@ if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
       echo
    fi
 else
-   if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
-      set +x
-      echo
-      echo " ############################################################# "
-      echo " --> Option to use background threads is disabled on Cray-XC40."
-      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
-      echo " ############################################################# "
-      echo
-      set -x
-      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
-   else
-      echo "Running threads serially"
-      [ $DUMP_group1 = YES ]  &&  ./thread_1 
-      [ $DUMP_group2 = YES ]  &&  ./thread_2 
-      [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3 
-      [ $DUMP_group4 = YES ]  &&  ./thread_4 
-      [ $DUMP_group5 = YES ]  &&  ./thread_5 
-      [ $DUMP_group6 = YES ]  &&  ./thread_6 
-      [ $DUMP_group7 = YES ]  &&  ./thread_7 
-      [ $DUMP_group8 = YES ]  &&  ./thread_8 
-      [ $DUMP_group9 = YES ]  &&  ./thread_9 
-      [ $DUMP_group10 = YES ]  &&  ./thread_10 
-      [ $DUMP_group11 = YES ]  &&  ./thread_11 
+   echo "Running threads serially"
+   [ $DUMP_group1 = YES ]  &&  ./thread_1 
+   [ $DUMP_group2 = YES ]  &&  ./thread_2 
+   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3 
+   [ $DUMP_group4 = YES ]  &&  ./thread_4 
+   [ $DUMP_group5 = YES ]  &&  ./thread_5 
+   [ $DUMP_group6 = YES ]  &&  ./thread_6 
+   [ $DUMP_group7 = YES ]  &&  ./thread_7 
+   [ $DUMP_group8 = YES ]  &&  ./thread_8 
+   [ $DUMP_group9 = YES ]  &&  ./thread_9 
+   [ $DUMP_group10 = YES ]  &&  ./thread_10 
+   [ $DUMP_group11 = YES ]  &&  ./thread_11 
 #     wait
-   fi
 fi
 
 #  if ADPUPA_wait is YES, adpupa is dumped AFTER all other dump threads have
