@@ -10,12 +10,12 @@
 #####################################################################
 # Submit notes:
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jglobal_*.wc2.lsf
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 cycbsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 cycqsub jglobal_*.wc2.lsf
 # cycbsub location: /u/Diane.Stokes/bin
 # cycbsub location: /u/Shelley.Melchior/bin
-# cycbsub location: /u/Iliana.Genkova/bin (copy of Nick's)
+# cycqsub location: /u/Iliana.Genkova/bin (copy of Nick's)
 #####################################################################
 
 set -xu

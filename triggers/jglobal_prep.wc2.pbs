@@ -15,10 +15,10 @@
 ##############################################
 # Submit notes:
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_prep.ph3.lsf
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jglobal_prep.ph3.lsf
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_prep.ph3.lsf
-# cycbsub location: /u/Iliana.Genkova/bin 
+# > jtyp=gdas cyc=00 desc=somethingfun cycqsub jglobal_prep.ph3.lsf
+# cycqsub location: /u/Iliana.Genkova/bin 
 # cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
 ##############################################
 
@@ -54,10 +54,6 @@ fi
 # source moduleload file
 # GitHub location: release/obsproc.v1.0.0/triggers/moduleload
 . /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
-
-# load correct version bufr_dump for WCOSS2
-module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
-module load bufr_dump/1.0.0
 
 ###
 #########################################

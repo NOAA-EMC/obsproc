@@ -10,9 +10,9 @@
 ##############################################
 # Submit notes:
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jglobal_*.wc2.lsf
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 desc=somethingfun cycbsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 desc=somethingfun cycqsub jglobal_*.wc2.lsf
 # cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
 ##############################################
 
