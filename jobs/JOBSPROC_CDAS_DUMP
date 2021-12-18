@@ -273,10 +273,10 @@ export BACK=${BACK:-off}  # option to use background threads in dumpjb
 
 if [ $COPY_TO_ARKV == YES ]; then
   if [[ "$RUN_ENVIR" == nco ]]; then
-    export COMARC=${COMROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`
+    export COMARC=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.`echo $PDY | cut -c1-6`)
     mkdir -m 775 -p $COMARC
   else
-    export COMARC=${COMARC:-${COMOUT_ROOT:?}/${RUN}/${envir}/${RUN}.`echo $PDY | cut -c1-6`}
+    export COMARC=${COMARC:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.`echo $PDY | cut -c1-6`}
     mkdir -m 755 -p $COMARC
   fi
 fi
