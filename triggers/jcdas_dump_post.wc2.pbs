@@ -144,11 +144,3 @@ export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${JTYP}.${PDY}
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_DUMP_POST
 exit
-
-# Kick off prep1 job
-err=$?
-if [ $err -eq 0 ]; then
-  unset LSB_SUB_RES_REQ
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/Notes/jobsWCOSS/CDAS/jcdas_prep1.wc2.pbs
-fi
