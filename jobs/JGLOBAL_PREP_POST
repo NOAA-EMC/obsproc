@@ -28,10 +28,6 @@ echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
 echo
 set -x
 
-# Retrieve GFS version to be used in obsproc/ush/gdas_counts.sh
-VERSION_FILE_gfs=${VERSION_FILE_gfs:-$NWROOT/versions/gfs.ver}
-[ -f $VERSION_FILE_gfs ] && . $VERSION_FILE_gfs
-
 ################################
 # Print out version information
 ################################
@@ -51,13 +47,6 @@ set -x
 #   On luna/surge may need to initialize the Modules package to find
 #   the module command.  Will do so for either system.
 #####################################################################
-if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-  . /opt/modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -128,8 +117,9 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${NWROOT:?}/obsproc.${obsproc_ver:?\
+-${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
+
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
@@ -159,26 +149,25 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMIN=${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
+  export COMOUT=${COMROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/$obsproc_ver/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 fi
 
 # The following are used by $PROCESS_TIMETWINS in the GDAS when it is YES
 # -----------------------------------------------------------------------
-#### Need to rethink these for WCOSS2 #####
-export COMINGFS=${COMINGFS:-${COMIN_ROOT:?}/${NET}/${envir}/${NET}.${PDY}/${cyc}/${COMPONENT}}
-export COMIN1=${COMIN1:-${COMIN_ROOT:?}/${NET}/${envir}/${RUN}.}
+export COMINGFS=${COMINGFS:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${NET}.${PDY}/${cyc}/${COMPONENT}}
+export COMIN1=${COMIN1:-${COMIN_ROOT:?}/obsproc/$obsproc_ver/${RUN}.}
 
 #################################################################
 # SETUP GDAS AND GFS POST-ANALYSIS PREPBUFR PROCESSING VARIABLES
@@ -212,25 +201,25 @@ elif [ $RUN = gdas ]; then
     MONS=(null JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC)
     MON=${MONS[10#$MM]}   # get month string from array MONS.
     YYYYMM=`echo $PDY  | cut -c1-6`
-    if [[ "$RUN_ENVIR" == nco ]]; then
-      export DATCOMIN=${COMIN_ROOT:?}/${NET}/${envir}/gdascounts
-      export SATCOMIN=${COMIN_ROOT:?}/${NET}/${envir}/gdascounts
-      export ARCHCOMIN=${COMIN_ROOT:?}/${NET}/${envir}
-      export DATCOM1_IN=${COMIN_ROOT:?}/${NET}/${envir}/gdascounts
-      export DATCOMOUT_dir=${COMROOT:?}/${NET}/${envir}/gdascounts/data_counts.$YYYYMM
-      export SATCOMOUT_dir=${COMROOT:?}/${NET}/${envir}/gdascounts/satcounts.$YYYYMM
-      export ARCHCOMOUT=${COMROOT:?}/${NET}/${envir}  # used in gdascounts_archive_pyear.sh
-      export DATCOM1_OUT=${COMROOT:?}/${NET}/${envir}/gdascounts
+    if [[ "$RUN_ENVIR" == nco ]]; then 
+      export DATCOMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts
+      export SATCOMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts
+      export ARCHCOMIN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}
+      export DATCOM1_IN=${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts
+      export DATCOMOUT_dir=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts/data_counts.$YYYYMM
+      export SATCOMOUT_dir=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts/satcounts.$YYYYMM
+      export ARCHCOMOUT=${COMROOT:?}/obsproc/${obsproc_ver}  # used in gdascounts_archive_pyear.sh
+      export DATCOM1_OUT=${COMROOT:?}/obsproc/${obsproc_ver}/gdascounts
       mkdir -m 775 -p $DATCOMOUT_dir $SATCOMOUT_dir $ARCHCOMOUT $DATCOM1_OUT
     else
-      export DATCOMIN=${DATCOMIN:-${COMIN_ROOT:?}/${NET}/${envir}/gdascounts}
-      export SATCOMIN=${SATCOMIN:-${COMIN_ROOT:?}/${NET}/${envir}/gdascounts}
-      export ARCHCOMIN=${ARCHCOMIN:-${COMIN_ROOT:?}/${NET}/$envir}
-      export DATCOM1_IN=${DATCOM1_IN:-${COMIN_ROOT:?}/${NET}/${envir}/gdascounts}
-      export DATCOMOUT_dir=${DATCOMOUT_dir:-${COMOUT_ROOT:?}/${NET}/${envir}/gdascounts/data_counts.$YYYYMM}
-      export SATCOMOUT_dir=${SATCOMOUT_dir:-${COMOUT_ROOT:?}/${NET}/${envir}/gdascounts/satcounts.$YYYYMM}
-      export ARCHCOMOUT=${ARCHCOMOUT:-${COMOUT_ROOT:?}/${NET}/$envir}  # used in gdascounts_archive_pyear.sh
-      export DATCOM1_OUT=${DATCOM1_OUT:-${COMOUT_ROOT:?}/${NET}/${envir}/gdascounts}
+      export DATCOMIN=${DATCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
+      export SATCOMIN=${SATCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
+      export ARCHCOMIN=${ARCHCOMIN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}}
+      export DATCOM1_IN=${DATCOM1_IN:-${COMIN_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
+      export DATCOMOUT_dir=${DATCOMOUT_dir:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}/gdascounts/data_counts.$YYYYMM}
+      export SATCOMOUT_dir=${SATCOMOUT_dir:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}/gdascounts/satcounts.$YYYYMM}
+      export ARCHCOMOUT=${ARCHCOMOUT:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}} #proposed location
+      export DATCOM1_OUT=${DATCOM1_OUT:-${COMOUT_ROOT:?}/obsproc/${obsproc_ver}/gdascounts}
       mkdir -m 775 -p $DATCOMOUT_dir $SATCOMOUT_dir $ARCHCOMOUT $DATCOM1_OUT
     fi
   fi 
@@ -238,12 +227,12 @@ elif [ $RUN = gdas ]; then
     export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
     export SHPNAMDIR_DCOM=${SHPNAMDIR:-${DCOMROOT}/prod/ndbc}
     if [[ "$RUN_ENVIR" == nco ]]; then
-      export VOSarch_IN=${COMROOTp2:?}/arch/${envir}/VOS
-      export VOSarch_OUT=${COMROOTp2:?}/arch/${envir}/VOS
+      export VOSarch_IN=${COMROOT:?}/arch/VOS
+      export VOSarch_OUT=${COMROOT:?}/arch/VOS
       mkdir -m 755 $VOSarch_OUT
     else
-      export VOSarch_IN=${VOSarch_IN:-${COMROOTp2:?}/arch/${envir}/VOS}
-      export VOSarch_OUT=${VOSarch_OUT:-${COMOUT_ROOT:?}/arch/${envir}/VOS}
+      export VOSarch_IN=${VOSarch_IN:-${COMROOT:?}/arch/VOS}
+      export VOSarch_OUT=${VOSarch_OUT:-${COMOUT_ROOT:?}/arch/VOS}
       mkdir -p -m 755 $VOSarch_OUT
     fi
   fi 
@@ -255,7 +244,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exprep_post.sh.ecf
+$SCRIPTSobsproc/exprep_post.sh 
 eval err_${RUN}_prep_post=$?
 eval [[ \$err_${RUN}_prep_post -ne 0 ]] && $DATA/err_exit
 
