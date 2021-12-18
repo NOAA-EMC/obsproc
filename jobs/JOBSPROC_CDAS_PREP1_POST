@@ -36,12 +36,6 @@ echo
 echo "####################################################################"
 echo
 echo "Current OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_DUMP version used by this job is ${bufr_dump_ver:-not set}"
-echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
-     then echo "bufr_dump is required but not loaded! Exiting...";
-     exit;
-fi
 echo
 echo "####################################################################"
 echo
@@ -179,20 +173,18 @@ fi
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}
-  export COMOUT=${COMROOT:?}/obsproc/${RUN}.${PDY}
-  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${RUN}.${PDY}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${RUN}.${PDY}}
-  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
