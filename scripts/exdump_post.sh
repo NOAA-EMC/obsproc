@@ -1,7 +1,7 @@
 #!/bin/ksh
 #####################################################################
 echo "----------------------------------------------------------"
-echo "exdump_post.sh version $obsproc_dump_post_ver - If requested:"
+echo "exdump_post.sh version $obsproc_ver - If requested:       "
 echo "       1) Generates combined dump STATUS file             "
 echo "       2) Prepares data counts for the SDM                "
 echo "       3) Removes or masks restricted data from dump files"
@@ -10,7 +10,6 @@ echo "          (meaningless on WCOSS)                          "
 echo "       5) Lists the contents of dump files                "
 echo "       6) Updates dump data count average tables          "
 echo "----------------------------------------------------------"
-echo "        Dec 16 2021 - Renamed all *.sh.ecf scripts to *.sh" 
 #####################################################################
 #
 # modification history:
@@ -59,6 +58,7 @@ echo "        Dec 16 2021 - Renamed all *.sh.ecf scripts to *.sh"
 #                        restricted reports in BUFR_REMOREST processing, but
 #                        whose reports are retained and instead station IDs
 #                        are masked.
+# 09 Dec 2021 Esposito - Updated for use on WCOSS2.
 #####################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
@@ -78,14 +78,6 @@ $DATA/postmsg "$jlogfile" "$msg"
 #  determine local system name and type if available
 #  -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
-getsystp_err=$?
-if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
-   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
-   sys_tp=""
-fi
-echo sys_tp is set to: $sys_tp
 
 cat break > $pgmout
 
@@ -572,7 +564,7 @@ EOFthread
    done
 
    if [[ "${MPMD}" == YES ]]; then
-     if [ -s $DATA/mpmd.cmdfile ]; then
+      if [ -s $DATA/mpmd.cmdfile ]; then
       echo
       echo "------------------------------------------------------------------"
       echo "Invoking poe or poe-like mpmd processing: `date -u`"
@@ -586,32 +578,19 @@ EOFthread
       else
          which cfp
          which_cfp_err=$?
-         if [ $which_cfp_err -eq 0 ]; then
-            export MP_CSS_INTERRUPT=yes
-            mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile 2>&1 
-            err=$?; $DATA/err_chk
-         else
-            set +x
-            echo -e "\n *** FATAL ERROR:  cfp command not found!    ***"
-            echo -e   " ***   Either load cfp module or set MPMD=NO ***\n"
-            set -x
-            msg="***FATAL ERROR: cfp command not found for MPMD run on IBM"
-            $DATA/postmsg "$jlogfile" "$msg"
-            $DATA/err_exit
-         fi # end $which_cfp_err check
-      fi # end $ntasks check
-     else
-      echo
-      echo "==> There are no tasks in MPMD Command File - MPMD not run"
-      echo
-     fi # end $DATA/mpmd.cmdfile check
-
-     echo
-     echo "Ending mpmd processing  : `date -u`"
-     echo "--------------------------------------------------------------------"
-     echo
-     echo
+         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
    fi
+else
+   echo
+   echo "==> There are no tasks in MPMD Command File - MPMD not run"
+   echo
+fi
+echo
+echo "Ending mpmd processing  : `date -u`"
+echo "--------------------------------------------------------------------"
+echo
+echo
+fi
 
    for n in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
    do
@@ -624,6 +603,8 @@ EOFthread
 
 #  endif loop $PROCESS_LISTERS
 fi
+
+
 
 if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
 
