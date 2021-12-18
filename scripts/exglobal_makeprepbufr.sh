@@ -3,7 +3,7 @@
 
 #############################################################################
 echo "----------------------------------------------------------------------"
-echo "exglobal_makeprepbufr.sh.ecf - Global (GDAS, GFS) model prepbufr      "
+echo "exglobal_makeprepbufr.sh     - Global (GDAS, GFS) model prepbufr      "
 echo "                               processing                             "
 echo "----------------------------------------------------------------------"
 echo "History:                                                              "
@@ -21,7 +21,7 @@ echo "                Update to remove obsolete functionality of adding     "
 echo "                bufr format buoy reports to nsstbufr file.  These data"
 echo "                are now included in the sfcshp file, already included "
 echo "                in the nsstbufr file.                                 " 
-echo "  Dec 16 2021 - Renamed all *.sh.ecf scripts to *sh                   "
+echo "  Dec 16 2021 - Renamed all *.sh.ecf scripts to *.sh                  "
 echo "----------------------------------------------------------------------"
 echo 
 #############################################################################
