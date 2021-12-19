@@ -1,5 +1,5 @@
 #!/bin/ksh
-# JAIRNOW_DUMP - 24 Oct 2014
+# JOBSPROC_AIRNOW_DUMP - 24 Oct 2014
 #  J-job script to run AIRNOW_DUMP processing (ozone dump & mini pb creation)
 #
 # Dump AIRNOW data and encode into its own mini-PREPBUFR file for use in
@@ -13,11 +13,12 @@
 #               added HOMEobsproc_prep assignment (w/ defaults)
 #               set EXECPREP & EXECFIX to use HOMEobsproc_prep by default
 # 17 Dec 2019 - modified to run on WCOSS ph3
+# 19 Dec 2021 - modified to run on WCOSS2
 #--
 set -xa
 date -u
 
-echo ; echo "Starting job script JAIRNOW_DUMP (`date -u`)"
+echo ; echo "Starting job script JOBSPROC_AIRNOW_DUMP (`date -u`)"
 
 ###################################################################
 # Set DEBUG LEVEL - modifies info in execution trace prompt string
@@ -52,11 +53,9 @@ set +x
 echo
 echo "####################################################################"
 echo
-echo "Current OBSPROC_AIRNOW version is ${obsproc_airnow_ver:-not set}"
-echo "OBSPROC_DUMP version used by this job is ${obsproc_dump_ver:-not set}"
-echo "OBSPROC_SHARED_BUFR_DUMPLIST version used by this job is" \
-       "${obsproc_shared_bufr_dumplist_ver:-not set}"
-echo "OBSPROC_PREP version used by this job is ${obsproc_prep_ver:-not set}"
+echo "OBSPROC version is ${obsproc_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
+     "${bufr_dump_ver:-not set}"
 echo
 echo "####################################################################"
 echo
@@ -64,15 +63,7 @@ set -x
 
 #####################################################################
 # List modules loaded for this job
-#   May need to initialize Modules package to find the module command.
 #####################################################################
-if [ -f /opt/modules/default/init/sh ]; then  # on luna/surge
-  . /opt/modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/Modules/default/init/sh ]; then  # on tide/gyre
-  . /usrx/local/Modules/default/init/sh 2>/dev/null
-elif [ -f /usrx/local/prod/modules/default/init/sh ]; then # on venus/mars
-  . /usrx/local/prod/modules/default/init/sh 2>/dev/null
-fi
 set +x
 echo
 echo "####################################################################"
@@ -86,6 +77,7 @@ set -x
 ##################################
 # Specify NET, RUN and model Name
 ##################################
+export obsNET=${obsNET:-obsproc}
 export NET=${NET:-hourly}
 # model was assigned to obsproc_airnow in ecflow
 #export model=${model:-hourly}
@@ -94,6 +86,7 @@ export RUN=${RUN:-aqm}  # Used in child scripts for file names
 
 set +x
 echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
 echo model is ${model:?"###FATAL ERROR \"model\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
@@ -140,27 +133,24 @@ export SENDCOM=${SENDCOM:-YES}
 # Paths for obsproc items
 # -----------------------
 export HOMEobsproc=${HOMEobsproc:\
--/${NWROOT:?}/obsproc.${obsproc_ver:?\
+-/${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
 -$HOMEobsproc/scripts}
 
-# --------------------------------------
+# ---------------------------------------------------------------------
 # Paths for dump and bufr_dumplist items
-# --------------------------------------
-export HOMEbufr_util=${HOMEbufr_util:\
--/${NWROOT:?}/bufr_util.${bufr_util_ver:?\
-"###FATAL ERROR \"bufr_util_ver\" is not set"}}
-
-export USHbufr_util=${USHbufr_util:-$HOMEbufr_util/ush}
-export FIXbufr_util=${FIXbufr_util:-$HOMEbufr_util/fix}
+# Default variables are pre-defined when the bufr_dump module is loaded
+# ---------------------------------------------------------------------
+export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
+export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 # NOTE: path to dump executables defaults to $HOMEobsproc_dump/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------
-export ushscript_dump=${ushscript_dump:-$USHbufr_util}
+export ushscript_dump=${ushscript_dump:-$USHbufr_dump}
 
 # -----------------------------------------
 # Paths for combined obsproc and dump items
@@ -178,8 +168,8 @@ export FIXPREP=${FIXPREP:-$HOMEobsproc/fix}
 
 # TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/gpfs/dell1/nco/ops/dcom}
-export TANK=${TANK:-${DCOMROOT}/prod}
+export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
+export TANK=${TANK:-${DCOMROOT}}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -218,11 +208,11 @@ for pdy in $PDYm1 $PDYm5; do
   export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
   if [ "$RUN_ENVIR" = nco ]; then
-    export COMIN=${COMIN_ROOT:?}/obsproc/${model}.${pdy}
-    export COMOUT=${COMROOT:?}/obsproc/${model}.${pdy}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
+    export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
     mkdir -m 775 -p $COMOUT
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${model}.${pdy}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${pdy}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory (e.g.,
@@ -232,7 +222,7 @@ for pdy in $PDYm1 $PDYm5; do
     export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
 #    export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${model}.${pdy}}
 # ! Do not inherit value of COMOUT from previous run of pdy loop
-    export COMOUT=${COMOUT_ROOT}/obsproc/${model}.${pdy}
+    export COMOUT=${COMOUT_ROOT}/${obsNET}/${obsproc}/${model}.${pdy}
     mkdir -m 755 -p $COMOUT
   fi # RUN_ENVIR = nco 
 
@@ -253,7 +243,7 @@ for pdy in $PDYm1 $PDYm5; do
 #####################
 # Execute the script
 #####################
-  $SCRIPTSobsproc/exairnow_dump.sh.ecf
+  $SCRIPTSobsproc/exairnow_dump.sh
 
   err_airnow_dump=$?
   [[ $err_airnow_dump -ne 0 ]] && $DATA/err_exit
@@ -289,11 +279,11 @@ for tmmark in tm024 tm120; do
   export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
   if [ "$RUN_ENVIR" = nco ]; then
-    export COMIN=${COMIN_ROOT:?}/obsproc/${model}.${PDY}
-    export COMOUT=${COMROOT:?}/obsproc/${model}.${PDY}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
+    export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
     mkdir -m 775 -p $COMOUT
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/obsproc/${model}.${PDY}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc}/${model}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory (e.g.,
@@ -301,10 +291,10 @@ for tmmark in tm024 tm120; do
 #  from a previous checkout run (this could mess up some logic downstream)
 # ----------------------------------------------------------------------------
     export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-    export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${model}.${PDY}}
+    export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${model}.${PDY}}
 #    export COMOUT=${COMOUT:-${COMOUT_ROOT}/${NET}/${envir}/${model}.${pdy}}
 # ! Do not inherit value of COMOUT from previous run of pdy loop
-    export COMOUT=${COMOUT_ROOT}/obsproc/${model}.${PDY}
+    export COMOUT=${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${model}.${PDY}
     mkdir -m 755 -p $COMOUT
   fi # RUN_ENVIR = nco 
 
@@ -325,7 +315,7 @@ for tmmark in tm024 tm120; do
 #####################
 # Execute the script
 #####################
-  $SCRIPTSobsproc/exairnow_dump.sh.ecf
+  $SCRIPTSobsproc/exairnow_dump.sh
 
   err_airnow_dump=$?
   [[ $err_airnow_dump -ne 0 ]] && $DATA/err_exit
@@ -362,8 +352,8 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
 
 if [ "$KEEPDATA" != YES ]; then
@@ -371,6 +361,6 @@ if [ "$KEEPDATA" != YES ]; then
    rm -rf $DATA
 fi
 
-set -x ; echo ; echo "JAD: normal end of JAIRNOW_DUMP ($(date))"
+set -x ; echo ; echo "JAD: normal end of JOBSPROC_AIRNOW_DUMP ($(date))"
 exit
-#---end JAIRNOW_DUMP
+#---end JOBSPROC_AIRNOW_DUMP
