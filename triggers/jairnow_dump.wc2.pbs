@@ -129,7 +129,7 @@ export TANK=/lfs/h1/ops/canned/dcom
 export DEBUG_LEVEL=3
 
 
-export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com/
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
 export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${model}.${PDY}
 mkdir -p $COMOUT_ROOT
 

@@ -185,7 +185,7 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 # Run setpdy and initialize PDY variables
 ##########################################
 ./setpdy.sh
-. PDY
+. $DATA/PDY
 
 DATA_save=$DATA
 
@@ -222,7 +222,7 @@ for pdy in $PDYm1 $PDYm5; do
     export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
 #    export COMOUT=${COMOUT:-${COMOUT_ROOT}/obsproc/${model}.${pdy}}
 # ! Do not inherit value of COMOUT from previous run of pdy loop
-    export COMOUT=${COMOUT_ROOT}/${obsNET}/${obsproc}/${model}.${pdy}
+    export COMOUT=${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${model}.${pdy}
     mkdir -m 755 -p $COMOUT
   fi # RUN_ENVIR = nco 
 
@@ -283,7 +283,7 @@ for tmmark in tm024 tm120; do
     export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
     mkdir -m 775 -p $COMOUT
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc}/${model}.${PDY}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory (e.g.,
