@@ -1,8 +1,7 @@
 #!/bin/bash
 #################################
 #PBS -N obsproc_%JTYP%_dump_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Shelley.Melchior/obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Shelley.Melchior/obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -j oe
 #PBS -S /bin/bash
 #PBS -q dev
 #PBS -A OBSPROC-DEV
@@ -11,8 +10,10 @@
 #PBS -l debug=TRUE
 #####################################################################
 # Submit notes:
+# submit from dir where you wish output log file to be written (# PBS -j oe)
+# output log file assumes name as assigned in "# PBS -N" with unique jobid suffix
 # For specific PDY:
-# > jtyp=airnow cyc=00 PDY=20211219 desc=somethingfun cycqsub jairnow_dump.wc2.pbs
+# > jtyp=airnow cyc=00 PDY=20211219 desc=somethingfun bash -l cycqsub /full/path/to/jairnow_dump.wc2.pbs
 # For latest/current PDY:
 # > jtyp=rap cyc=00 cycqsub jairnow_dump.wc2.pbs
 # cycqsub location: /u/Nicholas.Esposito/bin
