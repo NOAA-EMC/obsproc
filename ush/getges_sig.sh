@@ -181,7 +181,7 @@ fi
 #-------------------------------------------------------------------------------
 # Default top level directories.
 export GETGES_COM=${GETGES_COM:-${COMROOT}}
-export GETGES_NWG=${GETGES_NWG:-${GESROOT}}
+export GETGES_NWG=${GETGES_NWG:-${COMROOT}/nwges}
 export GETGES_GLO=${GETGES_GLO:-/gloptmp}
 
 #-------------------------------------------------------------------------------

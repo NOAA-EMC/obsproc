@@ -235,7 +235,7 @@ export envir_getges=${envir_getges:-prod}
 export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gdas.$PDY)/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gfs.$PDY)/${cyc}/${COMPONENT}}
 if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then
-  export GETGES_NWG=${GETGES_NWG:-$GESROOT}  # this needs work for wc2
+  export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges} 
   export GETGES_COM=${GETGES_COM:-$COMROOT}
 fi
 

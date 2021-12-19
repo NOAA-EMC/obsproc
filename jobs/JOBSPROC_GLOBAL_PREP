@@ -202,7 +202,7 @@ export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
 
 export envir_getges=${envir_getges:-$envir}
 export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
-export GETGES_NWG=${GETGES_NWG:-$GESROOT}   # this needs work for wc2
+export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges} 
 export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges})/gfs/${gfs_ver}/gdas.$PDY/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges})/gfs/${gfs_ver}/gfs.$PDY/${cyc}/${COMPONENT}}
 

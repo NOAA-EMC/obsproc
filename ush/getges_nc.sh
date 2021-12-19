@@ -992,7 +992,7 @@ elif [[ "$netwk" = "global" ]];then
    echo "getges.sh ERROR: The \$COMINgfs variable must be defined." >&2
    exit 1
  fi
- GETGES_NWG=${GETGES_NWG:-${GESROOT:?}}
+ GETGES_NWG=${GETGES_NWG:-${COMROOT:?}/nwges}
  case $typef in
   biascr) geslist='
    $GETGES_NWG/$envir/gdas.$day/gdas.t${cyc}z.abias
