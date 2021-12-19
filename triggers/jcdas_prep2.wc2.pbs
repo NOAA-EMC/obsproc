@@ -137,14 +137,15 @@ export DATA=/lfs/h2/emc/ptmp/$USER/pdy
 mkdir -p $DATA
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
 
 pwd=$(pwd)
 cd $DATA
 $UTILROOT/ush/setpdy.sh 2
 cd $pwd
 . $DATA/PDY
-export COMIN=$COMIN_ROOT/obsproc/${JTYP}.${PDYm1}
-export COMOUT=$COMIN_ROOT/obsproc/${JTYP}.${PDYm1}
+export COMIN=$COMIN_ROOT/obsproc/${obsproc_ver}/${JTYP}.${PDYm1}
+export COMOUT=$COMOUT_ROOT/obsproc/${obsproc_ver}/${JTYP}.${PDYm1}
 
 export GETGES_COM=/lfs/h1/ops/canned/com/gfs/v16.2/
 export GESROOT=/lfs/h1/ops/canned/com/gfs/v16.2/

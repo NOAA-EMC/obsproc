@@ -136,7 +136,7 @@ cd $pwd
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
 #export COMIN=${COMIN_ROOT}/obsproc/${JTYP}.${PDYm1}
 #export COMOUT_ROOT=/gpfs/dell2/ptmp/$USER/com
-#export COMOUT=${COMOUT_ROOT}/obsproc/${JTYP}.${PDYm1}
+#export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}?${JTYP}.${PDYm1}
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_PREP2_POST
 err=$?

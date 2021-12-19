@@ -140,7 +140,8 @@ export DATAROOT=/lfs/h2/emc/ptmp/$USER
 export jlogfile=$DATAROOT/${JTYP}_dump_post.$PDY.jlogfile
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com
-export COMOUT=/lfs/h2/emc/ptmp/$USER/com/obsproc/${JTYP}.${PDY}
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
+export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_DUMP_POST
 exit

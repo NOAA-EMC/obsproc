@@ -132,7 +132,7 @@ export DATAROOT=/lfs/h2/emc/ptmp/${USER}
 export jlogfile=/lfs/h2/emc/ptmp/${USER}/${JTYP}_prep1.$PDY.jlogfile
 
 export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com
-export COMIN=$COMIN_ROOT/obsproc/${JTYP}.${PDY}
+export COMIN=$COMIN_ROOT/obsproc/${obsproc_ver}/${JTYP}.${PDY}
 export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_PREP1
