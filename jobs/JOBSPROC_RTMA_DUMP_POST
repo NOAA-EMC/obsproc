@@ -71,7 +71,6 @@ set +x
 echo
 echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-#echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
 
@@ -87,6 +86,8 @@ if [ $err_ru = 0 ]; then
 else
   export RUN=${RUN:-rtma}     # normal, hourly cycle run
 fi
+
+echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 
 
 ##############################
