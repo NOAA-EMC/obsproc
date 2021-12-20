@@ -36,7 +36,7 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BURF_DUMP version used by this job, for dumplist, is" \
+echo "BUFR_DUMP version used by this job, for dumplist, is" \
        "${bufr_dump_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
