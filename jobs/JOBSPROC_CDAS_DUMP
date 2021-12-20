@@ -125,7 +125,7 @@ export HOMEobsproc=${HOMEobsproc:\
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
 -$HOMEobsproc/scripts}
 
-# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
+# NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------

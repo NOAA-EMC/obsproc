@@ -133,7 +133,7 @@ export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
 export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
-# NOTE: path to dump executables defaults to $HOMEbufr_util/exec in dumpjb
+# NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
 # directory path to data dump script executed in model script
 # -----------------------------------------------------------

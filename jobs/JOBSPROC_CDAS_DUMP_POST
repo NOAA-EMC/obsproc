@@ -222,8 +222,8 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_post
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
 
-[ -n "$bufr_util_ver" ]  &&  \
- echo "BUFR_UTIL version used by this job is $bufr_util_ver" >> \
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
 
 if [ "$KEEPDATA" != YES ]; then

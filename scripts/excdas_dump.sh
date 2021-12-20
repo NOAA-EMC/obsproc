@@ -438,7 +438,7 @@ DTIM_latest_adpsfc=${DTIM_latest_adpsfc:-"+2.99"}
 # check for wndsat tank presence in past 10 days
 wndsat=""
 err_check_tanks=0
-##########sh $USHbufr_util/check_tanks.sh wndsat
+##########sh $USHbufr_dump/check_tanks.sh wndsat
 ##########err_check_tanks=$?
 err_check_tanks=99 # comment out 2 lines above & add this line to ensure wndsat
                    # is not ever dumped
@@ -849,7 +849,7 @@ DTIM_latest_trkob=${DTIM_latest_trkob:-"+2.99"}
 # check for atms tank presence in past 10 days
 atms=""
 err_check_tanks=0
-sh $USHbufr_util/check_tanks.sh atms
+sh $USHbufr_dump/check_tanks.sh atms
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    atms=atms
@@ -859,7 +859,7 @@ fi
 # check for cris tank presence in past 10 days
 cris=""
 err_check_tanks=0
-sh $USHbufr_util/check_tanks.sh cris
+sh $USHbufr_dump/check_tanks.sh cris
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    cris=cris
@@ -869,7 +869,7 @@ fi
 # check for mls tank presence in past 10 days
 mls=""
 err_check_tanks=0
-sh $USHbufr_util/check_tanks.sh mls
+sh $USHbufr_dump/check_tanks.sh mls
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    mls=mls
