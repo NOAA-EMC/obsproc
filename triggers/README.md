@@ -1,3 +1,5 @@
+# For reference purposes only!!
+These are a conglomeration of various developers' trigger scripts that work in their user environment. Unified trigger scripts are a forthcoming project.
 
 # OBSPROC CDAS trigger script files
 jcdas_dump.wc2.pbs
@@ -56,4 +58,4 @@ jdump_monitor.wc2.pbs
 jdump_alert.wc2.pbs
 
 # AIRNOW trigger script file
-forthcoming ...
+jairnow.wc2.pbs
