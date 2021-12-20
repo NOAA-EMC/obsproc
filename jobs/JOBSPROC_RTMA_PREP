@@ -59,7 +59,6 @@ set -x
 ###########################
 export obsNET=${obsNET:-obsproc}
 export NET=${NET:-rtma}
-#export RUN=${RUN:-urma}
 
 set +x
 echo
