@@ -1,0 +1,259 @@
+#!/bin/bash
+set -xa
+date -u
+
+###################################################################
+# Set DEBUG LEVEL - modifies info in execution trace prompt string
+###################################################################
+export DEBUG_LEVEL=${DEBUG_LEVEL=1}
+case $DEBUG_LEVEL in
+  1) export PS4='+ ${SECONDS}s + ' ;;       # add seconds (this is typical case)
+  0) export PS4='+ ';;                      # don't include seconds (useful if
+                                            #  want to diff output from 2 runs)
+  2) export PS4='+ ${SECONDS}s:L$LINENO + ';;         # add script line #
+  3) export PS4='+ ${SECONDS}s:${0##*/}:L$LINENO + ';;# add script name & line #
+  4) export PS4='+ ${0##*/}:L$LINENO + ';;  # script name & line (no seconds)
+  *) echo "Unrecognized DEBUG_LEVEL.  Stay with current PS4 setting";;
+esac
+
+########################################
+# Check that required variables are set
+########################################
+set +x
+echo
+echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
+echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
+echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
+echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
+echo
+set -x
+
+###############################
+# Print out version information
+###############################
+set +x
+echo
+echo "####################################################################"
+echo
+echo "OBSPROC version is ${obsproc_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
+     "${bufr_dump_ver:-not set}"
+echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
+     then echo "bufr_dump is required but not loaded! Exiting...";
+     exit;
+fi
+echo
+echo "####################################################################"
+echo
+set -x
+
+#####################################################################
+## List modules loaded for this job.
+######################################################################
+set +x
+echo
+echo "####################################################################"
+echo
+      module list
+echo
+echo "####################################################################"
+echo
+set -x
+
+###########################
+# Specify NET and RUN Name
+###########################
+export obsNET=${obsNET:-obsproc}
+export NET=${NET:-rtma}
+
+set +x
+echo
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
+echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo
+set -x
+
+echo $job | grep "_ru_"
+err_ru=$?
+if [ $err_ru = 0 ]; then
+  export RUN=${RUN:-rtma_ru}  # rapid update w/ sub-hourly cycles
+  set +x
+  echo
+  echo cycM is ${cycM:?"###FATAL ERROR \"cycM\" is not set"}
+  echo
+  set -x
+else
+  export RUN=${RUN:-rtma}     # normal, hourly cycle run
+fi
+
+echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+
+
+##############################
+# Specify cycle and time-mark
+##############################
+export cycle=t${cyc}z
+export tmmark=tm00
+
+###############################
+# Create new working directory
+###############################
+jobid=${jobid:-${job}.$(hostname -s).$$}
+export DATA=${DATA:-$DATAROOT/${jobid}}
+rm -rf $DATA
+mkdir -p $DATA
+cd $DATA
+export pgmout=OUTPUT.$$
+
+######################################
+# Set job log file for postmsg output
+######################################
+jlogfile=${jlogfile:-${DATA}/jlogfile}
+
+#############################################
+# SENDCOM  - Copy files to $COMOUT directory
+# SENDECF  - Flag Events on ECFLOW
+# SENDDBN  - Alert output file to TOC
+#############################################
+export SENDCOM=${SENDCOM:-YES}
+export SENDECF=${SENDECF:-YES}
+export SENDDBN=${SENDDBN:-YES}
+
+##########################
+# Specify Execution Areas
+##########################
+
+# ------------------------
+# Paths for obsproc items
+# ------------------------
+export HOMEobsproc=${HOMEobsproc:\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
+"###FATAL ERROR \"obsproc_ver\" is not set"}}
+
+export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
+export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
+
+#########################################################################
+## Add some prod utilities to working directory
+##########################################################################
+echo "step ############# break ##############################" > ./break
+cp $UTILROOT/ush/err_chk   .; chmod +x err_chk
+cp $UTILROOT/ush/err_exit  .; chmod +x err_exit
+cp $UTILROOT/ush/prep_step .; chmod +x prep_step
+cp $UTILROOT/ush/postmsg   .; chmod +x postmsg
+cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
+
+##########################################
+# Run setpdy and initialize PDY variables
+##########################################
+set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
+setpdy.sh
+. $DATA/PDY
+
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset exported cycle to 4-digit value t<HHMM>z
+#  (Note: This value for $cycle will now be used in this script and in
+#         downstream script exdump_post.sh.ecf)
+
+[ -n "$cycM" ]  &&  cycle=t${cyc}${cycM}z
+
+#########################
+# Define COM directories
+#########################
+export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
+
+if [[ "$RUN_ENVIR" == nco ]]; then
+  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${RUN}.${PDY})}
+  mkdir -m 775 -p $COMOUT
+else
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
+
+# COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
+#  prevent job from writing into a non-unique directory that might already have 
+#  output in it from a previous checkout run for the same cycle
+# -----------------------------------------------------------------------------
+  export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
+  mkdir -m 755 -p $COMOUT
+fi
+
+# comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
+export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})}
+
+# ---------------------------
+# Paths for non-obsproc items
+# ---------------------------
+
+# directory path to data count averaging executed in model script and in
+#  bufr_avgdata.sh
+# ----------------------------------------------------------------------
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN})}
+
+#  .. AVGDarch_OUT is directory path for avg tables output by model script
+#     --------------------------------------------------------------------
+if [[ "$RUN_ENVIR" == nco ]]; then
+  export AVGDarch_OUT=$HOMEarch/avgdata
+  mkdir -p $AVGDarch_OUT
+else
+  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
+  mkdir -p $AVGDarch_OUT
+fi
+
+#  .. OBCNTarch is directory path to write new status files to & read all status
+#     files from {can WRITE to this location only if COPY=YES (the default)}
+#     --------------------------------------------------------------------------
+export OBCNTarch=${OBCNTarch:-$HOMEarch/obcount_30day}
+
+#################################################
+# SETUP RTMA DATA DUMP POST PROCESSING VARIABLES
+#################################################
+
+#########################################################
+# Specify variables specific to this execution of script
+#########################################################
+export PROCESS_DATACOUNTS=NO # Not processed in RTMA run
+export PROCESS_REMOREST=${PROCESS_REMOREST:-YES}
+export PROCESS_UNBLKBUFR=${PROCESS_UNBLKBUFR:-NO}
+export PROCESS_LISTERS=${PROCESS_LISTERS:-YES}
+
+export MPMD=${MPMD:-"NO"}   # do not run listdumps in parallel by default
+
+# Data count average tables are generated in the 23Z run only
+if [ "$cyc" = '23' -a -z "$cycM" ]; then
+   export PROCESS_AVGTABLES=${PROCESS_AVGTABLES:-YES}
+else
+   export PROCESS_AVGTABLES=${PROCESS_AVGTABLES:-NO}
+fi
+
+env
+
+#####################
+# Execute the script
+#####################
+$SCRIPTSobsproc/exdump_post.sh
+eval err_${RUN}_dump_post=$?
+eval [[ \$err_${RUN}_dump_post -ne 0 ]] && $DATA/err_exit
+
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_post_ran
+
+> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
+[ -n "$obsproc_ver" ]  &&  \
+ echo "OBSPROC version is $obsproc_ver" >> \
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
+
+[ -n "$bufr_dump_ver" ]  &&  \
+ echo "BUFR_DUMP version used by this job is  $bufr_dump_ver" >> \
+ $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
+
+
+if [ "$KEEPDATA" != YES ]; then
+   cd $DATAROOT
+   rm -rf $DATA
+fi
+date -u
+
+exit

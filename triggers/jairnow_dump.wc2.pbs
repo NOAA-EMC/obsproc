@@ -1,0 +1,141 @@
+#!/bin/bash
+#################################
+#PBS -N obsproc_%JTYP%_dump_%DESC%_%CC%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q dev
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=3:mem=1000MB
+#PBS -l walltime=00:30:00
+#PBS -l debug=TRUE
+#####################################################################
+# Submit notes:
+# submit from dir where you wish output log file to be written (# PBS -j oe)
+# output log file assumes name as assigned in "# PBS -N" with unique jobid suffix
+# For specific PDY:
+# > jtyp=airnow cyc=00 PDY=20211219 desc=somethingfun bash -l cycqsub /full/path/to/jairnow_dump.wc2.pbs
+# For latest/current PDY:
+# > jtyp=rap cyc=00 cycqsub jairnow_dump.wc2.pbs
+# cycqsub location: /u/Nicholas.Esposito/bin
+# cycqsub location: /u/Shelley.Melchior/bin
+#####################################################################
+
+NCPU=`wc -l < $PBS_NODEFILE`
+echo ------------------------------------------------------
+echo ' This job is allocated on '${NCPU}' cpu(s)'
+echo 'Job is running on node(s): '
+cat $PBS_NODEFILE
+echo ------------------------------------------------------
+echo PBS: qsub is running on $PBS_O_HOST
+echo PBS: originating queue is $PBS_O_QUEUE
+echo PBS: executing queue is $PBS_QUEUE
+echo PBS: working directory is $PBS_O_WORKDIR
+echo PBS: execution mode is $PBS_ENVIRONMENT
+echo PBS: job identifier is $PBS_JOBID
+echo PBS: job name is $PBS_JOBNAME
+echo PBS: node file is $PBS_NODEFILE
+echo PBS: current home directory is $PBS_O_HOME
+echo PBS: PATH = $PBS_O_PATH
+echo ------------------------------------------------------
+
+set -xa
+
+set -xu
+
+
+export envir=prod
+export cyc=%CC%
+type=%DESC%
+JTYP=%JTYP%
+DESC=%DESC%
+export job=${JTYP}_dump_$cyc
+export jobid=$job.$PBS_JOBID
+export model=hourly
+export PDY=%PDY%
+
+export DUMPJBprocdate=1900123100
+export KEEPDATA=YES
+
+userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
+
+export obsproc_ver=v1.0.0
+export HOMEobsproc=${userROOT}/install/obsproc
+
+VERSION_FILE=${userROOT}/githubwkspc/obsproc/versions/run.ver
+if [ -f $VERSION_FILE ]; then
+  . $VERSION_FILE
+else
+  echo Need version info...  Exiting...
+  exit 7
+fi
+
+module load prod_util/${prod_util_ver}
+module load prod_envir/${prod_envir_ver}
+
+module load grib_util/${grib_util_ver}
+module load util_shared/${util_shared_ver}
+module load w3nco/${w3nco_ver}
+module load w3emc/${w3emc_ver}
+module load bacio/${bacio_ver}
+module load bufr_dump/${bufr_dump_ver}
+module load bufr/${bufr_ver}
+
+module load envvar/${envvar_ver}
+module load PrgEnv-intel/${PrgEnv_intel_ver}
+module load intel/${intel_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load hdf5/${hdf5_ver}
+module load netcdf/${netcdf_ver}
+module load cfp/${cfp_ver}
+
+module unload bufr_dump
+module use ${userROOT}/install/bufr-dump/modulefiles
+module load bufr_dump/$bufr_dump_ver
+export HOMEbufr_dump=${userROOT}/install/bufr_dump
+
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_util/") -eq 0 ]]; then echo "prod_util is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_envir/") -eq 0 ]]; then echo "prod_envir is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)util_shared/") -eq 0 ]]; then echo "util_shared is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
+
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)hdf5/") -eq 0 ]]; then echo "hdf5 is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)netcdf/") -eq 0 ]]; then echo "netcdf is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)w3nco/") -eq 0 ]]; then echo "w3nco is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)w3emc/") -eq 0 ]]; then echo "w3emc is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bacio/") -eq 0 ]]; then echo "bacio is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; then echo "bufr_dump is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr/") -eq 0 ]]; then echo "bufr is not loaded!"; fi
+
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)envvar/") -eq 0 ]]; then echo "envvar is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)PrgEnv-intel/") -eq 0 ]]; then echo "PrgEnv-intel is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)intel/") -eq 0 ]]; then echo "intel is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)craype/") -eq 0 ]]; then echo "craype is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "cray-mpich is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
+
+
+export SENDECF=NO   # developer
+export SENDSDM=NO   # developer
+export SENDDBN=NO   # developer
+
+export DATAROOT=/lfs/h2/emc/ptmp/$USER
+export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}_dump.$PDY.jlogfile
+
+export DCOMROOT=/lfs/h1/ops/canned/dcom
+export TANK=/lfs/h1/ops/canned/dcom
+
+export DEBUG_LEVEL=3
+
+
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com
+export COMOUT=${COMOUT_ROOT}/obsproc/${obsproc_ver}/${model}.${PDY}
+mkdir -p $COMOUT_ROOT
+
+
+$HOMEobsproc/jobs/JOBSPROC_AIRNOW_DUMP
+err=$?
+echo "the err is $err"
+

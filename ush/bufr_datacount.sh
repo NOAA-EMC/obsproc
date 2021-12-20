@@ -29,6 +29,7 @@ set -aux
 #  26 Mar 2017 DStokes   - Cray port: Replaced mail command with mail.py utility
 #                  in order to send dump status info to SDM from any node
 #  11 Apr 2018 SMelchior - removed final "gdas1" usage.
+#  15 Dec 2021 NEsposito - update HOMEbufr_util to HOMEbufr_dump
 #
 ################################################################################
 #
@@ -64,7 +65,7 @@ set -aux
 #               - formerly EXECobsproc_dump_post prior to WCOSS2.  Path to
 #                 obsproc executable directory containing bufr_datacount.
 #                 (invoked only if $DTCX is not imported)
-#   FIXbufr_util
+#   FIXbufr_dump
 #               - formerly FIXobsproc_shared_bufr_dumplist prior to WCOSS2
 #               - path to obsproc fix directory containing the
 #                 bufr_dumplist file
@@ -74,12 +75,12 @@ set -aux
 #   DTCX        - path to bufr_datacount executable
 #                  (defaults to $EXECobsproc/bufr_datacount if not passed in)
 #   LIST_CNT    - path to the bufr_dumplist file
-#                  (defaults to $FIXbufr_util/bufr_dumplist
+#                  (defaults to $FIXbufr_dump/bufr_dumplist
 #                   if not passed in)
 
 
 DTCX=${DTCX:-$EXECobsproc/bufr_datacount}
-LIST_CNT=${LIST_CNT:-$FIXbufr_util/bufr_dumplist}
+LIST_CNT=${LIST_CNT:-$FIXbufr_dump/bufr_dumplist}
 
 cd $DATA
 

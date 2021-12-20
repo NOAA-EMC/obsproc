@@ -1,0 +1,144 @@
+#!/bin/bash
+set -xa
+date -u
+
+###################################################################
+# Set DEBUG LEVEL - modifies info in execution trace prompt string
+###################################################################
+export DEBUG_LEVEL=${DEBUG_LEVEL=1}
+case $DEBUG_LEVEL in
+  1) export PS4='+ ${SECONDS}s + ' ;;       # add seconds (this is typical case)
+  0) export PS4='+ ';;                      # don't include seconds (useful if
+                                            #  want to diff output from 2 runs)
+  2) export PS4='+ ${SECONDS}s:L$LINENO + ';;         # add script line #
+  3) export PS4='+ ${SECONDS}s:${0##*/}:L$LINENO + ';;# add script name & line #
+  4) export PS4='+ ${0##*/}:L$LINENO + ';;  # script name & line (no seconds)
+  *) echo "Unrecognized DEBUG_LEVEL.  Stay with current PS4 setting";;
+esac
+
+########################################
+# Check that required variables are set
+########################################
+set +x
+echo
+echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
+echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
+echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
+echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
+echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
+echo
+set -x
+
+###############################
+# Print out version information
+###############################
+set +x
+echo
+echo "####################################################################"
+echo
+echo "OBSPROC version is ${obsproc_ver:-not set}"
+echo
+echo "####################################################################"
+echo
+set -x
+
+#####################################################################
+## List modules loaded for this job
+######################################################################
+set +x
+echo
+echo "####################################################################"
+echo
+      module list
+echo
+echo "####################################################################"
+echo
+set -x
+
+######################
+# Specify obsNET, NET, and RUN
+######################
+ # no default values - MUST be exported by trigger script
+
+################
+# Specify cycle
+################
+export cycle=t${cyc}z
+
+###############################
+# Create new working directory
+###############################
+jobid=${jobid:-${job}.$(hostname -s).$$}
+export DATA=${DATA:-$DATAROOT/${jobid}}
+rm -rf $DATA
+mkdir -p $DATA
+cd $DATA
+export pgmout=OUTPUT.$$
+
+######################################
+# Set job log file for postmsg output
+######################################
+jlogfile=${jlogfile:-${DATA}/jlogfile}
+
+################################################
+# SENDECF      - Flag Events on ECFLOW
+################################################
+export SENDECF=${SENDECF:-YES}
+
+##########################
+# Specify Execution Areas
+##########################
+
+# ----------------------------------
+# Paths for obsproc_dump_alert items
+# ----------------------------------
+export HOMEobsproc=${HOMEobsproc:\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
+"###FATAL ERROR \"obsproc_ver\" is not set"}}
+
+export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+
+##########################################
+# Run setpdy and initialize PDY variables
+##########################################
+setpdy.sh
+. $DATA/PDY
+
+#########################
+# Define COM directories
+#########################
+export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
+export COMPONENT=${COMPONENT:-atmos}
+
+if [[ "$RUN_ENVIR" == nco ]]; then
+  if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  else
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  fi
+else
+  if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
+  else
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
+  fi
+fi
+
+env
+
+#####################
+# Execute the script
+#####################
+$SCRIPTSobsproc/exdump_alert.sh
+err_dump_alert=$?
+[[ $err_dump_alert -ne 0 ]] && $DATA/err_exit
+
+if [ "$KEEPDATA" != YES ]; then
+   cd $DATAROOT
+   rm -rf $DATA
+fi
+date -u
+
+exit
