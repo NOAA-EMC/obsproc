@@ -58,4 +58,4 @@ jdump_monitor.wc2.pbs
 jdump_alert.wc2.pbs
 
 # AIRNOW trigger script file
-jairnow.wc2.pbs
+jairnow_dump.wc2.pbs
