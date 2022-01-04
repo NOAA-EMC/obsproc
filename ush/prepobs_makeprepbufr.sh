@@ -1744,8 +1744,9 @@ backup AFWA ACARS into PREPBUFR"
 
 set +x
 cat <<\EOFmpp > MP_PREPDATA
+#!/bin/ksh 
 { echo
-#!/bin/ksh
+
 # This herefile script performs the "prepdata" processing.  It is designed to
 #  run in either a parallel (e.g., poe/mpi or background threads) or serial
 #  environment. In the parallel environment, it first splits the input BUFR
@@ -1916,6 +1917,7 @@ for name in $BUFRLIST_all;do
 [ ! -f $dump_dir/$name ]  &&  > $dump_dir/$name
 done
 
+export FORT5=prepdata.stdin 
 export FORT11=$DATA/cdate10.dat
 export FORT12=$PRPT
 export FORT15=$LANDC
@@ -1964,7 +1966,8 @@ export FORT52=prevents.filtering.prepdata
 #    linked to the IOBUF i/o buffering library
 export IOBUF_PARAMS='*prevents.filtering.prepdata:verbose'
 
-$TIMEIT $PRPX <prepdata.stdin >>$mp_pgmout 2>&1
+#$TIMEIT $PRPX <prepdata.stdin >>$mp_pgmout 2>&1
+$TIMEIT $PRPX  >>$mp_pgmout 2>&1
 errPREPDATA=$?
 unset IOBUF_PARAMS
 #------------------------------------------------------------------------------
@@ -2079,7 +2082,7 @@ set -x
          echo "#!/bin/ksh"|tee -a $DATA/prep_exec.cmd
          multi=-1
          while [ $((multi+=1)) -lt $NSPLIT ] ; do
-            echo "ksh $DATA/MP_PREPDATA $multi "|tee -a $DATA/prep_exec.cmd
+            echo "$DATA/MP_PREPDATA $multi "|tee -a $DATA/prep_exec.cmd
          done
          if [ "$launcher_PREP" != cfp -a "$launcher_PREP" != aprun ]; then
             # fill in empty tasks
@@ -2114,7 +2117,8 @@ set -x
          elif [ "$launcher_PREP" = mpiexec ]; then
 	    chmod 755 $DATA/prep_exec.cmd
             #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
-             mpiexec -n 6 $DATA/prep_exec.cmd
+            # mpiexec -n 6 $DATA/prep_exec.cmd
+            mpiexec -n $NSPLIT cfp $DATA/prep_exec.cmd  
 	    export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure	 
          elif [ "$launcher_PREP" = mpirun.lsf ]; then
