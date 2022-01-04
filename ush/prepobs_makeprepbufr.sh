@@ -1746,7 +1746,7 @@ set +x
 cat <<\EOFmpp > MP_PREPDATA
 #!/bin/ksh 
 { echo
-#!/bin/ksh
+
 # This herefile script performs the "prepdata" processing.  It is designed to
 #  run in either a parallel (e.g., poe/mpi or background threads) or serial
 #  environment. In the parallel environment, it first splits the input BUFR
@@ -2082,7 +2082,7 @@ set -x
          echo "#!/bin/ksh"|tee -a $DATA/prep_exec.cmd
          multi=-1
          while [ $((multi+=1)) -lt $NSPLIT ] ; do
-            echo "ksh $DATA/MP_PREPDATA $multi "|tee -a $DATA/prep_exec.cmd
+            echo "$DATA/MP_PREPDATA $multi "|tee -a $DATA/prep_exec.cmd
          done
          if [ "$launcher_PREP" != cfp -a "$launcher_PREP" != aprun ]; then
             # fill in empty tasks
