@@ -155,7 +155,7 @@ TIMEIT=${TIMEIT:-""}
 [ -s $DATA/time ] && TIMEIT="$DATA/time -p"
 
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem -tp)}
+sys_tp=${sys_tp:-$(getsystem)}
 getsystp_err=$?
 if [ $getsystp_err -ne 0 ]; then
    msg="***WARNING: error using getsystem to determine system type and phase"

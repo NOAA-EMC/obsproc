@@ -78,7 +78,7 @@ TIMEIT=${TIMEIT:-""}
 #$TIMEIT mpirun -genvall -n $LSB_DJOB_NUMPROC -machinefile $LSB_DJOB_HOSTFILE $OIQCX > outout 2> errfile
 
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem -tp)}
+sys_tp=${sys_tp:-$(getsystem)}
 getsystp_err=$?
 if [ $getsystp_err -ne 0 ]; then
    msg="***WARNING: error using getsystem to determine system type and phase"
