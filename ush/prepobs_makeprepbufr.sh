@@ -363,7 +363,7 @@
 #     SITE          Site name (may have been set by local shell startup script)
 #                   Default is ""
 #     sys_tp        System type and phase.  If not imported, an attempt is made
-#                   to set it using getsystem.pl (an NCO prod_util script).
+#                   to set it using getsystem (an NCO prod_util script).
 #                   A failed attempt results in an empty string.
 #     NEMSIO_IN     Flag that if ".true." indicates that nemsio atmospheric 
 #                   background fields will be input rather than sigio.
@@ -924,10 +924,10 @@ fi
 #  determine local system name and type if available
 #  -------------------------------------------------
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
+sys_tp=${sys_tp:-$(getsystem)}
 getsystp_err=$?
 if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
+   msg="***WARNING: error using getsystem to determine system type and phase"
    [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
 fi
 echo sys_tp is set to: $sys_tp

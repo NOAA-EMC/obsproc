@@ -94,20 +94,16 @@ set -u
 TIMEIT=${TIMEIT:-""}
 [ -s $DATA/time ] && TIMEIT="$DATA/time -p"
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
+sys_tp=${sys_tp:-$(getsystem)}
 getsystp_err=$?
 if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
+   msg="***WARNING: error using getsystem to determine system type and phase"
    set +u
    [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
    set -u
 fi
 echo sys_tp is set to: $sys_tp
-if [ "$sys_tp" = "Cray-XC40" -o "$SITE" = "SURGE" -o "$SITE" = "LUNA" ]; then
-  launcher_PSTX=${launcher_PSTX:-"aprun -n 1 -N 1 -d 1"}
-else
-  launcher_PSTX=${launcher_PSTX:-""}
-fi
+launcher_PSTX=${launcher_PSTX:-""}
 $TIMEIT $launcher_PSTX $PSTX < /dev/null > outout  2> errfile
 err=$?
 ###cat errfile

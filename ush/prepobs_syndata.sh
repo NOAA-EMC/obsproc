@@ -55,7 +55,7 @@ set -aux
 #   pgmout   - string indicating path to for standard output file (skipped
 #              over by this script if not passed in)
 #   sys_tp   - system type and phase.  (if not passed in, an attempt is made to
-#              set this string using getsystem.pl, an NCO script in prod_util)
+#              set this string using getsystem, an NCO script in prod_util)
 #   SITE     - site name (may have been set by local shell startup script)
 #   launcher_SYNDX - launcher for SYNDX executable (on Cray-XC40, defaults to
 #                    aprun using single task)
@@ -155,18 +155,14 @@ TIMEIT=${TIMEIT:-""}
 [ -s $DATA/time ] && TIMEIT="$DATA/time -p"
 
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
+sys_tp=${sys_tp:-$(getsystem)}
 getsystp_err=$?
 if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
+   msg="***WARNING: error using getsystem to determine system type and phase"
    [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
 fi
 echo sys_tp is set to: $sys_tp
-if [ "$sys_tp" = "Cray-XC40" -o "$SITE" = "SURGE" -o "$SITE" = "LUNA" ]; then
-  launcher_SYNDX=${launcher_SYNDX:-"aprun -n 1 -N 1 -d 1"}
-else
-  launcher_SYNDX=${launcher_SYNDX:-""}
-fi
+launcher_SYNDX=${launcher_SYNDX:-""}
 $TIMEIT $launcher_SYNDX $SYNDX < $SYNDC > outout  2> errfile
 err=$?
 ###cat errfile

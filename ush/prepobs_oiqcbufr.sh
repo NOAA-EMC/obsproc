@@ -28,7 +28,7 @@ qid=$$
 #   pgmout   - string indicating path to for standard output file (skipped
 #              over by this script if not passed in)
 #   sys_tp   - system type and phase.  (if not passed in, an attempt is made to
-#              set this string using getsystem.pl, an NCO script in prod_util)
+#              set this string using getsystem, an NCO script in prod_util)
 #   SITE     - site name (may have been set by local shell startup script)
 #   launcher_OIQCX - launcher for OIQCX executable (on Cray-XC40, defaults to
 #                    aprun using 16 tasks)
@@ -78,20 +78,14 @@ TIMEIT=${TIMEIT:-""}
 #$TIMEIT mpirun -genvall -n $LSB_DJOB_NUMPROC -machinefile $LSB_DJOB_HOSTFILE $OIQCX > outout 2> errfile
 
 SITE=${SITE:-""}
-sys_tp=${sys_tp:-$(getsystem.pl -tp)}
+sys_tp=${sys_tp:-$(getsystem)}
 getsystp_err=$?
 if [ $getsystp_err -ne 0 ]; then
-   msg="***WARNING: error using getsystem.pl to determine system type and phase"
+   msg="***WARNING: error using getsystem to determine system type and phase"
    [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
 fi
 echo sys_tp is set to: $sys_tp
-if [ "$sys_tp" = "Cray-XC40" -o "$SITE" = "SURGE" -o "$SITE" = "LUNA" ]; then
-   launcher_OIQCX=${launcher_OIQCX:-"aprun -n 16 -N 16 -j 1"}  # consistent with tide/gyre
-#  launcher_OIQCX=${launcher_OIQCX:-"aprun -n 24 -N 24 -j 1"}  # slightly faster
-elif [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
-   launcher_OIQCX=${launcher_OIQCX:-mpirun}
-else
-   launcher_OIQCX=${launcher_OIQCX:-"mpirun.lsf"}
+launcher_OIQCX=${launcher_OIQCX:-mpiexec}
 #########################module load ibmpe ics lsf uncomment if not in profile
 #  seems to run ok w next 10 lines commented out (even though Jack had them in
 #   his version of this script)
