@@ -99,7 +99,6 @@ launcher_OIQCX=${launcher_OIQCX:-mpiexec}
 ###export MPICH_ALLTOALL_THROTTLE=0
 ###export MP_COLLECTIVE_OFFLOAD=yes
 ###export KMP_STACKSIZE=1024m
-fi
 
 $TIMEIT $launcher_OIQCX $OIQCX > outout  2> errfile
 
