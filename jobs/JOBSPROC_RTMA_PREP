@@ -210,7 +210,8 @@ fi
 export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
 export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
                                               # NOTE: only NEMSIO_IN or NETCDF_IN can be .true.
-export envir_getges=${envir_getges:-prod}
+#export envir_getges=${envir_getges:-prod}
+export envir_getges=${envir_getges:-${envir:-prod}}
 export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gdas.$PDY)/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gfs.$PDY)/${cyc}/${COMPONENT}}
 if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then
