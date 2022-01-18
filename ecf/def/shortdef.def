@@ -1,0 +1,81 @@
+# $dump = dump/[jobsproc_$net_dump, jobsproc_$net_dump_post]
+# $prep = prep/[jobsproc_$net_prep, jobsproc_$net_prep_post]
+# $dump_alert = dump/jobsproc_$net_dump_alert
+
+para
+ primary
+
+  cron
+   obsproc
+    v1.0
+     ...
+      airnow_dump
+
+  12
+   obsproc
+    v1.0
+     mods
+      jobsproc_mods
+
+     nam
+      tm00 - tm06
+       $dump
+       $prep
+       dump
+        jobsproc_nam_dump2
+      tm01 +
+       dump
+        jobsproc_nam_dump_alert
+
+     cdas
+      $dump
+      $prep+'1'
+      $prep+'2'
+
+     gfs
+      atmos
+       $dump
+       $prep
+       $dump_alert
+
+     gdas
+      atmos
+       $dump
+       $prep
+       $dump_alert
+
+     # hourly
+
+     urma
+      06z - 11z
+       $dump
+       $prep
+
+     rap
+      12z - 17z
+       $dump
+       $prep
+      12z +
+       $dump+'_erly'
+       $prep+_'erly'
+      15z - 17z +
+       pcyc
+        $dump+'_pcyc'
+        $prep+_'pcyc'
+
+     rtma
+      12z -17z
+       main
+        $dump
+        $prep
+       rapid
+        00, 15, 30, 45
+         $dump
+         $prep
+
+     dump_monitor
+      12z - 17z
+       jobsproc_dump_monitor
+
+     #dump_alert
+

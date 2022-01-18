@@ -1,0 +1,5 @@
+both the gfs and gdas families have triggers to gfs/gdas jobs
+the location and triggers will need to be updated once gfs/gdas are in place
+to add, uncomment triggers under gfs/gdas prep family and modify the section in the def file after "# just for the triggers"
+
+--replace=/para/primary/12/obsproc

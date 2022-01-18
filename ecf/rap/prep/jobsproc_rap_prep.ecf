@@ -1,0 +1,46 @@
+#PBS -N obsproc_rap_prep_%JTYP%%CYC%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q %QUEUE%
+#PBS -A %PROJ%-%PROJENVIR%
+#PBS -l walltime=00:15:00
+#PBS -l place=vscatter,select=1:ncpus=1:mem=30gb:prepost=true
+#PBS -l debug=true
+
+export model=obsproc
+
+%include <head.h>
+%include <envir-p1.h>
+
+export cyc=%CYC%
+JTYP=%JTYP% # '', erly_, pcyc_
+
+#Load the modules
+module load intel/${intel_ver}
+
+module load netcdf/${netcdf_ver}
+
+module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
+module load bufr_dump/${bufr_dump_ver}
+module list
+
+#export GETGES_COM=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/
+#export GESROOT=/lfs/h1/ops/canned/com/gfs/${gfs_ver}/
+
+# CALL executable job script here
+$HOMEobsproc/jobs/JOBSPROC_RAP_PREP
+
+%include <tail.h>
+%manual
+######################################################################
+# Purpose: Job to execute the 00Z RAP PREPBUFR data processing
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+%end
