@@ -1,0 +1,32 @@
+suite para
+  family primary
+    family cron
+
+      family obsproc
+        defstatus complete
+        edit PROJ 'OBSPROC'
+        family v1.0
+          edit PACKAGEHOME '/lfs/h1/ops/%ENVIR%/packages/obsproc.%obsproc_ver%'
+
+          family airnow
+            task jobsproc_airnow_dump
+              edit JTYP airnow
+              cron 21:00
+          endfamily 
+
+          #family ingest_p3
+          #family hydro
+          family mods
+            edit JTYP mods
+            task jobsproc_mods
+              cron 14:30
+          endfamily
+          #endfamily
+          #endfamily
+
+        endfamily #v1.0
+      endfamily #obsproc
+
+    endfamily #cron
+  endfamily #primary
+endsuite

@@ -1,0 +1,2532 @@
+suite prod12
+  repeat day 1
+  edit ECF_TRIES '1'
+  edit CYC '12'
+  edit ENVIR 'prod'
+  edit PROJ 'OPS'
+  edit E 'j'
+  edit QUEUE 'prod'
+  edit PROJENVIR 'OPS'
+  edit MACHINE_SITE 'production'
+
+  family dump_monitor
+    edit MACHINE_PHASE 'p3'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit PROJ 'OBSPROC-%PROJENVIR%'
+    edit QUEUE 'prod'
+    edit KEEPDATA 'YES'
+    family 12z
+      edit CYC '12'
+      task jdump_monitor
+        time 12:30
+    endfamily
+    family 13z
+      edit CYC '13'
+      task jdump_monitor
+        time 13:30
+    endfamily
+    family 14z
+      edit CYC '14'
+      task jdump_monitor
+        time 14:30
+    endfamily
+    family 15z
+      edit CYC '15'
+      task jdump_monitor
+        time 15:30
+    endfamily
+    family 16z
+      edit CYC '16'
+      task jdump_monitor
+        time 16:30
+    endfamily
+    family 17z
+      edit CYC '17'
+      task jdump_monitor
+        time 17:30
+    endfamily
+  endfamily
+
+  family cdas2
+    edit COM 'gpfs/dell1/nco/ops/com'
+    edit PROJ 'REAN'
+    task jcdas2_prep
+      trigger /prod12/gfs/atmos/obsproc/prep/jgfs_atmos_prep == complete
+      time 16:00
+    task jcdas2_forecast
+      trigger jcdas2_prep == complete
+  endfamily
+
+  family nam
+    edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit PROJ 'NAM-OPS'
+    edit QUEUE 'prod'
+    edit QUEUESHARED 'prod_shared'
+    family tm00
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3'
+      edit TMMARK '00'
+      family obsproc
+        family dump
+          task jnam_dump2
+            time 13:15
+          task jnam_dump
+            time 13:15
+          task jnam_dump_alert
+            trigger jnam_dump_post:release_nam12_dump_alert
+          task jnam_dump_post
+            trigger jnam_dump == complete and jnam_dump2 == complete
+            event 1 release_nam12_dump_alert
+        endfamily
+        family prep
+          task jnam_prep
+            trigger ../dump/jnam_dump == complete and ../dump/jnam_dump2 == complete
+          task jnam_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+      family analysis
+        task jnam_analysis_prico
+          trigger ../obsproc/prep/jnam_prep == complete and ../prelim == complete and ../coldstart == complete
+        task jnam_analysis_firewx
+          trigger ../obsproc/prep/jnam_prep == complete and ../prelim == complete and ../coldstart == complete
+        task jnam_analysis_hawaii
+          trigger ../obsproc/prep/jnam_prep == complete and ../prelim == complete and ../coldstart == complete
+        task jnam_analysis_alaska
+          trigger ../obsproc/prep/jnam_prep == complete and ../prelim == complete and ../coldstart == complete
+        task jnam_analysis
+          trigger ../obsproc/prep/jnam_prep == complete and ../prelim == complete and ../coldstart == complete and ../tcrelocate == complete
+        task jnam_analysis_conus
+          trigger ../obsproc/prep/jnam_prep == complete and ../prelim == complete and ../coldstart == complete
+      endfamily
+    endfamily
+  endfamily
+
+  family urma
+    edit PROJ 'RTMA'
+    edit QUEUE 'prod'
+    edit QUEUESERV 'prod_transfer'
+    edit ECF_FILES '/ecf/ecfnets/scripts/urma'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit FILESYSTEM 'dell2'
+
+    family 06z
+      edit CYC '06'
+      family obsproc
+        task urma_dump
+          time 12:30
+        task urma_dump_post
+          trigger urma_dump == complete
+        task urma_prep
+          trigger urma_dump == complete
+        task urma_prep_post
+          trigger urma_prep == complete
+      endfamily
+    endfamily
+
+    family 07z
+      edit CYC '07'
+      family obsproc
+        task urma_dump
+          time 13:30
+        task urma_dump_post
+          trigger urma_dump == complete
+        task urma_prep
+          trigger urma_dump == complete
+        task urma_prep_post
+          trigger urma_prep == complete
+      endfamily
+      family 2p5
+        task urma_getguess
+          time 13:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '112'
+          edit PTILE '14'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '64'
+          edit PTILE '8'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family ak
+        task urma_getguess
+          time 13:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '32'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '32'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family hi
+        task urma_getguess
+          time 13:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pr
+        task urma_getguess
+          time 13:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pcp
+        edit CYC '13'
+        task urma_pcpn
+          trigger /prod12/pcpanl/13z/pcpn_anal:stage4_done
+      endfamily
+    endfamily
+    family 08z
+      edit CYC '08'
+      family obsproc
+        task urma_dump
+          time 14:30
+        task urma_dump_post
+          trigger urma_dump == complete
+        task urma_prep
+          trigger urma_dump == complete
+        task urma_prep_post
+          trigger urma_prep == complete
+      endfamily
+      family 2p5
+        task urma_getguess
+          time 14:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '112'
+          edit PTILE '14'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '64'
+          edit PTILE '8'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family ak
+        task urma_getguess
+          time 14:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '32'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '32'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family hi
+        task urma_getguess
+          time 14:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pr
+        task urma_getguess
+          time 14:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pcp
+        edit CYC '14'
+        task urma_pcpn
+          trigger /prod12/pcpanl/14z/pcpn_anal:stage4_done
+      endfamily
+    endfamily
+    family 09z
+      edit CYC '09'
+      family obsproc
+        task urma_dump
+          time 15:30
+        task urma_dump_post
+          trigger urma_dump == complete
+        task urma_prep
+          trigger urma_dump == complete
+        task urma_prep_post
+          trigger urma_prep == complete
+      endfamily
+      family 2p5
+        task urma_getguess
+          time 15:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '112'
+          edit PTILE '14'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '64'
+          edit PTILE '8'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family ak
+        task urma_getguess
+          time 15:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '32'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '32'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family hi
+        task urma_getguess
+          time 15:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pr
+        task urma_getguess
+          time 15:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pcp
+        edit CYC '15'
+        task urma_pcpn
+          trigger /prod12/pcpanl/15z/pcpn_anal:stage4_done
+      endfamily
+    endfamily
+    family 10z
+      edit CYC '10'
+      family obsproc
+        task urma_dump
+          time 16:30
+        task urma_dump_post
+          trigger urma_dump == complete
+        task urma_prep
+          trigger urma_dump == complete
+        task urma_prep_post
+          trigger urma_prep == complete
+      endfamily
+      family 2p5
+        task urma_getguess
+          time 16:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '112'
+          edit PTILE '14'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '64'
+          edit PTILE '8'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family ak
+        task urma_getguess
+          time 16:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '32'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '32'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family hi
+        task urma_getguess
+          time 16:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pr
+        task urma_getguess
+          time 16:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pcp
+        edit CYC '16'
+        task urma_pcpn
+          trigger /prod12/pcpanl/16z/pcpn_anal:stage4_done
+      endfamily
+    endfamily
+    family 11z
+      edit CYC '11'
+      family obsproc
+        task urma_dump
+          time 17:30
+        task urma_dump_post
+          trigger urma_dump == complete
+        task urma_prep
+          trigger urma_dump == complete
+        task urma_prep_post
+          trigger urma_prep == complete
+      endfamily
+      family 2p5
+        task urma_getguess
+          time 17:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '112'
+          edit PTILE '14'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '64'
+          edit PTILE '8'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family ak
+        task urma_getguess
+          time 17:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+          edit CPUS '32'
+        task urma_post
+          trigger urma_gsianl == complete
+          edit CPUS '32'
+        task urma_gempak
+          trigger urma_post == complete
+      endfamily
+      family hi
+        task urma_getguess
+          time 17:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pr
+        task urma_getguess
+          time 17:30
+        task urma_gsianl
+          trigger urma_getguess == complete and ../obsproc/urma_prep == complete
+        task urma_post
+          trigger urma_gsianl == complete
+      endfamily
+      family pcp
+        edit CYC '17'
+        task urma_pcpn
+          trigger /prod12/pcpanl/17z/pcpn_anal:stage4_done
+      endfamily
+    endfamily
+  endfamily
+
+  family rtma
+    edit PROJ 'RTMA'
+    edit QUEUE 'prod'
+    edit QUEUESERV 'prod_transfer'
+    edit ECF_FILES '/ecf/ecfnets/scripts/rtma'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit FILESYSTEM 'dell2'
+    family 12z
+      edit CYC '12'
+      edit MACHINE_SITE 'production'
+      family 00
+        edit SUBCYC '00'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 12:08
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+      endfamily
+      family 15
+        edit SUBCYC '15'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 12:23
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+      endfamily
+      family 30
+        edit SUBCYC ''
+        family obsproc_ru
+          edit SUBCYC '30'
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 12:38
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family obsproc
+          edit RAPID '_'
+          task rtma_dump
+            time 12:30
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+      endfamily
+      family 45
+        edit SUBCYC '45'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 12:53
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+      endfamily
+    endfamily
+
+    family 13z
+      edit CYC '13'
+      family 00
+        edit SUBCYC '00'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 13:08
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 13:08
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 15
+        edit SUBCYC '15'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 13:23
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 13:17
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 30
+        edit SUBCYC ''
+        family obsproc_ru
+          edit SUBCYC '30'
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 13:38
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          edit SUBCYC '30'
+          task rtma_getguess
+            time 13:32
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+        family obsproc
+          edit RAPID '_'
+          task rtma_dump
+            time 13:30
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family 2p5
+          task rtma_getguess
+            time 13:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family ak
+          task rtma_getguess
+            time 13:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '32'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '32'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family gu
+          task rtma_getguess
+            time 13:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family hi
+          task rtma_getguess
+            time 13:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pr
+          task rtma_getguess
+            time 13:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pcp
+          task rtma_pcpn
+            time 13:15
+        endfamily
+      endfamily
+      family 45
+        edit SUBCYC '45'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 13:53
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 13:47
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+    endfamily
+    family 14z
+      edit CYC '14'
+      family 00
+        edit SUBCYC '00'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 14:08
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 14:08
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 15
+        edit SUBCYC '15'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 14:23
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 14:17
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 30
+        edit SUBCYC ''
+        family obsproc_ru
+          edit SUBCYC '30'
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 14:38
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          edit SUBCYC '30'
+          task rtma_getguess
+            time 14:32
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+        family obsproc
+          edit RAPID '_'
+          task rtma_dump
+            time 14:30
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family 2p5
+          task rtma_getguess
+            time 14:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family ak
+          task rtma_getguess
+            time 14:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '32'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '32'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family gu
+          task rtma_getguess
+            time 14:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family hi
+          task rtma_getguess
+            time 14:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pr
+          task rtma_getguess
+            time 14:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pcp
+          task rtma_pcpn
+            time 14:15
+        endfamily
+      endfamily
+      family 45
+        edit SUBCYC '45'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 14:53
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 14:47
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+    endfamily
+    family 15z
+      edit CYC '15'
+      family 00
+        edit SUBCYC '00'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 15:08
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 15:08
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 15
+        edit SUBCYC '15'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 15:23
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 15:17
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 30
+        edit SUBCYC ''
+        family obsproc_ru
+          edit SUBCYC '30'
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 15:38
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          edit SUBCYC '30'
+          task rtma_getguess
+            time 15:32
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+        family obsproc
+          edit RAPID '_'
+          task rtma_dump
+            time 15:30
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family 2p5
+          task rtma_getguess
+            time 15:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family ak
+          task rtma_getguess
+            time 15:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '32'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '32'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family gu
+          task rtma_getguess
+            time 15:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family hi
+          task rtma_getguess
+            time 15:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pr
+          task rtma_getguess
+            time 15:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pcp
+          task rtma_pcpn
+            time 15:15
+        endfamily
+      endfamily
+      family 45
+        edit SUBCYC '45'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 15:53
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 15:47
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+    endfamily
+    family 16z
+      edit CYC '16'
+      family 00
+        edit SUBCYC '00'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 16:08
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 16:08
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 15
+        edit SUBCYC '15'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 16:23
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 16:17
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 30
+        edit SUBCYC ''
+        family obsproc_ru
+          edit SUBCYC '30'
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 16:38
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          edit SUBCYC '30'
+          task rtma_getguess
+            time 16:32
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+        family obsproc
+          edit RAPID '_'
+          task rtma_dump
+            time 16:30
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family 2p5
+          task rtma_getguess
+            time 16:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family ak
+          task rtma_getguess
+            time 16:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '32'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '32'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family gu
+          task rtma_getguess
+            time 16:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family hi
+          task rtma_getguess
+            time 16:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pr
+          task rtma_getguess
+            time 16:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pcp
+          task rtma_pcpn
+            time 16:15
+        endfamily
+      endfamily
+      family 45
+        edit SUBCYC '45'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 16:53
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 16:47
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+    endfamily
+    family 17z
+      edit CYC '17'
+      family 00
+        edit SUBCYC '00'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 17:08
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 17:08
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 15
+        edit SUBCYC '15'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 17:23
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 17:17
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+      family 30
+        edit SUBCYC ''
+        family obsproc_ru
+          edit SUBCYC '30'
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 17:38
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          edit SUBCYC '30'
+          task rtma_getguess
+            time 17:32
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+        family obsproc
+          edit RAPID '_'
+          task rtma_dump
+            time 17:30
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family 2p5
+          task rtma_getguess
+            time 17:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family ak
+          task rtma_getguess
+            time 17:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+            edit CPUS '32'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '32'
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family gu
+          task rtma_getguess
+            time 17:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+          task rtma_gempak
+            trigger rtma_post == complete
+        endfamily
+        family hi
+          task rtma_getguess
+            time 17:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pr
+          task rtma_getguess
+            time 17:30
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc/rtma_prep == complete
+          task rtma_post
+            trigger rtma_gsianl == complete
+        endfamily
+        family pcp
+          task rtma_pcpn
+            time 17:15
+        endfamily
+      endfamily
+      family 45
+        edit SUBCYC '45'
+        family obsproc_ru
+          edit RAPID '_ru_'
+          task rtma_dump
+            time 17:53
+          task rtma_dump_post
+            trigger rtma_dump == complete
+          task rtma_prep
+            trigger rtma_dump == complete
+          task rtma_prep_post
+            trigger rtma_prep == complete
+        endfamily
+        family rapid
+          task rtma_getguess
+            time 17:47
+          task rtma_gsianl
+            trigger rtma_getguess == complete and ../obsproc_ru/rtma_prep == complete
+            edit CPUS '112'
+            edit PTILE '14'
+          task rtma_post
+            trigger rtma_gsianl == complete
+            edit CPUS '64'
+            edit PTILE '8'
+        endfamily
+      endfamily
+    endfamily
+  endfamily
+
+  family nam_catchup_18
+    edit CYC '18'
+    edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit PROJ 'NAM-OPS'
+    edit QUEUE 'prod'
+    edit QUEUESHARED 'prod_shared'
+
+    family tm06
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup'
+      edit TMMARK '06'
+      family obsproc
+        family dump
+          task jnam_catchup_dump2
+            time 15:40
+          task jnam_catchup_dump
+            time 15:40
+          task jnam_catchup_dump_post
+            trigger jnam_catchup_dump == complete and jnam_catchup_dump2 == complete
+        endfamily
+        family prep
+          task jnam_catchup_prep
+            trigger ../dump/jnam_catchup_dump == complete and ../dump/jnam_catchup_dump2 == complete
+          task jnam_catchup_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+    endfamily
+
+    family tm05
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup'
+      edit TMMARK '05'
+      family obsproc
+        family dump
+          task jnam_catchup_dump2
+            time 16:00
+          task jnam_catchup_dump
+            time 16:00
+          task jnam_catchup_dump_post
+            trigger jnam_catchup_dump == complete and jnam_catchup_dump2 == complete
+        endfamily
+        family prep
+          task jnam_catchup_prep
+            trigger ../dump/jnam_catchup_dump == complete and ../dump/jnam_catchup_dump2 == complete
+          task jnam_catchup_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+      family analysis
+        task jnam_catchup_analysis_alaska
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm06/forecast == complete
+        task jnam_catchup_analysis
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm06/forecast == complete
+        task jnam_catchup_analysis_conus
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm06/forecast == complete
+      endfamily
+      family forecast
+        task jnam_catchup_forecast
+          trigger ../analysis == complete
+      endfamily
+      task jnam_catchup_verfrad
+        trigger analysis/jnam_catchup_analysis == complete
+      family parent
+        edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup/parent'
+        task jnam_catchup_post_manager
+          trigger ../forecast == active
+          event 1 release_post00
+          event 2 release_post01
+        family post
+          task jnam_catchup_post_f00
+            trigger ../jnam_catchup_post_manager:release_post00
+          task jnam_catchup_post_f01
+            trigger ../jnam_catchup_post_manager:release_post01
+        endfamily
+        family prdgen
+          task jnam_catchup_prdgen_f00
+            task jhyspt_gfs_nceppost_prep_f84
+              trigger /prod12/gfs/atmos/post/jgfs_atmos_post_manager:release_post084
+              edit FHR 'f84'
+              edit HR '084'
+          endfamily
+          task jhyspt_gfs_nceppost_prep
+            trigger 3hrly == complete
+        endfamily
+      endfamily
+    endfamily
+    family dust
+      task jdust_fcst
+        trigger ../prep/nam/jhyspt_nam_prep eq complete
+    endfamily
+    family canned
+      task jhyspt_canned_fcst
+        trigger ../prep/nam/jhyspt_nam12k_prep eq complete and ../prep/nam/jhyspt_firewx_prep eq complete and ../prep/nam/jhyspt_nam_prep eq complete and ../prep/hrrr/jhyspt_hrrr_prep_12 eq complete
+      task jhyspt_canned_post
+        trigger jhyspt_canned_fcst eq complete
+        event 10 ncorzdm_bldr
+        event 20 ncorzdm
+    endfamily
+    family volcano_traj
+      task jhyspt_volcano_traj
+        trigger ../prep/global/gfs_nceppost eq complete
+    endfamily
+  endfamily
+  family nam_catchup_18
+    edit CYC '18'
+    edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit PROJ 'NAM-OPS'
+    edit QUEUE 'prod'
+    edit QUEUESHARED 'prod_shared'
+
+    family tm06
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup'
+      edit TMMARK '06'
+      family obsproc
+        family dump
+          task jnam_catchup_dump2
+            time 15:40
+          task jnam_catchup_dump
+            time 15:40
+          task jnam_catchup_dump_post
+            trigger jnam_catchup_dump == complete and jnam_catchup_dump2 == complete
+        endfamily
+        family prep
+          task jnam_catchup_prep
+            trigger ../dump/jnam_catchup_dump == complete and ../dump/jnam_catchup_dump2 == complete
+          task jnam_catchup_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+    endfamily
+
+    family tm05
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup'
+      edit TMMARK '05'
+      family obsproc
+        family dump
+          task jnam_catchup_dump2
+            time 16:00
+          task jnam_catchup_dump
+            time 16:00
+          task jnam_catchup_dump_post
+            trigger jnam_catchup_dump == complete and jnam_catchup_dump2 == complete
+        endfamily
+        family prep
+          task jnam_catchup_prep
+            trigger ../dump/jnam_catchup_dump == complete and ../dump/jnam_catchup_dump2 == complete
+          task jnam_catchup_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+      family analysis
+        task jnam_catchup_analysis_alaska
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm06/forecast == complete
+        task jnam_catchup_analysis
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm06/forecast == complete
+        task jnam_catchup_analysis_conus
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm06/forecast == complete
+      endfamily
+      family forecast
+        task jnam_catchup_forecast
+          trigger ../analysis == complete
+      endfamily
+      task jnam_catchup_verfrad
+        trigger analysis/jnam_catchup_analysis == complete
+      family parent
+        edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup/parent'
+        task jnam_catchup_post_manager
+          trigger ../forecast == active
+          event 1 release_post00
+          event 2 release_post01
+        family post
+          task jnam_catchup_post_f00
+            trigger ../jnam_catchup_post_manager:release_post00
+          task jnam_catchup_post_f01
+            trigger ../jnam_catchup_post_manager:release_post01
+        endfamily
+        family prdgen
+          task jnam_catchup_prdgen_f00
+            trigger ../post/jnam_catchup_post_f00 == complete
+            event 1 post_1_complete
+            event 2 post_2_complete
+            event 3 post_3_complete
+            event 4 post_4_complete
+            event 5 post_5_complete
+            event 6 post_6_complete
+            event 7 post_7_complete
+            event 8 post_8_complete
+          task jnam_catchup_prdgen_f01
+              trigger ../post/jnam_catchup_post_f01 == complete
+              event 1 post_complete
+          endfamily
+        endfamily
+        family conus
+          edit grid 'conus'
+          task jnam_catchup_post_manager
+            trigger ../../forecast == active or ../../forecast == complete
+            event 1 release_post00
+            event 2 release_post01
+          family post
+            task jnam_catchup_post_f00
+              trigger ../jnam_catchup_post_manager:release_post00
+            task jnam_catchup_post_f01
+              trigger ../jnam_catchup_post_manager:release_post01
+          endfamily
+          family prdgen
+            task jnam_catchup_prdgen_f00
+              trigger ../post/jnam_catchup_post_f00 == complete
+            task jnam_catchup_prdgen_f01
+              trigger ../post/jnam_catchup_post_f01 == complete
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family tm02
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup'
+      edit TMMARK '02'
+      family prelim
+        task jnam_catchup_nemsinterp_boco
+          trigger ../../tm06/prelim/jnam_catchup_metgrid_boco == complete
+      endfamily
+      family obsproc
+        family dump
+          task jnam_catchup_dump2
+            time 17:23
+          task jnam_catchup_dump
+            time 17:23
+          task jnam_catchup_dump_post
+            trigger jnam_catchup_dump == complete and jnam_catchup_dump2 == complete
+        endfamily
+        family prep
+          task jnam_catchup_prep
+            trigger ../dump/jnam_catchup_dump == complete and ../dump/jnam_catchup_dump2 == complete
+          task jnam_catchup_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+      family analysis
+        task jnam_catchup_analysis_alaska
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm03/forecast == complete
+        task jnam_catchup_analysis
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm03/forecast == complete
+        task jnam_catchup_analysis_conus
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm03/forecast == complete
+      endfamily
+      family forecast
+        task jnam_catchup_forecast
+          trigger ../analysis == complete
+      endfamily
+      task jnam_catchup_verfrad
+        trigger analysis/jnam_catchup_analysis == complete
+      family parent
+        edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup/parent'
+        task jnam_catchup_post_manager
+          trigger ../forecast == active
+          event 1 release_post00
+          event 2 release_post01
+        family post
+          task jnam_catchup_post_f00
+            trigger ../jnam_catchup_post_manager:release_post00
+          task jnam_catchup_post_f01
+            trigger ../jnam_catchup_post_manager:release_post01
+        endfamily
+        family prdgen
+          task jnam_catchup_prdgen_f00
+            trigger ../post/jnam_catchup_post_f00 == complete
+            event 1 post_1_complete
+            event 2 post_2_complete
+            event 3 post_3_complete
+            event 4 post_4_complete
+            event 5 post_5_complete
+            event 6 post_6_complete
+            event 7 post_7_complete
+            event 8 post_8_complete
+          task jnam_catchup_prdgen_f01
+            trigger ../post/jnam_catchup_post_f01 == complete
+            event 1 post_1_complete
+            event 2 post_2_complete
+            event 3 post_3_complete
+            event 4 post_4_complete
+            event 5 post_5_complete
+            event 6 post_6_complete
+            event 7 post_7_complete
+            event 8 post_8_complete
+        endfamily
+      endfamily
+      family nest
+        edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup/nest'
+        family alaska
+          edit grid 'alaska'
+          task jnam_catchup_post_manager
+            trigger ../../forecast == active or ../../forecast == complete
+            event 1 release_post00
+            event 2 release_post01
+          family post
+            task jnam_catchup_post_f00
+              trigger ../jnam_catchup_post_manager:release_post00
+            task jnam_catchup_post_f01
+              trigger ../jnam_catchup_post_manager:release_post01
+          endfamily
+          family prdgen
+            task jnam_catchup_prdgen_f00
+              trigger ../post/jnam_catchup_post_f00 == complete
+              event 1 post_complete
+            task jnam_catchup_prdgen_f01
+              trigger ../post/jnam_catchup_post_f01 == complete
+              event 1 post_complete
+          endfamily
+        endfamily
+        family conus
+          edit grid 'conus'
+          task jnam_catchup_post_manager
+            trigger ../../forecast == active or ../../forecast == complete
+            event 1 release_post00
+            event 2 release_post01
+          family post
+            task jnam_catchup_post_f00
+              trigger ../jnam_catchup_post_manager:release_post00
+            task jnam_catchup_post_f01
+              trigger ../jnam_catchup_post_manager:release_post01
+          endfamily
+          family prdgen
+            task jnam_catchup_prdgen_f00
+              trigger ../post/jnam_catchup_post_f00 == complete
+            task jnam_catchup_prdgen_f01
+              trigger ../post/jnam_catchup_post_f01 == complete
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family tm01
+      edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup'
+      edit TMMARK '01'
+      family prelim
+        task jnam_catchup_nemsinterp_boco
+          trigger ../../tm06/prelim/jnam_catchup_metgrid_boco == complete
+      endfamily
+      family obsproc
+        family dump
+          task jnam_catchup_dump2
+            time 18:18
+          task jnam_catchup_dump
+            time 18:18
+          task jnam_catchup_dump_post
+            trigger jnam_catchup_dump == complete and jnam_catchup_dump2 == complete
+        endfamily
+        family prep
+          task jnam_catchup_prep
+            trigger ../dump/jnam_catchup_dump == complete and ../dump/jnam_catchup_dump2 == complete
+          task jnam_catchup_prep_post
+            trigger ../../analysis == complete
+        endfamily
+      endfamily
+      family analysis
+        task jnam_catchup_analysis_alaska
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm02/forecast == complete
+        task jnam_catchup_analysis
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm02/forecast == complete
+        task jnam_catchup_analysis_conus
+          trigger ../obsproc/prep/jnam_catchup_prep == complete and ../prelim == complete and ../../tm02/forecast == complete
+      endfamily
+      family forecast
+        task jnam_catchup_forecast
+          trigger ../analysis == complete
+      endfamily
+      task jnam_catchup_verfrad
+        trigger analysis/jnam_catchup_analysis == complete
+      family parent
+        edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup/parent'
+        task jnam_catchup_post_manager
+          trigger ../forecast == active
+          event 1 release_post00
+          event 2 release_post01
+        family post
+          task jnam_catchup_post_f00
+            trigger ../jnam_catchup_post_manager:release_post00
+          task jnam_catchup_post_f01
+            trigger ../jnam_catchup_post_manager:release_post01
+        endfamily
+        family prdgen
+          task jnam_catchup_prdgen_f00
+            trigger ../post/jnam_catchup_post_f00 == complete
+            event 1 post_1_complete
+            event 2 post_2_complete
+            event 3 post_3_complete
+            event 4 post_4_complete
+            event 5 post_5_complete
+            event 6 post_6_complete
+            event 7 post_7_complete
+            event 8 post_8_complete
+          task jnam_catchup_prdgen_f01
+            trigger ../post/jnam_catchup_post_f01 == complete
+            event 1 post_1_complete
+            event 2 post_2_complete
+            event 3 post_3_complete
+            event 4 post_4_complete
+            event 5 post_5_complete
+            event 6 post_6_complete
+            event 7 post_7_complete
+            event 8 post_8_complete
+        endfamily
+      endfamily
+      family nest
+        edit ECF_FILES '/ecf/ecfnets/scripts/nam_p3/nam_catchup/nest'
+        family alaska
+          edit grid 'alaska'
+          task jnam_catchup_post_manager
+            trigger ../../forecast == active or ../../forecast == complete
+            event 1 release_post00
+            event 2 release_post01
+          family post
+            task jnam_catchup_post_f00
+              trigger ../jnam_catchup_post_manager:release_post00
+            task jnam_catchup_post_f01
+              trigger ../jnam_catchup_post_manager:release_post01
+          endfamily
+          family prdgen
+            task jnam_catchup_prdgen_f00
+              trigger ../post/jnam_catchup_post_f00 == complete
+              event 1 post_complete
+            task jnam_catchup_prdgen_f01
+              trigger ../post/jnam_catchup_post_f01 == complete
+              event 1 post_complete
+          endfamily
+        endfamily
+        family conus
+          edit grid 'conus'
+          task jnam_catchup_post_manager
+            trigger ../../forecast == active or ../../forecast == complete
+            event 1 release_post00
+            event 2 release_post01
+          family post
+            task jnam_catchup_post_f00
+              trigger ../jnam_catchup_post_manager:release_post00
+            task jnam_catchup_post_f01
+              trigger ../jnam_catchup_post_manager:release_post01
+          endfamily
+          family prdgen
+            task jnam_catchup_prdgen_f00
+              trigger ../post/jnam_catchup_post_f00 == complete
+            task jnam_catchup_prdgen_f01
+              trigger ../post/jnam_catchup_post_f01 == complete
+          endfamily
+        endfamily
+        family hi_pr_firewx
+          task jnam_catchup_postguess
+            trigger ../../forecast == complete
+          family hawaii
+            edit DOMAIN 'hawaii'
+            task jnam_catchup_npsguess
+              trigger ../jnam_catchup_postguess == complete
+            task jnam_catchup_nestiniguess
+              trigger jnam_catchup_npsguess == complete
+            task jnam_catchup_nestsfcupdate
+              trigger jnam_catchup_nestiniguess == complete
+          endfamily
+          family prico
+            edit DOMAIN 'prico'
+            task jnam_catchup_npsguess
+              trigger ../jnam_catchup_postguess == complete
+            task jnam_catchup_nestiniguess
+              trigger jnam_catchup_npsguess == complete
+            task jnam_catchup_nestsfcupdate
+              trigger jnam_catchup_nestiniguess == complete
+          endfamily
+          family firewx
+            edit DOMAIN 'firewx'
+            task jnam_catchup_npsguess
+              trigger ../jnam_catchup_postguess == complete
+            task jnam_catchup_nestiniguess
+              trigger jnam_catchup_npsguess == complete
+            task jnam_catchup_nestsfcupdate
+              trigger jnam_catchup_nestiniguess == complete
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+  endfamily
+
+  family gfs
+    edit CYC '12'
+    edit ECF_FILES '/ecf/ecfnets/scripts/gfs'
+    edit PROJ 'GFS-OPS'
+    edit NET 'gfs'
+    edit RUN 'gfs'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit QUEUESHARED 'prod_shared'
+    edit QUEUESERV 'prod_transfer'
+    edit QUEUE 'prod'
+    edit MACHINE_SITE 'production'
+    family atmos
+      family obsproc
+        family dump
+          task jgfs_atmos_dump
+            event 1 release_sfcprep
+            time 14:47
+          task jgfs_atmos_dump_post
+            trigger jgfs_atmos_dump == complete
+            event 1 release_gfs12_dump_alert
+          task jgfs_atmos_dump_alert
+            trigger jgfs_atmos_dump_post:release_gfs12_dump_alert
+        endfamily
+        family prep
+          task jgfs_atmos_emcsfc_sfc_prep
+            trigger ../dump/jgfs_atmos_dump:release_sfcprep
+          task jgfs_atmos_prep
+            trigger ../dump/jgfs_atmos_dump == complete and ../dump/jgfs_atmos_tropcy_qc_reloc == complete
+          task jgfs_atmos_prep_post
+            trigger ./jgfs_atmos_prep == complete and ../../analysis/jgfs_atmos_analysis == complete
+        endfamily
+      endfamily
+      family analysis
+        task jgfs_atmos_analysis
+          trigger ../obsproc/prep/jgfs_atmos_prep == complete and ../obsproc/prep/jgfs_atmos_emcsfc_sfc_prep == complete
+          event 1 release_fcst
+        task jgfs_atmos_analysis_calc
+          trigger ./jgfs_atmos_analysis == complete
+      endfamily
+      family post
+        task jgfs_atmos_post_manager
+          trigger ../analysis/jgfs_atmos_analysis == complete
+          event 1 release_postanl
+          event 210 release_post384
+        task jgfs_atmos_post_anl
+          trigger ./jgfs_atmos_post_manager:release_postanl
+          edit FHRGRP '000'
+          edit FHRLST 'anl'
+          edit HR 'anl'
+          edit FHR 'anl'
+        task jgfs_atmos_post_f000
+          trigger ./jgfs_atmos_post_manager:release_post000
+          edit FHRGRP '001'
+          edit FHRLST 'f000'
+          edit FHR 'f000'
+          edit HR '000'
+          edit HR '042'
+
+        ...
+
+        task jgfs_atmos_post_f384
+          trigger ./jgfs_atmos_post_manager:release_post384
+          edit FHRGRP '209'
+          edit FHRLST 'f384'
+          edit FHR 'f384'
+          edit HR '384'
+      endfamily
+      family post_processing
+        task jgfs_atmos_wafs_gcip
+          trigger ../post/jgfs_atmos_post_f003 == complete
+          time 16:40
+        family grib_wafs
+          task jgfs_atmos_wafs_f00
+            trigger ../../post/jgfs_atmos_post_f000 == complete and ../../post/jgfs_atmos_post_f120 == complete and ../grib2_wafs/jgfs_atmos_wafs_grib2 == complete
+            edit FCSTHR '00'
+          task jgfs_atmos_wafs_f06
+            trigger ../../post/jgfs_atmos_post_f006 == complete and ./jgfs_atmos_wafs_f00 == complete
+            edit FCSTHR '06'
+          ...
+          task jgfs_atmos_wafs_f120
+            trigger ../../post/jgfs_atmos_post_f120 == complete and ./jgfs_atmos_wafs_f114 == complete
+            edit FCSTHR '120'
+        endfamily
+        family grib2_wafs
+          task jgfs_atmos_wafs_grib2
+            trigger ../../post/jgfs_atmos_post_f000 == complete
+          task jgfs_atmos_wafs_grib2_0p25
+            trigger ../../post/jgfs_atmos_post_f036 == complete
+          task jgfs_atmos_wafs_blending
+            trigger ./jgfs_atmos_wafs_grib2 == complete
+            time 16:33
+          task jgfs_atmos_wafs_blending_0p25
+            trigger ./jgfs_atmos_wafs_grib2_0p25 == complete
+            time 16:25
+        endfamily
+        family bufr_sounding
+          task jgfs_atmos_postsnd
+            trigger ../../post/jgfs_atmos_post_manager:release_post000
+        endfamily
+        family bulletins
+          task jgfs_atmos_fbwind
+            trigger ../../post/jgfs_atmos_post_f006 == complete and ../../post/jgfs_atmos_post_f012 == complete and ../../post/jgfs_atmos_post_f024 == complete
+        endfamily
+        family awips_20km_1p0
+          task jgfs_atmos_awips_f000
+            trigger ../../post/jgfs_atmos_post_f000 == complete
+            edit FHRGRP '000'
+            edit FHRLST 'f000'
+            edit FCSTHR '000'
+            edit TRDRUN 'YES'
+          ...
+          task jgfs_atmos_awips_g2_f240
+            trigger ../../post/jgfs_atmos_post_f240 == complete
+            edit FHRGRP '240'
+            edit FHRLST 'f240'
+            edit FCSTHR '240'
+            edit TRDRUN 'YES'
+        endfamily
+      endfamily
+      family gempak
+        task jgfs_atmos_gempak
+          trigger ../../atmos/analysis/jgfs_atmos_analysis == complete
+        task jgfs_atmos_gempak_meta
+          trigger ../../atmos/analysis/jgfs_atmos_analysis == complete
+        task jgfs_atmos_gempak_ncdc_upapgif
+          trigger ./jgfs_atmos_gempak == active or ./jgfs_atmos_gempak == complete
+        task jgfs_atmos_npoess_pgrb2_0p5deg
+          trigger ../post/jgfs_atmos_post_anl eq active or ../post/jgfs_atmos_post_anl == complete
+        task jgfs_atmos_pgrb2_spec_gempak
+          trigger ./jgfs_atmos_npoess_pgrb2_0p5deg == complete
+      endfamily
+      family verf
+        task jgfs_atmos_vminmon
+          trigger ../analysis/jgfs_atmos_analysis == complete
+      endfamily
+    endfamily
+    family wave
+      family init
+        task jgfs_wave_init
+          trigger ../../atmos/obsproc/prep/jgfs_atmos_prep == complete
+      endfamily
+      family prep
+        task jgfs_wave_prep
+          trigger ../init/jgfs_wave_init == complete
+      endfamily
+      family post
+        task jgfs_wave_postsbs
+          trigger ../../atmos/post/jgfs_atmos_post_manager:release_post000
+        task jgfs_wave_postpnt
+          trigger ../../jgfs_forecast == complete
+        task jgfs_wave_post_bndpnt
+          trigger ../../atmos/post/jgfs_atmos_post_manager:release_post180
+        task jgfs_wave_post_bndpntbll
+          trigger ../../atmos/post/jgfs_atmos_post_manager:release_post180
+        task jgfs_wave_prdgen_gridded
+          trigger ./jgfs_wave_postsbs == active or ./jgfs_wave_postsbs == complete
+        task jgfs_wave_prdgen_bulls
+          trigger ./jgfs_wave_postpnt == complete and ./jgfs_wave_postsbs == complete
+      endfamily
+      family gempak
+        task jgfs_wave_gempak
+          trigger ../post/jgfs_wave_postsbs == active or ../post/jgfs_wave_postsbs == complete
+      endfamily
+    endfamily
+    task jgfs_forecast
+      trigger ./atmos/analysis/jgfs_atmos_analysis:release_fcst and ./wave/prep/jgfs_wave_prep == complete
+    family mos
+      edit ALERT_FROM_P3 'YES'
+      edit ECF_FILES '/ecf/ecfnets/scripts/gfs/mos'
+      edit PROJ 'GFS-%PROJENVIR%'
+      edit COM '/gpfs/hps/nco/ops/com'
+      edit QUEUESERV 'prod_transfer'
+      edit MODULES 'module load cfp-intel-sandybridge/1.1.0 grib_util gempak/6.32.0'
+      edit QUEUE 'prod'
+      family prep
+        task jgfsmos_stn_prep
+          trigger /prod12/gfs/atmos/post/jgfs_atmos_post_f096 == complete
+          edit NTASK '3'
+          edit PTILE '3'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_grd_prep
+          trigger /prod12/gfs/atmos/post/jgfs_atmos_post_f096 == complete
+          edit NTASK '4'
+          edit PTILE '4'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_ext_stn_prep
+          trigger /prod12/gfs/atmos/post == complete
+          edit NTASK '2'
+          edit PTILE '2'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_ext_grd_prep
+          trigger /prod12/gfs/atmos/post == complete
+          edit NTASK '7'
+          edit PTILE '4'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '2'
+      endfamily
+      family forecast
+        task jgfsmos_stn_fcst
+          trigger ../prep/jgfsmos_stn_prep == complete
+          edit NTASK '5'
+          edit PTILE '5'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_grd_fcst
+          trigger ../prep/jgfsmos_stn_prep == complete and ../prep/jgfsmos_grd_prep == complete
+          edit NTASK '7'
+          edit PTILE '4'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '2'
+        task jgfsmos_ext_stn_fcst
+          trigger ../prep/jgfsmos_ext_stn_prep == complete and ../prdgen/jgfsmos_stn_prdgen == complete
+          edit NTASK '3'
+          edit PTILE '3'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_ext_grd_fcst
+          trigger ../prep/jgfsmos_ext_stn_prep == complete and ../prep/jgfsmos_ext_grd_prep == complete and jgfsmos_grd_fcst == complete
+          edit NTASK '7'
+          edit PTILE '4'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '2'
+      endfamily
+      family prdgen
+        task jgfsmos_stn_prdgen
+          trigger ../forecast/jgfsmos_stn_fcst == complete
+          edit NTASK '1'
+          edit PTILE '1'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_grd_prdgen
+          trigger ../forecast/jgfsmos_grd_fcst == complete and jgfsmos_stn_prdgen == complete
+          edit NTASK '18'
+          edit PTILE '1'
+          edit OMP_NUM_THREADS '20'
+          edit NODES '18'
+        task jgfsmos_ext_stn_prdgen
+          trigger ../forecast/jgfsmos_ext_stn_fcst == complete and jgfsmos_stn_prdgen == complete
+          edit NTASK '1'
+          edit PTILE '1'
+          edit OMP_NUM_THREADS '1'
+          edit NODES '1'
+        task jgfsmos_ext_grd_prdgen
+          trigger ../forecast/jgfsmos_ext_grd_fcst == complete and jgfsmos_grd_prdgen == complete and jgfsmos_ext_stn_prdgen == complete
+          edit NTASK '17'
+          edit PTILE '1'
+          edit OMP_NUM_THREADS '20'
+          edit NODES '17'
+        task jgfsmos_wx_prdgen
+          trigger ../prdgen/jgfsmos_grd_prdgen == complete
+          edit NTASK '2'
+          edit PTILE '1'
+          edit OMP_NUM_THREADS '20'
+          edit NODES '2'
+        task jgfsmos_wx_ext_prdgen
+          trigger ../prdgen/jgfsmos_ext_grd_prdgen == complete and jgfsmos_wx_prdgen == complete
+          edit NTASK '2'
+          edit PTILE '1'
+          edit OMP_NUM_THREADS '20'
+          edit NODES '2'
+      endfamily
+    endfamily
+  endfamily
+
+  family gdas
+    edit CYC '12'
+    edit ECF_FILES '/ecf/ecfnets/scripts/gdas'
+    edit PROJ 'GDAS-OPS'
+    edit NET 'gfs'
+    edit RUN 'gdas'
+    edit COM '/gpfs/dell1/nco/ops/com'
+    edit QUEUESHARED 'prod_shared'
+    edit QUEUESERV 'prod_transfer'
+    edit QUEUE 'prod'
+    edit MACHINE_SITE 'production'
+    family atmos
+      family obsproc
+        family dump
+          task jgdas_atmos_tropcy_qc_reloc
+            time 17:45
+          task jgdas_atmos_dump
+            event 1 release_sfcprep
+            time 17:50
+          task jgdas_atmos_dump_post
+            trigger jgdas_atmos_dump == complete
+            event 1 release_gdas12_dump_alert
+          task jgdas_atmos_dump_alert
+            trigger jgdas_atmos_dump_post:release_gdas12_dump_alert
+        endfamily
+        family prep
+          task jgdas_atmos_emcsfc_sfc_prep
+            trigger ../dump/jgdas_atmos_dump:release_sfcprep
+          task jgdas_atmos_prep
+            trigger ../dump/jgdas_atmos_dump == complete and ../dump/jgdas_atmos_tropcy_qc_reloc == complete
+          task jgdas_atmos_prep_post
+            trigger ./jgdas_atmos_prep == complete and ../../analysis/jgdas_atmos_analysis == complete
+        endfamily
+      endfamily
+      family init
+        task jgdas_atmos_gldas
+          trigger ../analysis/jgdas_atmos_analysis == complete
+      endfamily
+      family analysis
+        task jgdas_atmos_analysis
+          trigger ../obsproc/prep/jgdas_atmos_prep == complete and ../obsproc/prep/jgdas_atmos_emcsfc_sfc_prep == complete
+          event 1 release_fcst
+        task jgdas_atmos_analysis_calc
+          trigger ./jgdas_atmos_analysis == complete
+        task jgdas_atmos_analysis_diag
+          trigger ./jgdas_atmos_analysis == complete
+      endfamily
+      family post
+        task jgdas_atmos_post_manager
+          trigger ../../jgdas_forecast == active
+          event 1 release_postanl
+          event 2 release_post000
+          event 3 release_post001
+          event 4 release_post002
+          event 5 release_post003
+          event 6 release_post004
+          event 7 release_post005
+          event 8 release_post006
+          event 9 release_post007
+          event 10 release_post008
+          event 11 release_post009
+        task jgdas_atmos_post_anl
+          trigger ./jgdas_atmos_post_manager:release_postanl
+          edit FHRGRP '000'
+          edit FHRLST 'anl'
+          edit HR 'anl'
+          edit FHR 'anl'
+        task jgdas_atmos_post_f000
+          trigger ./jgdas_atmos_post_manager:release_post000
+          edit FHR 'f000'
+          edit HR '000'
+          edit FHRGRP '001'
+          edit FHRLST 'f000'
+        task jgdas_atmos_post_f001
+          trigger ./jgdas_atmos_post_manager:release_post001
+          edit FHR 'f001'
+          edit HR '001'
+          edit FHRGRP '002'
+          edit FHRLST 'f001'
+        task jgdas_atmos_post_f002
+          trigger ./jgdas_atmos_post_manager:release_post002
+          edit FHR 'f002'
+          edit HR '002'
+          edit FHRGRP '003'
+          edit FHRLST 'f002'
+        task jgdas_atmos_post_f003
+          trigger ./jgdas_atmos_post_manager:release_post003
+          edit FHR 'f003'
+          edit HR '003'
+          edit FHRGRP '004'
+          edit FHRLST 'f003'
+        task jgdas_atmos_post_f004
+          trigger ./jgdas_atmos_post_manager:release_post004
+          edit FHR 'f004'
+          edit HR '004'
+          edit FHRGRP '005'
+          edit FHRLST 'f004'
+        task jgdas_atmos_post_f005
+          trigger ./jgdas_atmos_post_manager:release_post005
+          edit FHR 'f005'
+          edit HR '005'
+          edit FHRGRP '006'
+          edit FHRLST 'f005'
+        task jgdas_atmos_post_f006
+          trigger ./jgdas_atmos_post_manager:release_post006
+          edit FHR 'f006'
+          edit HR '006'
+          edit FHRGRP '007'
+          edit FHRLST 'f006'
+        task jgdas_atmos_post_f007
+          trigger ./jgdas_atmos_post_manager:release_post007
+          edit FHR 'f007'
+          edit HR '007'
+          edit FHRGRP '008'
+          edit FHRLST 'f007'
+        task jgdas_atmos_post_f008
+          trigger ./jgdas_atmos_post_manager:release_post008
+          edit FHR 'f008'
+          edit HR '008'
+          edit FHRGRP '009'
+          edit FHRLST 'f008'
+        task jgdas_atmos_post_f009
+          trigger ./jgdas_atmos_post_manager:release_post009
+          edit FHR 'f009'
+          edit HR '009'
+          edit FHRGRP '010'
+          edit FHRLST 'f009'
+      endfamily
+      family post_processing
+        task jgdas_atmos_chgres_forenkf
+          trigger ../../jgdas_forecast == complete and ../../enkf/forecast == complete
+      endfamily
+      family gempak
+        task jgdas_atmos_gempak
+          trigger ../../jgdas_forecast == complete
+        task jgdas_atmos_gempak_meta_ncdc
+          trigger ./jgdas_atmos_gempak == complete
+      endfamily
+      family verf
+        task jgdas_atmos_vminmon
+          trigger ../analysis/jgdas_atmos_analysis == complete
+        task jgdas_atmos_verfrad
+          trigger ../analysis/jgdas_atmos_analysis_diag == complete
+        task jgdas_atmos_verfozn
+          trigger ../analysis/jgdas_atmos_analysis_diag == complete
+      endfamily
+    endfamily
+    family wave
+      family init
+        task jgdas_wave_init
+          trigger ../../atmos/obsproc/prep/jgdas_atmos_prep == complete
+      endfamily
+      family prep
+        task jgdas_wave_prep
+          trigger ../init/jgdas_wave_init == complete
+      endfamily
+      family post
+        task jgdas_wave_postsbs
+          trigger ../../atmos/post/jgdas_atmos_post_manager:release_post000
+        task jgdas_wave_postpnt
+          trigger ../../jgdas_forecast == complete
+      endfamily
+    endfamily
+    task jgdas_forecast
+      trigger ./atmos/analysis/jgdas_atmos_analysis:release_fcst and ./wave/prep/jgdas_wave_prep == complete and ./atmos/init/jgdas_atmos_gldas == complete
+    family enkf
+      family analysis
+        family create
+          task jgdas_enkf_select_obs
+            trigger ../../../atmos/obsproc/prep/jgdas_atmos_prep == complete and /prod06/gdas/enkf/post == complete
+          task jgdas_enkf_diag
+            trigger ./jgdas_enkf_select_obs == complete
+          task jgdas_enkf_update
+            trigger ./jgdas_enkf_diag == complete
+        endfamily
+        family recenter
+          family ecen
+            trigger ../create/jgdas_enkf_update == complete and ../../../atmos/analysis/jgdas_atmos_analysis_calc == complete and /prod06/gdas/atmos/post_processing/jgdas_atmos_chgres_forenkf == complete
+            edit ECF_FILES '/ecf/ecfnets/scripts/gdas/enkf/analysis/recenter/ecen'
+            family grp1
+              edit FHRGRP '003'
+              task jgdas_enkf_ecen
+            endfamily
+            family grp2
+              edit FHRGRP '006'
+              task jgdas_enkf_ecen
+            endfamily
+            family grp3
+              edit FHRGRP '009'
+              task jgdas_enkf_ecen
+            endfamily
+          endfamily
+          task jgdas_enkf_sfc
+            trigger ../create/jgdas_enkf_update == complete and ../../../atmos/analysis/jgdas_atmos_analysis_calc == complete
+        endfamily
+      endfamily
+      family forecast
+        trigger ./analysis/recenter/ecen == complete and ./analysis/recenter/jgdas_enkf_sfc == complete
+        edit ECF_FILES '/ecf/ecfnets/scripts/gdas/enkf/forecast'
+        family grp1
+          edit ENSGRP '01'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp2
+          edit ENSGRP '02'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp3
+          edit ENSGRP '03'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp4
+          edit ENSGRP '04'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp5
+          edit ENSGRP '05'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp6
+          edit ENSGRP '06'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp7
+          edit ENSGRP '07'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp8
+          edit ENSGRP '08'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp9
+          edit ENSGRP '09'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp10
+          edit ENSGRP '10'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp11
+          edit ENSGRP '11'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp12
+          edit ENSGRP '12'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp13
+          edit ENSGRP '13'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp14
+          edit ENSGRP '14'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp15
+          edit ENSGRP '15'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp16
+          edit ENSGRP '16'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp17
+          edit ENSGRP '17'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp18
+          edit ENSGRP '18'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp19
+          edit ENSGRP '19'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp20
+          edit ENSGRP '20'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp21
+          edit ENSGRP '21'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp22
+          edit ENSGRP '22'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp23
+          edit ENSGRP '23'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp24
+          edit ENSGRP '24'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp25
+          edit ENSGRP '25'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp26
+          edit ENSGRP '26'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp27
+          edit ENSGRP '27'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp28
+          edit ENSGRP '28'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp29
+          edit ENSGRP '29'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp30
+          edit ENSGRP '30'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp31
+          edit ENSGRP '31'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp32
+          edit ENSGRP '32'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp33
+          edit ENSGRP '33'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp34
+          edit ENSGRP '34'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp35
+          edit ENSGRP '35'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp36
+          edit ENSGRP '36'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp37
+          edit ENSGRP '37'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp38
+          edit ENSGRP '38'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp39
+          edit ENSGRP '39'
+          task jgdas_enkf_fcst
+        endfamily
+        family grp40
+          edit ENSGRP '40'
+          task jgdas_enkf_fcst
+        endfamily
+      endfamily
+      family post
+        trigger ./forecast == complete
+        task jgdas_enkf_post_f003
+          edit FHMIN_EPOS '003'
+          edit FHMAX_EPOS '003'
+          edit FHOUT_EPOS '003'
+        task jgdas_enkf_post_f004
+          edit FHMIN_EPOS '004'
+          edit FHMAX_EPOS '004'
+          edit FHOUT_EPOS '004'
+        task jgdas_enkf_post_f005
+          edit FHMIN_EPOS '005'
+          edit FHMAX_EPOS '005'
+          edit FHOUT_EPOS '005'
+        task jgdas_enkf_post_f006
+          edit FHMIN_EPOS '006'
+          edit FHMAX_EPOS '006'
+          edit FHOUT_EPOS '006'
+        task jgdas_enkf_post_f007
+          edit FHMIN_EPOS '007'
+          edit FHMAX_EPOS '007'
+          edit FHOUT_EPOS '007'
+        task jgdas_enkf_post_f008
+          edit FHMIN_EPOS '008'
+          edit FHMAX_EPOS '008'
+          edit FHOUT_EPOS '008'
+        task jgdas_enkf_post_f009
+          edit FHMIN_EPOS '009'
+          edit FHMAX_EPOS '009'
+          edit FHOUT_EPOS '009'
+      endfamily
+    endfamily
+  endfamily
+
+endsuite
+# enddef
