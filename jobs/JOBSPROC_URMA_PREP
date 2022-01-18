@@ -132,6 +132,7 @@ export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
 # Paths for non-obsproc items
 # ---------------------------
 
+export TANK=${TANK:-${DCOMROOT}}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
@@ -162,7 +163,8 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  #export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
@@ -179,7 +181,8 @@ fi
 export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
 export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
                                               # NOTE: only NESMIO_IN or NETCDF_IN can be .true.
-export envir_getges=${envir_getges:-prod}
+#export envir_getges=${envir_getges:-prod}
+export envir_getges=${envir_getges:-${envir:-prod}}
 export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gdas.$PDY)/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gfs.$PDY)/${cyc}/${COMPONENT}}
 if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then 
