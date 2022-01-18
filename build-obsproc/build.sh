@@ -3,7 +3,8 @@
 set -eux
 
 # Location of PWD and package source directory.
-pkg_root=`dirname $(readlink -f $0)`
+#pkg_root=`dirname $(readlink -f $0)`
+pkg_root=`dirname $(pwd)`
 
 INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
@@ -12,7 +13,7 @@ target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
 if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   source $pkg_root/versions/build.ver
   set +x
-  module purge
+  module reset
   module use $pkg_root/modulefiles
   module load obsproc_$target
   module list
@@ -42,7 +43,8 @@ rm -rf $INSTALL_PREFIX
 #############################################################################
 
 # Remove build directory upon successfull build and install
-cd $pkg_root
+#cd $pkg_root
+cd ../
 rm -rf build
 
 exit 0

@@ -28,19 +28,19 @@ if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
 endif()
 
 # Build and install code.
-add_subdirectory(sorc)
+add_subdirectory(../sorc sorc)
 
 # Install jobs.
-add_subdirectory(jobs)
+add_subdirectory(../jobs jobs)
 
 # Install scripts.
-add_subdirectory(scripts)
+add_subdirectory(../scripts scripts)
 
 # Install utility scripts.
-add_subdirectory(ush)
+add_subdirectory(../ush ush)
 
 # Install fix files.
-add_subdirectory(fix)
+add_subdirectory(../fix fix)
 
 # Install parm files.
-add_subdirectory(parm)
+add_subdirectory(../parm parm)
