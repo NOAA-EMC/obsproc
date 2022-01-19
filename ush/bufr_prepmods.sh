@@ -145,8 +145,8 @@ for dtyp in $dtypes ; do
     mkdir -p $DBASE
 
     if [ ".$dtyp" = '.ships' -o \
-         ".$dtyp" = '.shpall' -o \
-	 ".$dtyp" = '.shipsb' ] ; then   # restrict access to SHIPS/SHIPSB/SHPALL directory
+         ".$dtyp" = '.shipsb' -o \
+	 ".$dtyp" = '.shpall' ] ; then   # restrict access to SHIPS/SHIPSB/SHPALL directory
       chgrp rstprod $DBASE
       chmod 750     $DBASE
     fi # dtyp = ships/shipsb/shpall
@@ -265,12 +265,12 @@ RETURN CODE $errget"
       err_grand=99
     else
       cp -p $dtyp.$cymd $DBASE/$dtyp.$cymd
-###   if [ ".$dtyp" = '.ships' ] ; then        # restrict access to SHIPS files
       if [ ".$dtyp" = '.ships' -o \
-           ".$dtyp" = '.shpall' ] ; then   # restrict access to SHIPS/SHPALL files
+	   ".$dtyp" = '.shipsb' -o \
+           ".$dtyp" = '.shpall' ] ; then   # restrict access to SHIPS/SHIPSB/SHPALL files
         chgrp rstprod $DBASE/$dtyp.$cymd
         chmod 640     $DBASE/$dtyp.$cymd
-      fi # dtyp = ships/shpall
+      fi # dtyp = ships/shipsb/shpall
       msg="program  $pgm completed normally for $cymd FOR $dtyp"
       set +x
       echo
