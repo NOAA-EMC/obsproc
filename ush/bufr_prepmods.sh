@@ -145,10 +145,11 @@ for dtyp in $dtypes ; do
     mkdir -p $DBASE
 
     if [ ".$dtyp" = '.ships' -o \
-         ".$dtyp" = '.shpall' ] ; then   # restrict access to SHIPS/SHPALL directory
+         ".$dtyp" = '.shpall' -o \
+	 ".$dtyp" = '.shipsb' ] ; then   # restrict access to SHIPS/SHIPSB/SHPALL directory
       chgrp rstprod $DBASE
       chmod 750     $DBASE
-    fi # dtyp = ships/shpall
+    fi # dtyp = ships/shipsb/shpall
 
 #  run the dumpjb script for this datatype  
 #  ---------------------------------------
