@@ -7,8 +7,6 @@
 #PBS -l place=vscatter,select=1:ncpus=12:mem=6gb
 #PBS -l debug=true
 
-##PBS -l place=vscatter,select=1:ncpus=32:mem=32gb
-
 export model=obsproc
 
 %include <head.h>
@@ -28,8 +26,8 @@ module load netcdf/${netcdf_ver}
 module list
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_PREP1
-%include <tail.h>
 
+%include <tail.h>
 %manual
 ######################################################################
 #

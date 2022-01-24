@@ -15,7 +15,8 @@ export model=obsproc
 export cyc=%CYC%
 JTYP=%JTYP% # '', erly_, pcyc_
 
-#export MPMD=NO  # uncomment if you do not provide poe BSUB cards
+export MPMD=NO  # uncomment for serial runs
+#export NPROCS=3
 
 #Load the modules
 module load intel/${intel_ver}
@@ -28,13 +29,6 @@ module load intel/${intel_ver}
 module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 module list
-
-# Need these settings only when cyc=23 and have local set of dump status
-# files to process
-#export COPY=YES
-#export HOMEarch=/lfs/h2/emc/ptmp/$USER/HOMEarch/com/rap/prod/sdm_rtdm
-#export AVGDarch_OUT=$HOMEarch/avgdata
-#export OBCNTarch=$HOMEarch/obcount_30day
 
 # CALL executable job script here
 $HOMEobsproc/jobs/JOBSPROC_RAP_DUMP_POST

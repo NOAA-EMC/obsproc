@@ -6,12 +6,14 @@ suite para
         edit PROJ 'OBSPROC'
         family v1.0
           edit PACKAGEHOME '/lfs/h1/ops/%ENVIR%/packages/obsproc.%obsproc_ver%'
+
           family nam
             #defstatus complete
             edit JTYP nam
             edit ECF_FILES '%PACKAGEHOME%/ecf/nam'
             family tm00
               edit TMMARK 'tm00'
+              edit CYC '00'
               family dump
                 task jobsproc_nam_dump
                   time 01:15
@@ -46,7 +48,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_06/v4.2/tm06/analysis == complete
               endfamily
             endfamily
             family tm05
@@ -63,7 +65,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_06/v4.2/tm05/analysis == complete
               endfamily
             endfamily
             family tm04
@@ -80,7 +82,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_06/v4.2/tm04/analysis == complete
               endfamily
             endfamily
             family tm03
@@ -97,7 +99,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_06/v4.2/tm03/analysis == complete
               endfamily
             endfamily
             family tm02
@@ -114,7 +116,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_06/v4.2/tm02/analysis == complete
               endfamily
             endfamily
             family tm01
@@ -131,7 +133,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_06/v4.2/tm01/analysis == complete
               endfamily
             endfamily
           endfamily # nam
@@ -195,9 +197,9 @@ suite para
                   time 05:50
                 task jobsproc_gdas_atmos_dump_post
                   trigger jobsproc_gdas_atmos_dump == complete
-                  event 1 release_gdas12_dump_alert
+                  event 1 release_gdas00_dump_alert
                 task jobsproc_gdas_atmos_dump_alert
-                  trigger jobsproc_gdas_atmos_dump_post:release_gdas12_dump_alert
+                  trigger jobsproc_gdas_atmos_dump_post:release_gdas00_dump_alert
               endfamily
               family prep
                 task jobsproc_gdas_atmos_prep
@@ -469,7 +471,6 @@ suite para
                 endfamily
               endfamily #pcyc
             endfamily #17z
-
           endfamily #rap
 
           family dump_monitor
@@ -515,6 +516,34 @@ suite para
     family nam
       family v4.2
         family tm00
+          family analysis
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family nam_catchup_06
+      family v4.2
+        family tm06
+          family analysis
+          endfamily
+        endfamily
+        family tm05
+          family analysis
+          endfamily
+        endfamily
+        family tm04
+          family analysis
+          endfamily
+        endfamily
+        family tm03
+          family analysis
+          endfamily
+        endfamily
+        family tm02
+          family analysis
+          endfamily
+        endfamily
+        family tm01
           family analysis
           endfamily
         endfamily

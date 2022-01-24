@@ -1,4 +1,4 @@
-#PBS -N obsproc_%JTYP%_prep_post_%CYC%
+#PBS -N obsproc_%JTYP%_prep_post_%TMMARK%_%CYC%
 #PBS -j oe
 #PBS -S /bin/bash
 #PBS -q %QUEUE%

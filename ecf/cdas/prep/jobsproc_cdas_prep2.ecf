@@ -21,6 +21,8 @@ module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
+
+module load netcdf/${netcdf_ver}
 module list
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_PREP2

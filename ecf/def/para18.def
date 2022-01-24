@@ -13,6 +13,7 @@ suite para
             edit ECF_FILES '%PACKAGEHOME%/ecf/nam'
             family tm00
               edit TMMARK 'tm00'
+              edit CYC '18'
               family dump
                 task jobsproc_nam_dump
                   time 19:15
@@ -47,7 +48,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_00/v4.2/tm06/analysis == complete
               endfamily
             endfamily
             family tm05
@@ -64,7 +65,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_00/v4.2/tm05/analysis == complete
               endfamily
             endfamily
             family tm04
@@ -81,7 +82,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_00/v4.2/tm04/analysis == complete
               endfamily
             endfamily
             family tm03
@@ -98,7 +99,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_00/v4.2/tm03/analysis == complete
               endfamily
             endfamily
             family tm02
@@ -115,7 +116,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_00/v4.2/tm02/analysis == complete
               endfamily
             endfamily
             family tm01
@@ -132,7 +133,7 @@ suite para
                 task jobsproc_nam_prep
                   trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
                 task jobsproc_nam_prep_post
-                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+                  trigger ../../../../../nam_catchup_00/v4.2/tm01/analysis == complete
               endfamily
             endfamily
           endfamily # nam
@@ -498,6 +499,34 @@ suite para
     family nam
       family v4.2
         family tm00
+          family analysis
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family nam_catchup_00
+      family v4.2
+        family tm06
+          family analysis
+          endfamily
+        endfamily
+        family tm05
+          family analysis
+          endfamily
+        endfamily
+        family tm04
+          family analysis
+          endfamily
+        endfamily
+        family tm03
+          family analysis
+          endfamily
+        endfamily
+        family tm02
+          family analysis
+          endfamily
+        endfamily
+        family tm01
           family analysis
           endfamily
         endfamily
