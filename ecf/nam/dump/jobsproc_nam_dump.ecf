@@ -16,6 +16,8 @@ export cyc=%CYC%
 JTYP=%JTYP% #=nam
 export tmmark=%TMMARK%
 
+export NPROCS=7
+
 #########################################
 #Now load the modules
 #########################################
