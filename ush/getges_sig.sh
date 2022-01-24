@@ -964,9 +964,10 @@ elif [[ $netwk = gfs ]];then
 elif [[ $netwk = cdas ]];then
  fhbeg=06
  fhend=06
+   #$GETGES_COM/cdas/$envir/cdas.$day/cdas.t${cyc}z.sf$fh'
  case $typef in
   sigges)  geslist='
-   $GETGES_COM/cdas/$envir/cdas.$day/cdas.t${cyc}z.sf$fh'
+   $COMINcdas/cdas.t${cyc}z.sf$fh'
    ;;
   siggm3) geslist='
    $GETGES_COM/cdas/$envir/cdas.$day/cdas.t${cyc}z.sf$fhm3'

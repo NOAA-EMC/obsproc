@@ -1278,7 +1278,9 @@ if [ "$launcher" = cfp ]; then
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      $launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      #$launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      NPROCS=${NPROCS:-1}
+      $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
