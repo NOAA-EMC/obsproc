@@ -85,7 +85,7 @@ if [ $getsystp_err -ne 0 ]; then
    [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
 fi
 echo sys_tp is set to: $sys_tp
-launcher_OIQCX=${launcher_OIQCX:-mpiexec}
+launcher_OIQCX=${launcher_OIQCX:-"mpiexec -n $NCPUS"}
 #########################module load ibmpe ics lsf uncomment if not in profile
 #  seems to run ok w next 10 lines commented out (even though Jack had them in
 #   his version of this script)
