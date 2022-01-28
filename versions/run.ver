@@ -11,6 +11,7 @@ export netcdf_ver=4.7.4
 #export w3emc_ver=2.7.3 #2.9.2
 #export bacio_ver=2.4.1
 export bufr_dump_ver=1.0.0
+export prepobs_ver=1.0.0
 #export bufr_ver=11.5.0
 
 #export PrgEnv_intel_ver=8.1.0
