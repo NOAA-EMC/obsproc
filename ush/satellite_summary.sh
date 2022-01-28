@@ -72,7 +72,7 @@
 #
 #   Sum the satellites by cycle time
 #
- $USHobsproc_prep_post/satellite_daily.pl
+ $USHobsproc/satellite_daily.pl
   sort -u   tmpsat_list > tmpsat_types  
   sort -o   tmpsat_davg00 tmpsat_davg00  
   sort -o   tmpsat_davg06 tmpsat_davg06  
@@ -82,8 +82,8 @@
 #
 #   Create the html pages       
 #
-  cp $FIXobsproc_prep_post/satellite_counts.tbl .
-  $USHobsproc_prep_post/satellite_html.pl $MONTH $YEAR
+  cp $FIXobsproc/satellite_counts.tbl .
+  $USHobsproc/satellite_html.pl $MONTH $YEAR
 
 exit
 

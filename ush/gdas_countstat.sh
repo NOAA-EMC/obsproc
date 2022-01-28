@@ -116,8 +116,8 @@ echo "&DATA" > ${net}_${month}_dumpstats.$CYCLE
         if test -s $type
         then 
           echo "get stats for $type"
-          mnemonic=`grep $type $FIXobsproc_prep_post/gdascounts_types | awk '{print $2}'`
-          awk -f $FIXobsproc_prep_post/gdascounts_avg.awk $type var=$mnemonic >> ${net}_${month}_dumpstats.$CYCLE
+          mnemonic=`grep $type $FIXobsproc/gdascounts_types | awk '{print $2}'`
+          awk -f $FIXobsproc/gdascounts_avg.awk $type var=$mnemonic >> ${net}_${month}_dumpstats.$CYCLE
         else
           echo $type is not dumped for $net
         fi

@@ -13,7 +13,7 @@
 #   FIXobsproc_prep_post    Directory containing input base html file
 #
 # Fixed files:
-#   $FIXobsproc_prep_post/gdascounts_base.shtml
+#   $FIXobsproc/gdascounts_base.shtml
 #
 # Output:
 #   index.shtml
@@ -51,7 +51,7 @@ Month[12]=December
 
 # Bring in fresh page base.
 # 
-cp $FIXobsproc_prep_post/gdascounts_base.shtml gdascounts_base.shtml
+cp $FIXobsproc/gdascounts_base.shtml gdascounts_base.shtml
 
 # Above file should have the demarcation patterns expected in following sed commands
 #
