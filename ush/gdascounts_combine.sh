@@ -72,7 +72,7 @@ set -x
   cp $DATCOM1_IN/index.shtml temp
 
 # We have option here to rebuild the gdas counts main page starting with 
-# content from $FIXobsproc_prep_post/gdascounts_base.shtml.  Before doing so,
+# content from $FIXobsproc/gdascounts_base.shtml.  Before doing so,
 # ensure the header and footer content that will surround the new table is
 # the same as (or preferred to) that in the current index.shtml file.
 if [[ "$REBUILD_MAINPAGE" == YES ]]; then
@@ -80,7 +80,7 @@ if [[ "$REBUILD_MAINPAGE" == YES ]]; then
   export StartYr=2002
   export EndYr=$YEAR
   export LastMon_EndYr=$MM
-  $USHobsproc_prep_post/build_mainpage.sh
+  $USHobsproc/build_mainpage.sh
   err=$?
   if [[ $err -eq 0 ]]; then
     cp index.shtml temp2  # this may seem odd, but parent script expects temp2

@@ -1060,7 +1060,7 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
    msg="Attempt to update data count average table dump monitoring"
    $DATA/postmsg "$jlogfile" "$msg"
 
-   $USHobsproc_shared_bufr_avgdata/bufr_avgdata.sh $NET
+   $USHobsproc/bufr_avgdata.sh $NET
    errsc=$?
    if [ "$errsc" -eq '0' ]; then
       rm $AVGDarch_OUT/obcount_30davg.${NET}.current

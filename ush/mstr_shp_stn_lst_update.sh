@@ -160,7 +160,7 @@ echo "$msg"
 echo
 set -x
 
-$USHobsproc_prep_post/mstr_shp_stn_lst_update2.sh
+$USHobsproc/mstr_shp_stn_lst_update2.sh
 
 msg="VOS2_DAILY PROCESSING COMPLETED NORMALLY"
 $DATA/postmsg "$jlogfile" "$msg"

@@ -132,19 +132,19 @@ fi
 
 #    00Z counts
 
-  $USHobsproc_prep_post/gdas_countstat.sh $date gdas $numdays 00 ${MONTH} 
+  $USHobsproc/gdas_countstat.sh $date gdas $numdays 00 ${MONTH} 
 
 #    06Z counts
 
-  $USHobsproc_prep_post/gdas_countstat.sh $date gdas $numdays 06 ${MONTH}
+  $USHobsproc/gdas_countstat.sh $date gdas $numdays 06 ${MONTH}
 
 #    12Z counts
 
-  $USHobsproc_prep_post/gdas_countstat.sh $date gdas $numdays 12 ${MONTH} 
+  $USHobsproc/gdas_countstat.sh $date gdas $numdays 12 ${MONTH} 
  
 #    18Z counts
 
-  $USHobsproc_prep_post/gdas_countstat.sh $date gdas $numdays 18 ${MONTH}
+  $USHobsproc/gdas_countstat.sh $date gdas $numdays 18 ${MONTH}
 
 
 #   Execute monthly_avg
@@ -159,7 +159,7 @@ fi
   export FORT13=gdas_${MONTH}_dumpstats.t18z
   export FORT50=tmp1
 
-  $EXECobsproc_prep_post/gdascounts_ave 1>aa.out 2>aa.out
+  $EXECobsproc/gdascounts_ave 1>aa.out 2>aa.out
   export err=$?; err_chk
 
 
@@ -172,7 +172,7 @@ echo "MONTH=${MONTH}" > ${MONTH}.htmlscript
 echo "YEAR=$YEAR" >> ${MONTH}.htmlscript
 cat ${MONTH}.gdas.outfile >> ${MONTH}.htmlscript
 echo "cat <<EOF > ${MONTH}.html" >> ${MONTH}.htmlscript
-cat $FIXobsproc_prep_post/gdascounts_html  >> ${MONTH}.htmlscript
+cat $FIXobsproc/gdascounts_html  >> ${MONTH}.htmlscript
 
 
 #  Run the script
@@ -182,11 +182,11 @@ cat $FIXobsproc_prep_post/gdascounts_html  >> ${MONTH}.htmlscript
 
 # Generate 3 satellite count files (received,selected,assimilated)
 
-  $USHobsproc_prep_post/satellite_summary.sh                             
+  $USHobsproc/satellite_summary.sh                             
 
 # Combine 4 files ( 1 non-sat, 3 sat ) into 1
 
-  $USHobsproc_prep_post/gdascounts_combine.sh                           
+  $USHobsproc/gdascounts_combine.sh                           
 
   cp temp2 index.shtml           
   cp temp2 ${Month}_${YEAR}.shtml
