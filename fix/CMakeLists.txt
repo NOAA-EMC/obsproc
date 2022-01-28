@@ -6,10 +6,6 @@ list(APPEND fix_files
   gdascounts_html
   gdascounts_types
   prepobs_anow.bufrtable
-  prepobs_errtable.cdas
-  prepobs_errtable.nam
-  prepobs_oiqc.oberrs
-  prepobs_oiqc.oberrs.cdas
   satellite_counts.tbl
   )
 
