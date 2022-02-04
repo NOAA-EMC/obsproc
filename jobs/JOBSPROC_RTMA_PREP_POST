@@ -123,19 +123,19 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 ##########################
 
-# -------------------------------
-# Paths for obsproc items
-# -------------------------------
+# ----------------------------------
+# Paths for obsproc & prepobs items
+# ----------------------------------
 export HOMEobsproc=${HOMEobsproc:\
 -${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:\
--$HOMEobsproc/scripts}
+export SCRIPTSprepobs=${SCRIPTSprepobs:\
+-$HOMEprepobs/scripts}
 
-export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
+export EXECprepobs=${EXECprepobs:-$HOMEprepobs/exec}
 
-export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
+export USHprepobs=${USHprepobs:-$HOMEprepobs/ush}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -198,7 +198,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exprep_post.sh
+$SCRIPTSprepobs/exprep_post.sh
 eval err_${RUN}_prep_post=$?
 eval [[ \$err_${RUN}_prep_post -ne 0 ]] && $DATA/err_exit
 
