@@ -193,7 +193,7 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
@@ -212,8 +212,8 @@ export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
                                               # NOTE: only NEMSIO_IN or NETCDF_IN can be .true.
 #export envir_getges=${envir_getges:-prod}
 export envir_getges=${envir_getges:-${envir:-prod}}
-export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gdas.$PDY)/${cyc}/${COMPONENT}}
-export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gfs.$PDY)/${cyc}/${COMPONENT}}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gdas.$PDY/${cyc}/${COMPONENT}}
+export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gfs.$PDY/${cyc}/${COMPONENT}}
 if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then
   export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges}
   export GETGES_COM=${GETGES_COM:-$COMROOT}
