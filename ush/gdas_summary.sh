@@ -198,7 +198,10 @@ cat $FIXobsproc/gdascounts_html  >> ${MONTH}.htmlscript
 # Move this over to the public web server.
 #
 if [ "$SENDWEB" = 'YES' ]; then
-  if [ "$USER" = nwprod ]; then
+  if [ "$USER" = ops.prod ]; then
+    scp ${Month}_${YEAR}.html nwprod@ncorzdm:/home/people/nco/nwprod/pmb/nwtest/gdas/
+    scp index.shtml nwprod@ncorzdm:/home/people/nco/nwprod/pmb/nwtest/gdas/
+  elif [ $USER = ops.para ]; then
     scp ${Month}_${YEAR}.html nwprod@ncorzdm:/home/people/nco/nwprod/pmb/nw${envir}/gdas/
     scp index.shtml nwprod@ncorzdm:/home/people/nco/nwprod/pmb/nw${envir}/gdas/
   else # developer

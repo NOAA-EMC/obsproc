@@ -129,21 +129,21 @@ if [ $COPY = YES ]; then
 #  updated status files)
 #  ----------------------------------------------------------------------------
 
-mkdir -p $OBCNTarch/${net}/${net}.${PDY}
-chmod 775 $OBCNTarch/${net}/${net}.${PDY}
-mkdir -p $OBCNTarch/${net}/${net}.${PDYm1}
-chmod 775 $OBCNTarch/${net}/${net}.${PDYm1}
+mkdir -p $OBCNTarch/${net}.${PDY}
+chmod 775 $OBCNTarch/${net}.${PDY}
+mkdir -p $OBCNTarch/${net}.${PDYm1}
+chmod 775 $OBCNTarch/${net}.${PDYm1}
 [ $net = dump -o $net = rap -o $net = rtma -o $net = urma ] && set +x
 if [ $net = gfs -o $net = gdas ]; then
-   cp -p ${comin_nocyc}/*/*/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}/${net}.${PDY}
+   cp -p ${comin_nocyc}/*/*/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}.${PDY}
 else
-   cp -p ${comin}/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}/${net}.${PDY}
+   cp -p ${comin}/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}.${PDY}
 fi
 err_copy_status=$?
-chmod 775 $OBCNTarch/${net}/${net}.${PDY}/*
+chmod 775 $OBCNTarch/${net}.${PDY}/*
 if [ $err_copy_status -eq 0 ]; then
    msg="$net_uc tm00 status file(s) for today successfully copied to \
-$OBCNTarch/${net}/${net}.${PDY}"
+$OBCNTarch/${net}.${PDY}"
    set +x
    echo
    echo "$msg"
@@ -152,15 +152,15 @@ $OBCNTarch/${net}/${net}.${PDY}"
    [ -n "$jlogfile" ] && postmsg "$jlogfile" "$msg"
 fi
 if [ $net = gfs -o $net = gdas ]; then
-   cp -p ${comin_m1_nocyc}/*/*/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}/${net}.${PDYm1}
+   cp -p ${comin_m1_nocyc}/*/*/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}.${PDYm1}
 else
-   cp -p ${comin_m1}/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}/${net}.${PDYm1}
+   cp -p ${comin_m1}/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}.${PDYm1}
 fi
 err_copy_status_yesterday=$?
-chmod 775 $OBCNTarch/${net}/${net}.${PDYm1}/*
+chmod 775 $OBCNTarch/${net}.${PDYm1}/*
 if [ $err_copy_status_yesterday -eq 0 ]; then
    msg="$net_uc tm00 status file(s) for yesterday successfully copied to \
-$OBCNTarch/${net}/${net}.${PDYm1}"
+$OBCNTarch/${net}.${PDYm1}"
    set +x
    echo
    echo "$msg"
@@ -169,22 +169,22 @@ $OBCNTarch/${net}/${net}.${PDYm1}"
    [ -n "$jlogfile" ] && postmsg "$jlogfile" "$msg"
 fi
 if [ $net = nam -o $net = gfs -o $net = gdas ]; then
-   mkdir -p $OBCNTarch/${net}/${net}.${PDY}/updated.status
-   chmod 775 $OBCNTarch/${net}/${net}.${PDY}/updated.status
-   mkdir -p $OBCNTarch/${net}/${net}.${PDYm1}/updated.status
-   chmod 775 $OBCNTarch/${net}/${net}.${PDYm1}/updated.status
+   mkdir -p $OBCNTarch/${net}.${PDY}/updated.status
+   chmod 775 $OBCNTarch/${net}.${PDY}/updated.status
+   mkdir -p $OBCNTarch/${net}.${PDYm1}/updated.status
+   chmod 775 $OBCNTarch/${net}.${PDYm1}/updated.status
    if [ $net = nam ]; then
       cp -p ${comin}/${qual3}.t*z.updated.status.tm00.bufr_d \
-      $OBCNTarch/${net}/${net}.${PDY}/updated.status
+      $OBCNTarch/${net}.${PDY}/updated.status
    else
       cp -p ${comin_nocyc}/*/*/${qual3}.t*z.updated.status.tm00.bufr_d \
-       $OBCNTarch/${net}/${net}.${PDY}/updated.status
+       $OBCNTarch/${net}.${PDY}/updated.status
    fi
    err_copy_updated_status=$?
-   chmod 775 $OBCNTarch/${net}/${net}.${PDY}/updated.status/*
+   chmod 775 $OBCNTarch/${net}.${PDY}/updated.status/*
    if [ $err_copy_updated_status -eq 0 ]; then
       msg="$net_uc tm00 updated status file(s) for today successfully copied \
-to $OBCNTarch/${net}/${net}.${PDY}/updated.status"
+to $OBCNTarch/${net}.${PDY}/updated.status"
       set +x
       echo
       echo "$msg"
@@ -194,16 +194,16 @@ to $OBCNTarch/${net}/${net}.${PDY}/updated.status"
    fi
    if [ $net = nam ]; then
       cp -p ${comin_m1}/${qual3}.t*z.updated.status.tm00.bufr_d \
-       $OBCNTarch/${net}/${net}.${PDYm1}/updated.status
+       $OBCNTarch/${net}.${PDYm1}/updated.status
    else
       cp -p ${comin_m1_nocyc}/*/*/${qual3}.t*z.updated.status.tm00.bufr_d \
-       $OBCNTarch/${net}/${net}.${PDYm1}/updated.status
+       $OBCNTarch/${net}.${PDYm1}/updated.status
    fi
    err_copy_updated_status_yesterday=$?
-   chmod 775 $OBCNTarch/${net}/${net}.${PDYm1}/updated.status/*
+   chmod 775 $OBCNTarch/${net}.${PDYm1}/updated.status/*
    if [ $err_copy_updated_status_yesterday -eq 0 ]; then
       msg="$net_uc tm00 updated status file(s) for yesterday successfully \
-copied to $OBCNTarch/${net}/${net}.${PDYm1}/updated.status"
+copied to $OBCNTarch/${net}.${PDYm1}/updated.status"
       set +x
       echo
       echo "$msg"
@@ -214,7 +214,7 @@ copied to $OBCNTarch/${net}/${net}.${PDYm1}/updated.status"
 fi
 set -x
 
-cd $OBCNTarch/${net}/${net}.${PDY}
+cd $OBCNTarch/${net}.${PDY}
 
 ls *.bufr_d > $DATA/ls.files_today.bufr
 
@@ -226,7 +226,7 @@ for n in `cat $DATA/ls.files_today.bufr`; do
    fi
 done
 
-cd $OBCNTarch/${net}/${net}.${PDYm1}
+cd $OBCNTarch/${net}.${PDYm1}
 
 ls *.bufr_d > $DATA/ls.files_yesterday.bufr
 
@@ -252,7 +252,7 @@ echo
 set -x
 
 set +x
-ls -d $OBCNTarch/${net}/* > ls.dir
+ls -d $OBCNTarch/* > ls.dir
 set -x
 
 if [ -s ls.dir ];then
@@ -321,7 +321,7 @@ pdym30d=$($NDATE -720 ${PDY}00)
 pdym30d=$(echo $pdym30d | sed 's/00$//')  # remove trailing 00 
 
 # build array for last 30 days files
-for dir in $OBCNTarch/${net}/$net*; do
+for dir in $OBCNTarch/$net*; do
   set +x
   netday=$(echo $dir | awk -F'/' '{print $NF}')
   # test day is no more than 30 days from $PDY
@@ -339,7 +339,7 @@ for cycle_avg in $cycles; do
    for dtg in "${arr30d[@]}"; do
      set +x
      grep -h -e " REPORTS" -e "^EOF @@@" \
-     $OBCNTarch/${net}/${net}.${dtg}/*${cycle_avg}.status.*bufr_d | \
+     $OBCNTarch/${net}.${dtg}/*${cycle_avg}.status.*bufr_d | \
      grep -e " in data group " -e "^EOF @@@" | grep -e " HAS" -e "^EOF @@@" | \
      grep -v -e "Domain" >> delete
      awk -F" HAS" '{print$2}' delete | awk -F" REPORTS" '{print$1}' | \
@@ -432,8 +432,8 @@ if [ $COPY = YES ]; then
 #   "break" in the script sooner than if all 30-days are missing)
 #  ----------------------------------------------------------------
 
-   rmdir $OBCNTarch/${net}/${net}.${PDYm1}
-   rmdir $OBCNTarch/${net}/${net}.${PDY}
+   rmdir $OBCNTarch/${net}.${PDYm1}
+   rmdir $OBCNTarch/${net}.${PDY}
 
 fi
 

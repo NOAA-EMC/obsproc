@@ -2118,7 +2118,8 @@ set -x
 	    chmod 755 $DATA/prep_exec.cmd
             #mpiexec -n 6 -ppn 32 $DATA/prep_exec.cmd #IG
             # mpiexec -n 6 $DATA/prep_exec.cmd
-            mpiexec -n $NSPLIT cfp $DATA/prep_exec.cmd  
+            #mpiexec -n $NSPLIT cfp $DATA/prep_exec.cmd  
+            mpiexec -np $NSPLIT --cpu-bind verbose,core cfp $DATA/prep_exec.cmd  
 	    export err=$?; $DATA/err_chk
             [ $err != 0 ] && exit 55  # for extra measure	 
          elif [ "$launcher_PREP" = mpirun.lsf ]; then
