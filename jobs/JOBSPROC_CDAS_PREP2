@@ -207,7 +207,7 @@ if [[ "$RUN_ENVIR" == nco ]]; then
    # ... COM_IN is path to files possibly read by prepobs_cqcbufr
   export COM_IN=$(compath.py ${envir}/${obsNET}/${obsproc_ver})
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
    # ... COM_IN is path to files possibly read by prepobs_cqcbufr
@@ -241,8 +241,8 @@ export PREPDATA=NO    # DO NOT
                       # PREPOBS_LISTHEADERS and PREPOBS_MONOPREPBUFR
                       # (instead, feed the file below into the Q.C. codes)
 
-#export PREPBUFR_IN=${PREPBUFR_IN:-$COMIN/${RUN}.${cycle}.prepbufr_pre-qc}
-export PREPBUFR_IN=${PREPBUFR_IN:-$COMINcdas/${RUN}.${cycle}.prepbufr_pre-qc}
+export PREPBUFR_IN=${PREPBUFR_IN:-$COMIN/${RUN}.${cycle}.prepbufr_pre-qc}
+#export PREPBUFR_IN=${PREPBUFR_IN:-$COMINcdas/${RUN}.${cycle}.prepbufr_pre-qc}
 
 export GETGUESS=${GETGUESS:-YES}
                       # Encode first guess (background) values interpolated to

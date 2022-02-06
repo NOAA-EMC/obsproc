@@ -176,8 +176,8 @@ setpdy.sh
 # Define COMOUT directory  (no COMIN for this job)
 ##################################################
 
-#export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/$obsproc_ver/${NET}.${PDY})}
-export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/$obsproc_ver/${NET}.${PDY})}
+#export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/$obsproc_ver/${NET}.${PDY})}
+export COMOUT=${COMOUT:-$(compath.py -o  ${obsNET}/$obsproc_ver/${NET}.${PDY})}
 mkdir -m 775 -p $COMOUT
 
 ##############################################
