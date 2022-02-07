@@ -10,7 +10,7 @@
 #   StartYr                 4-digit year (Optional)
 #   EndYr                   4-digit year
 #   LastMon_EndYr           2-digit month
-#   FIXobsproc_prep_post    Directory containing input base html file
+#   FIXobsproc              Directory containing input base html file
 #
 # Fixed files:
 #   $FIXobsproc/gdascounts_base.shtml
