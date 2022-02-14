@@ -44,3 +44,6 @@ add_subdirectory(fix)
 
 # Install parm files.
 add_subdirectory(parm)
+
+# Install modulefiles
+add_subdirectory(modulefiles)
