@@ -1,0 +1,22 @@
+help([[
+Sets environment variables for obsproc  pacakage
+]])
+
+local pkgName = myModuleName()
+local pkgVersion = myModuleVersion()
+local pkgNameVer = myModuleFullName()
+
+conflict(pkgName)
+
+local base = "@CMAKE_INSTALL_PREFIX@"
+
+setenv("HOMEobsproc", base)
+setenv("EXECobsproc", pathJoin(base, "exec"))
+setenv("FIXobsproc", pathJoin(base, "fix"))
+setenv("SCRIPTSobsproc", pathJoin(base, "scripts"))
+setenv("USHobsproc", pathJoin(base, "ush"))
+
+whatis("Name: ".. pkgName)
+whatis("Version: " .. pkgVersion)
+whatis("Category: Utility")
+whatis("Description: This module sets the environment variables for OBSPROC package")
