@@ -15,6 +15,8 @@ git checkout feature/branchname
 ls
 ```
 
+build.sh default to building for WCOSS2, but it also supports Hera and Orion by setting `INSTALL_TARGET=hera/orion/wcoss2`
+
 You may do the following instructions from develop or any feature branch.
 
 You will see a `build.sh` script. You will run this to build and install the obsproc code in your local clone space:
