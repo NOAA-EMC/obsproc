@@ -9,6 +9,11 @@ load("cmake/3.20.2")
 load("craype/2.7.8")
 load("cray-mpich/8.1.4")
 
+setenv("CC", "mpicc")
+setenv("FC", "mpiifort")
+setenv("CXX", "mpiicpc")
+
+
 -- Load common modules for this package
 load("obsproc_common")
 
