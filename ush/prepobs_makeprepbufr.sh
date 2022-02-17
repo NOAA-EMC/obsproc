@@ -2510,7 +2510,7 @@ if [ "$SYNDATA"  = 'YES' ]; then
       if [ -f ${tstsp}syndata.tcvitals.$tmmark ]; then
          cp ${tstsp}syndata.tcvitals.$tmmark tcvitals_orig
       else
-         cp ${COMSP}syndata.tcvitals.$tmmark tcvitals_orig
+         cp ${COMINtcvital}syndata.tcvitals.$tmmark tcvitals_orig
       fi
 
       if [ "$RELOCATION_HAS_RUN" != 'YES' -o "$NET" = 'nam' ]; then

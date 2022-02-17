@@ -223,7 +223,7 @@ else
   mkdir -m 755 -p $COMOUT
 fi
 
-export COMINcdas=${COMINcdas:-$(compath.py ${envir_getges}/cdas/${cdas_ver}/cdas.$PDY)}
+export COMINcdas=${COMINcdas:-$(compath.py ${envir_getges}/cdas/${cdas_ver})}
 #################################################
 # SETUP CDAS PREPBUFR PREP2 PROCESSING VARIABLES
 #################################################
@@ -242,7 +242,6 @@ export PREPDATA=NO    # DO NOT
                       # (instead, feed the file below into the Q.C. codes)
 
 export PREPBUFR_IN=${PREPBUFR_IN:-$COMIN/${RUN}.${cycle}.prepbufr_pre-qc}
-#export PREPBUFR_IN=${PREPBUFR_IN:-$COMINcdas/${RUN}.${cycle}.prepbufr_pre-qc}
 
 export GETGUESS=${GETGUESS:-YES}
                       # Encode first guess (background) values interpolated to
