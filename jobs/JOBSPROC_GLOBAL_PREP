@@ -156,7 +156,8 @@ export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dict
 # prepobsp_prevents.sh.
 # ---------------------------------------------------------------------------
 #export HOMEgfs=${HOMEgfs:-${PACKAGEROOT:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
-export HOMEgfs=${HOMEgfs:-$(compath.py ${envir}/gfs/${gfs_ver})}
+#export HOMEgfs=${HOMEgfs:-$(compath.py ${envir}/gfs/${gfs_ver})}
+export HOMEgfs=${HOMEgfs:-$HOMEobsproc}  #Temporary place to let job run. change it to above layer when gfs run in realtime
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -183,7 +184,8 @@ export COMPONENT=${COMPONENT:-atmos}
 if [[ "$RUN_ENVIR" == nco ]]; then
 
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMINtcvital=${COMINtcvital:-$(compath.py ${envir}/${NET}/${gfs_ver}/${RUN}.${PDY})/${cyc}/${COMPONENT}/${RUN}.${cycle}.}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
@@ -204,8 +206,8 @@ export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
 export envir_getges=${envir_getges:-${envir:-prod}}
 export GETGES_COM=${GETGES_COM:-$COMROOT}     # Root location for GFS/GDAS COM data
 export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges} 
-export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gdas.$PDY)/${cyc}/${COMPONENT}}
-export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver}/gfs.$PDY)/${cyc}/${COMPONENT}}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gdas.$PDY/${cyc}/${COMPONENT}}
+export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gfs.$PDY/${cyc}/${COMPONENT}}
 
 
 

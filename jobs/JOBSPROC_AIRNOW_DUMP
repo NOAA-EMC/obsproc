@@ -209,7 +209,7 @@ for pdy in $PDYm1 $PDYm5; do
 
   if [ "$RUN_ENVIR" = nco ]; then
     export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
-    export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
+    export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${model}.${PDY})}
     mkdir -m 775 -p $COMOUT
   else
     export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${pdy}}
@@ -280,7 +280,7 @@ for tmmark in tm024 tm120; do
 
   if [ "$RUN_ENVIR" = nco ]; then
     export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
-    export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${model}.${PDY})}
+    export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${model}.${PDY})}
     mkdir -m 775 -p $COMOUT
   else
     export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${PDY}}
