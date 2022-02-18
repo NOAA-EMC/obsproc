@@ -111,7 +111,9 @@ export HOMEobsproc=${HOMEobsproc:\
 
 export SCRIPTSprepobs=${SCRIPTSprepobs:-$HOMEprepobs/scripts}
 export EXECprepobs=${EXECprepobs:-$HOMEprepobs/exec}
+export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHprepobs=${USHprepobs:-$HOMEprepobs/ush}
+export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 export FIXprepobs=${FIXprepobs:-$HOMEprepobs/fix}
 
 ###############################################

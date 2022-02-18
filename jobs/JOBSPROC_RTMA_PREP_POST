@@ -134,8 +134,10 @@ export SCRIPTSprepobs=${SCRIPTSprepobs:\
 -$HOMEprepobs/scripts}
 
 export EXECprepobs=${EXECprepobs:-$HOMEprepobs/exec}
+export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 
 export USHprepobs=${USHprepobs:-$HOMEprepobs/ush}
+export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 
 #########################################################################
 # Add some prod utilities to working directory
