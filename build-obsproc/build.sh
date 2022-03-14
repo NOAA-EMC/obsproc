@@ -13,7 +13,6 @@ target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
 if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
   source $pkg_root/versions/build.ver
   set +x
-  module reset
   module use $pkg_root/modulefiles
   module load obsproc_$target
   module list
@@ -33,12 +32,10 @@ make install
 # This section to be removed when NCO is comfortable with the typical
 # `cmake`, `make` and `make install` process.
 # To abide by current NCO working practices,
-# manually copy compiled executables and fix files from `$INSTALL_PREFIX/`
+# manually copy compiled executables from `$INSTALL_PREFIX/`
 # directory to `pkg_root` and then remove `$INSTALL_PREFIX/`
 mkdir -p $pkg_root/exec
 cp -f $INSTALL_PREFIX/exec/*                                  $pkg_root/exec/
-cp -f $INSTALL_PREFIX/fix/prepobs_landc                       $pkg_root/fix/
-cp -f $INSTALL_PREFIX/fix/syndat_syndata.slmask.t126.gaussian $pkg_root/fix/
 rm -rf $INSTALL_PREFIX
 #############################################################################
 
