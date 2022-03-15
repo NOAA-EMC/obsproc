@@ -36,6 +36,8 @@ echo "                       groups to match bufr_dumplist.  Removed tideg"
 echo "                       from sfcshp dump group to make unique dump   "
 echo "                       file.                                        "
 echo "                     - Copy bufr_dumplist to COMOUT.                "
+echo "         Mar 08 2022 - Enable the dumping of 002017 in vadwnd dump  "
+echo "                       group.                                       "
 ###########################################################################
 
 set -xau
@@ -563,8 +565,8 @@ export DUMP_NUMBER=4
 #=======================================================================
 
 # Skip NeXRaD VAD WINDS FROM LEVEL 2 DECODER (not ready to be handled in GSI)
-
-export SKIP_002017=YES
+# 3/9/2022 -- enable the dumping of 002017 in the vadwnd dump group.
+#export SKIP_002017=YES
 
 # Dump AIRCFT and AIRCAR with wide time window to improve PREPOBS_PREPACQC
 #  track-check performance
