@@ -26,3 +26,12 @@ cd build-obsproc
 You will have a new `exec/` directory in your clone space.
 
 Installation is complete.
+
+## Dependencies
+To run the obsproc suite there are two required modules: <br />
+- bufr_dump<br />
+- prepobs<br />
+
+You may either load NCO's installations. Or you may make local installations by cloning and building their respective github repositories.<br />
+- https://github.com/noaa-emc/bufr-dump<br />
+- https://github.com/noaa-emc/prepobs
