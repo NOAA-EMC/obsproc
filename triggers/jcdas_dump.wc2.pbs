@@ -1,56 +1,24 @@
 #!/bin/bash
-#PBS -N obsproc_%JTYP%_dump_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Praveen.Kumar/obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Praveen.Kumar/obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
+#PBS -N obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%
+#PBS -j oe
 #PBS -l walltime=1:00:00
 #PBS -A OBSPROC-DEV
 #PBS -q dev
-#PBS -l place=vscatter,select=1:ncpus=32:mem=32gb
-
-## WCOSS1
-##BSUB -J %JTYP%_dump_%DESC%_%CC%
-##BSUB -o /gpfs/dell2/ptmp/Praveen.Kumar/%JTYP%_dump_%PDY%_%CC%_%DESC%.o%J
-##BSUB -L /bin/sh
-##BSUB -cwd /gpfs/dell2/stmp/%U
-##BSUB -q dev
-###BSUB -R "span[ptile=3]"
-##BSUB -R "span[ptile=4]"
-###BSUB -n 3
-##BSUB -n 4
-###BSUB -R rusage[mem=4000]
-###BSUB -R affinity[core]
-##BSUB -R affinity[core:distribute=balance]
-##BSUB -W 01:00
-##BSUB -P OBSPROC-T2O
+#PBS -l place=vscatter,select=1:ncpus=3:mem=8gb
+#BPS -l debug=true
 
 ##############################################
 # Submit notes:
+# Run from [ps]tmp when running manually
+# When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=cdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jcdas_*.wc2.pbs
+# > jtyp=cdas cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jcdas_dump.wc2.pbs
 # For latest/current PDY:
-# > jtyp=cdas cyc=00 desc=somethingfun cycqsub jcdas_*.wc2.pbs
-# cycqsub location: /u/Praveen.Kumar/bin
+# > jtyp=cdas cyc=00 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jcdas_dump.wc2.pbs
+# cycqsub location: /u/Shelley.Melchior/bin
 ##############################################
 
-NCPU=`wc -l < $PBS_NODEFILE`
-echo ------------------------------------------------------
-echo ' This job is allocated on '${NCPU}' cpu(s)'
-echo 'Job is running on node(s): '
-cat $PBS_NODEFILE
-echo ------------------------------------------------------
-echo PBS: qsub is running on $PBS_O_HOST
-echo PBS: originating queue is $PBS_O_QUEUE
-echo PBS: executing queue is $PBS_QUEUE
-echo PBS: working directory is $PBS_O_WORKDIR
-echo PBS: execution mode is $PBS_ENVIRONMENT
-echo PBS: job identifier is $PBS_JOBID
-echo PBS: job name is $PBS_JOBNAME
-echo PBS: node file is $PBS_NODEFILE
-echo PBS: current home directory is $PBS_O_HOME
-echo PBS: PATH = $PBS_O_PATH
-echo ------------------------------------------------------
-
-set -xa
+set -xu
 
 export envir=prod
 export cyc=%CC%
@@ -58,19 +26,20 @@ DESC=%DESC%
 JTYP=%JTYP%
 export job=${JTYP}_dump_$cyc
 export jobid=$job.$PBS_JOBID
-
 export PDY=%PDY%
-
-export DUMPJBprocdate=190012310000
-export KEEPDATA=YES
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsproc_ver=v1.0.0
 export bufr_dump_ver=1.0.0
-export HOMEobsproc=${userROOT}/obsproc-cmake
+export obsNET=obsproc
+PACKAGEROOTpara=/lfs/h1/ops/para/packages
+#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}        # NCO prod
+export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
 
-VERSION_FILE=${userROOT}/gitwkspc/obsproc/versions/run.ver
+VERSION_FILE=$HOMEobsproc/versions/run.ver                            # NCO prod
+#VERSION_FILE=${userROOT}/install/obsproc-rel.v1.0.0/versions/run.ver # local
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
@@ -78,74 +47,83 @@ else
  exit 7
 fi
 
-#Load the modules
-module load prod_util/${prod_util_ver}
-module load prod_envir/${prod_envir_ver}
-
+# Load the modules specified in $VERSION_FILE
+module load libjpeg
 module load grib_util/${grib_util_ver}
-module load util_shared/${util_shared_ver}
-module load hdf5/${hdf5_ver}
 module load netcdf/${netcdf_ver}
-module load w3nco/${w3nco_ver}
-module load w3emc/${w3emc_ver}
-module load bacio/${bacio_ver}
-module load bufr_dump/${bufr_dump_ver}
-module load bufr/${bufr_ver}
-
-module load envvar/${envvar_ver}
-module load PrgEnv-intel/${PrgEnv_intel_ver}
 module load intel/${intel_ver}
 module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
+# use para installation
+module unload bufr_dump
+#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
+module use ${userROOT}/install/bufr-dump-rel.1.0.0/modulefiles
+module load bufr_dump/${bufr_dump_ver}
 
-#Check if they exist
+# Be sure the modules are loaded 
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_util/") -eq 0 ]]; then echo "prod_util is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_envir/") -eq 0 ]]; then echo "prod_envir is not loaded!"; fi
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)util_shared/") -eq 0 ]]; then echo "util_shared is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)libjpeg/") -eq 0 ]]; then echo "libjpeg is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
-
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)hdf5/") -eq 0 ]]; then echo "hdf5 is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)netcdf/") -eq 0 ]]; then echo "netcdf is not loaded!"; fi
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)w3nco/") -eq 0 ]]; then echo "w3nco is not loaded!"; fi
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)w3emc/") -eq 0 ]]; then echo "w3emc is not loaded!"; fi
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bacio/") -eq 0 ]]; then echo "bacio is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; then echo "bufr_dump is not loaded!"; fi
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr/") -eq 0 ]]; then echo "bufr is not loaded!"; fi
-
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)envvar/") -eq 0 ]]; then echo "envvar is not loaded!"; fi
-if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)PrgEnv-intel/") -eq 0 ]]; then echo "PrgEnv-intel is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)intel/") -eq 0 ]]; then echo "intel is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)craype/") -eq 0 ]]; then echo "craype is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "cray-mpich is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
 
-module unload bufr_dump # 2.0.0
-module use ${userROOT}/bufr-dump-cmake/modulefiles
-module load bufr_dump/$bufr_dump_ver  # use 1.0.0 for now
 
 export SENDECF=NO   # developer
 export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
-# Canned data 
-export DCOMROOT=/lfs/h1/ops/canned/dcom
-export TANK=/lfs/h1/ops/canned/dcom
+export TANK=$DCOMROOT
 
-# Live data 
-#export DCOMROOT=/lfs/h1/ops/prod/dcom
-#export TANK=/lfs/h1/ops/prod/dcom
-
-export DATAROOT=/lfs/h2/emc/ptmp/$USER
-export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump.$PDY.jlogfile
+export DATAROOT=/lfs/h2/emc/stmp/$USER
+export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
 
 export DEBUG_LEVEL=3
+export LOUD=ON
+export KEEPDATA=YES
 
-export COMIN=$COMROOT/obsproc/${JTYP}.${PDY}
-export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/com/
-export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/com  # if unspecified, defaults to DATAROOT
+
+#export COM_ENGICE=$CANCOMROOT/omb/v4.4/sice
+#export COM_SSTOI=$CANCOMROOT/gfs/v16.2/sst
+#export COMIN=$COMROOT/obsproc/${JTYP}.${PDY}
+export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
+export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com 
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_DUMP
+err=$?
+
+# When run from cron, the stdout is written to /u/$USER
+# mv to stmp
+pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
+cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
+outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+if [ -f "$cronlogfile" ]; then
+  mkdir -p $outputdir
+  mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
+fi
+
+# If you wish to only run the dump job, un-comment the exit line below
+#exit
+
+# Kick off dump_post job
+if [ $err -eq 0 ]; then
+  echo "submit jcdas_dump_post"
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jcdas_dump_post.wc2.pbs
+fi
+
+# Kick off prep1 job
+if [ $err -eq 0 ]; then
+  echo "submit jcdas_dump_post"
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jcdas_prep1.wc2.pbs
+fi
+
 exit
