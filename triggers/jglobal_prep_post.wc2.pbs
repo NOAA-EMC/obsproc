@@ -1,20 +1,22 @@
 #!/bin/sh  
-#PBS -N obsproc_%JTYP%_prep_post_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%.o%J
-#PBS -q debug
-#PBS -l walltime=00:15:00
+#PBS -N obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q dev
+#PBS -l walltime=00:05:00
 #PBS -A OBSPROC-DEV
-#PBS -l place=vscatter,select=1:ncpus=1:mem=4gb
+#PBS -l place=vscatter,select=1:ncpus=1:mem=1gb
+#PBS -l debug=true
 
 #####################################################################
 # Submit notes:
+# Run from [ps]tmp when running manually
+# When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_prep_post.wc2.pbs
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 cycqsub jglobal_*.wc2.lsf
-# cycqsub location: /u/Iliana.Genkova/bin
-# cycqsub GitHub location: release/obsproc.v1.0.0/triggers/cycqsub
+# > jtyp=gdas cyc=00 /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_prep_post.wc2.pbs
+# cycqsub location: /u/Shelley.Melchior/bin
 #####################################################################
 
 set -xu
@@ -24,18 +26,20 @@ export cyc=%CC%
 DESC=%DESC%
 JTYP=%JTYP%
 export job=${JTYP}_prep_post_$cyc
-
 export PDY=%PDY%
 
-userROOT=/u/Iliana.Genkova/INSTALL
+userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsNET=obsproc
 export obsproc_ver=v1.0.0 
-export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
-export TANK=/lfs/h1/ops/canned/dcom
+export prepobs_ver=1.0.0
+PACKAGEROOTpara=/lfs/h1/ops/para/packages
+#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}       # NCO prod
+export HOMEobsproc=${userROOT}/install/obsproc-rmprep           # local
 
-VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
-#VERSION_FILE=$PACKAGEROOT/obsproc/${obsproc_ver}/versions/run.ver # when /obsproc goes live
+#VERSION_FILE=${HOMEobsproc}/versions/run.ver
+VERSION_FILE=${userROOT}/install/obsproc-rmprep/versions/run.ver
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
@@ -43,38 +47,63 @@ else
  exit 7
 fi
 
-# source moduleload file
-# GitHub location: release/obsproc.v1.0.0/triggers/moduleload
-. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+#Load the modules
+module load grib_util/${grib_util_ver}
+module load netcdf/${netcdf_ver}
+module load bufr_dump/${bufr_dump_ver}
+# use local prepobs installation
+#module use ${userROOT}/install/prepobs/modulefiles
+module load prepobs/${prepobs_ver}
+module load intel/${intel_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
 
-export util_shared_ver=1.0.3 #1.0.4 in run.ver
+#Check if they exist
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)netcdf/") -eq 0 ]]; then echo "netcdf is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; then echo "bufr_dump is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prepobs/") -eq 0 ]]; then echo "prepobs is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)intel/") -eq 0 ]]; then echo "intel is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)craype/") -eq 0 ]]; then echo "craype is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "cray-mpich is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
 
 export SENDECF=NO   # developer
 export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
-export DATAROOT=/lfs/h2/emc/ptmp/$USER 
-export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump_post.$PDY.jlogfile
+export DATAROOT=/lfs/h2/emc/stmp/$USER 
+export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
 
-export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc
+export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com 
+export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
 
-#export COMIN_ROOT=/lfs/h1/ops/canned/com 
-export COMOUT_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com
 export DEBUG_LEVEL=3
 export KEEPDATA=YES
+export LOUD=ON
 
-#export COMIN=${COMIN_ROOT}/gfs/v16.2/$JTYP.${PDY}/${cyc}/atmos
-export COMIN=/lfs/h2/emc/ptmp/${USER}/global_wcoss2/com/obsproc/${obsproc_ver}/$JTYP.${PDY}/${cyc}/atmos
 
-export DATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
-export SATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
-export ARCHCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2 
-export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
-export COMOUT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com/obsproc/${obsproc_ver}/${JTYP}.${PDY}
-export COMIN1=/lfs/h1/ops/canned/com/gfs/v16.2/$JTYP.
+#export DATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+#export SATCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+#export ARCHCOMIN=/lfs/h1/ops/canned/com/gfs/v16.2 
+#export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
+#export COMIN1=/lfs/h1/ops/canned/com/gfs/v16.2/$JTYP.
 
 $HOMEobsproc/jobs/JOBSPROC_GLOBAL_PREP_POST
 
 err=$?
-echo $err
 
+# When run from cron, the stdout is written to /u/$USER
+# mv to stmp
+pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
+cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
+outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+if [ -f "$cronlogfile" ]; then
+  mkdir -p $outputdir
+  mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
+fi
+
+exit
