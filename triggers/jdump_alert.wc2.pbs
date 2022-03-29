@@ -42,7 +42,6 @@ PACKAGEROOTpara=/lfs/h1/ops/para/packages
 export HOMEobsproc=${PACKAGEROOT}/obsproc.$obsproc_ver                 # NCO prod
 
 VERSION_FILE=${HOMEobsproc}/versions/run.ver
-#VERSION_FILE=${userROOT}/EMC_obsproc/$obsproc_ver/EMC_obsproc_jdump_alert/versions/run.ver
 if [ -f $VERSION_FILE ]; then
   . $VERSION_FILE
 else

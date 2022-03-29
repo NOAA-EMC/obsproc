@@ -41,8 +41,7 @@ export bufr_dump_ver=1.0.0
 #export HOMEobsproc=${PACKAGEROOT}/${obsNET}.${obsproc_ver}      # NCO prod
 export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
 
-#VERSION_FILE=${userROOT}/install/obsproc-rel.v1.0.0/versions/run.ver # local
-VERSION_FILE=$HOMEobsproc/versions/run.ver   # NCO
+VERSION_FILE=$HOMEobsproc/versions/run.ver 
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
