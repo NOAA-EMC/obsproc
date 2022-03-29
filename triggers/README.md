@@ -1,5 +1,5 @@
 ## For reference purposes only!!
-This is a unified listing of sample trigger scripts that work in a user environment.<br />
+This is a unified listing of sample trigger scripts that work in a user/development environment.<br />
 Usage instructions are contained within each trigger, near the top, just below the PBS job cards.
 
 ## OBSPROC CDAS trigger script files
