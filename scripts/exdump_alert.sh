@@ -53,7 +53,7 @@ if [ $err -eq 0 ]; then
    if [ $RETC -eq 6 ]
       then
       msg="DATACOUNT low on 1 or more CRITICAL ob types - SDM should check \
-ALERTLOG messages"
+ALERTLOG messages in ${COMROOT}/logs/alertlog/$RUN.t${cyc}z"
       postmsg "$jlogfile" "$msg"
       echo $msg > errfile
       export err=6
@@ -61,7 +61,7 @@ ALERTLOG messages"
    elif [ $RETC -eq 5 ]
       then
       msg="DATACOUNT low on 1 or more non-critical ob types - SDM should check \
-ALERTLOG messages"
+ALERTLOG messages in ${COMROOT}/logs/alertlog/$RUN.t${cyc}z"
       postmsg "$jlogfile" "$msg"
   fi
 else

@@ -10,7 +10,6 @@ list(APPEND scripts_files
   exmods.sh
   exnam_dump.sh
   exnam_makeprepbufr.sh
-  exprep_post.sh
   exrap_dump.sh
   exrap_makeprepbufr.sh
   exrtma_dump.sh

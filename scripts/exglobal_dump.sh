@@ -76,6 +76,8 @@ echo "                       to match bufr_dumplist. Removed tideg from     "
 echo "                       sfcshp dump group to make individual dump file."
 echo "                     - Copy bufr_dumplist to COMOUT.                  "
 echo "         Dec 16 2021 - modified to work on WCOSS2                     "
+echo "         Mar 09 2022 - Enable the dumping of 002017 in vadwnd dump    "
+echo "                       group.                                         "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -907,7 +909,8 @@ export DUMP_NUMBER=4
 #=======================================================================
 
 # Skip NeXRaD VAD WINDS FROM LEVEL 2 DECODER (not ready to be handled in GSI) (002017)
-export SKIP_002017=YES
+# 3/9/2022 -- enable the dumping of 002017 in the vadwnd dump group.
+#export SKIP_002017=YES
 
 # Dump AIRCFT and AIRCAR with wide time window to improve PREPOBS_PREPACQC
 #  track-check performance

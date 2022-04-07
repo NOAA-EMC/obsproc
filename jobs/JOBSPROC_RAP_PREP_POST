@@ -43,8 +43,6 @@ set -x
 
 #####################################################################
 ## List modules loaded for this job
-##   On luna/surge may need to initialize the Modules package to find
-##   the module command.  Will do so for either system.
 ######################################################################
 set +x
 echo
@@ -116,17 +114,17 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 ##########################
 
-# -------------------------------
-# Paths for obsproc items
-# -------------------------------
+# ----------------------------------
+# Paths for obsproc & prepobs items
+# ----------------------------------
 export HOMEobsproc=${HOMEobsproc:\
 -${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+export SCRIPTSprepobs=${SCRIPTSprepobs:-$HOMEprepobs/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
-export FIXobsproc=${FIXobsproc:-$HOMEobsproc/fix}
+export FIXprepobs=${FIXprepobs:-$HOMEprepobs/fix}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -151,7 +149,7 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
@@ -182,7 +180,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exprep_post.sh
+$SCRIPTSprepobs/exprep_post.sh
 err_prep_post=$?
 eval err_${RUN}_prep_post=${err_prep_post}
 [[ $err_prep_post -ne 0 ]] && $DATA/err_exit

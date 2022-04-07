@@ -112,17 +112,17 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 ##########################
 
-# -------------------------------
-# Paths for obsproc items
-# -------------------------------
+# ----------------------------------
+# Paths for obsproc & prepobs items
+# ----------------------------------
 export HOMEobsproc=${HOMEobsproc:\
 -${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+export SCRIPTSprepobs=${SCRIPTSprepobs:-$HOMEprepobs/scripts}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
-export FIXobsproc=${FIXobsproc:-$HOMEobsproc/fix}
+export FIXprepobs=${FIXprepobs:-$HOMEprepobs/fix}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 
 #########################################################################
@@ -149,7 +149,7 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
@@ -165,8 +165,10 @@ fi
 
 # The following are used by $PROCESS_TIMETWINS in the GDAS when it is YES
 # -----------------------------------------------------------------------
-export COMINGFS=${COMINGFS:-$(compath.py ${envir}/${NET}/${gfs_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
-export COMIN1=${COMIN1:-$(compath.py ${envir}/${NET}/${gfs_ver}/${RUN}.)}
+export COMINgdas=${COMINgfs:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
+export COMINGFS=${COMINgfs:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
+#export COMIN1=${COMIN1:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
+export COMIN1=${COMIN1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver})/${RUN}.} #twinwind file now write in obsproc package
 
 #################################################################
 # SETUP GDAS AND GFS POST-ANALYSIS PREPBUFR PROCESSING VARIABLES
@@ -205,9 +207,9 @@ elif [ $RUN = gdas ]; then
       export SATCOMIN=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
       export ARCHCOMIN=$(compath.py ${envir}/${obsNET}/${obsproc_ver})
       export DATCOM1_IN=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
-      export DATCOMOUT_dir=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts/data_counts.$YYYYMM)
-      export SATCOMOUT_dir=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts/satcounts.$YYYYMM)
-      export ARCHCOMOUT=$(compath.py ${envir}/${obsNET}/${obsproc_ver})  # used in gdascounts_archive_pyear.sh
+      export DATCOMOUT_dir=$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}/gdascounts/data_counts.$YYYYMM)
+      export SATCOMOUT_dir=$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}/gdascounts/satcounts.$YYYYMM)
+      export ARCHCOMOUT=$(compath.py -o ${obsNET}/${obsproc_ver})  # used in gdascounts_archive_pyear.sh
       export DATCOM1_OUT=$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}/gdascounts)
       mkdir -m 775 -p $DATCOMOUT_dir $SATCOMOUT_dir $ARCHCOMOUT $DATCOM1_OUT
     else
@@ -243,7 +245,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exprep_post.sh 
+$SCRIPTSprepobs/exprep_post.sh 
 eval err_${RUN}_prep_post=$?
 eval [[ \$err_${RUN}_prep_post -ne 0 ]] && $DATA/err_exit
 

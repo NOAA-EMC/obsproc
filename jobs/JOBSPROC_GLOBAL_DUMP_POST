@@ -155,7 +155,7 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
@@ -180,7 +180,7 @@ export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$obsNET/${obsproc_ver})/sdm_rtdm/${RUN}} 
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$obsNET/${obsproc_ver})/sdm_rtdm/${NET}} 
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)
@@ -190,6 +190,9 @@ export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$obsNET/${obsproc_ver})/sdm_rt
 if [[ "$RUN_ENVIR" == nco ]]; then
   export AVGDarch_IN=$HOMEarch/avgdata
   export AVGDarch_OUT=$HOMEarch/avgdata
+  if [ ! -d $AVGDarch_OUT ]; then
+    mkdir -p $AVGDarch_OUT
+  fi
 else
   [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
   export AVGDarch_IN=\

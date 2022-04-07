@@ -43,8 +43,6 @@ set -x
 
 #####################################################################
 # List modules loaded for this job
-#   On luna/surge may need to initialize the Modules package to find
-#   the module command.  Will do so for either system.
 #####################################################################
 set +x
 echo
@@ -124,17 +122,17 @@ export HOMEobsproc=${HOMEobsproc:\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
-export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
+export USHprepobs=${USHprepobs:-$HOMEprepobs/ush}
 
 # directory path to data prep script executed in model script
 # -----------------------------------------------------------
-export ushscript_prep=${ushscript_prep:-$USHobsproc}
+export ushscript_prep=${ushscript_prep:-$USHprepobs}
 
 # directory paths to overall PREP processing executed in
 #  prepobs_makeprepbufr.sh and its various child scripts
 # -------------------------------------------------------
-export EXECPREP=${EXECPREP:-${HOMEobsproc}/exec}
-export FIXPREP=${FIXPREP:-${HOMEobsproc}/fix}
+export EXECPREP=${EXECPREP:-${HOMEprepobs}/exec}
+export FIXPREP=${FIXPREP:-${HOMEprepobs}/fix}
 export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
 
 # ---------------------------
@@ -177,7 +175,7 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
@@ -194,10 +192,11 @@ fi
 export NEMSIO_IN=${NEMSIO_IN:-.false.}      # switch for nemsio vs sigio guess
 export NETCDF_IN=${NETCDF_IN:-.true.}       # switch for netcdf history guess
                                             # NOTE: only NESMIO_IN or NETCDF_IN can be .true.
-export envir_getges=${envir_getges:-prod}
+#export envir_getges=${envir_getges:-prod}
+export envir_getges=${envir_getges:-${envir:-prod}}
 export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges}
-export COMINgdas=${COMINgdas:-$(compath.py gfs/${envir_getges}/gdas.$PDY)/${cyc}/${COMPONENT}}
-export COMINgfs=${COMINgfs:-$(compath.py gfs/${envir_getges}/gfs.$PDY)/${cyc}/${COMPONENT}}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gdas.$PDY/${cyc}/${COMPONENT}}
+export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gfs.$PDY/${cyc}/${COMPONENT}}
 
 ################################################################################
 # SETUP RAP (full cycle), RAP_P (partial cycle) or RAP_E (early cycle) PREPBUFR

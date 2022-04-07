@@ -1,3 +1,4 @@
+#!/bin/ksh
 ###########################################################################
 echo "--------------------------------------------------------------------"
 echo "excdas_dump.sh - CDAS network data dump processing              "
@@ -35,6 +36,8 @@ echo "                       groups to match bufr_dumplist.  Removed tideg"
 echo "                       from sfcshp dump group to make unique dump   "
 echo "                       file.                                        "
 echo "                     - Copy bufr_dumplist to COMOUT.                "
+echo "         Mar 08 2022 - Enable the dumping of 002017 in vadwnd dump  "
+echo "                       group.                                       "
 ###########################################################################
 
 set -xau
@@ -562,8 +565,8 @@ export DUMP_NUMBER=4
 #=======================================================================
 
 # Skip NeXRaD VAD WINDS FROM LEVEL 2 DECODER (not ready to be handled in GSI)
-
-export SKIP_002017=YES
+# 3/9/2022 -- enable the dumping of 002017 in the vadwnd dump group.
+#export SKIP_002017=YES
 
 # Dump AIRCFT and AIRCAR with wide time window to improve PREPOBS_PREPACQC
 #  track-check performance
@@ -1064,7 +1067,9 @@ if [ "$launcher" = cfp ]; then
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      $launcher_DUMP -np 8 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      #$launcher_DUMP -np 8 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      NPROCS=${NPROCS:-8}
+      $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"

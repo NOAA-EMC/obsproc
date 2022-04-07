@@ -112,22 +112,22 @@ export HOMEobsproc=${HOMEobsproc:\
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
 -$HOMEobsproc/scripts}
 
-export FIXobsproc=${FIXobsproc:-$HOMEobsproc/fix}
-export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
-export ushscript_prep=${ushscript_prep:-$USHobsproc}
+export FIXprepobs=${FIXprepobs:-$HOMEprepobs/fix}
+export USHprepobs=${USHprepobs:-$HOMEprepobs/ush}
+export ushscript_prep=${ushscript_prep:-$USHprepobs}
 
 # directory paths to overall PREP processing executed in
 #  prepobs_makeprepbufr.sh and its various child scripts
 #  (other than prepobs_syndata.sh, see below)
 # -------------------------------------------------------
-export EXECPREP=${EXECPREP:-${HOMEobsproc}/exec}
-export FIXPREP=${FIXPREP:-${HOMEobsproc}/fix}
+export EXECPREP=${EXECPREP:-${HOMEprepobs}/exec}
+export FIXPREP=${FIXPREP:-${HOMEprepobs}/fix}
 export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
 
 # directory paths to SYNDATA processing executed in prepobs_syndata.sh
 # --------------------------------------------------------------------
-export EXECSYND=${EXECSYND:-${HOMEobsproc}/exec}
-export FIXSYND=${FIXSYND:-${HOMEobsproc}/fix}
+export EXECSYND=${EXECSYND:-${HOMEprepobs}/exec}
+export FIXSYND=${FIXSYND:-${HOMEprepobs}/fix}
 export PARMSYND=${PARMSYND:-${HOMEobsproc}/parm}
 
 # ---------------------------
@@ -199,7 +199,7 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
@@ -209,7 +209,7 @@ else
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 

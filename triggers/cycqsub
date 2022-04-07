@@ -14,6 +14,4 @@ else
  qsub_command=qsub
 fi
 
-sed "s/%HHMM%/`date -u +\%H\%M`/;s/%CC%/$cyc/;s/%CCM%/$cycM/;s/%JTYP%/$jtyp/;s/%YYYYMMDD%/`date -u +\%Y\%m\%d`
-/;s/%PDY%/$PDY/;s/%_PDY%/$_PDY/;s/%TMMARK%/$tmmark/;s/%DESC%/$desc/;s/%_DESC%/$_desc/" $pbs_file | $qsub_command
-
+sed "s/%HHMM%/`date -u +\%H\%M`/;s/%CC%/$cyc/;s/%CCM%/$cycM/;s/%JTYP%/$jtyp/;s/%YYYYMMDD%/`date -u +\%Y\%m\%d`/;s/%PDY%/$PDY/;s/%_PDY%/$_PDY/;s/%TMMARK%/$tmmark/;s/%DESC%/$desc/;s/%_DESC%/$_desc/" $pbs_file | $qsub_command

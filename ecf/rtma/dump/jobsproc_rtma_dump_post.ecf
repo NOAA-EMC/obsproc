@@ -1,0 +1,37 @@
+#PBS -N obsproc_%JTYP%%RAPID%_dump_post_%CYC%%CYCM%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q %QUEUE%
+#PBS -A %PROJ%-%PROJENVIR%
+#PBS -l walltime=00:10:00
+#PBS -l place=vscatter,select=1:ncpus=1:mem=2500MB
+#PBS -l debug=true
+
+export model=obsproc
+
+%include <head.h>
+%include <envir-p1.h>
+
+export cyc=%CYC%
+export cycM=%CYCM%
+JTYP=%JTYP%
+
+#export MPMD=NO  # uncomment if you do not provide poe BSUB cards
+
+#Load the modules
+module load intel/${intel_ver}
+#module load craype/${craype_ver}
+#module load cray-mpich/${cray_mpich_ver}
+#module load cray-pals/${cray_pals_ver}
+#module load cfp/${cfp_ver}
+
+module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
+module load bufr_dump/${bufr_dump_ver}
+module list
+
+# CALL executable job script here
+$HOMEobsproc/jobs/JOBSPROC_RTMA_DUMP_POST
+
+%include <tail.h>
+%manual
+%end

@@ -182,10 +182,10 @@ export TANK=${TANK:-${DCOMROOT}}
 
 # directory paths to ice, sst & snowdepth grib files used in model script
 # -----------------------------------------------------------------------
-export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/omb/$omb_ver/sice)}
-export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/omb/$omb_ver/sice)}
-export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/gfs/${gfs_ver}/sst)} 
-export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/gfs/${gfs_ver}/sst)}
+export COM_ENGICE=${COM_ENGICE:-$(compath.py $envir/seaice_analysis/$seaice_analysis_ver)/seaice_analysis}
+export COM_ICE5MIN=${COM_ICE5MIN:-$(compath.py $envir/seaice_analysis/$seaice_analysis_ver)/seaice_analysis}
+export COM_SSTOI=${COM_SSTOI:-$(compath.py $envir/nsst/${nsst_ver})/nsst} 
+export COM_SSTRTG=${COM_SSTRTG:-$(compath.py $envir/nsst/${nsst_ver})/nsst}
 export TANK_GRIBFLDS=${TANK_GRIBFLDS:-${DCOMROOT}}
 
 #########################################################################
@@ -211,7 +211,7 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 if [[ "$RUN_ENVIR" == nco ]]; then
 	export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
-	export COMOUT=${COMOUT:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+	export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 else
  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}

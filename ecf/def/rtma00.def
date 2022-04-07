@@ -1,0 +1,504 @@
+suite para
+  family primary
+    family 00
+      family obsproc
+        defstatus complete
+        edit PROJ 'OBSPROC'
+        family v1.0
+          edit PACKAGEHOME '/lfs/h1/ops/%ENVIR%/packages/obsproc.%obsproc_ver%'
+
+          family rtma
+            edit JTYP rtma
+            defstatus complete
+            edit ECF_FILES '%PACKAGEHOME%/ecf/rtma'
+            edit CYCM '' # only set for rapid update jobs
+            edit RAPID ''
+
+            family 00z
+              edit CYC '00'
+              family main
+                family dump
+                  task jobsproc_rtma_dump
+                    time 00:30
+                  task jobsproc_rtma_dump_post
+                    trigger jobsproc_rtma_dump == complete
+                endfamily
+                family prep
+                  task jobsproc_rtma_prep
+                    trigger ../dump/jobsproc_rtma_dump == complete
+                  task jobsproc_rtma_prep_post
+                    trigger jobsproc_rtma_prep == complete
+                endfamily
+              endfamily
+              family rapid
+                edit RAPID '_ru'
+                family 00
+                  edit CYCM '00'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 00:08
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 15
+                  edit CYCM '15'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 00:23
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 30
+                  edit CYCM '30'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 00:38
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #30
+                family 45
+                  edit CYCM '45'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 00:53
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #45
+              endfamily #rapid
+            endfamily #00z
+            family 01z
+              edit CYC '01'
+              family main
+                family dump
+                  task jobsproc_rtma_dump
+                    time 01:30
+                  task jobsproc_rtma_dump_post
+                    trigger jobsproc_rtma_dump == complete
+                endfamily
+                family prep
+                  task jobsproc_rtma_prep
+                    trigger ../dump/jobsproc_rtma_dump == complete
+                  task jobsproc_rtma_prep_post
+                    trigger jobsproc_rtma_prep == complete
+                endfamily
+              endfamily
+              family rapid
+                edit RAPID '_ru'
+                family 00
+                  edit CYCM '00'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 01:08
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 15
+                  edit CYCM '15'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 01:23
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 30
+                  edit CYCM '30'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 01:38
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #30
+                family 45
+                  edit CYCM '45'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 01:53
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #45
+              endfamily #rapid
+            endfamily #01z
+            family 02z
+              edit CYC '02'
+              family main
+                family dump
+                  task jobsproc_rtma_dump
+                    time 02:30
+                  task jobsproc_rtma_dump_post
+                    trigger jobsproc_rtma_dump == complete
+                endfamily
+                family prep
+                  task jobsproc_rtma_prep
+                    trigger ../dump/jobsproc_rtma_dump == complete
+                  task jobsproc_rtma_prep_post
+                    trigger jobsproc_rtma_prep == complete
+                endfamily
+              endfamily
+              family rapid
+                edit RAPID '_ru'
+                family 00
+                  edit CYCM '00'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 02:08
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 15
+                  edit CYCM '15'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 02:23
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 30
+                  edit CYCM '30'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 02:38
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #30
+                family 45
+                  edit CYCM '45'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 02:53
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #45
+              endfamily #rapid
+            endfamily #02z
+            family 03z
+              edit CYC '03'
+              family main
+                family dump
+                  task jobsproc_rtma_dump
+                    time 03:30
+                  task jobsproc_rtma_dump_post
+                    trigger jobsproc_rtma_dump == complete
+                endfamily
+                family prep
+                  task jobsproc_rtma_prep
+                    trigger ../dump/jobsproc_rtma_dump == complete
+                  task jobsproc_rtma_prep_post
+                    trigger jobsproc_rtma_prep == complete
+                endfamily
+              endfamily
+              family rapid
+                edit RAPID '_ru'
+                family 00
+                  edit CYCM '00'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 03:08
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 15
+                  edit CYCM '15'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 03:23
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 30
+                  edit CYCM '30'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 03:38
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #30
+                family 45
+                  edit CYCM '45'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 03:53
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #45
+              endfamily #rapid
+            endfamily #03z
+            family 04z
+              edit CYC '04'
+              family main
+                family dump
+                  task jobsproc_rtma_dump
+                    time 04:30
+                  task jobsproc_rtma_dump_post
+                    trigger jobsproc_rtma_dump == complete
+                endfamily
+                family prep
+                  task jobsproc_rtma_prep
+                    trigger ../dump/jobsproc_rtma_dump == complete
+                  task jobsproc_rtma_prep_post
+                    trigger jobsproc_rtma_prep == complete
+                endfamily
+              endfamily
+              family rapid
+                edit RAPID '_ru'
+                family 00
+                  edit CYCM '00'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 04:08
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 15
+                  edit CYCM '15'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 04:23
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 30
+                  edit CYCM '30'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 04:38
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #30
+                family 45
+                  edit CYCM '45'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 04:53
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #45
+              endfamily #rapid
+            endfamily #04z
+            family 05z
+              edit CYC '05'
+              family main
+                family dump
+                  task jobsproc_rtma_dump
+                    time 05:30
+                  task jobsproc_rtma_dump_post
+                    trigger jobsproc_rtma_dump == complete
+                endfamily
+                family prep
+                  task jobsproc_rtma_prep
+                    trigger ../dump/jobsproc_rtma_dump == complete
+                  task jobsproc_rtma_prep_post
+                    trigger jobsproc_rtma_prep == complete
+                endfamily
+              endfamily
+              family rapid
+                edit RAPID '_ru'
+                family 00
+                  edit CYCM '00'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 05:08
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 15
+                  edit CYCM '15'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 05:23
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily
+                family 30
+                  edit CYCM '30'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 05:38
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #30
+                family 45
+                  edit CYCM '45'
+                  family dump
+                    task jobsproc_rtma_dump
+                      time 05:53
+                    task jobsproc_rtma_dump_post
+                      trigger jobsproc_rtma_dump == complete
+                  endfamily
+                  family prep
+                    task jobsproc_rtma_prep
+                      trigger ../dump/jobsproc_rtma_dump == complete
+                    task jobsproc_rtma_prep_post
+                      trigger jobsproc_rtma_prep == complete
+                  endfamily
+                endfamily #45
+              endfamily #rapid
+            endfamily #05z
+          endfamily #rtma
+
+
+        endfamily #v1.0
+    endfamily # obsproc
+
+  endfamily #00
+endsuite

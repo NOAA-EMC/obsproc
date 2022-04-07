@@ -1,0 +1,584 @@
+suite para
+  family primary
+    family 12
+      family obsproc
+        #defstatus complete
+        edit PROJ 'OBSPROC'
+        family v1.0
+          edit PACKAGEHOME '/lfs/h1/ops/%ENVIR%/packages/obsproc.%obsproc_ver%'
+
+          #family ingest_p3
+          #family hydro
+          #family mods
+          #  defstatus complete
+          #  edit JTYP mods
+          #  task jobsproc_mods
+          #    time 14:30
+          #endfamily
+
+          family nam
+            #defstatus complete
+            edit JTYP nam
+            edit ECF_FILES '%PACKAGEHOME%/ecf/nam'
+            family tm00
+              edit TMMARK 'tm00'
+              edit CYC '12'
+              family dump
+                task jobsproc_nam_dump
+                  time 13:15
+                task jobsproc_nam_dump2
+                  time 13:15
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+                  event 1 release_nam12_dump_alert
+                task jobsproc_nam_dump_alert
+                  trigger jobsproc_nam_dump_post:release_nam12_dump_alert
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam/v4.2/tm00/analysis == complete
+              endfamily
+            endfamily # tm00
+ 
+            edit CYC '18'
+            family tm06
+              edit TMMARK 'tm06'
+              family dump
+                task jobsproc_nam_dump
+                  time 15:40
+                task jobsproc_nam_dump2
+                  time 15:40
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam_catchup_18/v4.2/tm06/analysis == complete
+              endfamily
+            endfamily
+            family tm05
+              edit TMMARK 'tm05'
+              family dump
+                task jobsproc_nam_dump
+                  time 16:00
+                task jobsproc_nam_dump2
+                  time 16:00
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam_catchup_18/v4.2/tm05/analysis == complete
+              endfamily
+            endfamily
+            family tm04
+              edit TMMARK 'tm04'
+              family dump
+                task jobsproc_nam_dump
+                  time 16:00
+                task jobsproc_nam_dump2
+                  time 16:00
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam_catchup_18/v4.2/tm04/analysis == complete
+              endfamily
+            endfamily
+            family tm03
+              edit TMMARK 'tm03'
+              family dump
+                task jobsproc_nam_dump
+                  time 16:30
+                task jobsproc_nam_dump2
+                  time 16:30
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam_catchup_18/v4.2/tm03/analysis == complete
+              endfamily
+            endfamily
+            family tm02
+              edit TMMARK 'tm02'
+              family dump
+                task jobsproc_nam_dump
+                  time 17:23
+                task jobsproc_nam_dump2
+                  time 17:23
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam_catchup_18/v4.2/tm02/analysis == complete
+              endfamily
+            endfamily
+            family tm01
+              edit TMMARK 'tm01'
+              family dump
+                task jobsproc_nam_dump
+                  time 18:18
+                task jobsproc_nam_dump2
+                  time 18:18
+                task jobsproc_nam_dump_post
+                  trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+              endfamily
+              family prep
+                task jobsproc_nam_prep
+                  trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+                task jobsproc_nam_prep_post
+                  trigger ../../../../../nam_catchup_18/v4.2/tm01/analysis == complete
+              endfamily
+            endfamily
+          endfamily # nam
+
+          family cdas #cdas00
+            #defstatus complete
+            edit JTYP cdas
+            edit CYC '00'
+            family dump
+              task jobsproc_cdas_dump
+                time 16:10
+              task jobsproc_cdas_dump_post
+                trigger jobsproc_cdas_dump == complete
+            endfamily
+            family prep
+              task jobsproc_cdas_prep1
+                trigger ../dump/jobsproc_cdas_dump == complete
+              task jobsproc_cdas_prep1_post
+                trigger jobsproc_cdas_prep1 == complete
+              task jobsproc_cdas_prep2
+                trigger jobsproc_cdas_prep1 == complete
+              task jobsproc_cdas_prep2_post
+                trigger jobsproc_cdas_prep2 == complete
+            endfamily
+          endfamily
+
+          family gfs
+            defstatus complete
+            edit JTYP gfs
+            edit ECF_FILES '%PACKAGEHOME%/ecf/global'
+            family atmos
+              family dump
+                task jobsproc_gfs_atmos_dump
+                  event 1 release_sfcprep
+                  time 14:47
+                task jobsproc_gfs_atmos_dump_post
+                  trigger jobsproc_gfs_atmos_dump == complete
+                  event 1 release_gfs12_dump_alert
+                task jobsproc_gfs_atmos_dump_alert
+                  trigger jobsproc_gfs_atmos_dump_post:release_gfs12_dump_alert
+              endfamily
+              family prep
+                task jobsproc_gfs_atmos_prep
+                  trigger ../dump/jobsproc_gfs_atmos_dump == complete
+                  #trigger ../dump/jobsproc_gfs_atmos_dump == complete and ../../../../../../gfs/v16.2/atmos/obsproc/dump/jobsproc_gfs_atmos_tropcy_qc_reloc == complete
+                task jobsproc_gfs_atmos_prep_post
+                  trigger jobsproc_gfs_atmos_prep == complete
+                  #trigger jobsproc_gfs_atmos_prep == complete and ../../../../../gfs/v16.2/atmos/analysis/jobsproc_gfs_atmos_analysis == complete
+              endfamily
+            endfamily #atmos
+          endfamily #gfs
+
+          family gdas
+            #defstatus complete
+            edit JTYP gdas
+            edit ECF_FILES '%PACKAGEHOME%/ecf/global'
+            family atmos
+              family dump
+                task jobsproc_gdas_atmos_dump
+                  event 1 release_sfcprep
+                  time 17:50
+                task jobsproc_gdas_atmos_dump_post
+                  trigger jobsproc_gdas_atmos_dump == complete
+                  event 1 release_gdas12_dump_alert
+                task jobsproc_gdas_atmos_dump_alert
+                  trigger jobsproc_gdas_atmos_dump_post:release_gdas12_dump_alert
+              endfamily
+              family prep
+                task jobsproc_gdas_atmos_prep
+                  trigger ../dump/jobsproc_gdas_atmos_dump == complete 
+                  #trigger ../dump/jobsproc_gdas_atmos_dump == complete and ../../../../../gdas/v14.2/atmos/obsproc/dump/jobsproc_gdas_atmos_tropcy_qc_reloc == complete
+                task jobsproc_gdas_atmos_prep_post
+                  trigger jobsproc_gdas_atmos_prep == complete 
+                  #trigger jobsproc_gdas_atmos_prep == complete and ../../../../../gdas/v14.2/atmos/analysis/jobsproc_gdas_atmos_analysis == complete
+              endfamily
+            endfamily #atmos
+          endfamily #gdas
+
+          family urma
+            defstatus complete
+            edit JTYP urma
+            edit ECF_FILES '%PACKAGEHOME%/ecf/urma'
+
+            family 06z
+              edit CYC '06'
+              family dump
+                task jobsproc_urma_dump
+                  time 12:30
+                task jobsproc_urma_dump_post
+                  trigger jobsproc_urma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_urma_prep
+                  trigger ../dump/jobsproc_urma_dump == complete
+                task jobsproc_urma_prep_post
+                  trigger jobsproc_urma_prep == complete
+              endfamily
+            endfamily
+            family 07z
+              edit CYC '07'
+              family dump
+                task jobsproc_urma_dump
+                  time 13:30
+                task jobsproc_urma_dump_post
+                  trigger jobsproc_urma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_urma_prep
+                  trigger ../dump/jobsproc_urma_dump == complete
+                task jobsproc_urma_prep_post
+                  trigger jobsproc_urma_prep == complete
+              endfamily
+            endfamily
+            family 08z
+              edit CYC '08'
+              family dump
+                task jobsproc_urma_dump
+                  time 14:30
+                task jobsproc_urma_dump_post
+                  trigger jobsproc_urma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_urma_prep
+                  trigger ../dump/jobsproc_urma_dump == complete
+                task jobsproc_urma_prep_post
+                  trigger jobsproc_urma_prep == complete
+              endfamily
+            endfamily
+            family 09z
+              edit CYC '09'
+              family dump
+                task jobsproc_urma_dump
+                  time 15:30
+                task jobsproc_urma_dump_post
+                  trigger jobsproc_urma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_urma_prep
+                  trigger ../dump/jobsproc_urma_dump == complete
+                task jobsproc_urma_prep_post
+                  trigger jobsproc_urma_prep == complete
+              endfamily
+            endfamily
+            family 10z
+              edit CYC '10'
+              family dump
+                task jobsproc_urma_dump
+                  time 16:30
+                task jobsproc_urma_dump_post
+                  trigger jobsproc_urma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_urma_prep
+                  trigger ../dump/jobsproc_urma_dump == complete
+                task jobsproc_urma_prep_post
+                  trigger jobsproc_urma_prep == complete
+              endfamily
+            endfamily
+            family 11z
+              edit CYC '11'
+              family dump
+                task jobsproc_urma_dump
+                  time 17:30
+                task jobsproc_urma_dump_post
+                  trigger jobsproc_urma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_urma_prep
+                  trigger ../dump/jobsproc_urma_dump == complete
+                task jobsproc_urma_prep_post
+                  trigger jobsproc_urma_prep == complete
+              endfamily
+            endfamily #urma
+          endfamily
+
+          family rap
+            defstatus complete
+            edit JTYP ''
+            edit ECF_FILES '%PACKAGEHOME%/ecf/rap'
+
+            family 12z
+              edit CYC '12'
+              family dump
+                task jobsproc_rap_dump_erly
+                  edit JTYP erly_
+                  time 12:26
+                task jobsproc_rap_dump_post_erly
+                  edit JTYP erly_
+                  trigger jobsproc_rap_dump_erly == complete
+                task jobsproc_rap_dump
+                  time 12:58
+                task jobsproc_rap_dump_post
+                  trigger jobsproc_rap_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rap_prep_erly
+                  edit JTYP erly_
+                  trigger ../dump/jobsproc_rap_dump_erly == complete
+                task jobsproc_rap_prep_post_erly
+                  edit JTYP erly_
+                  trigger jobsproc_rap_prep_erly == complete
+                task jobsproc_rap_prep
+                  trigger ../dump/jobsproc_rap_dump == complete
+                task jobsproc_rap_prep_post
+                  trigger jobsproc_rap_prep == complete
+              endfamily
+            endfamily #rap
+
+            family 13z
+              edit CYC '13'
+              family dump
+                task jobsproc_rap_dump
+                  time 13:26
+                task jobsproc_rap_dump_post
+                  trigger jobsproc_rap_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rap_prep
+                  trigger ../dump/jobsproc_rap_dump == complete
+                task jobsproc_rap_prep_post
+                  trigger jobsproc_rap_prep == complete
+              endfamily
+            endfamily
+
+            family 14z
+              edit CYC '14'
+              family dump
+                task jobsproc_rap_dump
+                  time 14:26
+                task jobsproc_rap_dump_post
+                  trigger jobsproc_rap_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rap_prep
+                  trigger ../dump/jobsproc_rap_dump == complete
+                task jobsproc_rap_prep_post
+                  trigger jobsproc_rap_prep == complete
+              endfamily
+            endfamily
+
+            family 15z
+              edit CYC '15'
+              family dump
+                task jobsproc_rap_dump
+                  time 15:26
+                task jobsproc_rap_dump_post
+                  trigger jobsproc_rap_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rap_prep
+                  trigger ../dump/jobsproc_rap_dump == complete
+                task jobsproc_rap_prep_post
+                  trigger jobsproc_rap_prep == complete
+              endfamily
+
+              family pcyc
+                edit JTYP pcyc_
+                family dump
+                  task jobsproc_rap_dump_pcyc
+                    time 19:00
+                  task jobsproc_rap_dump_post_pcyc
+                    trigger jobsproc_rap_dump_pcyc == complete
+                endfamily
+                family prep
+                  task jobsproc_rap_prep_pcyc
+                    trigger ../dump/jobsproc_rap_dump_pcyc == complete
+                  task jobsproc_rap_prep_post_pcyc
+                    trigger jobsproc_rap_prep_pcyc == complete
+                endfamily
+              endfamily #pcyc
+
+            endfamily
+
+            family 16z
+              edit CYC '16'
+              family dump
+                task jobsproc_rap_dump
+                  time 16:26
+                task jobsproc_rap_dump_post
+                  trigger jobsproc_rap_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rap_prep
+                  trigger ../dump/jobsproc_rap_dump == complete
+                task jobsproc_rap_prep_post
+                  trigger jobsproc_rap_prep == complete
+              endfamily
+
+              family pcyc
+                edit JTYP pcyc_
+                family dump
+                  task jobsproc_rap_dump_pcyc
+                    time 19:00
+                  task jobsproc_rap_dump_post_pcyc
+                    trigger jobsproc_rap_dump_pcyc == complete
+                endfamily
+                family prep
+                  task jobsproc_rap_prep_pcyc
+                    trigger ../dump/jobsproc_rap_dump_pcyc == complete
+                  task jobsproc_rap_prep_post_pcyc
+                    trigger jobsproc_rap_prep_pcyc == complete
+                endfamily
+              endfamily #pcyc
+            endfamily
+
+
+            family 17z
+              edit CYC '17'
+              family dump
+                task jobsproc_rap_dump
+                  time 17:26
+                task jobsproc_rap_dump_post
+                  trigger jobsproc_rap_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rap_prep
+                  trigger ../dump/jobsproc_rap_dump == complete
+                task jobsproc_rap_prep_post
+                  trigger jobsproc_rap_prep == complete
+              endfamily
+
+              family pcyc
+                edit JTYP pcyc_
+                family dump
+                  task jobsproc_rap_dump_pcyc
+                    time 20:00
+                  task jobsproc_rap_dump_post_pcyc
+                    trigger jobsproc_rap_dump_pcyc == complete
+                endfamily
+                family prep
+                  task jobsproc_rap_prep_pcyc
+                    trigger ../dump/jobsproc_rap_dump_pcyc == complete
+                  task jobsproc_rap_prep_post_pcyc
+                    trigger jobsproc_rap_prep_pcyc == complete
+                endfamily
+              endfamily #pcyc
+            endfamily #17z
+
+          endfamily #rap
+
+          family dump_monitor
+            #defstatus complete
+            edit JTYP dump_monitor
+            edit ECF_FILES '%PACKAGEHOME%/ecf/dump_monitor'
+            family 12z
+              edit CYC '12'
+              task jobsproc_dump_monitor
+                time 12:30
+            endfamily
+            family 13z
+              edit CYC '13'
+              task jobsproc_dump_monitor
+                time 13:30
+            endfamily
+            family 14z
+              edit CYC '14'
+              task jobsproc_dump_monitor
+                time 14:30
+            endfamily
+            family 15z
+              edit CYC '15'
+              task jobsproc_dump_monitor
+                time 15:30
+            endfamily
+            family 16z
+              edit CYC '16'
+              task jobsproc_dump_monitor
+                time 16:30
+            endfamily
+            family 17z
+              edit CYC '17'
+              task jobsproc_dump_monitor
+                time 17:30
+            endfamily
+          endfamily
+
+        endfamily #v1.0
+    endfamily # obsproc
+
+    # just for the triggers
+    family nam
+      family v4.2
+        family tm00
+          family analysis
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family nam_catchup_18
+      family v4.2
+        family tm06
+          family analysis
+          endfamily
+        endfamily
+        family tm05
+          family analysis
+          endfamily
+        endfamily
+        family tm04
+          family analysis
+          endfamily
+        endfamily
+        family tm03
+          family analysis
+          endfamily
+        endfamily
+        family tm02
+          family analysis
+          endfamily
+        endfamily
+        family tm01
+          family analysis
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family gfs
+      family v16.2
+        family atmos
+          family obsproc
+            family dump
+            endfamily
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+    family gdas
+      family v14.2
+        family atmos
+          family obsproc
+            family dump
+            endfamily
+          endfamily
+        endfamily
+      endfamily
+    endfamily
+
+  endfamily #12
+endsuite

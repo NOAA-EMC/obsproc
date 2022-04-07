@@ -1,21 +1,23 @@
 #!/bin/sh  
-#PBS -N obsproc_%JTYP%_dump_post_%DESC%_%CC%
-#PBS -o /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
-#PBS -e /lfs/h2/emc/ptmp/Iliana.Genkova/obsproc_%JTYP%_dump_post_%PDY%_%CC%_%DESC%.o%J
-#PBS -q debug
+#PBS -N obsproc_%JTYP%_dump_post_%PDY%_%CC%_%DESC%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q dev
 #PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
-#PBS -l place=vscatter,select=1:ncpus=1:mem=4gb
+#PBS -l place=vscatter,select=1:ncpus=3:mem=4gb
+#PBS -l debug=true
+
 
 #####################################################################
 # Submit notes:
+# Run from [ps]tmp when running manually
+# When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun cycqsub jglobal_*.wc2.lsf
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/cycqsub /path/to/triggers/jglobal_dump_post.wc2.pbs
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 cycqsub jglobal_*.wc2.lsf
-# cycbsub location: /u/Diane.Stokes/bin
-# cycbsub location: /u/Shelley.Melchior/bin
-# cycqsub location: /u/Iliana.Genkova/bin (copy of Nick's)
+# > jtyp=gdas cyc=00 desc=somethingfun /u/Shelley.Melchior/cycqsub /path/to/triggers/jglobal_*.wc2.lsf
+# cycqsub location: /u/Shelley.Melchior/bin
 #####################################################################
 
 set -xu
@@ -26,23 +28,20 @@ DESC=%DESC%
 JTYP=%JTYP%
 export job=${JTYP}_dump_post_$cyc
 export jobid=$job.$PBS_JOBID
-
-export DUMPJBprocdate=190001010000
-export KEEPDATA=YES
-#export MPMD=NO  # uncomment if you do not provide poe BSUB cards
-
-export obsNET=obsproc
-export obsproc_ver=v1.0.0 
-#export DCOMROOT=/lfs/h1/ops/canned/dcom #for testing before /dcom goes live
-#export TANK=/lfs/h1/ops/canned/dcom
-
 export PDY=%PDY%
 PDYm1=$(date -d "${PDY} 1 day ago" +%Y%m%d)
 
-userROOT=/u/Iliana.Genkova/INSTALL
+userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-VERSION_FILE=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/GIT/obsproc/versions/run.ver
-#VERSION_FILE=$PACKAGEROOT/obsproc/${obsproc_ver}/versions/run.ver # when /obsproc goes live
+export obsNET=obsproc
+export obsproc_ver=v1.0.0 
+export bufr_dump_ver=1.0.0
+
+#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/${obsNET}.${obsproc_ver}      # NCO prod
+export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
+
+VERSION_FILE=$HOMEobsproc/versions/run.ver 
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
@@ -50,39 +49,70 @@ else
  exit 7
 fi
 
-# source moduleload file
-# GitHub location: release/obsproc.v1.0.0/triggers/moduleload
-. /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/Trigs.KEEP/SetEnvironment/moduleload
+# Load the modules specified in $VERSION_FILE
+module load grib_util/${grib_util_ver}
+module load netcdf/${netcdf_ver}
+module load intel/${intel_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
+# use para installation
+module unload bufr_dump
+#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
+module use ${userROOT}/install/bufr-dump-rel.1.0.0/modulefiles
+module load bufr_dump/${bufr_dump_ver}
 
-# load correct version bufr_dump for WCOSS2
-module use /u/Iliana.Genkova/INSTALL/bufr-dump/modulefiles/
-module load bufr_dump/1.0.0
+# Be sure the modules are loaded 
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_util/") -eq 0 ]]; then echo "prod_util is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_envir/") -eq 0 ]]; then echo "prod_envir is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)netcdf/") -eq 0 ]]; then echo "netcdf is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; then echo "bufr_dump is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)intel/") -eq 0 ]]; then echo "intel is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)craype/") -eq 0 ]]; then echo "craype is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "cray-mpich is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
 
 export SENDECF=NO  # developer
 export SENDDBN=NO  # developer
 export SENDSDM=NO  # developer
 
-export DATAROOT=/lfs/h2/emc/ptmp/$USER 
-export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}_dump_post.$PDY.jlogfile
+export TANK=$DCOMROOT
+
+export DATAROOT=/lfs/h2/emc/stmp/$USER 
+export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
 
 export DEBUG_LEVEL=3
+export LOUD=ON
+export KEEPDATA=YES
 
-export HOMEobsproc=/u/Iliana.Genkova/INSTALL/obsproc #before obsproc on WCOSS2 
-export HOMEbufr_dump="${HOMEbufr_dump:-"/u/Iliana.Genkova/INSTALL/bufr-dump"}"
+export COMPONENT=atmos
+export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com 
+export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
+export comin=${COMIN_ROOT}/${obsNET}/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export comin_m1=${COMIN_ROOT}/${obsNET}/${obsproc_ver}/${JTYP}.${PDYm1}/${cyc}/${COMPONENT}
 
 export COPY=YES
-export HOMEarch=/lfs/h2/emc/stmp/$USER/com/${JTYP}/prod/sdm_rtdm # from Nick IG
+export HOMEarch=${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/sdm_rtdm/gfs
 export AVGDarch_IN=$HOMEarch/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day
-
-export COMPONENT=atmos
-export COMIN_ROOT=/lfs/h2/emc/ptmp/$USER/global_wcoss2/com 
-#export COMIN=$COMROOT/gfs/${gfs_ver}/${JTYP}.${PDY}/${cyc}
-export COMOUT=${COMIN_ROOT}/obsproc/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
 
 $HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP_POST
 
 err=$?
 echo $err
 
+# When run from cron, the stdout is written to /u/$USER
+# mv to stmp
+pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
+cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
+outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+if [ -f "$cronlogfile" ]; then
+  mkdir -p $outputdir
+  mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
+fi
+
+exit
