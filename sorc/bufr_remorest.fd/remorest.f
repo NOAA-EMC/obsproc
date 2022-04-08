@@ -101,6 +101,38 @@ C      - Included subset NC001101 in logic section that replaces station
 C        ID w/ MASKSTID.
 C        BENEFIT: BUFR format restricted ships data can be properly
 C                 dispensed to public users.
+C XXXX-XX-XX  D. A. KEYSER -- All reports in message types in namelist
+C     "MSG_MIXED" are now also tested for their value for EXPRSRD
+C     (number of hours until the restriction expires) when their
+C     restriction flag (RSRD) is set - any reports with a non-missing
+C     EXPRSRD less than the difference in hours between the current
+C     UTC wall-clock date and the BUFR file center time ("DIFF_HR")
+C     minus 4 are now not considered restricted and are copied (prior
+C     to this, the value of EXPRSRD was ignored and all reports with
+C     RSRD set were restricted and skipped), "DIFF_HR" is a new
+C     imported script environment variable; Improved information that
+C     is printed out for each report that is either skipped or retained
+C     (latter is currently commented out); Improved information printed
+C     out at end summarizing counts of reports retained, skipped or
+C     masked
+C XXXX-XX-XX  D. A. KEYSER -- 
+C          - For PREPBUFR files only, all reports in message types in
+C     namelist "MSG_MASK" (if their dump report type is listed in
+C     namelist "IMASK_T29") are now tested for their values for both
+C     RSRD and EXPRSRD and are only considered to be restricted if
+C     RSRD is set and EXPRSRD is .GE. the difference in hours between
+C     the current UTC wall-clock date and the BUFR file center time
+C     (read in via imported script environment variable "DIFF_HR")
+C     minus 4.  (Prior to this RSRD and EXPRSRD were not examined, ALL
+C     reports from the message type having the listed dump report type
+C     were considered to be restricted.  This is still the case for
+C     message types in namelist "MSG_MASK" for DUMP files.)
+C          - When a report coming out of "MSG_MASK" is deemed to be
+C     restricted (either PREPBUFR or DUMP) and its id is masked to be
+C     "MASKSTID", the report's value for RSRD is now re-set to MISSING
+C     when copied to non-restricted file (EXPRSRD is also set to
+C     MISSING, but it likely was already MISSING).
+C          - Improved documentation and printout.
 C
 C USAGE:
 C   INPUT FILES:
@@ -108,16 +140,16 @@ C     UNIT 05  - DATA CARDS CONTAINING NAMELIST SWITCHES (SEE REMARKS)
 C     UNIT 11  - INPUT BUFR FILENAME (IN CHARACTER) (USED ONLY FOR
 C                DIAGNOSTIC PRINT INFO)
 C     UNIT 21  - BUFR FILE (PREPBUFR OR DUMP) CONTAINING A MIXTURE OF
-C                RESTRICTED AND UNRESTRICTED REPORTS
+C                RESTRICTED (AT LEAST FOR SOME PERIOD FO TIME) AND 
+C                NON-RESTRICTED REPORTS
 C
 C   OUTPUT FILES:
 C     UNIT 06  - STANDARD OUTPUT PRINT
 C     UNIT 51  - BUFR FILE (PREPBUFR OR DUMP) CONTAINING EITHER ONLY
-C                UNRESTRICTED REPORTS OR UNRESTRICTED REPORTS AND
-C                RESTRICTED REPORTS WHOSE REPORT ID's HAVE BEEN MASKED
-C                {I.E., ALL OCCURRENCES OF ID IN A REPORT ARE
-C                UNILATERALLY CHANGED TO EITHER "MASKSTID" (WHERE THE
-C                ID IS STORED BY ITSELF) OR TO ALL "X"'s WHERE THE
+C                NON-RESTRICTED REPORTS WHOSE REPORT ID's HAVE 
+C                BEEN MASKED {I.E., ALL OCCURRENCES OF ID IN A REPORT
+C                ARE UNILATERALLY CHANGED TO EITHER "MASKSTID" (WHERE
+C                THE ID IS STORED BY ITSELF) OR TO ALL "X"'s WHERE THE
 C                NUMBER OF "X"'s CORRESPONDS TO THE THE NUMBER OF
 C                CHARACTERS IN THE ORIGINAL REPORT ID (WHERE THE ID IS
 C                EMBEDDED IN THE REPLICATED RAW REPORT BULLETIN HEADER
@@ -126,6 +158,7 @@ C
 C   SUBPROGRAMS CALLED: (LIST ALL CALLED FROM ANYWHERE IN CODES)
 C
 C     UNIQUE:    - NONE
+C     SYSTEM:    - GET_ENVIRONMENT_VARIABLE
 C     LIBRARY:
 C       W3LIB    - W3TAGB   W3TAGE   ERREXIT
 C       BUFR     - DATELEN  OPENBF   IREADMG  UFBCNT  NMSUB
