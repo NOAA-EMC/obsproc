@@ -161,7 +161,7 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 # TANK is root directory path to observational database used in dumpjb
 #  and engice, sst & snowdepth grib files used in model script
 # --------------------------------------------------------------------
-export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/${envir}/dcom}
+export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/prod/dcom}
 export TANK=${TANK:-${DCOMROOT}}
 
 # directory paths to engice, sst & snowdepth grib files used in model script
