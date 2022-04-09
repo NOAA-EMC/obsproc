@@ -169,15 +169,17 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 ##############################
 # Run setpdy and initialize PDY variables
 ##############################
-setpdy.sh
+setpdy.sh 9
 . PDY
+
+export YYYY=`echo $PDYm9 | cut -c1-4` #mods doing $PDYm9  data
 
 ##################################################
 # Define COMOUT directory  (no COMIN for this job)
 ##################################################
 
-#export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/$obsproc_ver/${NET}.${PDY})}
-export COMOUT=${COMOUT:-$(compath.py -o  ${obsNET}/$obsproc_ver/${NET}.${PDY})}
+export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/$obsproc_ver/${NET}.${PDY})}
+export MODSDIR=${MODSDIR:-$(compath.py -o ${obsNET}/$obsproc_ver)/mods.$YYYY}
 mkdir -m 775 -p $COMOUT
 
 ##############################################
@@ -187,7 +189,8 @@ mkdir -m 775 -p $COMOUT
 
 export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/${envir}/dcom}
 echo $DCOMROOT
-export MODSDIR=${MODSDIR:-${DCOMROOT}/mods}
+#export MODSDIR=${MODSDIR:-${DCOMROOT}/mods}
+#export MODSDIR=${MODSDIR:-${COM_OUT}/mods.$YYYY}
 
 
 env ; echo "JMODS: end of env listing" ; echo 

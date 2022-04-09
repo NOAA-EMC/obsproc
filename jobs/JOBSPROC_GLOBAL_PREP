@@ -156,8 +156,8 @@ export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dict
 # prepobsp_prevents.sh.
 # ---------------------------------------------------------------------------
 #export HOMEgfs=${HOMEgfs:-${PACKAGEROOT:?}/gfs.${gfs_ver:?"###FATAL ERROR \"gfs_ver\" is not set"}}
-#export HOMEgfs=${HOMEgfs:-$(compath.py ${envir}/gfs/${gfs_ver})}
-export HOMEgfs=${HOMEgfs:-$HOMEobsproc}  #Temporary place to let job run. change it to above layer when gfs run in realtime
+export HOMEgfs=${HOMEgfs:-$(compath.py gfs/${gfs_ver})}
+#export HOMEgfs=${HOMEgfs:-$HOMEobsproc}  #Temporary place to let job run. change it to above layer when gfs run in realtime
 
 #########################################################################
 # Add some prod utilities to working directory

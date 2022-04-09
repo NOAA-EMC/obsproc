@@ -141,7 +141,8 @@ for dtyp in $dtypes ; do
 
 #  make and/or move to directory for this data for this day
 #  --------------------------------------------------------
-    DBASE=$MODSDIR/$year/$mnth/$dtyp
+    #DBASE=$MODSDIR/$year/$mnth/$dtyp
+    DBASE=$MODSDIR/$mnth/$dtyp
     mkdir -p $DBASE
 
     if [ ".$dtyp" = '.ships' -o \
