@@ -5,25 +5,28 @@ C   PRGMMR: Keyser           ORG: EMC         DATE: 2017-10-20
 C
 C ABSTRACT: THIS PROGRAM READS THROUGH AN INPUT BUFR FILE (NORMALLY
 C   EITHER A PREPBUFR OR A DATA DUMP FILE) WHICH CAN CONTAIN A MIXTURE
-C   OF REPORTS WHICH ARE UNRESTRICTED OR RESTRICTED (W.R.T.
-C   REDISTRIBUTION OUTSIDE OF NCEP) AND EITHER WRITES OUT (TO AN
-C   OTHERWISE IDENTICAL BUFR FILE) ONLY THOSE REPORTS WHICH ARE
-C   UNRESTRICTED OR WRITES OUT ALL REPORTS BUT WITH MASKED REPORT ID's
-C   FOR THOSE REPORTS WHICH ARE RESTRICTED (WHAT IT DOES IS BASED ON
-C   NAMELIST SWITCHES).  IT DETERMINES WHICH REPORTS ARE RESTRICTED
-C   BASED ON EITHER THE MESSAGE TYPE AND SUBTYPE (MAKING UP THE TABLE A
-C   ENTRY IN DATA DUMP FILES), THE PREPBUFR TABLE A ENTRY (PREPBUFR
-C   FILES) (IN EITHER CASE WHEN THE MESSAGE IS KNOWN TO CONTAIN EITHER
-C   ALL RESTRICTED OR ALL UNRESTRICTED REPORTS), THE DUMP REPORT TYPE
-C   (WHEN REPORTS IN A PARTICULAR PREPBUFR TABLE A ENTRY ARE MASKED) OR
-C   THE RESTRICTED FLAG (MNEMONIC "RSRD") WITHIN EACH REPORT IN A
-C   MESSAGE (WHEN THE MESSAGE MAY CONTAIN A MIXTURE OF RESTRICTED AND
-C   UNRESTRICTED REPORTS). (NOTE: THE CASE OF MASKING REPORT ID's IN
-C   DATA DUMP FILES CAN ONLY BE DONE CURRENTLY FOR TABLE A ENTRIES
-C   WHERE ALL REPORTS ARE CONSIDERED TO BE RESTRICTED.  THE CASE OF
-C   MASKING REPORT ID's IN PREPBUFR FILES CAN ONLY BE DONE CURRENTLY
-C   FOR TABLE A ENTRIES WHERE ALL REPORTS WITH A PARTICULAR SET OF DUMP
-C   REPORT TYPES ARE CONSIDERED TO BE RESTRICTED.)
+C   OF REPORTS WHICH ARE UNRESTRICTED OR RESTRICTED FOR AT LEAST
+C   SOME PERIOD OF TIME (W.R.T. REDISTRIBUTION OUTSIDE OF NCEP) AND
+C   EITHER WRITES OUT (TO AN OTHERWISE IDENTICAL BUFR FILE) ONLY THOSE
+C   REPORTS WHICH ARE NON-RESTRICTED OR WRITES OUT ALL REPORTS BUT WITH
+C   MASKED REPORT ID's FOR THOSE REPORTS WHICH ARE RESTRICTED (WHAT IT
+C   DOES IS BASED ON NAMELIST SWITCHES). {NOTE: WHEN A RESTRICTED
+C   REPORT IS WRITTEN OUT WITH A MASKED REPORT ID, ITS RESTRICTION FLAG
+C   (MNEMONIC "RSRD") AND ITS NUMBER OF HOURS UNTIL THE RESTRICTION
+C   EXPIRES (MNEMONIC "EXPRSRD") ARE RE-SET TO MISSING SO THAT THE
+C   REPORT IS NO LONGER CONSIDERED TO BE RESTRICTED.} IT DETERMINES 
+C   WHICH REPORTS ARE RESTRICTED BASED ON EITHER THE MESSAGE TYPE AND
+C   SUBTYPE (MAKING UP THE TABLE A ENTRY IN DATA DUMP FILES), THE
+C   PREPBUFR TABLE A ENTRY (PREPBUFR FILES) (IN EITHER CASE WHEN THE
+C   MESSAGE IS KNOWN TO CONTAIN EITHER ALL RESTRICTED OR ALL NON-
+C   RESTRICTED REPORTS), THE DUMP REPORT TYPE (WHEN REPORTS IN A
+C   PARTICULAR PREPBUFR TABLE A ENTRY ARE MASKED) OR THE REPORT'S
+C   VALUE FOR "RSRD") AND, IF "RSRD" IS SET, ITS VALUE FOR "EXPRSRD"
+C   WITHIN EACH REPORT IN A MESSAGE (WHEN THE MESSAGE MAY CONTAIN A
+C   MIXTURE OF RESTRICTED AND NON-RESTRICTED REPORTS). (NOTE: THE CASE
+C   OF MASKING REPORT ID's IN DATA DUMP FILES CAN ONLY BE DONE
+C   CURRENTLY FOR TABLE A ENTRIES WHERE ALL REPORTS ARE CONSIDERED TO
+C   BE RESTRICTED.
 C
 C PROGRAM HISTORY LOG:
 C 2003-07-14  D. A. KEYSER -- ORIGINAL AUTHOR
@@ -146,7 +149,8 @@ C
 C   OUTPUT FILES:
 C     UNIT 06  - STANDARD OUTPUT PRINT
 C     UNIT 51  - BUFR FILE (PREPBUFR OR DUMP) CONTAINING EITHER ONLY
-C                NON-RESTRICTED REPORTS WHOSE REPORT ID's HAVE 
+C                NON-RESTRICTED REPORTS OR NON-RESTRICTED REPORTS AND
+C                PREVIOUSLY RESTRICTED REPORTS WHOSE REPORT ID's HAVE 
 C                BEEN MASKED {I.E., ALL OCCURRENCES OF ID IN A REPORT
 C                ARE UNILATERALLY CHANGED TO EITHER "MASKSTID" (WHERE
 C                THE ID IS STORED BY ITSELF) OR TO ALL "X"'s WHERE THE
@@ -172,35 +176,70 @@ C REMARKS:
 C   CONTENTS OF INPUT NAMELIST "SWITCHES":
 C     MSG_RESTR - 20-WORD CHARACTER*8 ARRAY CONTAINING UP TO 20 BUFR
 C                 MESSAGE TABLE A ENTRIES FOR WHICH ALL REPORTS ARE
-C                 RESTRICTED AND WILL BE REMOVED (These messages are
-C                 skipped over without unpacking any reports)
+C                 CONSIDERED TO BE RESTRICTED AND WILL ALWAYS BE
+C                 REMOVED (These messages are skipped over without
+C                 unpacking any reports)
 C     MSG_MIXED - 20-WORD CHARACTER*8 ARRAY CONTAINING UP TO 20 BUFR
-C                 MESSAGE TABLE A ENTRIES WHICH CONTAIN A MIXTURE OF
-C                 RESTRICTED AND UNRESTRICTED REPORTS BASED ON BUFR
-C                 MNEMONIC "RSRD" - ALL RESTRICTED REPORTS WILL BE
-C                 REMOVED (These messages must be unpacked and every
-C                 report must be checked to see if it is restricted -
-C                 unrestricted reports are copied, restricted reports
-C                 are skipped over)
-C     MSG_MASKA - 20-WORD CHARACTER*8 ARRAY CONTAINING UP TO 20 BUFR
+C                 MESSAGE TABLE A ENTRIES WHICH MAY CONTAIN A MIXTURE
+C                 OF REPORTS WITH AND WITHOUT THEIR RESTRICTION
+C                 INDICATOR (BUFR MNEMONIC "RSRD") BEING SET. IF "RSRD"
+C                 IS NOT SET -OR- IT IS SET AND THE TIME IN HOURS FOR
+C                 THE EXPIRATION ON RESTRICTION (BUFR MNEMONIC
+C                 "EXPRSRD") IS ALSO SET AND HAS A VALUE LESS THAN
+C                 "DIFF_HR" (THE DIFFERENCE IN HOURS BETWEEN THE
+C                 CURRENT UTC WALL-CLOCK DATE AND THE BUFR FILE CENTER
+C                 TIME) MINUS 4, THE REPORT WILL BE RETAINED.
+C                 OTHERWISE, IT WILL BE REMOVED. (These messages must
+C                 be unpacked and values for "RSRD" and "EXPRSRD" must
+C                 be checked for every report. If "EXPRSRD is missing,
+C                 it is set to 99999999 hours essentially meaning the
+C                 report is restricted for all time if "RSRD" is set.)
+C     MSG_MASKA - FOR PREPBUFR FILES:
+C                 20-WORD CHARACTER*8 ARRAY CONTAINING UP TO 20 BUFR
+C                 MESSAGE TABLE A ENTRIES WHICH, IF THEIR DUMP REPORT
+C                 TYPE IS ONE OF UP TO 10 POSSIBLE LISTED IN SWITCH
+C                 IMASK_T29 (WHERE EACH LINE IN IMASK_T29 APPLIES TO
+C                 THE TABLE A ENTRY IN THE SAME LINE NUMBER HERE), MAY
+C                 CONTAIN A MIXTURE OF REPORTS WITH AND WITHOUT THEIR
+C                 RESTRICTION INDICATOR (BUFR MNEMONIC "RSRD") BEING
+C                 SET. IF "RSRD" IS NOT SET FOR A REPORT -OR- IT IS SET
+C                 AND THE TIME IN HOURS FOR THE EXPIRATION ON
+C                 RESTRICTION (BUFR MNEMONIC "EXPRSRD") IS ALSO SET AND
+C                 HAS A VALUE LESS THAN "DIFF_HR" (THE DIFFERENCE IN
+C                 HOURS BETWEEN THE CURRENT UTC WALL-CLOCK DATE AND THE
+C                 PREPBUFR FILE CENTER TIME) MINUS 4, THE REPORT WILL
+C                 BE COPIED WITHOUT ANY CHANGES.  OTHERWISE, THE REPORT
+C                 WILL NOT BE REMOVED, BUT ALL OCCURRENCES OF ITS ID
+C                 WILL BE CHANGED TO "MASKSTID". IN ADDITION, ITS
+C                 VALUES FOR "RSRD" AND "EXPRSRD" WILL BE RE-SET TO
+C                 MISSING SO THAT THE REPORT WILL NO LONGER BE
+C                 CONSIDERED AS RESTRICTED.  REPORTS WITH A DUMP REPORT
+C                 TYPE NOT LISTED IN SWITCH IMASK_T29 ARE CONSIDERED TO
+C                 BE NON-RESTRICTED AND THEIR REPORT IDS ARE NOT
+C                 CHANGED (MASKED OUT) WHEN COPIED.  (These m essages
+C                 must be unpacked and the values for "T29", "RSRD" and
+C                 "EXPRSRD" must be checked for every report. If
+C                 "EXPRSRD" is missing, it is set to 99999999 hours
+C                 essentially meaning the report is restricted for all
+C                 time if "RSRD" is set.)
+C                 FOR DATA DUMP FILES:
+C                 20-WORD CHARACTER*8 ARRAY CONTAINING UP TO 20 BUFR
 C                 MESSAGE TABLE A ENTRIES FOR WHICH ALL REPORTS ARE
-C                 RESTRICTED {BUT, FOR PREPBUFR FILES, ONLY IF THEIR
-C                 DUMP REPORT TYPE IS ONE OF UP TO 10 POSSIBLE LISTED
-C                 IN SWITCH IMASK_T29 (EACH LINE IN IMASK_T29 APPLIES
-C                 TO THE TABLE A ENTRY IN THE SAME LINE NUMBER HERE);
-C                 FOR DATA DUMP FILES, IMASK_T29 IS NOT USED, ALL
-C                 REPORTS IN THE TABLE A ENTRIES HERE WILL BE
-C                 RESTRICTED)} - THESE WILL NOT BE REMOVED, BUT ALL
-C                 OCCURRENCES OF THEIR REPORT ID's WILL BE UNILATERALLY
-C                 CHANGED TO EITHER "MASKSTID" (WHERE THE ID IS STORED
-C                 BY ITSELF, PREPBUFR OR DUMP FILES) OR TO ALL "X"'s
-C                 WHERE THE NUMBER OF "X"'s CORRESPONDS TO THE NUMBER
-C                 OF CHARACTERS IN THE ORIGINAL REPORT ID (WHERE THE ID
-C                 IS EMBEDDED IN THE REPLICATED RAW REPORT BULLETIN
-C                 HEADER STRING, DUMP FILES ONLY) (These messages must
-C                 be unpacked and every occurrence of every report's id
-C                 must be changed to either "MASKSTID" or "X"'s before
-C                 the report is copied)
+C                 CONSIDERED TO BE RESTRICTED. THEY WILL NOT BE
+C                 REMOVED, BUT ALL OCCURRENCES OF THEIR REPORT IDS WILL
+C                 BE UNILATERALLY CHANGED TO EITHER "MASKSTID" (WHERE
+C                 THE ID IS STORED BY ITSELF) OR TO ALL "X"'s WHERE THE
+C                 NUMBER OF "X"'s CORRESPONDS TO THE NUMBER OF
+C                 CHARACTERS IN THE ORIGINAL REPORT ID (WHERE THE ID IS
+C                 EMBEDDED IN THE RAW REPORT BULLETIN HEADER STRING).
+C                 IN ADDITION, THEIR VALUES FOR "RSRD" AND "EXPRSRD"
+C                 WILL BE RE-SET TO MISSING SO THAT THE REPORTS WILL NO
+C                 LONGER BE CONSIDERED AS RESTRICTED.  (These messages
+C                 must be unpacked and every occurrence of every
+C                 report's id must be changed to either "MASKSTID" or
+C                 "X"'s and every report's "RSRD" and "EXPRSRD" values
+C                 must be changed to missing before the report is
+C                 copied.  Switch IMASK_T29 is not considered here.)
 C     IMASK_T29 - (10,20) INTEGER ARRAY CONTAINING UP TO 10 POSSIBLE
 C                 DUMP REPORT TYPES (1ST DIMENSION) FOR THE UP TO 20
 C                 POSSIBLE PREPBUFR TABLE A ENTRIES LISTED IN SWITCH
@@ -211,7 +250,7 @@ C    Note 1: A particular Table A entry should NEVER appear in more
 C            than one of MSG_RESTR, MSG_MIXED or MSG_MASKA.
 C    Note 2: Any Table A entry not in either MSG_RESTR, MSG_MIXED or
 C            MSG_MASKA is assumed to be a Table A entry for BUFR
-C            messages for which ALL reports are UNRESTRICTED (these
+C            messages for which ALL reports are NON-RESTRICTED (these
 C            messages are copied intact, no reports are unpacked).
 C    Note 3: Always fill in these arrays MSG_RESTR, MSG_MIXED and
 C            MSG_MASKA beginning with word 1.  If there are less than
@@ -234,8 +273,8 @@ C            subtype.)
 C    Note 5: For PREPBUFR files, a value of "99999" in array IMASK_T29
 C            means not applicable whereas a value of "000" means
 C            reports in all dump report types in the corresponding
-C            Table A entry in MSG_MASKA should be restricted (masked)
-C            {in this case IMASK_T29(1,x) should be set to 000 and
+C            Table A entry in MSG_MASKA should be considered {in this
+C            case IMASK_T29(1,x) should be set to 000 and
 C            IMASK_T29(2:10,x) should be set to 99999 for all reports
 C            in Table A entry MSG_MASKA(x) since they would all be
 C            ignored - this is the default for all Table A entries
@@ -244,21 +283,53 @@ C            files)}
 C      
 C   LIST OF REPORT ID MNEMONICS IN EACH REPORT WHICH ARE CURRENTLY
 C    MASKED WHEN TABLE A ENTRY IS FOUND IN MSG_MASKA (AND FOR PREPBUFR
-C    FILES DUMP REPORT TYPE MATCHES ONE OF THE TYPES IN IMASK_T29):
+C    FILES DUMP REPORT TYPE MATCHES ONE OF THE TYPES IN IMASK_T29
+C    AND THE REPORT IS CONSIDERED TO BE RESTRICTED BASED ON ITS VALUES
+C    FOR "RSRD" and "EXPRSRD"):
 C
 C   PREPBUFR file: "SID"   - chgd to "MASKSTID" (all Tbl A entries)
+C  (PREPBUFR file  "RSRD" and "EXPRSRD" also set to missing)
 C   DUMP file:     "RPID"  - chgd to "MASKSTID" (all Tbl A entries)
 C   DUMP file:     "SHPC8" - chgd to "MASKSTID" (Tbl A entry NC001001)
 C   DUMP file:     "RRSTG" - chgd to "X" (where the number of "X"'s
 C                            corresponds to the the number of
 C                            characters in the original report id )
 C                            (all applicable Tbl A entries)
+C  (DUMP file:     "RSRD" and "EXPRSRD" also set to missing)
 C
 C   Note: Currently for dump files, the only Table A entry where all
 C         occurrences of report id in a report are known to be masked
 C         is NC001001.  This code may have to be modified to add this
 C         ability to mask all occurrences of report id for other Table
 C         A entries.
+C
+C
+C ONE SCRIPT ENVIRONMENT VARIABLE IS READ IN:
+C            DIFF_HR - The difference in hours between the current UTC
+C                      wall-clock date and the BUFR file center time
+C                      (should always be a positive number!). This
+C                      is used (after subtracting 4 hours***) to
+C                      determine if a BUFR subset that is marked as
+C                      restricted (via mnemonic "RSRD") is past the
+C                      expiration time of the restriction (mnemonic
+C                      "EXPRSRD") and should thus not be filtered out.
+C                      (Note: used only for BUFR DUMP and PREPBUFR
+C                      subsets in message types listed in namelist
+C                      switch MSG_MIXED and for PREPBUFR subsets in
+C                      applicalbe dump types and message types listed
+C                      in namelist switches IMASK_T29 and MSG_MASKA.)
+C                      Defaults to ZERO if not found (i.e., not
+C                      exported by the executing script).
+C                 *** Four hours is subtracted from DIFF_HR prior to
+C                     testing against the BUFR file center time in
+C                     order to account for some reports having an obx
+C                     time as much as 3-4 hours prior to the center
+C                     time in either a dump or PEPBUFR file.  This
+C                     ensures that these reports are not inadvertently
+C                     retained if the difference between the current
+C                     wall-clock date and the BUFR file center time is
+C                     very close to the time period of the restriction.
+C                     DIFF_HR minus 4 can never be less than zero.
 C
 C
 C ATTRIBUTES:
@@ -271,16 +342,34 @@ C$$$
 
       CHARACTER*2040 RAWRPT_STG
       CHARACTER*80 FILE
+      CHARACTER*8  DIFF_HR,PREPBUFR_MSGTYP(21),PRVSTG_prep,SPRVSTG_prep,
+     $             PRVSTG_dump,SPRVSTG_dump
       CHARACTER*8  SUBSET,SID,MSG_RESTR(20),MSG_MIXED(20),MSG_MASKA(20),
      $             RAWRPT(255),SID_orig
-      REAL*8       RID_8(6),GETBMISS,BMISS,RASTR_8(255)
-      INTEGER      IMASK_T29(10,20)
+      REAL*8       RID_8(8),RASTR_8(255),LALOH_8(2),ACRN_8,ACID_8,SID_8,
+     $             RPID_8,PRV_prep_8(2),PRV1_dump_8(255),
+     $             PRV2_dump_8(255),BMISS,GETBMISS,rsrd_8(2)
+      INTEGER      IMASK_T29(10,20),IRSUB_this_MR(20),IRSUB_this_MM(20),
+     $             IMSUB_this(10,20),IRSUB_this_sub_MR(20,0:255),
+     $             IRSUB_this_sub_MM(20,0:255),IUSUB_this(0:255,0:256)
 
-      EQUIVALENCE (RID_8(1),SID),(RAWRPT,RASTR_8)
+      EQUIVALENCE (RID_8(1),SID),(RAWRPT,RASTR_8),
+     $            (PRV_prep_8(1),PRVSTG_prep),
+     $            (PRV_prep_8(2),SPRVSTG_prep),
+     $            (PRV1_dump_8(1),PRVSTG_dump),
+     $            (PRV2_dump_8(1),SPRVSTG_dump)
 
       DATA  LUBFI/21/,LUBFJ/51/,IREC/0/,IRSUB/0/,IMSUB/0/,
-     $ IUSUB/0/,ireco_last/0/
+     $ IRSUB_this_MR/20*0/,IRSUB_this_MM/20*0/,IMSUB_this/200*0/,
+     $ IUSUB/0/,IRSUB_this_sub_MR/5120*0/,IRSUB_this_sub_MM/5120*0/,
+     $ IUSUB_this/65792*0/,ireco_last/0/
 
+      DATA PREPBUFR_MSGTYP/'ADPUPA  ','AIRCAR  ','AIRCFT  ','SATWND  ',
+     $                     'PROFLR  ','VADWND  ','SATEMP  ','ADPSFC  ',
+     $                     'SFCSHP  ','SFCBOG  ','SPSSMI  ','SYNDAT  ',
+     $                     'ERS1DA  ','GOESND  ','QKSWND  ','MSONET  ',
+     $                     'GPSIPW  ','RASSDA  ','WDSATR  ','ASCATW  ',
+     $                     'unknown '/
       NAMELIST/SWITCHES/MSG_RESTR,MSG_MIXED,MSG_MASKA,IMASK_T29
 
       CALL W3TAGB('BUFR_REMOREST',2021,0175,0012,'NP22')
@@ -293,6 +382,14 @@ C$$$
   100 FORMAT(/15X,'WELCOME TO THE BUFR_REMOREST - THE PROGRAM THAT ',
      $ 'REMOVES OR MASKS RESTRICTED REPORTS FROM A BUFR FILE'/42X,
      $ 'LAST REVISION 24 Jun 2021'//30X,'INPUT BUFR FILENAME IS: ',A)
+
+      IMASK_T29 = 99999
+      IMASK_T29(1,:) = 000
+      MSG_RESTR = '        '
+      MSG_MIXED = '        '
+      MSG_MASKA = '        '
+      IDIFF_HR = 0
+      READ(5,SWITCHES)
 
 C  Set BUFRLIB missing (BMISS) to 10E8_8 to avoid integer*4 overflows
 C  ------------------------------------------------------------------
