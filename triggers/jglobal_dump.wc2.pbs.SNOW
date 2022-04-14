@@ -38,9 +38,10 @@ export obsNET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}        # NCO prod
-export HOMEobsproc=${userROOT}/wrapper_scripts/JOBS/SNOW_issue94042/obsproc      # local
+export HOMEobsproc=${userROOT}/wrapper_scripts/JOBS/SNOW_issue94042/obsproc_run_SNOW_issue94042      # local
 
-VERSION_FILE=$HOMEobsproc/versions/run.ver
+#VERSION_FILE=$HOMEobsproc/versions/run.ver
+VERSION_FILE=${userROOT}/wrapper_scripts/JOBS/SNOW_issue94042/obsproc/versions/run.ver
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
