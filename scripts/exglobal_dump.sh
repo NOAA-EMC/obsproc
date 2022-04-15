@@ -1,7 +1,7 @@
 #!/bin/ksh
 #############################################################################
 echo "----------------------------------------------------------------------"
-echo "exglobal_dump.sh - Global (GDAS, GFS) network data dump processing"
+echo "exglobal_dump.sh.ecf - Global (GDAS, GFS) network data dump processing"
 echo "----------------------------------------------------------------------"
 echo "History: Jan 18 2000 - Original script.                               "
 echo "         May 16 2007 - Added DBNet alerts for GFS products.           "
@@ -71,13 +71,6 @@ echo "                       These gpsro dump files have the potential to   "
 echo "                       contain commercial data.  The equivalent       "
 echo "                       non-restricted gpsro dump files are alerted    "
 echo "                       instead.                                       "
-echo "         Sep 21 2020 - Incremented subsets for the sfcshp dump groups "
-echo "                       to match bufr_dumplist. Removed tideg from     "
-echo "                       sfcshp dump group to make individual dump file."
-echo "                     - Copy bufr_dumplist to COMOUT.                  "
-echo "         Dec 16 2021 - modified to work on WCOSS2                     "
-echo "         Mar 09 2022 - Enable the dumping of 002017 in vadwnd dump    "
-echo "                       group.                                         "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -110,7 +103,7 @@ set +u
 #               esatms crisfs gsrcsr ahicsr sstvcw
 #
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
-#               sfcshp tideg atovs* adpsfc ascatt
+#               sfcshp atovs* adpsfc ascatt
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
@@ -580,7 +573,7 @@ DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 # check for atms tank presence in past 10 days
 atms=""
 err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh atms
+sh $USHobsproc_dump/check_tanks.sh atms
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    atms=atms
@@ -594,7 +587,7 @@ DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
 # check for mls tank presence in past 10 days
 mls=""
 err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh mls
+sh $USHobsproc_dump/check_tanks.sh mls
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    mls=mls
@@ -605,7 +598,7 @@ fi
 # check for esatms tank presence in past 10 days
 esatms=""
 err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh esatms
+sh $USHobsproc_dump/check_tanks.sh esatms
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    esatms=esatms
@@ -616,7 +609,7 @@ fi
 # check for crisfs tank presence in past 10 days
 crisfs=""
 err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh crisfs
+sh $USHobsproc_dump/check_tanks.sh crisfs
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    crisfs=crisfs
@@ -718,8 +711,7 @@ export DUMP_NUMBER=2
 #
 #--------------------------------------------------------------------------
 # GDAS:
-# Dump # 2 : SFCSHP: 11 subtype(s) (added shipsb & shipub in dumplist)
-#            TIDEG:  1 subtype(s)
+# Dump # 2 : SFCSHP: 9 subtype(s)
 #            ATOVS:  1 subtype(s)
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
@@ -727,24 +719,22 @@ export DUMP_NUMBER=2
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 20 - 21
+#            TOTAL NUMBER OF SUBTYPES = 18 - 19
 #
 #--------------------------------------------------------------------------
 # GFS:
-# Dump # 2 : SFCSHP: 11 subtype(s) (added shipsb & shipub in dumplist)
-#            TIDEG:  1 subtype(s)
+# Dump # 2 : SFCSHP: 9 subtype(s)
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES =  19 - 20
+#            TOTAL NUMBER OF SUBTYPES =  17 - 18
 #
 #==========================================================================
 
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
-DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
 
 atovs=""
 if [ "$NET" = 'gdas' ]; then
@@ -752,13 +742,14 @@ if [ "$NET" = 'gdas' ]; then
    DTIM_latest_atovs=${DTIM_latest_atovs:-"+2.99"}
 fi
 
+DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_adpsfc=${DTIM_latest_adpsfc:-"+2.99"}
 DTIM_latest_ascatt=${DTIM_latest_ascatt:-"+2.99"}
 #-----------------------------------------------
 # check for wndsat tank presence in past 10 days
 wndsat=""
 err_check_tanks=0
-##########sh $USHbufr_dump/check_tanks.sh wndsat
+##########sh $USHobsproc_dump/check_tanks.sh wndsat
 ##########err_check_tanks=$?
 err_check_tanks=99 # comment out 2 lines above & add this line to ensure wndsat
                    # is not ever dumped
@@ -770,15 +761,13 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp $atovs adpsfc snocvr ascatt $wndsat
 error2=$?
 echo "$error2" > $DATA/error2
 
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sfcshp $job \
     ${COMSP}sfcshp.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tideg $job \
-    ${COMSP}tideg.tm00.bufr_d
    [ -f ${COMSP}atovs.tm00.bufr_d ]  &&  \
     $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_atovs $job \
     ${COMSP}atovs.tm00.bufr_d
@@ -909,8 +898,7 @@ export DUMP_NUMBER=4
 #=======================================================================
 
 # Skip NeXRaD VAD WINDS FROM LEVEL 2 DECODER (not ready to be handled in GSI) (002017)
-# 3/9/2022 -- enable the dumping of 002017 in the vadwnd dump group.
-#export SKIP_002017=YES
+export SKIP_002017=YES
 
 # Dump AIRCFT and AIRCAR with wide time window to improve PREPOBS_PREPACQC
 #  track-check performance
@@ -1224,7 +1212,7 @@ DTIM_latest_gpsro=${DTIM_latest_gpsro:-"+2.99"}
 # check for crisf4 tank presence in past 10 days
 crisf4=""
 err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh crisf4
+sh $USHobsproc_dump/check_tanks.sh crisf4
 err_check_tanks=$?
 if [ $err_check_tanks -eq 0 ];then
    crisf4=crisf4
@@ -1615,14 +1603,52 @@ set -x
 
 #  determine local system name and type if available
 #  -------------------------------------------------
-
 SITE=${SITE:-""}
+sys_tp=${sys_tp:-$(getsystem.pl -tp)}
+getsystp_err=$?
+if [ $getsystp_err -ne 0 ]; then
+   msg="***WARNING: error using getsystem.pl to determine system type and phase"
+   set +u
+   [ -n "$jlogfile" ] && $DATA/postmsg "$jlogfile" "$msg"
+   set -u
+fi
+echo sys_tp is set to: $sys_tp
 
-set +u
-launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
-
-if [ "$launcher" = cfp ]; then
+if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
+   launcher=${launcher:-"aprun_cfp"}
+else
+   launcher=${launcher:-"cfp"}
+fi
+if [ "$launcher" = aprun_cfp ]; then
+   #  Get compute node count:  Subtract one from the total number of unique
+   #  hosts to account for the MAMU node that runs serial portion of job
+   typeset -i nodesall=$(echo -e "${LSB_HOSTS// /\\n}"|sort -u|wc -w)
+   typeset -i ncnodes=$(($nodesall-1)) # we want compute nodes only
+   if [ $ncnodes -lt 1 ]; then
+      set +x
+      echo
+      echo " ######################################################## "
+      echo " --> Could not get positive compute node count for aprun! "
+      echo " --> Check that BSUB directives included a reservation    "
+      echo "                   request for one or more compute nodes. "
+      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT      "
+      echo " ######################################################## "
+      echo
+      set -x
+      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
+   fi
+elif [[ "$launcher" = cfp && -z "$LSB_HOSTS" ]]; then
+   set +x
+   echo
+   echo "You requested the cfp poe launcher but are not running under LSF!!"
+   echo "You must run under LSF to use cfp option on IBM.  Exiting..."
+   echo
+   set -x
+   $DATA/err_exit
+fi
+if [ "$launcher" = cfp -o "$launcher" = aprun_cfp ]; then
    > $DATA/poe.cmdfile
+
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
@@ -1637,11 +1663,35 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
 
-
    if [ -s $DATA/poe.cmdfile ]; then
-      export MP_CSS_INTERRUPT=yes
-      launcher_DUMP=${launcher_DUMP:-mpiexec} 
-      $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
+      nthreads=$(cat $DATA/poe.cmdfile | wc -l)
+      if [ $nthreads -eq 1 ]; then   # don't expect to need this, but just in case
+         echo "do not need cfp for 1 thread"
+         if [ "$launcher" = aprun_cfp ]; then
+           aprun -n 1 -N 1 -d 1 sh $DATA/poe.cmdfile
+         else
+           sh $DATA/poe.cmdfile
+         fi
+      elif [ "$launcher" = cfp ]; then  # iDataPlex
+         export MP_CSS_INTERRUPT=yes
+         launcher_DUMP=${launcher_DUMP:-mpirun.lsf}
+         if [ "$sys_tp" = Dell-p3 -o "$SITE" = VENUS -o "$SITE" = MARS ]; then
+           launcher_DUMP='mpirun -l'
+         fi
+         $launcher_DUMP cfp $DATA/poe.cmdfile 2>&1
+      elif [ "$launcher" = aprun_cfp ]; then
+         if [[ -z ${DUMPStpn:-""} ]]; then   # pes per node
+            # cfp is faster with extra thread so add one if there is room.
+            #   For now, going with 20 as default max rather than 24.
+            if [ $nthreads -lt 20 ]; then
+               DUMPStpn=$(($nthreads+1))
+            else
+               DUMPStpn=20
+            fi
+         fi
+         NPROCS=$(($ncnodes*$DUMPStpn))  # concurrent processes
+         aprun -j 1 -n${NPROCS} -N${DUMPStpn} -d 1 --cc depth cfp $DATA/poe.cmdfile
+      fi
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1652,19 +1702,31 @@ if [ "$launcher" = cfp ]; then
       echo
    fi
 else
-   echo "Running threads serially"
-   [ $DUMP_group1 = YES ]  &&  ./thread_1 
-   [ $DUMP_group2 = YES ]  &&  ./thread_2 
-   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3 
-   [ $DUMP_group4 = YES ]  &&  ./thread_4 
-   [ $DUMP_group5 = YES ]  &&  ./thread_5 
-   [ $DUMP_group6 = YES ]  &&  ./thread_6 
-   [ $DUMP_group7 = YES ]  &&  ./thread_7 
-   [ $DUMP_group8 = YES ]  &&  ./thread_8 
-   [ $DUMP_group9 = YES ]  &&  ./thread_9 
-   [ $DUMP_group10 = YES ]  &&  ./thread_10 
-   [ $DUMP_group11 = YES ]  &&  ./thread_11 
+   if [ "$sys_tp" = 'Cray-XC40' -o "$SITE" = SURGE -o "$SITE" = LUNA ]; then
+      set +x
+      echo
+      echo " ############################################################# "
+      echo " --> Option to use background threads is disabled on Cray-XC40."
+      echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
+      echo " ############################################################# "
+      echo
+      set -x
+      $DATA/err_exit "***FATAL: Check if compute nodes were allocated"
+   else
+      echo "Running threads serially"
+      [ $DUMP_group1 = YES ]  &&  ./thread_1 
+      [ $DUMP_group2 = YES ]  &&  ./thread_2 
+      [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3 
+      [ $DUMP_group4 = YES ]  &&  ./thread_4 
+      [ $DUMP_group5 = YES ]  &&  ./thread_5 
+      [ $DUMP_group6 = YES ]  &&  ./thread_6 
+      [ $DUMP_group7 = YES ]  &&  ./thread_7 
+      [ $DUMP_group8 = YES ]  &&  ./thread_8 
+      [ $DUMP_group9 = YES ]  &&  ./thread_9 
+      [ $DUMP_group10 = YES ]  &&  ./thread_10 
+      [ $DUMP_group11 = YES ]  &&  ./thread_11 
 #     wait
+   fi
 fi
 
 #  if ADPUPA_wait is YES, adpupa is dumped AFTER all other dump threads have
@@ -1757,13 +1819,6 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11 "
 #  endif loop $PROCESS_DUMP
 fi
 
-#
-# copy bufr_dumplist to $COMOUT per NCO SPA request
-# -------------------------------------------------
-echo "Copy bufr_dumplist to comout"
-LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp 
-chmod 644 $LIST_cp
 
 # GOOD RUN
 set +x
