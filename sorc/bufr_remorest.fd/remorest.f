@@ -399,18 +399,18 @@ C  ------------------------------------------------------------------
       print'(" BUFRLIB value for missing is: ",G0)', bmiss
       print'(1X)'
 
-      IMASK_T29 = 99999
-      IMASK_T29(1,:) = 000
-      MSG_RESTR = '        '
-      MSG_MIXED = '        '
-      MSG_MASKA = '        '
-      READ(5,SWITCHES)
+C  .... store rsrd_8 array as "almost" missing, will later encode back
+C       into output *.nr PRPEBUFR file for reports with id masked,
+C       overwriting original value (won't overwrite if exactly missing)
+C       ---------------------------------------------------------------
+      rsrd_8 = bmiss - 0.01_8
 
       IF(MSG_RESTR(1).NE.'        ')  THEN
          PRINT 107
-  107 FORMAT(//' ANY BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
-     $ 'ENTRIES ARE SKIPPED (WITHOUT UNPACKING) BECAUSE THEY CONTAIN ',
-     $ 'ONLY'/' RESTRICTED REPORTS ALL OF WHICH ARE TO BE REMOVED:'/)
+  107 FORMAT(//' ALL BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
+     $ 'ENTRIES ARE SKIPPED (WITHOUT UNPACKING) BECAUSE THEY'/
+     $ ' CONTAIN ONLY RESTRICTED REPORTS (FOR SOME PERIOD OF TIME) ALL',
+     $ ' OF WHICH ARE TO BE REMOVED:'/)
          DO I = 1,20
             IF(MSG_RESTR(I).EQ.'        ')  EXIT
             PRINT *, MSG_RESTR(I)
@@ -418,32 +418,100 @@ C  ------------------------------------------------------------------
       END IF
       IF(MSG_MIXED(1).NE.'        ')  THEN
          PRINT 108
-  108 FORMAT(//' ANY BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
+  108 FORMAT(//' ALL BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
      $ 'ENTRIES ARE UNPACKED REPORT BY REPORT BECAUSE THEY CAN'/
-     $ ' CONTAIN A MIXTURE OF BOTH UNRESTRICTED AND RESTRICTED REPORTS',
-     $ ' - ALL RESTRICTED REPORTS ARE TO BE REMOVED:'/)
+     $ ' CONTAIN A MIXTURE OF BOTH NON-RESTRICTED AND RESTRICTED ',
+     $ 'REPORTS - ALL RESTRICTED REPORTS WITHIN THE TIME'/' PERIOD OF ',
+     $ 'THE RESTRICTION ARE TO BE REMOVED:'/)
          DO I = 1,20
             IF(MSG_MIXED(I).EQ.'        ')  EXIT
             PRINT *, MSG_MIXED(I)
          ENDDO
+         CALL GET_ENVIRONMENT_VARIABLE('DIFF_HR',DIFF_HR)
+         READ(DIFF_HR,'(I8)',END=88,ERR=88) IDIFF_HR
+cppppp
+ccc      print *
+ccc      print *, 'DIFF_HR, IDIFF_HR : ',DIFF_HR, IDIFF_HR
+ccc      print *
+cppppp
+         GO TO 89
+   88    CONTINUE
+         PRINT 115
+  115 FORMAT(/'+++++BUFR_REMOREST: WARNING: ERROR OBTAINING IDIFF_HR -',
+     $ ' SET TO ZERO AND CONTINUE'/)
+         IDIFF_HR = 0
+   89    CONTINUE
+         IDIFF_HR_m4 = IDIFF_HR - 4
+         IDIFF_HR_m4 = MAX(IDIFF_HR_m4,0)
+         PRINT 118, IDIFF_HR,IDIFF_HR_m4
+  118 FORMAT(/' ===> The difference between the current wall-clock ',
+     $ 'date and the BUFR file center time is',I8,' hours.'/6X,
+     $ 'Will consider the difference here to be only',I8,' hours when ',
+     $ 'comparing against the time period of the'/6X,'restriction ',
+     $ '(this takes into account that some reports may have obs times ',
+     $ 'as much as 3-4 hours prior to'/6X,'the BUFR file center time, ',
+     $ 'and so ensures that these reports are not inadvertently ',
+     $ 'retained if the'/6X,'difference between the current wall-clock',
+     $ ' date and the BUFR file center time is very close to the'/
+     $ 6X,'the time period of the restriction).'/)
       END IF
       IF(MSG_MASKA(1).NE.'        ')  THEN
-         PRINT 1107
- 1107 FORMAT(//' ANY BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
+         if(MSG_MASKA(1)(1:2).eq.'NC') then
+
+c .. DUMP file case
+c    --------------
+           PRINT 1107
+ 1107 FORMAT(//' ALL BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
+     $ 'ENTRIES CONTAIN REPORTS ALL CONSIDERED TO BE RESTRICTED. THEY '/
+     $ 'ARE'/' UNPACKED REPORT BY REPORT AND EACH REPORT''S ID (ALL ',
+     $ 'OCCURRENCES IN A REPORT) IS CHANGED TO "MASKSTID" OR "X"''S ',
+     $ '(MASKED)'/' AND IT''S VALUES FOR "RSRD" AND "EXPRSRD" ARE RE-',
+     $ 'SET TO MISSING PRIOR TO THEIR BEING WRITTEN BACK OUT:'/)
+
+         else  
+
+c .. PREPBUFR file case
+c    ------------------
+           print 3108
+ 3108 FORMAT(//' ALL BUFR MESSAGES READ IN WITH THE FOLLOWING TABLE A ',
      $ 'ENTRIES ARE UNPACKED REPORT BY REPORT BECAUSE THEY CAN'/
-     $ ' CONTAIN EITHER ALL OR SOME RESTRICTED REPORTS WHOSE REPORT ',
-     $ 'ID''s (ALL OCCURRENCES IN A REPORT) ARE ALL CHANGED'/' TO ',
-     $ '"MASKSTID" OR "X"''S (MASKED) PRIOR TO THEIR BEING WRITTEN ',
-     $ 'BACK OUT:'/)
+     $ ' CONTAIN A MIXTURE OF BOTH NON-RESTRICTED AND RESTRICTED ',
+     $ 'REPORTS - THE ID''s FOR ALL RESTRICTED REPORTS WITHIN THE'/
+     $ ' TIME PERIOD OF THE RESTRICTION ARE ALL CHANGED TO "MASKSTID" ',
+     $ '(MASKED)  AND THEIR VALUES FOR "RSRD" AND "EXPRSRD"'/' ARE RE-',
+     $ 'SET TO MISSING PRIOR TO THEIR BEING WRITTEN BACK OUT:'/)
+         end if
+
          DO I = 1,20
             IF(MSG_MASKA(I).EQ.'        ')  EXIT
             PRINT *, MSG_MASKA(I)
          ENDDO
+
+         if(MSG_MASKA(1)(1:2).ne.'NC') then
+
+c .. PREPBUFR file case
+c    ------------------
+           CALL GET_ENVIRONMENT_VARIABLE('DIFF_HR',DIFF_HR)
+           READ(DIFF_HR,'(I8)',END=988,ERR=988) IDIFF_HR
+cppppp
+ccc        print *
+ccc        print *, 'DIFF_HR, IDIFF_HR : ',DIFF_HR, IDIFF_HR
+ccc        print *
+cppppp
+           GO TO 989
+  988      CONTINUE
+           PRINT 115
+           IDIFF_HR = 0
+  989      CONTINUE
+           IDIFF_HR_m4 = IDIFF_HR - 4
+           IDIFF_HR_m4 = MAX(IDIFF_HR_m4,0)
+           PRINT 118, IDIFF_HR,IDIFF_HR_m4
+         end if 
       END IF
 
       PRINT 109
   109 FORMAT(//' ALL OTHER BUFR MESSAGES READ IN ARE COPIED INTACT ',
-     $ '(WITHOUT UNPACKING) BECAUSE THEY CONTAIN ONLY UNRESTRICTED ',
+     $ '(WITHOUT UNPACKING) BECAUSE THEY CONTAIN ONLY NON-RESTRICTED ',
      $ 'REPORTS'//)
 
       CALL DATELEN(10)
@@ -533,55 +601,139 @@ C**********************************************************************
                CYCLE LOOP1
 C**********************************************************************
             ELSE IF(SUBSET.EQ.MSG_RESTR(I) .OR. (MSG_RESTR(I)(6:8).EQ.
-     $       'xxx'.AND.SUBSET(1:5).EQ.MSG_RESTR(I)(1:5))) THEN
+     $       'xxx'.AND.SUBSET(1:5).EQ.MSG_RESTR(I)(1:5)))  THEN
                PRINT 112
   112 FORMAT(' #####>>>> ALL reports in this message are RESTRICTED ',
      $ 'and are REMOVED - do NOT copy this message to output BUFR file')
+               IRSUB_this_MR(I) = IRSUB_this_MR(I) + ISUB
+              IF(SUBSET(1:2).EQ.'NC'.AND.MSG_RESTR(I)(6:8).EQ.'xxx')THEN
+                  READ(SUBSET(6:8),'(I3)') ISUBSET_678
+                  IF(ISUBSET_678.GE.0.AND.ISUBSET_678.LE.255) THEN
+                     IRSUB_this_sub_MR(I,ISUBSET_678) =
+     $                          IRSUB_this_sub_MR(I,ISUBSET_678) + ISUB
+                  ELSE
+                     PRINT 7115, ISUBSET_678,SUBSET
+ 7115 FORMAT(/'+++++BUFR_REMOREST: WARNING: INVALID BUFR MESSAGE ',
+     $ 'SUBTYPE READ IN: ',I5.3,', SUBSET = ',A,' CANNOT INCREMENT ',
+     $ 'RESTRICTED REPORT'/29X,'SKIPPED COUNTER FOR THIS SUBSET'/)
+                  END IF
+               END IF
                IRSUB = IRSUB + ISUB
                CYCLE LOOP1
 C**********************************************************************
             ELSE IF(SUBSET.EQ.MSG_MIXED(I) .OR. (MSG_MIXED(I)(6:8).EQ.
-     $       'xxx'.AND.SUBSET(1:5).EQ.MSG_MIXED(I)(1:5))) THEN
+     $       'xxx'.AND.SUBSET(1:5).EQ.MSG_MIXED(I)(1:5)))  THEN
                PRINT 113
-  113 FORMAT(' #####>>>> This msg has mixture of restricted/non-',
-     $ 'restricted data, restricted data are REMOVED- unpk each rpt & ',
-     $ 'test on mnem. "RSRD"')
+  113 FORMAT(' #####>>>> rpts in this msg mixed restr/non-restr- restr',
+     $ 'data w/i exp. time REMOVED- unpk each rpt & test mnems. ',
+     $ '"RSRD" & "EXPRSRD"')
 
 C  READ A SUBSET (REPORT) IN MESSAGE
 C  ---------------------------------
 
                LOOP1n2: DO WHILE(IREADSB(LUBFI).EQ.0)
 
-C  DECODE THE SUBSET (REPORT) LOOKING FOR RESTRICTED FLAG
-C   (mnemonic "RSRD")
-C  ------------------------------------------------------
+C  DECODE THE SUBSET (REPORT) LOOKING FOR RESTRICTED FLAG (MNEMONIC
+C   "RSRD") AND TIME OF EXPIRATION ON RESTRICTION (MNEMONIC "EXPRSRD")
+C   (if "EXPRSRD" is missing set it to 99999999 hours essentially
+C    meaning the report is restricted for all time)
+C  -------------------------------------------------------------------
 
                   CALL UFBINT(LUBFI,RID_8,6,1,NLV,
-     $                        'SID RPT YOB XOB TYP RSRD')
-                  IF(RID_8(6).GT.0.AND.RID_8(6).LT.BMISS/2)  THEN
-                     IF(RID_8(5).LT.BMISS/2)  THEN
+     $                               'SID RPT YOB XOB TYP RSRD EXPRSRD')
+                  IF(RID_8(6).GT.0.AND.IBFMS(RID_8(6)).EQ.0)  THEN
+                     IF(IBFMS(RID_8(7)).NE.0)  RID_8(7) = 99999999.
+                     IF(IDIFF_HR_m4.LE.RID_8(7))  THEN
+                        IF(IBFMS(RID_8(5)).EQ.0)  THEN
 
 C  Normally for PREPBUFR files
 C  ---------------------------
 
-                        PRINT 104, SID,(RID_8(II),II=2,4),
-     $                   (NINT(RID_8(II)),II=5,6)
-  104 FORMAT(10X,'- Skip report ',A8,' at ',F6.2,' UTC, ',F6.2,
-     $ ' (N+/S-) LAT, ',F7.2,'(E) LON, RTYP= ',I3,', RSRD=',I5)
-                     ELSE
+                           IF(SUBSET.EQ.'MSONET  ') THEN
+                              CALL UFBINT(LUBFI,PRV_prep_8,2,1,NLV,
+     $                                                 'PRVSTG SPRVSTG')
+                              PRINT 8104, SID,(RID_8(II),II=2,4),
+     $                         (NINT(RID_8(II)),II=5,7),PRVSTG_prep,
+     $                         SPRVSTG_prep
+ 8104 FORMAT(5X,'- **Skip ',A8,F7.2,'UTC',F7.2,'(N+/S-) LAT',F7.2,' E ',
+     $ 'LON, RTYP=',I3,', RSRD=',I5,' EXPRSRD=',I5,', PRVID=',A8,
+     $ ' SPRVID=',A8)
+                           ELSE
+                              PRINT 104, SID,(RID_8(II),II=2,4),
+     $                         (NINT(RID_8(II)),II=5,7)
+  104 FORMAT(5X,'- **Skip report ',A8,' at ',F6.2,' UTC, ',F6.2,
+     $ ' (N+/S-) LAT, ',F7.2,' E LON, RTYP= ',I3,', RSRD=',I5,
+     $ ' EXPRSRD=',I5)
+                           END IF
+                        ELSE
 
 C  Normally for DATA DUMP files
 C  ----------------------------
 
-                        CALL UFBINT(LUBFI,RID_8,5,1,NLV,
-     $                              'RPID HOUR MINU CLAT CLON')
-                           PRINT 110, SID,(NINT(RID_8(II)),II=2,3),
-     $                      (RID_8(II),II=4,5), NINT(RID_8(6))
-  110 FORMAT(10X,'- Skip report ',A8,' at ',2(I2.2),' UTC, ',F6.2,
-     $ ' (N+/S-) LAT, ',F7.2,'(E+/W-) LON, RSRD=',I5)
+                           CALL UFBINT(LUBFI,RID_8,7,1,NLV,
+     $                          'RPID HOUR MINU CLAT CLON RSRD EXPRSRD')
+                           IF(IBFMS(RID_8(4)).NE.0) THEN
+                              CALL UFBINT(LUBFI,LALOH_8,2,1,NLV,
+     $                                                    'CLATH CLONH')
+                              RID_8(4:5) = LALOH_8
+                           END IF
+                           IF(IBFMS(RID_8(1)).NE.0) THEN
+                              IF(SUBSET.EQ.'NC004004' .OR.
+     $                           SUBSET.EQ.'NC004006' .OR.
+     $                           SUBSET.EQ.'NC004009' .OR.
+     $                           SUBSET.EQ.'NC004010' .OR.
+     $                           SUBSET.EQ.'NC004011' .OR.
+     $                           SUBSET.EQ.'NC004014') THEN
+                                CALL UFBINT(LUBFI,ACRN_8,1,1,NLV,'ACRN')
+                                 RID_8(1) = ACRN_8
+                              ELSE IF(SUBSET.EQ.'NC004008' .OR.
+     $                                SUBSET.EQ.'NC004012' .OR.
+     $                                SUBSET.EQ.'NC004013') THEN
+                                CALL UFBINT(LUBFI,ACID_8,1,1,NLV,'ACID')
+                                 RID_8(1) = ACID_8
+                              ELSE IF(SUBSET.EQ.'NC007001' .OR.
+     $                                SUBSET.EQ.'NC007002') THEN
+                                 SID = '        '
+                              ELSE
+                                 SID = 'MISSING '
+                              END IF
+                           END IF
+                           IF(SUBSET(3:5).EQ.'255') THEN
+                              CALL UFBINT(LUBFI,PRV1_dump_8,1,255,NLV,
+     $                                                         'PRVSTG')
+                              IF(NLV.LT.1) PRVSTG_dump = '        '
+                              CALL UFBINT(LUBFI,PRV2_dump_8,1,255,NLV,
+     $                                                        'SPRVSTG')
+                              IF(NLV.LT.1) SPRVSTG_dump = '        '
+                              PRINT 8105, SID,(NINT(RID_8(II)),II=2,3),
+     $                         (RID_8(II),II=4,5), NINT(RID_8(6)),
+     $                         NINT(RID_8(7)),PRVSTG_dump,SPRVSTG_dump
+ 8105 FORMAT(5X,'- **Skip ',A8,' at ',2(I2.2),' UTC',F7.2,' (N+/S-) ',
+     $ 'LAT',F8.2,' (E+/W-) LON, RSRD=',I5,' EXPRSRD=',I5,', PRVID=',A8,
+     $ ' SPRVID=',A8)
+                           ELSE
+                              PRINT 110, SID,(NINT(RID_8(II)),II=2,3),
+     $                         (RID_8(II),II=4,5), NINT(RID_8(6)),
+     $                         NINT(RID_8(7))
+  110 FORMAT(5X,'- **Skip report ',A8,' at ',2(I2.2),' UTC, ',F6.2,
+     $ ' (N+/S-) LAT, ',F7.2,'(E+/W-) LON, RSRD=',I5,' EXPRSRD=',I5)
+                           END IF
+                        END IF
+                        IRSUB_this_MM(I) = IRSUB_this_MM(I) + 1
+                        IF(SUBSET(1:2).EQ.'NC'.AND.
+     $                   MSG_MIXED(I)(6:8).EQ.'xxx') THEN
+                           READ(SUBSET(6:8),'(I3)') ISUBSET_678
+                           IF(ISUBSET_678.GE.0.AND.ISUBSET_678.LE.255)
+     $                      THEN
+                              IRSUB_this_sub_MM(I,ISUBSET_678) =
+     $                             IRSUB_this_sub_MM(I,ISUBSET_678) + 1
+                           ELSE
+                              PRINT 7115, ISUBSET_678,SUBSET
+                           END IF
+                        END IF
+                        IRSUB = IRSUB + 1
+                        CYCLE  LOOP1n2
                      END IF
-                     IRSUB = IRSUB + 1
-                     CYCLE  LOOP1n2
                   END IF
 
                   CALL OPENMB(LUBFJ,SUBSET,IDATE)
