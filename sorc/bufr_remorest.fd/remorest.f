@@ -836,7 +836,7 @@ C Encode minutes into Sec. 1 of new output message header if non-zero
      $ /29X,'NON-RESTRICTED REPORT COPIED COUNTER FOR THIS SUBSET'/)
                   ELSE
                      IUSUB_this(ISUBSET_345,ISUBSET_678) =
-                                IUSUB_this(ISUBSET_345,ISUBSET_678) + 1
+     $                          IUSUB_this(ISUBSET_345,ISUBSET_678) + 1
                   END IF                  
                   IUSUB = IUSUB + 1
                ENDDO  LOOP1n2
