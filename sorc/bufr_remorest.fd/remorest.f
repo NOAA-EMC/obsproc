@@ -736,6 +736,74 @@ C  ----------------------------
                      END IF
                   END IF
 
+cppppp
+ccc               IF(IBFMS(RID_8(5)).EQ.0)  THEN
+ccc                  IF(SUBSET.EQ.'MSONET  ') THEN
+ccc                     CALL UFBINT(LUBFI,PRV_prep_8,2,1,NLV,
+ccc  $                                                 'PRVSTG SPRVSTG')
+ccc                     PRINT 9104, SID,(RID_8(II),II=2,4),
+ccc  $                   (NINT(RID_8(II)),II=5,7),PRVSTG_prep,
+ccc  $                   SPRVSTG_prep
+ 9104 FORMAT(5X,'- Retain ',A8,F7.2,'UTC',F7.2,'(N+/S-) LAT',F7.2,' E ',
+     $ 'LON, RTYP=',I3,', RSRD=',I5,' EXPRSRD=',I5,', PRVID=',A8,
+     $ ' SPRVID=',A8)
+ccc                        ELSE
+ccc                           PRINT 214, SID,(RID_8(II),II=2,4),
+ccc  $                        (NINT(RID_8(II)),II=5,7)
+  214 FORMAT(5X,'- Retain report ',A8,' at ',F6.2,' UTC, ',F6.2,
+     $ ' (N+/S-) LAT, ',F7.2,' E LON, RTYP= ',I3,', RSRD=',I5,
+     $ ' EXPRSRD=',I5)
+ccc                        END IF
+ccc               ELSE
+ccc                  CALL UFBINT(LUBFI,RID_8,7,1,NLV,
+ccc  $                          'RPID HOUR MINU CLAT CLON RSRD EXPRSRD')
+ccc                  IF(IBFMS(RID_8(4)).NE.0) THEN
+ccc                     CALL UFBINT(LUBFI,LALOH_8,2,1,NLV,'CLATH CLONH')
+ccc                     RID_8(4:5) = LALOH_8
+ccc                  END IF
+ccc                  IF(IBFMS(RID_8(1)).NE.0) THEN
+ccc                     IF(SUBSET.EQ.'NC004004' .OR.
+ccc  $                     SUBSET.EQ.'NC004006' .OR.
+ccc  $                     SUBSET.EQ.'NC004009' .OR.
+ccc  $                     SUBSET.EQ.'NC004010' .OR.
+ccc  $                     SUBSET.EQ.'NC004011' .OR.
+ccc  $                     SUBSET.EQ.'NC004014') THEN
+ccc                        CALL UFBINT(LUBFI,ACRN_8,1,1,NLV,'ACRN')
+ccc                        RID_8(1) = ACRN_8
+ccc                     ELSE IF(SUBSET.EQ.'NC004008' .OR.
+ccc  $                          SUBSET.EQ.'NC004012' .OR.
+ccc  $                          SUBSET.EQ.'NC004013') THEN
+ccc                        CALL UFBINT(LUBFI,ACID_8,1,1,NLV,'ACID')
+ccc                        RID_8(1) = ACID_8
+ccc                     ELSE IF(SUBSET.EQ.'NC007001' .OR.
+ccc  $                          SUBSET.EQ.'NC007002') THEN
+ccc                        SID = '        '
+ccc                     ELSE
+ccc                        SID = 'MISSING '
+ccc                     END IF
+ccc                  END IF
+ccc                  IF(SUBSET(3:5).EQ.'255') THEN
+ccc                     CALL UFBINT(LUBFI,PRV1_dump_8,1,255,NLV,
+ccc  $                                                         'PRVSTG')
+ccc                     IF(NLV.LT.1) PRVSTG_dump = '        '
+ccc                     CALL UFBINT(LUBFI,PRV2_dump_8,1,255,NLV,
+ccc  $                                                        'SPRVSTG')
+ccc                     IF(NLV.LT.1) SPRVSTG_dump = '        '
+ccc                     PRINT 9105, SID,(NINT(RID_8(II)),II=2,3),
+ccc  $                   (RID_8(II),II=4,5), NINT(RID_8(6)),
+ccc  $                   NINT(RID_8(7)),PRVSTG_dump,SPRVSTG_dump
+ 9105 FORMAT(5X,'- Retain ',A8,' at ',2(I2.2),' UTC',F7.2,' (N+/S-) ',
+     $ 'LAT',F8.2,' (E+/W-) LON, RSRD=',I5,' EXPRSRD=',I5,', PRVID=',A8,
+     $ ' SPRVID=',A8)
+ccc                  ELSE
+ccc                     PRINT 215, SID,(NINT(RID_8(II)),II=2,3),
+ccc  $                   (RID_8(II),II=4,5),NINT(RID_8(6)),
+ccc  $                   NINT(RID_8(7))
+  215 FORMAT(5X,'- Retain report ',A8,' at ',2(I2.2),' UTC, ',F6.2,
+     $ ' (N+/S-) LAT, ',F7.2,'(E+/W-) LON, RSRD=',I5,' EXPRSRD=',I5)
+ccc                  END IF
+ccc               END IF
+cppppp
                   CALL OPENMB(LUBFJ,SUBSET,IDATE)
                   call ufbcnt(lubfj,ireco,isubo)
                   if(ireco.ne.ireco_last) then
@@ -745,26 +813,66 @@ C Encode minutes into Sec. 1 of new output message header if non-zero
                   ireco_last  = ireco
                   CALL UFBCPY(LUBFI,LUBFJ)
                   CALL WRITSB(LUBFJ)
+                  IF(SUBSET(1:2).EQ.'NC') THEN
+                     READ(SUBSET(3:5),'(I3)') ISUBSET_345
+                     READ(SUBSET(6:8),'(I3)') ISUBSET_678
+                  ELSE
+                     ISUBSET_678 = 256
+                     ISUBSET_345 = -99
+                     DO II = 1,20
+                        IF(SUBSET.EQ.PREPBUFR_MSGTYP(II)) THEN
+                           ISUBSET_345 = II
+                           EXIT
+                        END IF
+                     ENDDO
+                     IF(ISUBSET_345.EQ.-99) ISUBSET_345 = 21
+                  END IF
+                  IF(SUBSET(1:2).EQ.'NC' .AND.
+     $               ((ISUBSET_345.LT.0.OR.ISUBSET_345.GT.255) .OR.
+     $                (ISUBSET_678.LT.0.OR.ISUBSET_678.GT.255))) THEN
+                     PRINT 7116, SUBSET
+ 7116 FORMAT(/'+++++BUFR_REMOREST: WARNING: INVALID BUFR MESSAGE ',
+     $ 'TYPE AND/OR SUBTYPE READ IN, SUBSET = ',A,' CANNOT INCREMENT'
+     $ /29X,'NON-RESTRICTED REPORT COPIED COUNTER FOR THIS SUBSET'/)
+                  ELSE
+                     IUSUB_this(ISUBSET_345,ISUBSET_678) =
+                                IUSUB_this(ISUBSET_345,ISUBSET_678) + 1
+                  END IF                  
                   IUSUB = IUSUB + 1
                ENDDO  LOOP1n2
                CYCLE  LOOP1
 C**********************************************************************
             ELSE IF(SUBSET.EQ.MSG_MASKA(I) .OR. (MSG_MASKA(I)(6:8).EQ.
-     $       'xxx'.AND.SUBSET(1:5).EQ.MSG_MASKA(I)(1:5))) THEN
+     $       'xxx'.AND.SUBSET(1:5).EQ.MSG_MASKA(I)(1:5)))  THEN
                IF(IMASK_T29(1,I).EQ.000)  THEN
-                  PRINT 1113
- 1113 FORMAT(' #####>>>> ALL rpts in msg RESTRICTED - unpk each rpt, ',
-     $ 'MASK all occurrences of id (chg to "MASKSTID" or "X"''s), copy',
-     $ ' to output file')
+                  if(subset(1:2).eq.'NC') then
+
+c  .. DUMP file case
+c     --------------
+                     PRINT 1113
+ 1113 FORMAT('  ###>> ALL rpts in msg RESTRICTED - unpk each rpt, MASK ',
+     $ 'all id''s (chg to "MASKSTID" or "X"''s), set to non-restr, ',
+     $ ' copy to output file')
+                   else
+
+c  .. PREPBUFR file case
+c     ------------------
+                     print 1114
+                  end if
                ELSE
+
+c  .. PREPBUFR file case
+c     ------------------
                   PRINT 1114
- 1114 FORMAT(' #####>>>> SOME or ALL rpts in msg RESTRICTED:')
+ 1114 FORMAT('  ###>> some rpts in msg may be RESTRICTED: if so & w/i ',
+     $ 'expir time, MASK id (chg to "MASKSTID"), set to non-restr, cpy',
+     $ ' to output file')
                   DO J = 1,10
                      IF(IMASK_T29(J,I).NE.99999)  PRINT 1115,
      $                IMASK_T29(J,I)
- 1115 FORMAT('  -- ALL rpts in dump type ',I3,' RESTRICTED- unpk',
-     $ ' each rpt, MASK all occurrences of id (chg to "MASKSTID" or ',
-     $ '"X"s), copy to o-put file')
+ 1115 FORMAT('  -- rpts in dump type ',I3,' mixed restr./non-restr.- ',
+     $ 'for restr. rpts w/i expir. time, MASK id, set to non-restr & ',
+     $ 'copy to output file')
                   ENDDO
                END IF
 
@@ -785,8 +893,8 @@ C Encode minutes into Sec. 1 of new output message header if non-zero
                   ireco_last  = ireco
                   CALL UFBCPY(LUBFI,LUBFJ)
                   CALL UFBINT(LUBFI,RID_8,6,1,NLV,
-     $                        'SID RPT YOB XOB TYP T29')
-                  IF(RID_8(5).LT.BMISS/2)  THEN
+     $                        'SID RPT YOB XOB TYP T29 RSRD EXPRSRD')
+                  IF(IBFMS(RID_8(5)).EQ.0)  THEN
 
 C  Come here for PREPBUFR files (report id is in mnemonic "SID")
 C   -- check for a match of dump report type
@@ -796,23 +904,38 @@ C  -------------------------------------------------------------
                         IF(IMASK_T29(1,I).EQ.000.OR.
      $                     IMASK_T29(J,I).EQ.NINT(RID_8(6)))  THEN
 
-C    .... dump report types match - this report is restricted
-C         ---------------------------------------------------
-
-                           PRINT 1104, SID,(RID_8(II),II=2,4),
-     $                      (NINT(RID_8(II)),II=5,6)
- 1104 FORMAT(10X,'- Change id of report ',A8,' at ',F6.2,' UTC, ',F6.2,
-     $ ' (N+/S-) LAT, ',F7.2,'(E) LON, RTYP= ',I3,', DTYP=',I5,
-     $ ' TO "MASKSTID"')
-                           SID = 'MASKSTID'
+C    .... dump report types match - look for restricted flag (mnemonic
+C         "RSRD") and time of expiration on restriction (mnemonic
+C         "EXPRSRD") (if "EXPRSRD" is missing set it to 99999999 hours
+C          essentially meaning the report is restricted for all time)
+C         ------------------------------------------------------------
+                           if(rid_8(7).gt.0.and.ibfms(rid_8(7)).EQ.0)
+     $                      then
+                              if(ibfms(rid_8(8)).ne.0)
+     $                         rid_8(8) = 99999999.
+                              if(IDIFF_HR_m4.le.rid_8(8))  then
+                                 PRINT 1104, SID,(RID_8(II),II=2,4),
+     $                            (NINT(RID_8(II)),II=5,8)
+ 1104 FORMAT(5X,'- Chg ID of rpt ',A8,' at',F6.2,' UTC, ',F6.2,
+     $ ' LAT,',F7.2,' E LON, RTYP=',I3,', DTYP=',I5,
+     $ ', RSRD=',I5,', EXPRSRD=',I5,' TO "MASKSTID"')
+                                 SID = 'MASKSTID'
+                                 SID_8 = RID_8(1)
+                                 IMSUB_this(J,I) = IMSUB_this(J,I) + 1
 
 C    .... update report id to masked value - "MASKSTID"
 C         ---------------------------------------------
+                                 CALL UFBINT(LUBFJ,SID_8,1,1,IRET,'SID')
 
-                           CALL UFBINT(LUBFJ,RID_8(1),1,1,IRET,'SID')
-                           EXIT
+C    .... re-set RSRD & EXPRSRD to "almost" missing so rpt is no longer
+C          restricted
+C         -----------------------r-------------------------------------
+                       call ufbint(lubfj,rsrd_8,2,1,iret,'RSRD EXPRSRD')
+                                 EXIT
+                              END IF
+                           END IF
                         END IF
-                     END DO
+                     ENDDO
                   ELSE
 
 C  Come here for DATA DUMP files where all reports are restricted
@@ -823,19 +946,26 @@ C   present)
 C  -------------------------------------------------------------------
 
                      IUPDATE_RAWRPT = 0
-                     CALL UFBINT(LUBFI,RID_8,6,1,NLV,
+                     CALL UFBINT(LUBFI,RID_8,7,1,NLV,
      $                           'RPID HOUR MINU CLAT CLON RSRD')
                      PRINT 1110, SID,(NINT(RID_8(II)),II=2,3),
-     $                (RID_8(II),II=4,5), NINT(RID_8(6))
- 1110 FORMAT('  - Chg all occurrences of id of rpt ',A8,' at ',2(I2.2),
-     $ ' UTC, ',F6.2,' (N+/S-) LAT, ',F7.2,'(E+/W-) LON, RSRD=',I5,
-     $ ' TO "MASKSTID" OR "X"''s')
+     $                (RID_8(II),II=4,5), NINT(RID_8(6)),NINT(RID_8(7))
+ 1110 FORMAT('  - Chg all instances of rpt id ',A8,' ',2(I2.2),' UTC, ',
+     $ F6.2,'(N+/S-) LAT ',F7.2,'(E+/W-) LON, RSRD=',I5,', EXPRSRD=',I5,
+     $ ' to MASKSTID or X''s')
                      SID_orig = SID
                      SID = 'MASKSTID'
+                     RPID_8 = RID_8(1)
+                     IMSUB_this(1,I) = IMSUB_this(1,I) + 1
 
 C    .... update report id in output file to masked value - "MASKSTID"
 C         ------------------------------------------------------------
+                     CALL UFBINT(LUBFJ,RPID_8,1,1,IRET,'RPID')
 
+C    .... re-set RSRD & EXPRSRD to "almost" missing so rpt is no longer
+C          restricted
+C         -----------------------r-------------------------------------
+                     call ufbint(lubfj,rsrd_8,2,1,iret,'RSRD EXPRSRD')
                      CALL UFBINT(LUBFJ,RID_8(1),1,1,IRET,'RPID')
                      IF(SUBSET.EQ.'NC001001'.or.
      $                  subset.eq.'NC001101') THEN
@@ -843,21 +973,18 @@ C         ------------------------------------------------------------
 C    .... update 2nd rpt id in ship rpts in output file to masked value
 C         - "MASKSTID"
 C         -------------------------------------------------------------
-
-                        CALL UFBINT(LUBFJ,RID_8(1),1,1,IRET,'SHPC8')
+                        CALL UFBINT(LUBFJ,RPID_8,1,1,IRET,'SHPC8')
                      END IF
 
 C    .... see if a replicated raw report bulletin header string is
 C         present
 C         --------------------------------------------------------
-
                      CALL UFBINT(LUBFI,RASTR_8,1,255,NLV,'RRSTG')
                      IST = 1
-                     IF(NLV.GT.0) THEN
+                     IF(NLV.GT.0)  THEN
 
 C        .... it is, store entire string in character array RAWRPT_STG
 C             --------------------------------------------------------
-
                         DO II = 1,NLV
                            IEN = IST+7
                            RAWRPT_STG(IST:IEN) = RAWRPT(II)
@@ -871,9 +998,8 @@ C        .... next determine character length of report id (ICHAR_id)
 C             for later check to see if it is embedded one or more
 C             times in raw report bulletin header string
 C             -------------------------------------------------------
-
                         DO II = 1,8
-                           IF(SID_orig(II:II).EQ.' ') THEN
+                           IF(SID_orig(II:II).EQ.' ')  THEN
                               ICHAR_id = II - 1
                               EXIT
                            END IF
@@ -881,17 +1007,16 @@ C             -------------------------------------------------------
 cppppp
 ccc   print *, 'original sid had ',ICHAR_id,' characters'
 cppppp
-                        IF(ICHAR_id.GE.1) THEN
+                        IF(ICHAR_id.GE.1)  THEN
 
 C        .... next parse through entire raw report bulletin header
 C             string looking for one or more occurrences of report id
 C             and "X" out the id
 C             -------------------------------------------------------
-
                            DO II = 1,IEN
                               IF(II+ICHAR_id-1.GT.IEN)  EXIT
                               IF(RAWRPT_STG(II:II+ICHAR_id-1).EQ.
-     $                           SID_orig(1:ICHAR_id)) THEN
+     $                           SID_orig(1:ICHAR_id))  THEN
 cppppp
 ccc   print *, 'Found a match to orig sid in RAWRPT_STG',' - in bytes ',
 ccc  $ II,' to ',II+ICHAR_id-1,' - set to "X"'
@@ -906,7 +1031,6 @@ cppppp
 C        .... reconstruct replicated raw report bulletin header string,
 C             but now with the id "X"'d out
 C             ---------------------------------------------------------
-
                            IF(IUPDATE_RAWRPT.EQ.1)  THEN
                               IST = 1
                               DO II = 1,NLV
@@ -918,7 +1042,6 @@ C             ---------------------------------------------------------
 C        .... finally, update replicated raw report bulletin header
 C             string with the id "X"'d out in output file
 C             -----------------------------------------------------
-
                               CALL UFBINT(LUBFJ,RASTR_8,1,NLV,IRET,
      $                                    'RRSTG')
 cppppp
@@ -928,9 +1051,31 @@ cppppp
                         END IF
                      END IF
                   END IF
-                  IF(SID.EQ.'MASKSTID') THEN
+                  IF(SID.EQ.'MASKSTID')  THEN
                      IMSUB = IMSUB + 1
                   ELSE
+                     IF(SUBSET(1:2).EQ.'NC') THEN
+                        READ(SUBSET(3:5),'(I3)') ISUBSET_345
+                        READ(SUBSET(6:8),'(I3)') ISUBSET_678
+                     ELSE
+                        ISUBSET_678 = 256
+                        ISUBSET_345 = -99
+                        DO II = 1,20
+                           IF(SUBSET.EQ.PREPBUFR_MSGTYP(II)) THEN
+                              ISUBSET_345 = II
+                              EXIT
+                           END IF
+                        ENDDO
+                        IF(ISUBSET_345.EQ.-99) ISUBSET_345 = 21
+                     END IF
+                     IF(SUBSET(1:2).EQ.'NC' .AND.
+     $                  ((ISUBSET_345.LT.0.OR.ISUBSET_345.GT.255) .OR.
+     $                   (ISUBSET_678.LT.0.OR.ISUBSET_678.GT.255))) THEN
+                        PRINT 7116, SUBSET
+                     ELSE
+                        IUSUB_this(ISUBSET_345,ISUBSET_678) =
+     $                          IUSUB_this(ISUBSET_345,ISUBSET_678) + 1
+                     END IF
                      IUSUB = IUSUB + 1
                   END IF
                   CALL WRITSB(LUBFJ)
@@ -940,8 +1085,30 @@ cppppp
          ENDDO  LOOP1n1
 C**********************************************************************
          PRINT 114
-  114 FORMAT(' ALL reports in this message are UNRESTRICTED - copy',
+  114 FORMAT(' ALL reports in this message are NON-RESTRICTED - copy',
      $ ' this message, intact, to output BUFR file')
+         IF(SUBSET(1:2).EQ.'NC') THEN
+            READ(SUBSET(3:5),'(I3)') ISUBSET_345
+            READ(SUBSET(6:8),'(I3)') ISUBSET_678
+         ELSE
+            ISUBSET_678 = 256
+            ISUBSET_345 = -99
+            DO II = 1,20
+               IF(SUBSET.EQ.PREPBUFR_MSGTYP(II)) THEN
+                  ISUBSET_345 = II
+                  EXIT
+               END IF
+            ENDDO
+            IF(ISUBSET_345.EQ.-99) ISUBSET_345 = 21
+         END IF
+         IF(SUBSET(1:2).EQ.'NC' .AND.
+     $      ((ISUBSET_345.LT.0.OR.ISUBSET_345.GT.255) .OR.
+     $       (ISUBSET_678.LT.0.OR.ISUBSET_678.GT.255))) THEN
+            PRINT 7116, SUBSET
+         ELSE
+            IUSUB_this(ISUBSET_345,ISUBSET_678) =
+     $                       IUSUB_this(ISUBSET_345,ISUBSET_678) + ISUB
+         END IF
          IUSUB = IUSUB + ISUB
          CALL CLOSMG(LUBFJ)
          CALL COPYMG(LUBFI,LUBFJ)
@@ -955,12 +1122,75 @@ C  ----------------------------------------------------------------
       CALL CLOSBF(LUBFI)
       CALL CLOSBF(LUBFJ)
 
-      PRINT 106, IRSUB,IMSUB,IUSUB
-  106 FORMAT(//'==> A TOTAL OF',I11,' RESTRICTED   REPORTS WERE SKIPPED'
-     $        /'==> A TOTAL OF',I11,' RESTRICTED   REPORTS WERE MASKED',
-     $ ' (ALL OCCURRENCES OF REPORT ID) THEN COPIED'
-     $        /'==> A TOTAL OF',I11,' UNRESTRICTED REPORTS WERE COPIED'/
-     $ /'PROGRAM COMPLETED SUCCESSFULLY'/)
+      PRINT 106, IRSUB
+  106 FORMAT(//'==> A TOTAL OF',I11,' RESTRICTED   REPORTS WERE ',
+     $ 'SKIPPED')
+      DO I = 1,20
+         IF(IRSUB_this_MR(I).GT.0) THEN
+            PRINT 1106, IRSUB_this_MR(I),MSG_RESTR(I)
+            DO J = 0,255
+               IF(IRSUB_this_sub_MR(I,J).GT.0) THEN
+                  PRINT 2106, IRSUB_this_sub_MR(I,J),MSG_RESTR(I)(1:5),J
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+      DO I = 1,20
+         IF(IRSUB_this_MM(I).GT.0) THEN
+            PRINT 1106, IRSUB_this_MM(I),MSG_MIXED(I)
+            DO J = 0,255
+               IF(IRSUB_this_sub_MM(I,J).GT.0) THEN
+                  PRINT 2106, IRSUB_this_sub_MM(I,J),MSG_MIXED(I)(1:5),J
+               END IF
+            ENDDO
+         END IF
+      ENDDO
+ 1106 FORMAT(16X,'--> ',I11,' reports from message type ',A)
+ 2106 FORMAT(21X,'--> ',I11,' reports from message type ',A,I3.3)
+
+      PRINT 116, IMSUB
+  116 FORMAT(//'==> A TOTAL OF',I11,' RESTRICTED   REPORTS WERE ',
+     $ 'MASKED AND THEN COPIED')
+      DO I = 1,20
+         DO J = 1,10
+            IF(IMSUB_this(J,I).GT.0) THEN
+               IF(IMASK_T29(J,I).GT.0) THEN
+                  PRINT 1108,IMSUB_this(J,I),MSG_MASKA(I),IMASK_T29(J,I)
+               ELSE
+                  PRINT 1106,IMSUB_this(J,I),MSG_MASKA(I)
+               END IF
+            END IF
+         ENDDO
+      ENDDO
+ 1108 FORMAT(16X,'--> ',I11,' reports from message type ',A,
+     $ ', DUMP report type ',I5)
+
+      PRINT 117, IUSUB
+  117 FORMAT(//'==> A TOTAL OF',I11,' NON-RESTRICTED REPORTS WERE ',
+     $ 'COPIED'/)
+      IPRINT_FLAG = 0
+      DO I = 1,21
+         IF(IUSUB_this(I,256).GT.0) THEN
+            PRINT 2108, IUSUB_this(I,256),PREPBUFR_MSGTYP(I)
+            IPRINT_FLAG = 1
+         END IF
+      ENDDO
+ 2108 FORMAT(16X,'--> ',I11,' reports from message type ',A)
+
+      IF(IPRINT_FLAG.EQ.0) THEN
+         DO I = 0,255
+            DO J = 0,255
+               IF(IUSUB_this(I,J).GT.0) THEN
+                  PRINT 2107, IUSUB_this(I,J),I,J
+               END IF
+            ENDDO
+         ENDDO
+      END IF
+ 2107 FORMAT(16X,'--> ',I11,' reports from message type NC',I3.3,I3.3)
+
+      PRINT 3117
+ 3117 FORMAT(//'PROGRAM COMPLETED SUCCESSFULLY'/)
+
 
       CALL W3TAGE('BUFR_REMOREST')
 
