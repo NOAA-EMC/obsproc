@@ -331,8 +331,8 @@ cat <<\EOFparm > bufr_remorest.datadump.parm
 =========================================================================
 EOFparm
 
-REMX=${REMX:-$EXECobsproc/bufr_remorest}
-REMC=${REMC:-bufr_remorest.datadump.parm}
+   REMX=${REMX:-$EXECobsproc/bufr_remorest}
+   REMC=${REMC:-bufr_remorest.datadump.parm}
 
    for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro
    do
@@ -345,11 +345,11 @@ REMC=${REMC:-bufr_remorest.datadump.parm}
       rc=$?
       if [ $rc -gt 0 ] ; then
          [ $rc -gt $retcode ]  && retcode=$rc
-         msg="**WARNING: ERROR generating unrestricted $file BUFR file \
+         msg="**WARNING: ERROR generating non-restricted $file BUFR file \
 (rc = $rc)"
          $DATA/postmsg "$jlogfile" "$msg"
       else
-         msg="Successful generation of unrestricted $file BUFR file"
+         msg="Successful generation of non-restricted $file BUFR file"
          $DATA/postmsg "$jlogfile" "$msg"
          cp $filestem $COMOUT/$filestem.nr
          chmod 664 $COMOUT/$filestem.nr
@@ -368,9 +368,112 @@ REMC=${REMC:-bufr_remorest.datadump.parm}
 
    done
 
-#  endif loop $PROCESS_REMOREST
-fi
+fi #  endif loop $PROCESS_REMOREST
 
+
+if [ $PROCESS_REMOREST_dm2 = YES ]; then
+
+########################################################################
+#     Remove Restriction on Data in 2-day old "aircar" and "aircft"    #
+#                         BUFR Data Dump files                         #
+########################################################################
+
+#  For dump files "aircar" and "aircft" for 2-days ago (this network, run and
+#  cycle):
+#    ---> For all Table A entries listed in parm card namelist switch
+#         "MSG_MIXED" (see below):
+#            If the restriction indicator (mnemonic RSRD) is set for a report,
+#            then its value for time in hours for the expiration on restriction
+#            (mnemonic EXPRSRD) is examined. If "DIFF_HR" (the difference in
+#            hours between the current UTC wall-clock date and the dump file
+#            center date, exported into program BUFR_REMOREST) minus 4 is less
+#            than or equal to EXPRSRD, then the report is considered to be
+#            restricted and will be skipped by program BUFR_REMOREST.
+#            Otherwise, the report is considered to be non-restricted and will
+#            be retained by program BUFR_REMOREST.
+#    ---> Since we are running 2-days late, we want to test on the value of
+#         EXPRSRD (which currently should be set to 48 hours for any reports in
+#         these dumps which have RSRD set).  This will allow non-rstprod users
+#         to have access to full "aircar" and "aircft" dumps after EXPRSRD + 4
+#         (52) hours.
+# -----------------------------------------------------------------------------
+
+   dumptimeM2=`$NDATE -$tmhr $PDYm2$cyc`
+
+   msg="REMOVE OR MASK RESTRICTED DATA FROM $tmmark_uc $net_uc DATA DUMPS \
+CENTERED ON $dumptimeM2 (2-days ago)"
+   $DATA/postmsg "$jlogfile" "$msg"
+
+   ymdh=$(date -u +'%Y%m%d%H')
+   export DIFF_HR=`$NHOUR $ymdh            $dumptimeM2`
+#                         current_date       dump_date
+
+   msg="Any reports with EXPRSRD less than `expr $DIFF_HR - 4 ` hrs will now \
+be retained"
+   $DATA/postmsg "$jlogfile" "$msg"
+
+cat <<\EOF_EXPRSRDparm > bufr_remorest.datadump_EXPRSRD.parm
+=========================================================================
+
+  Cards for DUMP Version of BUFR_REMOREST -- Version 1.1.0 (09 September 2015)
+  (documentation in bufr_remorest.datadump.parm above for $PROCESS_REMOREST
+   also applies here)
+
+ &SWITCHES
+   MSG_RESTR = '        ',
+   MSG_MIXED = 'NC004003',
+               'NC004004',
+               'NC004006',
+               'NC004007',
+               'NC004008',
+               'NC004009',
+               'NC004010',
+               'NC004011',
+               'NC004012',
+               'NC004013',
+               'NC004014',
+               'NC004015',
+               'NC004103',
+   MSG_MASKA = '        '
+
+ /
+
+=========================================================================
+EOF_EXPRSRDparm
+
+   REMX=${REMX:-$EXECobsproc_shared_bufr_remorest/bufr_remorest}
+   REMC=${REMC_EXPRSRD:-bufr_remorest.datadump_EXPRSRD.parm}
+
+   for file in aircar aircft
+   do
+      filestem=$RUN.$cycle.$file.$tmmark.bufr_d
+      [ -f $COMINm2/$filestem ]  ||  continue
+
+      cp $COMINm2/$filestem $filestem
+
+      $USHobsproc/bufr_remorest.sh $filestem
+      rc=$?
+      if [ $rc -gt 0 ] ; then
+         [ $rc -gt $retcode ]  && retcode=$rc
+         msg="**WARNING: ERROR generating non-restricted $file BUFR file \
+from 2-days ago (rc = $rc) -- existing file made 2-days ago is not overwritten"
+         $DATA/postmsg "$jlogfile" "$msg"
+      else
+         msg="Successful generation of non-restricted $file BUFR file from \
+2-days ago -- overwrite existing file made 2-days ago"
+         $DATA/postmsg "$jlogfile" "$msg"
+         cp $filestem $COMOUTm2/$filestem.nr
+         chmod 664 $COMOUTm2/$filestem.nr
+         if [ $SENDDBN = "YES" ] ; then
+             NETUP=`echo $RUN | tr {a-z} {A-Z}`           # can this be net_uc?
+             $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
+             $COMOUTm2/$filestem.nr
+         fi
+      fi
+
+   done
+
+fi #  endif loop $PROCESS_REMOREST_dm2
 
 
 if [ "$PROCESS_UNBLKBUFR" = 'YES' ]; then
@@ -381,9 +484,16 @@ $dumptime"
 
 ########################################################################
 #                  Unblock BUFR Data Dump Files                        #
+# {Note: will also unblock non-restricted aircar and aircft dump files #
+#        from 2-days ago if they were overwritten in REMOREST above    #
+#        (when $PROCESS_REMOREST_dm2 = YES)}                           #
 # ---> ON WCOSS dump files are already unblocked, so this whole set of #
 #      processing can hopefully be removed someday!!                   #
 ########################################################################
+
+   aircraft_nr_dm2=""
+   [ $PROCESS_REMOREST_dm2 = YES ] && \
+    aircraft_nr_dm2="aircar_nr_dm2 aircft_nr_dm2"
 
    for file in adpsfc adpupa aircar aircft satwnd sfcshp spssmi proflr \
                vadwnd goesnd erscat sfcbog erswnd ssmip  ssmipn ssmit  \
@@ -391,13 +501,26 @@ $dumptime"
                1bhrs3 1bmhs  1bhrs4 airs   airswm amsre  gpsipw msonet \
                rassda nexrad gpsro  airsev goesfv wndsat wdsatr osbuv8 \
                ascatt ascatw mtiasi avcsam avcspm gome   lghtng omi    \
-               esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam
+               esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam \
+	       $aircraft_nr_dm2
 #  --> don't add any new dumps here since files are already unblocked
 #      on WCOSS!!
 
    do
+      file_orig=$file
+      if [ $PROCESS_REMOREST_dm2 = YES ]; then
+	 if [ $file = aircar_nr_dm2 -o $file = aircft_nr_dm2 ]; then
+            file=`echo $file | cut -d"_" -f1`
+	    COMIN_save=$COMIN
+	    COMIN=$COMINm2
+	    COMOUT_save=$COMOUT
+	    COMOUT=$COMOUTm2
+	 fi
+      fi
       for qual in "" ".nr"
       do
+	 [ \( $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 \) -a \
+	    "$qual" != .nr ] && continue
          qualdbn=$qual
          COMIN_here=$COMIN
          if [ "$qual" = .nr ]; then
@@ -421,7 +544,12 @@ $dumptime"
 $file.unblock$qual (rc = $rc)"
             $DATA/postmsg "$jlogfile" "$msg"
          else
-            msg="$file$qual BUFR file SUCCESSFULLY copied to $file.unblock$qual"
+            if [ $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 ];then
+	       msg="$file$qual BUFR file from 2-days ago SUCCESSFULLY copied \
+to $file.unblock$qual -- overwrite existing file made 2-days ago"
+            else
+               msg="$file$qual BUFR file SUCCESSFULLY copied to $file.unblock$qual"
+	    fi
             $DATA/postmsg "$jlogfile" "$msg"
             cp $file.unblock$qual $COMOUT/$filestem.unblok$qual
             chmod 664 $COMOUT/$filestem.unblok$qual
@@ -469,11 +597,16 @@ a null file is copied in its place"
          fi
 
       done
+      if [ $PROCESS_REMOREST_dm2 = YES ]; then
+	 if [ $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 ]; then
+            COMIN=$COMIN_save
+	    COMOUT=$COMOUT_save
+	 fi
+      fi
 
    done
 
-#  endif loop $PROCESS_UNBLKBUFR
-fi
+fi #  endif loop $PROCESS_UNBLKBUFR
 
 
 
@@ -496,9 +629,9 @@ $dumptime"
 EOFlistdumps
 
    cat <<\EOFthread > $DATA/thread
-#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-#  Make herefile "thread" which will run in background shells to list dumps
-#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+#  Herefile "thread" which can run in parallel (via MPMD methods) to list dumps
+#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 { echo
       set -x
       mkdir -p $DATA/thread${1}
@@ -650,8 +783,7 @@ fi
       [ $err -gt $retcode ]  && retcode=$err
    done
 
-#  endif loop $PROCESS_LISTERS
-fi
+fi #  endif loop $PROCESS_LISTERS
 
 
 
@@ -739,8 +871,7 @@ by choice"
       fi
    done
 
-#  endif loop $PROCESS_AVGTABLES
-fi
+fi #  endif loop $PROCESS_AVGTABLES
 
 #######################
  
