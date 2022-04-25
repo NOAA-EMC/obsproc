@@ -157,16 +157,24 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
+# The following are used by $PROCESS_REMOREST_dm2 when it is YES
+# --------------------------------------------------------------
+  export COMINm2=${COMINm2:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
+  export COMOUTm2=${COMOUTm2:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
-  # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
+# COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
   export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
+# The following are used by $PROCESS_REMOREST_dm2 when it is YES
+# --------------------------------------------------------------
+  export COMINm2=${COMINm2:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
+  export COMOUTm2=${COMOUTm2:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
