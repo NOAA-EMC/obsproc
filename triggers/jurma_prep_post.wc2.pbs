@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%
+#PBS -N obsproc_%JTYP%_prep_post_%PDY%_%CC%%CCM%_%DESC%
 #PBS -j oe
 #PBS -S /bin/bash
 #PBS -l walltime=0:25:00
@@ -25,11 +25,12 @@ export envir=prod
 export cyc=%CC%
 DESC=%DESC%
 JTYP=%JTYP%
-export job=${JTYP}_dump_$cyc
+export job=${JTYP}_prep_post_${cyc}${cycM}
 export jobid=$job.$PBS_JOBID
 export PDY=%PDY%
 
-userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
+#userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
+userROOT=/lfs/h2/emc/obsproc/noscrub/Ashley.Stanfield
 
 export obsproc_ver=v1.0.0
 export prepobs_ver=1.0.0
@@ -75,11 +76,15 @@ export SENDECF=NO   # developer
 export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
-export DATAROOT=/lfs/h2/emc/stmp/$USER
-export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
+#export DATAROOT=/lfs/h2/emc/stmp/$USER
+export DATAROOT=/lfs/h2/emc/stmp/Ashley.Stanfield
+#export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
+export jlogfile=/lfs/h2/emc/stmp/Ashley.Stanfield/${JTYP}.$PDY.jlogfile
 
-export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
-export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
+#export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
+export COMIN_ROOT=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/com
+#export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
+export COMOUT_ROOT=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/com
 
 export KEEPDATA=YES
 export LOUD=ON
@@ -92,7 +97,8 @@ err=$?
 # mv to stmp
 pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
 cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
-outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+#outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+outputdir=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/output
 if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
