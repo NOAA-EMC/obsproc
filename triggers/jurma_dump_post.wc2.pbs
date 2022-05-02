@@ -37,7 +37,8 @@ export obsNET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}       # NCO prod
-export HOMEobsproc=${userROOT}/install/obsproc-rmprep     # local
+#export HOMEobsproc=${userROOT}/install/obsproc-rmprep     # local
+export HOMEobsproc=${userROOT}/git/obsproc_3durma     # local
 
 VERSION_FILE=${HOMEobsproc}/versions/run.ver
 if [ -f $VERSION_FILE ]; then
@@ -78,9 +79,9 @@ export SENDDBN=NO
 export SENDSDM=NO
 
 #export DATAROOT=/lfs/h2/emc/stmp/${USER}
-export DATAROOT=/lfs/h2/emc/stmp/Ashley.Stanfield
+export DATAROOT=/lfs/h2/emc/ptmp/Ashley.Stanfield
 #export jlogfile=/lfs/h2/emc/stmp/${USER}/${JTYP}.${PDY}.jlogfile
-export jlogfile=/lfs/h2/emc/stmp/Ashley.Stanfield/${JTYP}.${PDY}.jlogfile
+export jlogfile=/lfs/h2/emc/ptmp/Ashley.Stanfield/3DURMA_log/${JTYP}.${PDY}.jlogfile
 
 export COMIN_ROOT=${DATAROOT}/CRON/${DESC}/com
 export COMOUT_ROOT=${DATAROOT}/CRON/${DESC}/com
@@ -105,7 +106,7 @@ err=$?
 pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
 cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
 #outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
-outputdir=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/output
+outputdir=/lfs/h2/emc/ptmp/Ashley.Stanfield/CRON/${DESC}/output
 if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir 
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid

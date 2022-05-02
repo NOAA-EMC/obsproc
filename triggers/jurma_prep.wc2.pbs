@@ -39,7 +39,7 @@ export obsNET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}       # NCO prod
-export HOMEobsproc=${userROOT}/install/obsproc-rmprep           # local
+export HOMEobsproc=${userROOT}/git/obsproc_3durma           # local
 
 VERSION_FILE=${HOMEobsproc}/versions/run.ver
 if [ -f $VERSION_FILE ]; then
@@ -78,16 +78,16 @@ export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
 #export DATAROOT=/lfs/h2/emc/stmp/${USER}
-export DATAROOT=/lfs/h2/emc/stmp/Ashley.Stanfield
+export DATAROOT=/lfs/h2/emc/ptmp/Ashley.Stanfield
 #export jlogfile=/lfs/h2/emc/stmp/${USER}/${JTYP}.$PDY.jlogfile
-export jlogfile=/lfs/h2/emc/stmp/Ashley.Stanfield/${JTYP}.$PDY.jlogfile
+export jlogfile=/lfs/h2/emc/ptmp/Ashley.Stanfield/${JTYP}.$PDY.jlogfile
 
 #export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
-export COMIN_ROOT=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/com
+export COMIN_ROOT=/lfs/h2/emc/ptmp/Ashley.Stanfield/CRON/${DESC}/com
 #export COMIN=$COMIN_ROOT/obsproc/v1.0.0/${JTYP}.${PDY}
 #export COMIN_ROOT=$COMIN_ROOT as /lfs/h1/ops/canned/com
 #export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
-export COMOUT_ROOT=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/com
+export COMOUT_ROOT=/lfs/h2/emc/ptmp/Ashley.Stanfield/CRON/${DESC}/com
 
 export COMPONENT=atmos
 #export COMINgdas=/lfs/h1/ops/canned/com/gfs/v16.2/${JTYP}.${PDY}/${cyc}/${COMPONENT}
@@ -111,7 +111,7 @@ err=$?
 pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
 cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
 #outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
-outputdir=/lfs/h2/emc/stmp/Ashley.Stanfield/CRON/${DESC}/output
+outputdir=/lfs/h2/emc/ptmp/Ashley.Stanfield/CRON/${DESC}/output
 if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
@@ -124,7 +124,7 @@ fi
 if [ $err -eq 0 ]; then
   echo "submit jurma_prep_post:"
   jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/Ashley.Stanfield/triggers/jurma_prep_post.wc2.pbs
+  /lfs/h2/emc/obsproc/noscrub/Ashley.Stanfield/git/obsproc_3durma/triggers/jurma_prep_post.wc2.pbs
 fi
 
 exit
