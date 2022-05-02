@@ -12,4 +12,6 @@ load("hpc-impi/2018.0.4")
 -- Load common modules for this package
 load("obsproc_common")
 
+setenv("FC", "mpiifort")
+
 whatis("Description: obsproc build environment")
