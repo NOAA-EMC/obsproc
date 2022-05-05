@@ -23,6 +23,7 @@ set -xa
 
 export envir=prod
 export cyc=%CC%
+export cycM=%CCM%
 DESC=%DESC%
 JTYP=%JTYP%
 export job=${JTYP}_prep_post_${cyc}${cycM}
