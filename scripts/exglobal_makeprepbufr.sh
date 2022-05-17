@@ -556,7 +556,7 @@ if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
    err_ch=$?
    if [ $err_ch -eq 0 ]; then
 
-      DTYPS_nsst='sfcshp tesac bathy trkob'
+      DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
 
       echo "xglm: DTYPS_nsst='$DTYPS_nsst'"
 

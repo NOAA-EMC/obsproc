@@ -107,7 +107,7 @@ set +u
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
 #               avcsam eshrs3 ssmisu saphir atms 1bhrs4 sevcsr tesac mls
-#               esatms crisfs gsrcsr ahicsr sstvcw
+#               esatms crisfs gsrcsr ahicsr sstvcw subpfl saldrn
 #
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
 #               sfcshp tideg atovs* adpsfc ascatt
@@ -587,6 +587,7 @@ if [ $err_check_tanks -eq 0 ];then
    DTIM_latest_atms=${DTIM_latest_atms:-"+2.99"}
 fi
 #-----------------------------------------------
+DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
 DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
 DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
 DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
@@ -630,7 +631,7 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- saphir $atms 1bhrs4 sevcsr tesac $mls $esatms $crisfs gsrcsr ahicsr sstvcw
+ saphir $atms 1bhrs4 sevcsr tesac $mls $esatms $crisfs gsrcsr ahicsr sstvcw subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -655,6 +656,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}sevcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tesac $job \
     ${COMSP}tesac.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
+    ${COMSP}saldrn.tm00.bufr_d
    if [ "$mls" = mls ];then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_mls $job \
        ${COMSP}mls.tm00.bufr_d
