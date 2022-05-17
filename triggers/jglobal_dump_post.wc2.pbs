@@ -34,7 +34,7 @@ PDYm1=$(date -d "${PDY} 1 day ago" +%Y%m%d)
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsNET=obsproc
-export obsproc_ver=v1.0.0 
+export obsproc_ver=v1.0 
 export bufr_dump_ver=1.0.0
 
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
