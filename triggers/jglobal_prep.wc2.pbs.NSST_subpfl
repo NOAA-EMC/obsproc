@@ -37,7 +37,7 @@ PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}       # NCO prod
 #export HOMEobsproc=${userROOT}/install/obsproc-rmprep           # local
-export HOMEobsproc=${userROOT}/wrapper_scripts/JOBS/nsst_sldrn_subpfl/obsproc_run.iss51959.nsst_subpfl/scripts      # local
+export HOMEobsproc=${userROOT}/wrapper_scripts/JOBS/nsst_sldrn_subpfl/obsproc_run.iss51959.nsst_subpfl      # local
 
 #VERSION_FILE=${HOMEobsproc}/versions/run.ver
 VERSION_FILE=${userROOT}/wrapper_scripts/JOBS/nsst_sldrn_subpfl/obsproc/versions/run.ver
