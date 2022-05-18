@@ -290,7 +290,8 @@ C
 C   PREPBUFR file: "SID"   - chgd to "MASKSTID" (all Tbl A entries)
 C  (PREPBUFR file  "RSRD" and "EXPRSRD" also set to missing)
 C   DUMP file:     "RPID"  - chgd to "MASKSTID" (all Tbl A entries)
-C   DUMP file:     "SHPC8" - chgd to "MASKSTID" (Tbl A entry NC001001)
+C   DUMP file:     "SHPC8" - chgd to "MASKSTID" (Tbl A entry NC001001
+C                            and NC001101)
 C   DUMP file:     "RRSTG" - chgd to "X" (where the number of "X"'s
 C                            corresponds to the the number of
 C                            characters in the original report id )
@@ -299,9 +300,9 @@ C  (DUMP file:     "RSRD" and "EXPRSRD" also set to missing)
 C
 C   Note: Currently for dump files, the only Table A entry where all
 C         occurrences of report id in a report are known to be masked
-C         is NC001001.  This code may have to be modified to add this
-C         ability to mask all occurrences of report id for other Table
-C         A entries.
+C         is NC001001 and NC001101.  This code may have to be modified
+C         to add this ability to mask all occurrences of report id for
+C         other Table A entries.
 C
 C
 C ONE SCRIPT ENVIRONMENT VARIABLE IS READ IN:
@@ -639,7 +640,7 @@ C   (if "EXPRSRD" is missing set it to 99999999 hours essentially
 C    meaning the report is restricted for all time)
 C  -------------------------------------------------------------------
 
-                  CALL UFBINT(LUBFI,RID_8,6,1,NLV,
+                  CALL UFBINT(LUBFI,RID_8,7,1,NLV,
      $                               'SID RPT YOB XOB TYP RSRD EXPRSRD')
                   IF(RID_8(6).GT.0.AND.IBFMS(RID_8(6)).EQ.0)  THEN
                      IF(IBFMS(RID_8(7)).NE.0)  RID_8(7) = 99999999.
@@ -892,7 +893,7 @@ C Encode minutes into Sec. 1 of new output message header if non-zero
                   end if
                   ireco_last  = ireco
                   CALL UFBCPY(LUBFI,LUBFJ)
-                  CALL UFBINT(LUBFI,RID_8,6,1,NLV,
+                  CALL UFBINT(LUBFI,RID_8,8,1,NLV,
      $                        'SID RPT YOB XOB TYP T29 RSRD EXPRSRD')
                   IF(IBFMS(RID_8(5)).EQ.0)  THEN
 
@@ -940,14 +941,14 @@ C         -----------------------r-------------------------------------
 
 C  Come here for DATA DUMP files where all reports are restricted
 C   {report id is in mnemonic "RPID" (and for surface ship reports in
-C   Table A entry 'NC001001' also in mnemonic "SHPC8"), report id may
-C   also be embedded in replicated raw bulletin header string if it is
-C   present)
+C   Table A entry 'NC001001' and 'NC001101' also in mnemonic "SHPC8"),
+C   report id may also be embedded in replicated raw bulletin header
+C   string if it is present}
 C  -------------------------------------------------------------------
 
                      IUPDATE_RAWRPT = 0
                      CALL UFBINT(LUBFI,RID_8,7,1,NLV,
-     $                           'RPID HOUR MINU CLAT CLON RSRD')
+     $                          'RPID HOUR MINU CLAT CLON RSRD EXPRSRD')
                      PRINT 1110, SID,(NINT(RID_8(II)),II=2,3),
      $                (RID_8(II),II=4,5), NINT(RID_8(6)),NINT(RID_8(7))
  1110 FORMAT('  - Chg all instances of rpt id ',A8,' ',2(I2.2),' UTC, ',

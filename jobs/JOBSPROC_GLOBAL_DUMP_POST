@@ -175,6 +175,7 @@ else
 # --------------------------------------------------------------
   export COMINm2=${COMINm2:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
   export COMOUTm2=${COMOUTm2:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
+  mkdir -m 755 -p $COMOUTm2
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
