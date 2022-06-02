@@ -14,4 +14,12 @@ else
  qsub_command=qsub
 fi
 
+# cd to destination output dir for logfiles to be written there w/ pid
+outdir=/lfs/h2/emc/stmp/$USER/CRON/$desc/output
+echo $outdir
+mkdir -p $outdir
+cd $outdir
+echo `pwd`
+
 sed "s/%HHMM%/`date -u +\%H\%M`/;s/%CC%/$cyc/;s/%CCM%/$cycM/;s/%JTYP%/$jtyp/;s/%YYYYMMDD%/`date -u +\%Y\%m\%d`/;s/%PDY%/$PDY/;s/%_PDY%/$_PDY/;s/%TMMARK%/$tmmark/;s/%DESC%/$desc/;s/%_DESC%/$_desc/" $pbs_file | $qsub_command
+
