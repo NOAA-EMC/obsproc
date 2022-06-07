@@ -61,6 +61,8 @@ module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
+# use local bufr_dump installation
+#module use ${userROOT}/install/bufr_dump/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 # use local prepobs installation
 #module use ${userROOT}/install/prepobs/modulefiles
