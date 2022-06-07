@@ -63,8 +63,6 @@ module load bufr_dump/${bufr_dump_ver}
 #module use ${userROOT}/install/prepobs/modulefiles
 module load prepobs/${prepobs_ver}
 
-
-
 #Check if they exist
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)netcdf/") -eq 0 ]]; then echo "netcdf is not loaded!"; fi
