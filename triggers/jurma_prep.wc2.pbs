@@ -57,12 +57,13 @@ module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
 # use local bufr_dump installation
+#module unload bufr_dump
 #module use ${userROOT}/install/bufr_dump/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 # use local prepobs installation
+#module unload prepobs
 #module use ${userROOT}/install/prepobs/modulefiles
 module load prepobs/${prepobs_ver}
-
 
 #Check if they exist
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
