@@ -103,8 +103,8 @@ err=$?
 # When run from cron, the stdout is written to /u/$USER
 # mv to stmp
 pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
-#cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
-cronlogfile=/lfs/h2/emc/ptmp/$USER/$PBS_JOBNAME.o$pbsjobid
+cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
+#cronlogfile=/lfs/h2/emc/ptmp/$USER/$PBS_JOBNAME.o$pbsjobid
 outputdir=/lfs/h2/emc/ptmp/${USER}/CRON/${DESC}/output
 if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir
