@@ -21,7 +21,7 @@
 
 set -xu
 
-envir=prod
+export envir=prod
 export cyc=%CC%
 DESC=%DESC%
 JTYP=%JTYP%
