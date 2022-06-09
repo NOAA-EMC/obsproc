@@ -52,12 +52,15 @@ fi
 # Load the modules specified in $VERSION_FILE
 module load grib_util/${grib_util_ver}
 module load netcdf/${netcdf_ver}
-module load bufr_dump/${bufr_dump_ver}
 module load intel/${intel_ver}
 module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
+# use local bufr_dump installation
+#module unload bufr_dump
+#module use ${userROOT}/install/bufr_dump/modulefiles
+module load bufr_dump/${bufr_dump_ver}
 
 # Be sure the modules are loaded
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
