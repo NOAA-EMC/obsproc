@@ -1418,15 +1418,15 @@ export DUMP_NUMBER=9
 #            TOTAL NUMBER OF SUBTYPES = 1
 #
 #=======================================================================
-DTIM_earliest_atmsvc=${DTIM_earliest_atmsvc:-"-3.00"}
-DTIM_latest_atmsvc=${DTIM_latest_atmsvc:-"+2.99"}
+DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
 DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
 DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr atmsvc
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr
 
 error9=$?
 echo "$error9" > $DATA/error9
