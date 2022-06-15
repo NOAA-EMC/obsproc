@@ -40,6 +40,7 @@ CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
 MAKE_NSSTBUFR=${MAKE_NSSTBUFR:-YES}
 
 export COMSP=${COMSP:-$COMIN/${RUN}.${cycle}.}
+export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.}
 export tstsp=${tstsp:-/tmp/null/}
 
 if [ "$DO_QC" = 'YES' -a "$CQCBUFR" = 'YES' -a -n "$COM1" -a -n "$CQCC" ]; then
