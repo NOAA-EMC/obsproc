@@ -1107,8 +1107,12 @@ else
 
 fi
 
+# Time window is guesstimated as -3.00 to +2.99 hours for GMI1CR
+   DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+   DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
+
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 1bhrs4 \
- airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4
+ airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4 gmi1cr
 error7=$?
 echo "$error7" > $DATA/error7
 
