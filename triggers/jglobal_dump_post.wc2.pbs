@@ -38,8 +38,8 @@ export obsproc_ver=v1.0
 export obsproc_ver_pckg=v1.0.0 
 export bufr_dump_ver=1.0.0
 
-#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
-#export HOMEobsproc=${PACKAGEROOT}/${obsNET}.${obsproc_ver}      # NCO prod
+#export HOMEobsproc=${PACKAGEROOTpara}/${obsNET}.${obsproc_ver_pckg}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/${obsNET}.${obsproc_ver_pckg}      # NCO prod
 export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
 
 VERSION_FILE=$HOMEobsproc/versions/run.ver 
