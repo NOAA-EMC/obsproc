@@ -78,6 +78,7 @@ echo "                     - Copy bufr_dumplist to COMOUT.                  "
 echo "         Dec 16 2021 - modified to work on WCOSS2                     "
 echo "         Mar 09 2022 - Enable the dumping of 002017 in vadwnd dump    "
 echo "                       group.                                         "
+echo "         ??? ?? 2022 - Enable dumping of UPRAIR data in group #3.     "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -114,7 +115,7 @@ set +u
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
-#               adpupa
+#               adpupa uprair
 #
 # Dump group #4 (pb, TIME_TRIM defaults to ON) =
 #               aircar aircft proflr vadwnd rassda gpsipw hdob 
@@ -837,22 +838,26 @@ export DUMP_NUMBER=3
 #
 #--------------------------------------------------------------------------
 # Dump #3:   ADPUPA: 6 subtype(s)
+#            UPRAIR: 5 subtype(s)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 6
+#            TOTAL NUMBER OF SUBTYPES = 11
 #
 #====================================================================
 
 DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+2.99"}
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM3:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa uprair
 error3=$?
 echo "$error3" > $DATA/error3
 
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_adpupa $job \
     ${COMSP}adpupa.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_uprair $job \
+    ${COMSP}uprair.tm00.bufr_d
 fi
 
 set +x
@@ -1667,9 +1672,10 @@ else
 #     wait
 fi
 
-#  if ADPUPA_wait is YES, adpupa is dumped AFTER all other dump threads have
-#   run (normally done in real-time GFS runs to dump as late as possible in
-#   order to maximize data availability in GFS network, particularly DROPs)
+#  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
+#   threads have run (normally done in real-time GFS runs to dump as late as
+#   possible in order to maximize data availability in GFS network,
+#   particularly DROPs)
 #  --------------------------------------------------------------------------
 
 [ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
