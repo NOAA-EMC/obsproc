@@ -75,7 +75,7 @@ if [ "$DO_QC" = 'YES' -a "$CQCBUFR" = 'YES' -a -n "$COM1" -a -n "$CQCC" ]; then
    fi
 fi
 
-cdate10=`cut -c7-16 ncepdate`
+cdate10=${cdate10:-`cut -c7-16 ncepdate`}
 
 msg="CENTER TIME FOR PREPBUFR PROCESSING IS $cdate10"
 $DATA/postmsg "$jlogfile" "$msg"
