@@ -969,6 +969,8 @@ DTIM_earliest_005071=${DTIM_earliest_005071:-"-3.00"}
 DTIM_latest_005071=${DTIM_latest_005071:-"+2.99"}
 DTIM_earliest_005080=${DTIM_earliest_005080:-"-3.00"}
 DTIM_latest_005080=${DTIM_latest_005080:-"+2.99"}
+DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
+DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
