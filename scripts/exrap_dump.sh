@@ -455,6 +455,8 @@ DTIM_latest_005067=${DTIM_latest_005067:-"+1.49"}
  DTIM_latest_005068=${DTIM_latest_005068:-"+1.49"}
 DTIM_earliest_005069=${DTIM_earliest_005069:-"-1.50"}
 DTIM_latest_005069=${DTIM_latest_005069:-"+1.49"}
+DTIM_earliest_005081=${DTIM_earliest_005081:-"-1.50"}
+DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 
 if [ "$RUN" = 'rap_p' ]; then
 
