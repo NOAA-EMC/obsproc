@@ -158,7 +158,7 @@ DTIM_earliest_005081=-3.00
 DTIM_latest_005081=+1.00
 
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam infav1
+$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam
 error1=$?
 echo "$error1" > $DATA/error1
 
