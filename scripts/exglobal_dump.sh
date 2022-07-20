@@ -745,7 +745,7 @@ export DUMP_NUMBER=2
 #            TOTAL NUMBER OF SUBTYPES =  19 - 20
 #
 #==========================================================================
-
+DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
 
@@ -773,7 +773,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
 error2=$?
 echo "$error2" > $DATA/error2
 
