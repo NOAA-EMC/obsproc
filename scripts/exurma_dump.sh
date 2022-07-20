@@ -150,6 +150,14 @@ DTIM_latest_ascatt=0.00
 DTIM_earliest_efclam=-0.50
 DTIM_latest_efclam=+0.50
 
+#DTIM_earliest_infav1=-2.50
+#DTIM_latest_infav1=+2.49
+#DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
+#DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
+DTIM_earliest_005081=-3.00
+DTIM_latest_005081=+1.00
+
+
 $ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam
 error1=$?
 echo "$error1" > $DATA/error1
