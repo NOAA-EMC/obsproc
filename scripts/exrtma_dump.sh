@@ -284,6 +284,98 @@ set -x
 EOF
 set -x
 
+
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_11; chmod +x thread_11
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=11
+
+#==========================================================================
+# Dump # 11 : 1BHRS4, AIRSEV, LGHTNG, ESHRS3, LGYCLD, CRISF4, SSMISU, OSBUV8,
+#               (1)     (1)     (2)     (1)     (1)    (1)     (1)     (1)
+#             CRSFDB, SAPHIR
+#               (1)     (1)
+#             TOTAL NUMBER OF SUBTYPES = 12
+#=========================================================================
+
+# Time window -1.00 to +0.50 hours for LGHTNG for all cycle runs
+DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.00"}
+DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+0.50"}
+
+# Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
+DTIM_earliest_lgycld=${DTIM_earliest_lgycld:-"-0.50"}
+DTIM_latest_lgycld=${DTIM_latest_lgycld:-"+0.50"}
+
+
+   def_time_window_11=3.0 # default time window for dump 11 is -3.0 to +3.0 hours
+
+# Time window is -3.00 to +2.99 hours for 1BHRS4
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+   DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}      # earliest is default
+
+# Time window is -3.00 to +2.99 hours for AIRSEV
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+   DTIM_latest_airsev=${DTIM_latest_airsev:-"+2.99"}      # earliest is default
+
+# Time window is -2.00 to +1.99 hours for CRISF4, CRSFDB
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+   DTIM_earliest_crisf4=${DTIM_earliest_crisf4:-"-2.00"}
+   DTIM_latest_crisf4=${DTIM_latest_crisf4:-"+1.99"}
+   DTIM_earliest_crsfdb=${DTIM_earliest_crsfdb:-"-2.00"}
+   DTIM_latest_crsfdb=${DTIM_latest_crsfdb:-"+1.99"}
+
+# Time window is -1.00 to +1.00 hours for ESHRS3
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+   DTIM_earliest_eshrs3=${DTIM_earliest_eshrs3:-"-1.00"}
+   DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+1.00"}
+
+# Time window is -2.00 to +1.99 hours for SSMISU, OSBUV8
+   DTIM_earliest_ssmisu=${DTIM_earliest_ssmisu:-"-2.00"}
+   DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+1.99"}
+   DTIM_earliest_osbuv8=${DTIM_earliest_osbuv8:-"-2.00"}
+   DTIM_latest_osbuv8=${DTIM_latest_osbuv8:-"+0.99"}
+
+# Time window is -3.00 to +2.99 hours for SAPHIR
+   DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-3.00"}
+   DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
+
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_11} 1 1bhrs4 \
+ airsev lghtng eshrs3 lgycld crisf4 ssmisu osbuv8 crsfdb saphir
+error11=$?
+echo "$error11" > $DATA/error11
+
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/11.out 2>&1
+EOF
+set -x
+
+
+
+
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -301,6 +393,7 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_3 >> $DATA/poe.cmdfile  # moved up
    echo ./thread_1 >> $DATA/poe.cmdfile
    echo ./thread_2 >> $DATA/poe.cmdfile
+   echo ./thread_11 >> $DATA/poe.cmdfile #other btemps, radiances
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
@@ -320,10 +413,11 @@ else
    ./thread_1
    ./thread_2
    ./thread_3
+   ./thread_11
 #  wait
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/11.out
 
 set +x
 echo " "
@@ -333,12 +427,12 @@ set -x
 err1=`cat $DATA/error1`
 err2=`cat $DATA/error2`
 err3=`cat $DATA/error3`
-
+err11=`cat $DATA/error11`
 
 #================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=4
+export DUMP_NUMBER=12
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 
@@ -351,8 +445,9 @@ fi
 
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
-   if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' ] ; then
-      for n in $err1 $err2 $err3
+   if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' \
+     -o "$err11" -gt '5'] ; then
+      for n in $err1 $err2 $err3 $err11
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -362,7 +457,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
                set +x
 echo
 echo " ###################################################### "
-echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3"
+echo " --> > 22 RETURN CODE FROM DATA DUMP, \
+$err1, $err2, $err3, $err11"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -379,7 +475,8 @@ echo
       set +x
       echo
       echo " ###################################################### "
-      echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3"
+      echo " --> > 5 RETURN CODE FROM DATA DUMP, \
+$err1, $err2, $err3, $err11"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
