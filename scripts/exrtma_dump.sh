@@ -170,6 +170,9 @@ DTIM_earliest_005068=-1.50
 DTIM_latest_005068=+1.49
 DTIM_earliest_005069=-1.50
 DTIM_latest_005069=+1.49
+DTIM_earliest_005081=-3.00
+DTIM_latest_005081=+1.49
+
 
 DTIM_earliest_ascatt=-6.00
 DTIM_latest_ascatt=0.00
