@@ -52,6 +52,10 @@ fi
 module load grib_util/${grib_util_ver}
 module load netcdf/${netcdf_ver}
 module load bufr_dump/${bufr_dump_ver}
+# use local prepobs installation
+#module use ${userROOT}/install/prepobs/modulefiles
+module use /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/githubrun/prepobs_run/modulefiles
+module load prepobs/${prepobs_ver}
 module load intel/${intel_ver}
 module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
@@ -63,7 +67,6 @@ module unload prepobs
 #module use ${userROOT}/install/prepobs/modulefiles
 module use /lfs/h2/emc/obsproc/noscrub/$USER/githubrun/prepobs_run/modulefiles
 module load prepobs/${prepobs_ver}
-
 
 #Check if they exist
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi

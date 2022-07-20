@@ -455,6 +455,8 @@ DTIM_latest_005067=${DTIM_latest_005067:-"+1.49"}
  DTIM_latest_005068=${DTIM_latest_005068:-"+1.49"}
 DTIM_earliest_005069=${DTIM_earliest_005069:-"-1.50"}
 DTIM_latest_005069=${DTIM_latest_005069:-"+1.49"}
+DTIM_earliest_005081=${DTIM_earliest_005081:-"-1.50"}
+DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 
 if [ "$RUN" = 'rap_p' ]; then
 
@@ -1068,6 +1070,10 @@ if [ "$RUN" = 'rap_p' ]; then
    DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-1.00"}
    DTIM_latest_saphir=${DTIM_latest_saphir:-"+0.99"}
 
+# Time window is guesstimated as -1.00 to +0.99 hours for rap_p GMI1CR
+   DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-1.00"}
+   DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+0.99"}
+
 else
 
 #  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
@@ -1105,10 +1111,14 @@ else
    DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-3.00"}
    DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 
+# Time window is guesstimated as -3.00 to +2.99 hours for GMI1CR
+   DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+   DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
+
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 1bhrs4 \
- airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4
+ airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4 gmi1cr
 error7=$?
 echo "$error7" > $DATA/error7
 

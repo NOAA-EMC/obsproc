@@ -745,7 +745,7 @@ export DUMP_NUMBER=2
 #            TOTAL NUMBER OF SUBTYPES =  19 - 20
 #
 #==========================================================================
-
+DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
 
@@ -773,7 +773,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -1362,6 +1362,8 @@ DTIM_earliest_005072=${DTIM_earliest_005072:-"-3.00"}
 DTIM_latest_005072=${DTIM_latest_005072:-"+2.99"}
 DTIM_earliest_005080=${DTIM_earliest_005080:-"-3.00"}
 DTIM_latest_005080=${DTIM_latest_005080:-"+2.99"}
+DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
+DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
@@ -1421,13 +1423,16 @@ export DUMP_NUMBER=9
 #            TOTAL NUMBER OF SUBTYPES = 1
 #
 #=======================================================================
+DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
 DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
 DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr
+
 error9=$?
 echo "$error9" > $DATA/error9
 

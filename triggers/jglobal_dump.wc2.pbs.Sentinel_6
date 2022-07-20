@@ -118,15 +118,15 @@ fi
 # Kick off dump_post job
 if [ $err -eq 0 ]; then
   echo "submit jglobal_dump_post"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /lfs/h2/emc/obsproc/noscrub/$USER/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/jglobal_dump_post.wc2.pbs.Sentinel_6
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/jglobal_dump_post.wc2.pbs.Sentinel_6
 fi
 
 # Kick off prep job
 if [ $err -eq 0 ]; then
   echo "submit jglobal_prep"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /lfs/h2/emc/obsproc/noscrub/$USER/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/jglobal_prep.wc2.pbs_Sentinel_6
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/jglobal_prep.wc2.pbs_Sentinel_6
 fi
 
 exit
