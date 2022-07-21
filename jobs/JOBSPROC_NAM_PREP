@@ -289,7 +289,7 @@ export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
 #       if job fails in one of these programs, set offending program
 #       to NO and resubmit to "work-around" problem)
 
-export SYNDATA=${SYNDATA:-YES}   # Execute program SYNDAT_SYNDATA   if YES
+export SYNDATA=${SYNDATA:-NO}   # NEVER execute program SYNDAT_SYNDATA
 
 export PREPACQC=${PREPACQC:-YES} # Execute PREPACQC script processing if YES
    export PROCESS_ACQC=${PROCESS_ACQC:-YES} # Execute program PREPOBS_PREPACQC
