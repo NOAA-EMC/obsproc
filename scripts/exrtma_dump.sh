@@ -27,6 +27,8 @@ echo "                to match bufr_dumplist. Removed tideg from    "
 echo "                sfcshp dump group to make unique dump file.   "
 echo "             - Copy bufr_dumplist to COMOUT.                  "
 echo " Dec 15 2021 - set for use on WCOSS2.                         "
+echo " Jul 19 2022 - adding METOPBC - tank NC005081                 "
+
 #####################################################################
 
 set -x

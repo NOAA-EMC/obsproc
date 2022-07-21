@@ -38,6 +38,7 @@ echo "                       file.                                        "
 echo "                     - Copy bufr_dumplist to COMOUT.                "
 echo "         Mar 08 2022 - Enable the dumping of 002017 in vadwnd dump  "
 echo "                       group.                                       "
+echo "         Juy 20 2022  Adding METOPBC tank NC005081                                                 "
 ###########################################################################
 
 set -xau
