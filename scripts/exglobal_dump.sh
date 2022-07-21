@@ -78,6 +78,8 @@ echo "                     - Copy bufr_dumplist to COMOUT.                  "
 echo "         Dec 16 2021 - modified to work on WCOSS2                     "
 echo "         Mar 09 2022 - Enable the dumping of 002017 in vadwnd dump    "
 echo "                       group.                                         "
+echo "         Jul 21 2022 - Subpfl and saldrn added to dump group #1.      "
+echo "			              DBN alerts are also enabled for subpfl/saldrn. "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -658,6 +660,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}tesac.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
     ${COMSP}saldrn.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_subpfl $job \
+    ${COMSP}subpfl.tm00.bufr_d
    if [ "$mls" = mls ];then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_mls $job \
        ${COMSP}mls.tm00.bufr_d
