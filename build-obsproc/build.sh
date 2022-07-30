@@ -27,7 +27,7 @@ mkdir -p build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_INSTALL_BINDIR=exec ..
 make -j ${BUILD_JOBS:-8} VERBOSE=${BUILD_VERBOSE:-}
 make install
-exit 0
+#exit 0 # Steve's way
 #############################################################################
 # This section to be removed when NCO is comfortable with the typical
 # `cmake`, `make` and `make install` process.
