@@ -27,6 +27,7 @@ echo "                to match bufr_dumplist. Removed tideg from    "
 echo "                sfcshp dump group to make unique dump file.   "
 echo "             - Copy bufr_dumplist to COMOUT.                  "
 echo " Dec 15 2021 - set for use on WCOSS2.                         "
+echo " Jul 31 2022 - Subpfl,saldrn,snocvr & gmi1cr dump group added "
 #####################################################################
 
 set -x
@@ -110,9 +111,9 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #========================================================================
-# Dump # 1 : ASCATT, SATWND*, EFCLAM  -- TOTAL NUMBER OF SUBTYPES = 16
-#              (1)    (14)     (1)
-#
+# Dump # 1 : ASCATT, SATWND*, EFCLAM, SNOCVR, GMI1CR --
+#              (1)    (14)     (1)    (1)     (1)
+#                                  TOTAL NUMB OF SUBTYPES = 18
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -6.00 to 0.00 hours)
 #
@@ -177,7 +178,12 @@ DTIM_latest_ascatt=0.00
 DTIM_earliest_efclam=-0.50
 DTIM_latest_efclam=+0.50
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam
+DTIM_earliest_snocvr=-0.50
+DTIM_latest_snocvr=+0.50
+DTIM_earliest_gmi1cr=-0.50
+DTIM_latest_gmi1cr=+0.50
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam snocvr gmi1cr
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -213,9 +219,9 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #========================================================================
-# Dump # 2 : SFCSHP, ADPSFC, TIDEG
-#              (11)     (6)   (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 18
+# Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN
+#              (11)     (6)   (1)   (1)     (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 20
 #            time window radius is +/- 0.50 hours for SFCSHP and ADPSFC
 #=======================================================================
 
@@ -223,13 +229,18 @@ export DUMP_NUMBER=2
 
 export SKIP_000002=YES
 
+DTIM_earliest_subpfl=-0.50
+DTIM_latest_subpfl=+0.50
+DTIM_earliest_saaldrn=-0.50
+DTIM_latest_saldrn=+0.50
+
 # for rtma_ru_0000 read only from previous day's tank
 # Temporary bug fix
 if [ $RUN = "rtma_ru" -a $cycle = "t0000z" ]; then
   DTIM_latest_000000=-0.01
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc subpfl saldrn
 error2=$?
 echo "$error2" > $DATA/error2
 
