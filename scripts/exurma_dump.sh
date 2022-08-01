@@ -28,7 +28,8 @@ echo "                       tideg from sfcshp dump group to make   "
 echo "                       unique dump file.                      " 
 echo "                     - Copy bufr_dumplist to COMOUT.          "
 echo "         Dec 15 2021 - set for use on WCOSS2.                 "
-echo "         Aug  1 2022 - Added SUBPFL, SALDRN, and SNOCVR types."
+echo "         Aug  1 2022 - Added SUBPFL, SALDRN, SNOCVR,          "
+echo "                       and GMI1CR types.                      "
 #####################################################################
 
 set -x
@@ -92,9 +93,9 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #========================================================================
-# Dump # 1 : ASCATT, SATWND, EFCLAM -- TOTAL NUMBER OF SUBTYPES = 16
-#              (1)    (14)     (1)
-#
+# Dump # 1 : ASCATT, SATWND, EFCLAM, GMI1CR
+#              (1)    (14)     (1)    (?)
+#            -- TOTAL NUMBER OF SUBTYPES = 16+?
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -6.00 to 0.00 hours)
 #
@@ -158,8 +159,10 @@ DTIM_latest_efclam=+0.50
 DTIM_earliest_005081=-3.00
 DTIM_latest_005081=+1.00
 
+DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam
+$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam gmi1cr
 error1=$?
 echo "$error1" > $DATA/error1
 
