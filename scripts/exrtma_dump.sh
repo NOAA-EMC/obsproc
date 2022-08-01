@@ -178,10 +178,13 @@ DTIM_latest_ascatt=0.00
 DTIM_earliest_efclam=-0.50
 DTIM_latest_efclam=+0.50
 
-DTIM_earliest_snocvr=-0.50
-DTIM_latest_snocvr=+0.50
-DTIM_earliest_gmi1cr=-0.50
-DTIM_latest_gmi1cr=+0.50
+DTIM_earliest_snocvr=-1.50
+DTIM_latest_snocvr=+1.49
+DTIM_earliest_gmi1cr=-1.50
+DTIM_latest_gmi1cr=+1.49
+
+DTIM_earliest_005081=-1.50
+DTIM_latest_005081=+1.49
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam snocvr gmi1cr
 error1=$?
@@ -231,7 +234,7 @@ export SKIP_000002=YES
 
 DTIM_earliest_subpfl=-0.50
 DTIM_latest_subpfl=+0.50
-DTIM_earliest_saaldrn=-0.50
+DTIM_earliest_saldrn=-0.50
 DTIM_latest_saldrn=+0.50
 
 # for rtma_ru_0000 read only from previous day's tank
