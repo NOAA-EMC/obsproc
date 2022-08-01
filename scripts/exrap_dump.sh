@@ -51,7 +51,9 @@ echo "                       match bufr_dumplist.  Removed tideg from sfcshp   "
 echo "                       dump group to make individual dump file.          "
 echo "                     - Copy bufr_dumplist to COMOUT.                     "
 echo "         Dec 09 2021 - Updated to run on WCOSS2                          "
-echo "         Jul 26 2022 - Added SUBPFL/SALDRN to DUMP 1, SNOCVR to Dump 3.  "
+echo "         Aug 10 2022 - Added subpfl,saldn to dump #1,snocvr to dump #3.  "
+echo "                       added gmi1cr dump group #7                        "
+echo "                       b005/xx081 added to satwnd                        "
 ################################################################################
 
 set -xau
@@ -66,13 +68,14 @@ set +u
 # ------------------------------------------------------------------------
 # Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
+#                          subpfl saldrn
 # Dump group #2 (pb) = vadwnd satwnd adpupa
-# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg
+# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 # Dump group #4 (pb) = msonet gpsipw
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
-#                          saphir
+#                          saphir gmi1cr
 # Dump group #8 (non-pb) = gsrasr gsrcsr
 # Dump group #9 (non-pb) = lghtng
 # Dump group #10 STATUS FILE
@@ -267,8 +270,8 @@ export DUMP_NUMBER=1
 # Dump # 1 : 1BAMUA, 1BMHS,  ESAMUA, ESMHS, ATMS, MTIASI, SEVCSR, GPSRO,
 #              (1)    (1)     (1)     (1)   (1)    (1)    (1)     (1)
 #            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2, SUBPFL, SALDRN
-#              (1)    (1)     (1)     (1)     (1)     (1)    (1?)    (1?)
-#             TOTAL NUMBER OF SUBTYPES = 14+2?
+#              (1)    (1)     (1)     (1)     (1)     (1)    (1)    (1)
+#             TOTAL NUMBER OF SUBTYPES = 16
 #===============================================================================
  
 if [ "$RUN" = 'rap_p' ]; then
@@ -552,7 +555,7 @@ export DUMP_NUMBER=3
 #========================================================================
 # Dump # 3 : PROFLR, RASSDA, SFCSHP, ADPSFC, ASCATT, TIDEG, SNOCVR
 #              (3)     (1)    (11)     (3)     (1)    (1)    (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 20+1?
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -0.50 to +0.50 hours in
@@ -1045,9 +1048,9 @@ export DUMP_NUMBER=7
 #==========================================================================
 # Dump # 7 : AIRSEV, 1BHRS4, ESHRS3, LGYCLD, SSMISU, OSBUV8, CRSFDB,
 #              (1)     (2)     (1)     (1)     (1)     (1)     (1)
-#            SAPHIR, CRISF4
-#              (1)     (1)
-#             TOTAL NUMBER OF SUBTYPES = 10
+#            SAPHIR, CRISF4, GMI1CR
+#              (1)     (1)   (1)
+#             TOTAL NUMBER OF SUBTYPES = 11
 #=========================================================================
  
 # Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
