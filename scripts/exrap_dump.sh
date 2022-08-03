@@ -51,6 +51,9 @@ echo "                       match bufr_dumplist.  Removed tideg from sfcshp   "
 echo "                       dump group to make individual dump file.          "
 echo "                     - Copy bufr_dumplist to COMOUT.                     "
 echo "         Dec 09 2021 - Updated to run on WCOSS2                          "
+echo "         Aug 10 2022 - Added subpfl,saldn to dump #1,snocvr to dump #3.  "
+echo "                       added gmi1cr dump group #7                        "
+echo "                       b005/xx081 added to satwnd                        "
 ################################################################################
 
 set -xau
@@ -65,13 +68,14 @@ set +u
 # ------------------------------------------------------------------------
 # Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
+#                          subpfl saldrn
 # Dump group #2 (pb) = vadwnd satwnd adpupa
-# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg
+# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 # Dump group #4 (pb) = msonet gpsipw
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
-#                          saphir
+#                          saphir gmi1cr
 # Dump group #8 (non-pb) = gsrasr gsrcsr
 # Dump group #9 (non-pb) = lghtng
 # Dump group #10 STATUS FILE
@@ -265,9 +269,9 @@ export DUMP_NUMBER=1
 #===============================================================================
 # Dump # 1 : 1BAMUA, 1BMHS,  ESAMUA, ESMHS, ATMS, MTIASI, SEVCSR, GPSRO,
 #              (1)    (1)     (1)     (1)   (1)    (1)    (1)     (1)
-#            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2
-#              (1)    (1)     (1)     (1)     (1)     (1)
-#             TOTAL NUMBER OF SUBTYPES = 14
+#            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2, SUBPFL, SALDRN
+#              (1)    (1)     (1)     (1)     (1)     (1)    (1)    (1)
+#             TOTAL NUMBER OF SUBTYPES = 16
 #===============================================================================
  
 if [ "$RUN" = 'rap_p' ]; then
@@ -312,6 +316,13 @@ if [ "$RUN" = 'rap_p' ]; then
    DTIM_latest_esamua=${DTIM_latest_esamua:-"+0.49"}
     DTIM_earliest_esmhs=${DTIM_earliest_esmhs:-"-0.50"}
     DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+0.49"}
+
+# Uncertain on time window
+   DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-1.00"}
+   DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+0.99"}
+   DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-1.00"}
+   DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+0.99"}
+
 
 else
 
@@ -360,11 +371,17 @@ else
     DTIM_earliest_esmhs=${DTIM_earliest_esmhs:-"-1.00"}
     DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+1.00"}
 
+# Uncertain on time window
+   DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-2.00"}
+   DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.99"}
+   DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-2.00"}
+   DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+1.99"}
+
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_1} 1 1bamua \
  1bmhs esamua esmhs atms mtiasi sevcsr gpsro esiasi iasidb esatms \
- atmsdb sevasr amsr2
+ atmsdb sevasr amsr2 subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -536,9 +553,9 @@ export STATUS=NO
 export DUMP_NUMBER=3
 
 #========================================================================
-# Dump # 3 : PROFLR, RASSDA, SFCSHP, ADPSFC, ASCATT, TIDEG
-#              (3)     (1)    (11)     (3)     (1)    (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 20
+# Dump # 3 : PROFLR, RASSDA, SFCSHP, ADPSFC, ASCATT, TIDEG, SNOCVR
+#              (3)     (1)    (11)     (3)     (1)    (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -0.50 to +0.50 hours in
@@ -574,7 +591,9 @@ if [ "$RUN" = 'rap_p' ]; then
 
 # Time window is -0.50 to +0.50 hours for ASCATT (default)
 
-   dummy=idum  # dummy entry since nothing in this if-block
+   DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-0.50"}
+   DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+0.50"}
+   # dummy=idum  # dummy entry since nothing in this if-block
 
 else
 
@@ -585,11 +604,13 @@ else
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
    DTIM_earliest_ascatt=${DTIM_earliest_ascatt:-"-2.00"}
    DTIM_latest_ascatt=${DTIM_latest_ascatt:-"+2.00"}
+   DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-2.00"}
+   DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.00"}
 
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_3} 1 proflr \
- rassda sfcshp adpsfc ascatt tideg
+ rassda sfcshp adpsfc ascatt tideg snocvr
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -1027,9 +1048,9 @@ export DUMP_NUMBER=7
 #==========================================================================
 # Dump # 7 : AIRSEV, 1BHRS4, ESHRS3, LGYCLD, SSMISU, OSBUV8, CRSFDB,
 #              (1)     (2)     (1)     (1)     (1)     (1)     (1)
-#            SAPHIR, CRISF4
-#              (1)     (1)
-#             TOTAL NUMBER OF SUBTYPES = 10
+#            SAPHIR, CRISF4, GMI1CR
+#              (1)     (1)   (1)
+#             TOTAL NUMBER OF SUBTYPES = 11
 #=========================================================================
  
 # Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
