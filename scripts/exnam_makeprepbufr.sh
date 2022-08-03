@@ -21,7 +21,8 @@ cat break > $pgmout
 CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
 
 export COMSP=${COMSP:-$COMIN/${RUN}.${cycle}.}
-export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.}
+# secure turn off SYNDAT for nam
+# export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.}
 
 tmhr=`echo $tmmark|cut -c3-4`
 cdate10=`$NDATE -$tmhr $PDY$cyc`

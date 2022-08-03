@@ -15,7 +15,7 @@ export cray_pals_ver=1.0.12
 export cfp_ver=2.0.4
 
 export gfs_ver=v16.2
-export nam_ver=v4.2
+#export nam_ver=v4.2                    # secure turn off SYNDAT for nam
 export dictionaries_ver=v3.4.0
 export seaice_analysis_ver=v4.5		#engice, seaice.*5min.grb  file		
 export cdas_ver=v1.2
