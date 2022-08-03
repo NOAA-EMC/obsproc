@@ -94,8 +94,8 @@ export DUMP_NUMBER=1
 
 #========================================================================
 # Dump # 1 : ASCATT, SATWND, EFCLAM, GMI1CR
-#              (1)    (14)     (1)    (?)
-#            -- TOTAL NUMBER OF SUBTYPES = 16+?
+#              (1)    (14)     (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 17
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -6.00 to 0.00 hours)
 #
@@ -199,8 +199,8 @@ export DUMP_NUMBER=2
 
 #========================================================================
 # Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN, SNOCVR
-#             (11)     (6)    (1)    (1?)    (1?)    (1?)
-#            -- TOTAL NUMBER OF SUBTYPES = 18+3?
+#             (11)     (6)    (1)    (1)    (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #            time window radius is +/- 0.50 hours for SFCSHP and ADPSFC
 #=======================================================================
 
