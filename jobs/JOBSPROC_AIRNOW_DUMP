@@ -212,7 +212,7 @@ for pdy in $PDYm1 $PDYm5; do
     export COMOUT=$(compath.py -o ${obsNET}/${obsproc_ver}/${model}.${pdy})
     mkdir -m 775 -p $COMOUT
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${pdy}}
+    export COMIN=${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${pdy}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory (e.g.,
@@ -283,7 +283,7 @@ for tmmark in tm024 tm120; do
     export COMOUT=$(compath.py -o ${obsNET}/${obsproc_ver}/${model}.${PDY})
     mkdir -m 775 -p $COMOUT
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${PDY}}
+    export COMIN=${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${model}.${PDY}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory (e.g.,
