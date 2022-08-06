@@ -28,6 +28,8 @@ echo "                       tideg from sfcshp dump group to make   "
 echo "                       unique dump file.                      " 
 echo "                     - Copy bufr_dumplist to COMOUT.          "
 echo "         Dec 15 2021 - set for use on WCOSS2.                 "
+echo "         Aug  1 2022 - Added SUBPFL, SALDRN, SNOCVR,          "
+echo "                       and GMI1CR types.                      "
 #####################################################################
 
 set -x
@@ -91,9 +93,9 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #========================================================================
-# Dump # 1 : ASCATT, SATWND, EFCLAM -- TOTAL NUMBER OF SUBTYPES = 16
-#              (1)    (14)     (1)
-#
+# Dump # 1 : ASCATT, SATWND, EFCLAM, GMI1CR
+#              (1)    (14)     (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 17
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -6.00 to 0.00 hours)
 #
@@ -157,8 +159,10 @@ DTIM_latest_efclam=+0.50
 DTIM_earliest_005081=-3.00
 DTIM_latest_005081=+1.00
 
+DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam
+$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam gmi1cr
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -194,9 +198,9 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #========================================================================
-# Dump # 2 : SFCSHP, ADPSFC, TIDEG
-#             (11)     (6)    (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 18
+# Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN, SNOCVR
+#             (11)     (6)    (1)    (1)    (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #            time window radius is +/- 0.50 hours for SFCSHP and ADPSFC
 #=======================================================================
 
@@ -204,7 +208,15 @@ export DUMP_NUMBER=2
 
 export SKIP_000002=YES
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc
+DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-2.00"}
+DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.99"}
+DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-2.00"}
+DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+1.99"}
+DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-2.00"}
+DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+1.99"}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc \
+           subpfl saldrn snocvr
 error2=$?
 echo "$error2" > $DATA/error2
 

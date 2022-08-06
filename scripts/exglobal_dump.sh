@@ -78,6 +78,13 @@ echo "                     - Copy bufr_dumplist to COMOUT.                  "
 echo "         Dec 16 2021 - modified to work on WCOSS2                     "
 echo "         Mar 09 2022 - Enable the dumping of 002017 in vadwnd dump    "
 echo "                       group.                                         "
+echo "         Aug 10 2022 - subpfl and saldrn added to dump group #1.      "
+echo "                       gmi1cr added to dump group #9                  "
+echo "                       snocvr added to dump group #2                  "
+echo "                       b005/xx081 added to satwnd                     "
+echo "                       subpfl aadded to nsstbufr file                 "
+echo "	                     DBN alerts are also enabled for subpfl,saldrn, "
+echo "                       gmi1cr,and snocvr                              "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -658,6 +665,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}tesac.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
     ${COMSP}saldrn.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_subpfl $job \
+    ${COMSP}subpfl.tm00.bufr_d
    if [ "$mls" = mls ];then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_mls $job \
        ${COMSP}mls.tm00.bufr_d
@@ -789,6 +798,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}adpsfc.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatt $job \
     ${COMSP}ascatt.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_snocvr $job \
+    ${COMSP}snocvr.tm00.bufr_d
    if [ "$NET" = 'gdas' ]; then
     ####### ALERT TURNED ON for GDAS only ########################
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatw $job \
@@ -1439,6 +1450,8 @@ echo "$error9" > $DATA/error9
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_geoimr $job \
     ${COMSP}geoimr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gmi1cr $job \
+    ${COMSP}gmi1cr.tm00.bufr_d
 fi
 
 set +x
