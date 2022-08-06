@@ -84,7 +84,7 @@ echo "                       snocvr added to dump group #2                  "
 echo "                       b005/xx081 added to satwnd                     "
 echo "                       subpfl aadded to nsstbufr file                 "
 echo "	                     DBN alerts are also enabled for subpfl,saldrn, "
-echo "                       gmi1cr,and snocvr
+echo "                       gmi1cr,and snocvr                              "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
