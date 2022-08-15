@@ -44,3 +44,6 @@ add_subdirectory(fix)
 
 # Install parm files.
 add_subdirectory(parm)
+
+# Install release_notes.
+add_subdirectory(release_notes)
