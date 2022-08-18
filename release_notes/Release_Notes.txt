@@ -160,7 +160,7 @@ SCRIPTS file changes
  scripts/exurma_dump.sh
  scripts/exrtma_dump.sh
  scripts/excdas_dump.sh
- Add dump groups: gmi1cr, snocvr, saildrn, subpfl
+ Add dump groups: gmi1cr, snocvr, saldrn, subpfl
  Add Sentinel-6 data to gpsro (via dev to prod tank update)
  Add Metop-B/C AMVs data from tank b005/xx081 to satwnd dump group
 
@@ -206,8 +206,8 @@ Compute Resource Information
 
 Disk Space Changes 
 ------------------
- The newly generated dumps ( *gmi1c*, *snocvr*, *saldrn*, *subpfl* ) vary inn size from 1Mb to 200Mb
- depending on network, cycle time, time dump window. 0 size dumps are possible.
+ The newly generated dumps ( *gmi1cr*, *snocvr*, *saldrn*, *subpfl* ) vary in size from 1Mb to 200Mb
+ depending on network, cycle time, time dump window. 0 size dumps are possible
  The updated dumps (*gpsro*, *satwnd* and *nsstbufr) are up to ~25% larger in size
  For examples, see: /lfs/h2/emc/stmp/iliana.genkova/CRON/RELv1.1.0/com
  
@@ -237,7 +237,7 @@ Dissemination
 Special Instructions
 --------------------
  1.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0 at the same time
- 2.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0  before or at the same time as GFS v16.3 
+ 2.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0 before or at the same time as GFS v16.3 
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 obsproc v1.0.0        -> released to NCO on Dec 21,2021
