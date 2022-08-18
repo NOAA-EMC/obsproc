@@ -3,8 +3,7 @@
 set -eux
 
 # Location of PWD and package source directory.
-#pkg_root=`dirname $(readlink -f $0)`
-pkg_root=`dirname $(pwd)`
+readonly pkg_root=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )/.." && pwd -P)
 
 INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
@@ -27,7 +26,7 @@ mkdir -p build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX -DCMAKE_INSTALL_BINDIR=exec ..
 make -j ${BUILD_JOBS:-8} VERBOSE=${BUILD_VERBOSE:-}
 make install
-
+exit 0 # EMC can use exit here; NCO can comment this line out
 #############################################################################
 # This section to be removed when NCO is comfortable with the typical
 # `cmake`, `make` and `make install` process.

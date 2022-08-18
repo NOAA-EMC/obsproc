@@ -17,9 +17,9 @@ ls
 
 You may do the following instructions from develop or any feature branch.
 
-You will see a `build.sh` script in the build-obsproc/ directory. You will run this to build and install the obsproc code in your local clone space:
+You will see a `build.sh` script in the ush/ directory. You will run this to build and install the obsproc code in your local clone space:
 ```bash
-cd build-obsproc
+cd ush
 ./build.sh
 ```
 
