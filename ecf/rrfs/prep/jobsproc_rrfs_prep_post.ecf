@@ -1,0 +1,39 @@
+#PBS -N obsproc_rrfs_prep_post_%JTYP%%CYC%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q %QUEUE%
+#PBS -A %PROJ%-%PROJENVIR%
+#PBS -l walltime=00:15:00
+#PBS -l place=vscatter,select=1:ncpus=1:mem=3gb
+#PBS -l debug=true
+
+export model=obsproc
+
+%include <head.h>
+%include <envir-p1.h>
+
+export cyc=%CYC%
+JTYP=%JTYP% # '', erly_, pcyc_
+
+#Load the modules
+module load intel/${intel_ver}
+module list
+
+$HOMEobsproc/jobs/JOBSPROC_RRFS_PREP_POST
+
+# CALL executable job script here
+%include <tail.h>
+%manual
+######################################################################
+# Purpose:  Job to execute the RRFS PREPBUFR post-processing for the
+#           00Z cycle. (creating unrestricted PREPBUFR files)
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+%end

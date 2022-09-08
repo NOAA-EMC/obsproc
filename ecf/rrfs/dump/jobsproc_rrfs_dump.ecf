@@ -1,0 +1,51 @@
+#PBS -N obsproc_rrfs_dump_%JTYP%%CYC%
+#PBS -j oe
+#PBS -S /bin/bash
+#PBS -q %QUEUE%
+#PBS -A %PROJ%-%PROJENVIR%
+#PBS -l walltime=00:30:00
+#PBS -l place=vscatter,select=1:ncpus=8:mem=5gb
+#PBS -l debug=true
+
+export model=obsproc
+
+%include <head.h>
+%include <envir-p1.h>
+
+export cyc=%CYC%
+JTYP=%JTYP% # '', erly_, pcyc_
+
+#Load the modules
+module load intel/${intel_ver}
+
+export NPROCS=8
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
+#export launcher=serial # else defaults to cfp
+
+module load libjpeg/$libjpeg_ver
+module load grib_util/${grib_util_ver}
+
+module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
+module load bufr_dump/${bufr_dump_ver}
+module list
+
+# CALL executable job script here
+$HOMEobsproc/jobs/JOBSPROC_RRFS_DUMP
+
+%include <tail.h>
+%manual
+######################################################################
+# Purpose: Job to execute the 00Z RRFS DATA DUMP processing
+######################################################################
+
+######################################################################
+# Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+# include manual page below
+%end
