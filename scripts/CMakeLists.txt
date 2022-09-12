@@ -12,6 +12,8 @@ list(APPEND scripts_files
   exnam_makeprepbufr.sh
   exrap_dump.sh
   exrap_makeprepbufr.sh
+  exrrfs_dump.sh
+  exrrfs_makeprepbufr.sh
   exrtma_dump.sh
   exrtma_makeprepbufr.sh
   exurma_dump.sh
