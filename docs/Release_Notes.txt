@@ -1,160 +1,54 @@
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-obsproc v1.1.0        -> released to NCO on Aug ??,2022
-                      -> implemented ?? ??,2022 (prior or in sync with GFSv16.3)
+obsproc v1.1.0	RELEASED	AUG 18,2022
+	v1.1.?	IMPLEMENTED	??? ??,2022
 
+FILE CHANGES
 
-List of all code/scripts modified with this release
----------------------------------------------------
 M CMakeLists.txt
-R build-obsproc/*
+D build-obsproc/
 A cmake/FindMKL.cmake
 A cmake/FindNetCDF.cmake
 M docs/README.md
-  fix/CMakeLists.txt
-  fix/bufrtab.mods
-  fix/prepobs_anow.bufrtable
-  jobs/CMakeLists.txt
+A docs/Release_Notes.txt
+M ecf/global/dump/jobsproc_global_atmos_dump.ecf
 M jobs/JOBSPROC_AIRNOW_DUMP
-  jobs/JOBSPROC_CDAS_DUMP
-  jobs/JOBSPROC_CDAS_DUMP_POST
-  jobs/JOBSPROC_CDAS_PREP1
-  jobs/JOBSPROC_CDAS_PREP1_POST
-  jobs/JOBSPROC_CDAS_PREP2
-  jobs/JOBSPROC_CDAS_PREP2_POST
-  jobs/JOBSPROC_DUMP_ALERT
-  jobs/JOBSPROC_DUMP_MONITOR
-  jobs/JOBSPROC_GLOBAL_DUMP
-  jobs/JOBSPROC_GLOBAL_DUMP_POST
-  jobs/JOBSPROC_GLOBAL_PREP
-  jobs/JOBSPROC_GLOBAL_PREP_POST
-  jobs/JOBSPROC_MODS
-  jobs/JOBSPROC_NAM_DUMP
-  jobs/JOBSPROC_NAM_DUMP2
-  jobs/JOBSPROC_NAM_DUMP_POST
 M jobs/JOBSPROC_NAM_PREP
-  jobs/JOBSPROC_NAM_PREP_POST
-  jobs/JOBSPROC_RAP_DUMP
-  jobs/JOBSPROC_RAP_DUMP_POST
-  jobs/JOBSPROC_RAP_PREP
-  jobs/JOBSPROC_RAP_PREP_POST
-  jobs/JOBSPROC_RTMA_DUMP
-  jobs/JOBSPROC_RTMA_DUMP_POST
-  jobs/JOBSPROC_RTMA_PREP
-  jobs/JOBSPROC_RTMA_PREP_POST
-  jobs/JOBSPROC_URMA_DUMP
-  jobs/JOBSPROC_URMA_DUMP_POST
-  jobs/JOBSPROC_URMA_PREP
-  jobs/JOBSPROC_URMA_PREP_POST
-  modulefiles/dumpmb/1.0.1
-  modulefiles/obsproc_common.lua
-  modulefiles/obsproc_hera.lua
-  modulefiles/obsproc_orion.lua
-  modulefiles/obsproc_wcoss2.lua
-  parm/CMakeLists.txt
-  parm/prepobs_cqcbufr.cdas.parm
-  parm/prepobs_cqcbufr.gdas.parm
-  parm/prepobs_cqcbufr.gfs.parm
-  parm/prepobs_cqcbufr.nam.parm
-  parm/prepobs_cqcbufr.rap.parm
-  parm/prepobs_prepacqc.cdas.parm
-  parm/prepobs_prepacqc.gdas.parm
-  parm/prepobs_prepacqc.gfs.parm
-  parm/prepobs_prepacqc.nam.parm
-  parm/prepobs_prepacqc.rap.parm
-  parm/prepobs_prepdata.cdas.parm
-  parm/prepobs_prepdata.gdas.parm
-  parm/prepobs_prepdata.gfs.parm
-  parm/prepobs_prepdata.nam.parm
-  parm/prepobs_prepdata.rap.parm
-  parm/prepobs_prepdata.rtma.parm
-  parm/prepobs_prepdata.urma.parm
-  parm/prepobs_prepssmi.cdas.parm
-  parm/prepobs_prepssmi.gdas.parm
-  parm/prepobs_prepssmi.gfs.parm
-  parm/prepobs_prepssmi.nam.parm
-  parm/prepobs_prepssmi.rap.parm
-  parm/prepobs_prepssmi.rtma.parm
-  parm/prepobs_prevents.cdas.parm
-  parm/prepobs_profcqc.gdas.parm
-  parm/prepobs_profcqc.gfs.parm
-  parm/prepobs_profcqc.nam.parm
-  parm/prepobs_profcqc.rap.parm
-  parm/syndat_syndata.gdas.parm
-  parm/syndat_syndata.gfs.parm
-  parm/syndat_syndata.nam.parm
-  parm/transfer_airnow.list
-  parm/transfer_hourly.list.old0203
-  parm/wave_dcodquikscat.rtma.parm
-A release_notes/CMakeLists.txt
-A release_notes/Release_Notes.txt
-  scripts/CMakeLists.txt
-  scripts/exairnow_dump.sh
+D release_notes/CMakeLists.txt
+D release_notes/Release_Notes.txt
 M scripts/excdas_dump.sh
-  scripts/excdas_makeprepbufr.sh
-  scripts/exdump_alert.sh
-  scripts/exdump_monitor.sh
-  scripts/exdump_post.sh
 M scripts/exglobal_dump.sh
 M scripts/exglobal_makeprepbufr.sh
-  scripts/exmods.sh
-  scripts/exnam_dump.sh
 M scripts/exnam_makeprepbufr.sh
-  scripts/exprep_post.sh
 M scripts/exrap_dump.sh
-  scripts/exrap_makeprepbufr.sh
 M scripts/exrtma_dump.sh
-  scripts/exrtma_makeprepbufr.sh
 M scripts/exurma_dump.sh
-  scripts/exurma_makeprepbufr.sh
-  sorc/CMakeLists.txt
-  sorc/bufr_avgdata.fd/CMakeLists.txt
-  sorc/bufr_avgdata.fd/avgdata.f
-  sorc/bufr_datacount.fd/CMakeLists.txt
-  sorc/bufr_datacount.fd/datacount.f
-  sorc/bufr_listdumps.fd/CMakeLists.txt
-  sorc/bufr_listdumps.fd/inc_w3unpkb7.inc
-  sorc/bufr_listdumps.fd/iw3unpbf.f
-  sorc/bufr_listdumps.fd/listdumps.f
-  sorc/bufr_listdumps.fd/w3unpkb7.f
-  sorc/bufr_listdumps.fd/wordlength.f
-  sorc/bufr_prepmods.fd/CMakeLists.txt
-  sorc/bufr_prepmods.fd/bufr_prepmods.f
-  sorc/bufr_prepmods.fd/clonlat.f
-  sorc/bufr_prepmods.fd/mbuoyb.f
-  sorc/bufr_prepmods.fd/mnemonics.f
-  sorc/bufr_prepmods.fd/obname.f
-  sorc/bufr_prepmods.fd/raddate.f
-  sorc/bufr_prepmods.fd/ssmipn.f
-  sorc/bufr_prepmods.fd/tideg.f
-  sorc/bufr_remorest.fd/CMakeLists.txt
-  sorc/bufr_remorest.fd/remorest.f
-  sorc/prepobs_prepanow.fd/CMakeLists.txt
-  sorc/prepobs_prepanow.fd/prepanow.f
-  triggers/ (30)
-  ush/CMakeLists.txt
 A ush/build.sh
-  ush/bufr_avgdata.sh
-  ush/bufr_datacount.sh
-  ush/bufr_prepmods.sh
-  ush/bufr_remorest.sh
-  ush/dumpmb
-  versions/README
-  versions/build.ver
 M versions/run.ver
 M versions/VERSION
-------------------
-M-modified; A-added; D-deleted
+(M-modified; A-added; D-deleted)
 
-JOBS file changes
------------------
+DOCS CHANGES
+
+ docs/README.md
+ Update build instructions
+
+ docs//Release_Notes.txt
+ Update structre and shorten contents
+
+ECF CHANGES
+
+ ecf/global/dump/jobsproc_global_atmos_dump.ecf
+ Increase memory usage
+
+JOBS CHANGES
+
  jobs/JOBSPROC_AIRNOW_DUMP
  Correct COMIN path 
 
  jobs/JOBSPROC_NAM_PREP
  Correct COMINtcvital path; Turn off SYNDATA in prepbufr
 
-SCRIPTS file changes
---------------------
+SCRIPTS CHANGES
+
  scripts/exglobal_dump.sh
  scripts/exrap_dump.sh
  scripts/exurma_dump.sh
@@ -170,78 +64,52 @@ SCRIPTS file changes
  scripts/exnam_makeprepbufr.sh
  Comment out COMSPtcvital path to turn off SYNDAT for nam
 
-USH script changes
-------------------
+USH CHANGES
+
  ush/build.sh
  Move build.sh from obsolete /build-obsproc to /ush
 
-DOCS file changes
------------------
- docs/README.md
- Update build instructions  
+VERSIONS CHANGES
 
-VERSIONS file changes
-----------------
  versions/run.ver
  Secure turn off SYNDAT for nam
 
-FIX code changes
--------------------
- No changes.
+CHANGES TO OUTPUT AND FILE SIZES
 
-Source code changes
--------------------
- No changes
-
-Output changes
---------------
  Generate new dumps:
  *gmi1cr*, *snocvr*, *saldrn*, *subpfl*
  Update dumps:
  *gpsro*, *satwnd* and *nsstbufr (*nsstbufr is generatd only in global) 
 
-Compute Resource Information
-----------------------------
- Memory usage was increased, from 60 to 120gb, when testing with triggers/jglobal_dump.wc2.pbs
-
-Disk Space Changes 
-------------------
  The newly generated dumps ( *gmi1cr*, *snocvr*, *saldrn*, *subpfl* ) vary in size from 1Mb to 200Mb
  depending on network, cycle time, time dump window. 0 size dumps are possible
  The updated dumps (*gpsro*, *satwnd* and *nsstbufr) are up to ~25% larger in size
  For examples, see: /lfs/h2/emc/stmp/iliana.genkova/CRON/RELv1.1.0/com
- 
-Shared Software 
----------------
+
+CHANGES TO RESOURCES
+
+ Memory usage was increased, from 60 to 120gb, when testing with triggers/jglobal_dump.wc2.pbs
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
  obsproc needs modules bufr-dump and prepobs in order to run
-
-Libraries
----------
- See
- versions/build.ver 
- versions/run.ver 
-   
-Build Instructions
-------------------
- See README.md
-
-Preimplementation Testing Requirements
---------------------------------------
+ See docs/README.md for build instructions
+ See versions/build.ver and versions/run.ver for libaries
  Run jobs/JOBSPROC_networkname_DUMP and jobs/JOBSPROC_networkname_DUMP_POST
  for the following networkname values: GLOBAL, RAP, URMA, RTMA, CDAS
 
-Dissemination
--------------
- No change in dissemination. 
+DISSEMINATION INFORMATION
 
-Special Instructions
---------------------
+ No changes 
+
+SPECIAL INSTRUCTIONS
+
  1.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0 at the same time
  2.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0 before or at the same time as GFS v16.3 
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-obsproc v1.0.0        -> released to NCO on Dec 21,2021
-        v1.0.2        -> implemented Jun 28, 2022             
+obsproc v1.0.0	RELEASED	DEC 21,2021
+        v1.0.2  IMPLEMENTED	JUN 28, 2022             
 
 Transition from WCOSS Cray and Phase3 to WCOSS2
 ======================================
@@ -490,8 +358,7 @@ Provide a pointer to your COMOUT, temp directory and pbspro output file that was
  -airnow
  COMOUT=/lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/outputs/com/obsproc/v1.0.0/hourly.*
  log in /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/outputs/logs
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
+===========================================================================
 WCOSS1 RN:https://github.com/ShelleyMelchior-NOAA/smelchior/tree/main/RNs
 
 END
