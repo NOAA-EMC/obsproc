@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:20:00
-#PBS -l place=vscatter,select=1:ncpus=3:mem=100gb:prepost=true
+#PBS -l place=vscatter,select=1:ncpus=3:mem=150gb:prepost=true
 #PBS -l debug=true
 
 export model=obsproc
@@ -26,6 +26,7 @@ module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
 
 module load netcdf/${netcdf_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 export NPROCS=3
