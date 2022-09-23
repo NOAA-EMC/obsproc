@@ -1272,8 +1272,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}trkob.tm00.bufr_d
 # gpsro dump file has nr version which is alerted from
 # exdump_post.sh.ecf
-#  $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gpsro $job \
-#   ${COMSP}gpsro.tm00.bufr_d
+  $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gpsro $job \
+   ${COMSP}gpsro.tm00.bufr_d
    if [ "$crisf4" = crisf4 ];then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_crisf4 $job \
        ${COMSP}crisf4.tm00.bufr_d
