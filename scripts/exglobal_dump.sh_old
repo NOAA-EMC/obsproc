@@ -78,13 +78,6 @@ echo "                     - Copy bufr_dumplist to COMOUT.                  "
 echo "         Dec 16 2021 - modified to work on WCOSS2                     "
 echo "         Mar 09 2022 - Enable the dumping of 002017 in vadwnd dump    "
 echo "                       group.                                         "
-echo "         Aug 10 2022 - subpfl and saldrn added to dump group #1.      "
-echo "                       gmi1cr added to dump group #9                  "
-echo "                       snocvr added to dump group #2                  "
-echo "                       b005/xx081 added to satwnd                     "
-echo "                       subpfl aadded to nsstbufr file                 "
-echo "	                     DBN alerts are also enabled for subpfl,saldrn, "
-echo "                       gmi1cr,and snocvr                              "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -114,7 +107,7 @@ set +u
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
 #               avcsam eshrs3 ssmisu saphir atms 1bhrs4 sevcsr tesac mls
-#               esatms crisfs gsrcsr ahicsr sstvcw subpfl saldrn
+#               esatms crisfs gsrcsr ahicsr sstvcw
 #
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
 #               sfcshp tideg atovs* adpsfc ascatt
@@ -594,7 +587,6 @@ if [ $err_check_tanks -eq 0 ];then
    DTIM_latest_atms=${DTIM_latest_atms:-"+2.99"}
 fi
 #-----------------------------------------------
-DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
 DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
 DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
 DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
@@ -638,7 +630,7 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- saphir $atms 1bhrs4 sevcsr tesac $mls $esatms $crisfs gsrcsr ahicsr sstvcw subpfl saldrn
+ saphir $atms 1bhrs4 sevcsr tesac $mls $esatms $crisfs gsrcsr ahicsr sstvcw
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -663,10 +655,6 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}sevcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tesac $job \
     ${COMSP}tesac.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
-    ${COMSP}saldrn.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_subpfl $job \
-    ${COMSP}subpfl.tm00.bufr_d
    if [ "$mls" = mls ];then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_mls $job \
        ${COMSP}mls.tm00.bufr_d
@@ -754,7 +742,7 @@ export DUMP_NUMBER=2
 #            TOTAL NUMBER OF SUBTYPES =  19 - 20
 #
 #==========================================================================
-DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
+
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
 
@@ -782,7 +770,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc ascatt $wndsat
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -798,8 +786,6 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}adpsfc.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatt $job \
     ${COMSP}ascatt.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_snocvr $job \
-    ${COMSP}snocvr.tm00.bufr_d
    if [ "$NET" = 'gdas' ]; then
     ####### ALERT TURNED ON for GDAS only ########################
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatw $job \
@@ -1272,8 +1258,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}trkob.tm00.bufr_d
 # gpsro dump file has nr version which is alerted from
 # exdump_post.sh.ecf
-  $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gpsro $job \
-   ${COMSP}gpsro.tm00.bufr_d
+#  $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gpsro $job \
+#   ${COMSP}gpsro.tm00.bufr_d
    if [ "$crisf4" = crisf4 ];then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_crisf4 $job \
        ${COMSP}crisf4.tm00.bufr_d
@@ -1373,8 +1359,6 @@ DTIM_earliest_005072=${DTIM_earliest_005072:-"-3.00"}
 DTIM_latest_005072=${DTIM_latest_005072:-"+2.99"}
 DTIM_earliest_005080=${DTIM_earliest_005080:-"-3.00"}
 DTIM_latest_005080=${DTIM_latest_005080:-"+2.99"}
-DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
-DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
@@ -1434,24 +1418,19 @@ export DUMP_NUMBER=9
 #            TOTAL NUMBER OF SUBTYPES = 1
 #
 #=======================================================================
-DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
-DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
 DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
 DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr
-
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr
 error9=$?
 echo "$error9" > $DATA/error9
 
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_geoimr $job \
     ${COMSP}geoimr.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gmi1cr $job \
-    ${COMSP}gmi1cr.tm00.bufr_d
 fi
 
 set +x

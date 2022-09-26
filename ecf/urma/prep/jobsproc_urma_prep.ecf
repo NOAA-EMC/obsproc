@@ -18,6 +18,7 @@ JTYP=%JTYP% #=urma
 #Load the modules
 module load intel/${intel_ver}
 module load netcdf/${netcdf_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 # CALL executable job script here
