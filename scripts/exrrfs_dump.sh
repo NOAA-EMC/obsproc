@@ -3,7 +3,7 @@
 echo "------------------------------------------------------------------------ "
 echo "exrrfs_dump.sh     - Rapid Refresh Full and Partial Cycle Dump processing "
 echo "------------------------------------------------------------------------ "
-echo "History: Oct 13 2011 - Original RAP script.                              "
+echo "History: Oct 13 2011 - Original script.                                  "
 echo "         Sep 10 2014 - Use parallel scripting to process dump groups.    "
 echo "         Feb  3 2015 - Dump new satwnd types NC005019, NC005080,         "
 echo "                       NC005090. Reorder cfp commands and add new thread "
@@ -51,7 +51,11 @@ echo "                       match bufr_dumplist.  Removed tideg from sfcshp   "
 echo "                       dump group to make individual dump file.          "
 echo "                     - Copy bufr_dumplist to COMOUT.                     "
 echo "         Dec 09 2021 - Updated to run on WCOSS2                          "
-echo "         Aug 24 2022 - Renamed RRFS from RAP for initialization          "
+echo "         Aug 10 2022 - Added subpfl,saldn to dump #1,snocvr to dump #3.  "
+echo "                       added gmi1cr dump group #7                        "
+echo "                       b005/xx081 added to satwnd                        "
+echo "         Sep 26 2022 - Rewrote script to encorportate v1.1.0 additions   "
+echo "                       and finalize copy of RAP -> RRFS initial setup.   "
 ################################################################################
 
 set -xau
@@ -66,13 +70,14 @@ set +u
 # ------------------------------------------------------------------------
 # Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
+#                          subpfl saldrn
 # Dump group #2 (pb) = vadwnd satwnd adpupa
-# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg
+# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 # Dump group #4 (pb) = msonet gpsipw
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
-#                          saphir
+#                          saphir gmi1cr
 # Dump group #8 (non-pb) = gsrasr gsrcsr
 # Dump group #9 (non-pb) = lghtng
 # Dump group #10 STATUS FILE
@@ -205,7 +210,7 @@ to ${COMSP}${i}"
        echo " ###############################################"
        echo " "
        set -x
-#      echo "no imssnow data availble for RAP" | mail geoffrey.manikin@noaa.gov
+#      echo "no imssnow data availble for RRFS" | mail geoffrey.manikin@noaa.gov
        msg="**CANNOT LOCATE IMS SNOW GRIB FILE: ${flarr[$i]}"
        $DATA/postmsg "$jlogfile" "$msg"
      fi
@@ -266,9 +271,9 @@ export DUMP_NUMBER=1
 #===============================================================================
 # Dump # 1 : 1BAMUA, 1BMHS,  ESAMUA, ESMHS, ATMS, MTIASI, SEVCSR, GPSRO,
 #              (1)    (1)     (1)     (1)   (1)    (1)    (1)     (1)
-#            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2
-#              (1)    (1)     (1)     (1)     (1)     (1)
-#             TOTAL NUMBER OF SUBTYPES = 14
+#            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2, SUBPFL, SALDRN
+#              (1)    (1)     (1)     (1)     (1)     (1)    (1)    (1)
+#             TOTAL NUMBER OF SUBTYPES = 16
 #===============================================================================
  
 if [ "$RUN" = 'rrfs_p' ]; then
@@ -313,6 +318,13 @@ if [ "$RUN" = 'rrfs_p' ]; then
    DTIM_latest_esamua=${DTIM_latest_esamua:-"+0.49"}
     DTIM_earliest_esmhs=${DTIM_earliest_esmhs:-"-0.50"}
     DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+0.49"}
+
+# Uncertain on time window
+   DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-1.00"}
+   DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+0.99"}
+   DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-1.00"}
+   DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+0.99"}
+
 
 else
 
@@ -361,11 +373,17 @@ else
     DTIM_earliest_esmhs=${DTIM_earliest_esmhs:-"-1.00"}
     DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+1.00"}
 
+# Uncertain on time window
+   DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-2.00"}
+   DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.99"}
+   DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-2.00"}
+   DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+1.99"}
+
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_1} 1 1bamua \
  1bmhs esamua esmhs atms mtiasi sevcsr gpsro esiasi iasidb esatms \
- atmsdb sevasr amsr2
+ atmsdb sevasr amsr2 subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -415,7 +433,7 @@ export SKIP_005023=YES
 export SKIP_005090=YES
 
 # Skip old bufr EUMETSAT AMVs
-# For testing, skip in ecflow or obsproc_rrfs.ver file
+For testing, skip in ecflow or obsproc_rrfs.ver file
 #export SKIP_005064=YES
 #export SKIP_005065=YES
 #export SKIP_005066=YES
@@ -456,6 +474,8 @@ DTIM_latest_005067=${DTIM_latest_005067:-"+1.49"}
  DTIM_latest_005068=${DTIM_latest_005068:-"+1.49"}
 DTIM_earliest_005069=${DTIM_earliest_005069:-"-1.50"}
 DTIM_latest_005069=${DTIM_latest_005069:-"+1.49"}
+DTIM_earliest_005081=${DTIM_earliest_005081:-"-1.50"}
+DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 
 if [ "$RUN" = 'rrfs_p' ]; then
 
@@ -535,9 +555,9 @@ export STATUS=NO
 export DUMP_NUMBER=3
 
 #========================================================================
-# Dump # 3 : PROFLR, RASSDA, SFCSHP, ADPSFC, ASCATT, TIDEG
-#              (3)     (1)    (11)     (3)     (1)    (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 20
+# Dump # 3 : PROFLR, RASSDA, SFCSHP, ADPSFC, ASCATT, TIDEG, SNOCVR
+#              (3)     (1)    (11)     (3)     (1)    (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -0.50 to +0.50 hours in
@@ -552,6 +572,7 @@ export SKIP_002013=YES
 # Skip mobile synoptic reports in ADPSFC (not in domain)
 
 export SKIP_000002=YES
+
 
 def_time_window_3=0.5 # default time window for dump 3 is -0.5 to +0.5 hours
 
@@ -572,7 +593,9 @@ if [ "$RUN" = 'rrfs_p' ]; then
 
 # Time window is -0.50 to +0.50 hours for ASCATT (default)
 
-   dummy=idum  # dummy entry since nothing in this if-block
+   DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-0.50"}
+   DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+0.50"}
+   # dummy=idum  # dummy entry since nothing in this if-block
 
 else
 
@@ -583,11 +606,13 @@ else
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
    DTIM_earliest_ascatt=${DTIM_earliest_ascatt:-"-2.00"}
    DTIM_latest_ascatt=${DTIM_latest_ascatt:-"+2.00"}
+   DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-2.00"}
+   DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.00"}
 
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_3} 1 proflr \
- rassda sfcshp adpsfc ascatt tideg
+ rassda sfcshp adpsfc ascatt tideg snocvr
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -719,7 +744,7 @@ export DUMP_NUMBER=5
 export LALO=0  # GLOBAL dumps here (AIRCFT and AIRCAR dumped globally to
                # improve PREPOBS_PREPACQC track-check performance; GOESND
                # dumped globally to allow job to run much quicker w/o the need
-               # for geographical filtering (all GOES reports are in expanded
+               # for geogrrfshical filtering (all GOES reports are in expanded
                # NAM domain anyway)
 
 def_time_window_5=3.25 # default time window for dump 5 is -3.25 to +3.25 hours
@@ -730,7 +755,7 @@ def_time_window_5=3.25 # default time window for dump 5 is -3.25 to +3.25 hours
 #  {note: time window increased to improve PREPOBS_PREPACQC track-check
 #         performance; time window will be winnowed down to +/- 1.00 hours in
 #         output from PREPOBS_PREPACQC (for full and partial cycle runs), and
-#         geographical domain will be limited to north of 20S latitude)
+#         geogrrfshical domain will be limited to north of 20S latitude)
 
 
 # Time window -1.25 to -0.01 hours for GOESND cloud (only) for full and partial
@@ -804,7 +829,7 @@ export DUMP_NUMBER=6
 #===========================================================================
 
 export LALO=0  # GLOBAL dumps here (NEXRAD dumped globally to allow job to run
-               # much quicker w/o the need for geographical filtering (all
+               # much quicker w/o the need for geogrrfshical filtering (all
                # radar reports are over CONUS anyway)
 
 def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
@@ -1025,9 +1050,9 @@ export DUMP_NUMBER=7
 #==========================================================================
 # Dump # 7 : AIRSEV, 1BHRS4, ESHRS3, LGYCLD, SSMISU, OSBUV8, CRSFDB,
 #              (1)     (2)     (1)     (1)     (1)     (1)     (1)
-#            SAPHIR, CRISF4
-#              (1)     (1)
-#             TOTAL NUMBER OF SUBTYPES = 10
+#            SAPHIR, CRISF4, GMI1CR
+#              (1)     (1)   (1)
+#             TOTAL NUMBER OF SUBTYPES = 11
 #=========================================================================
  
 # Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
@@ -1068,6 +1093,10 @@ if [ "$RUN" = 'rrfs_p' ]; then
    DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-1.00"}
    DTIM_latest_saphir=${DTIM_latest_saphir:-"+0.99"}
 
+# Time window is guesstimated as -1.00 to +0.99 hours for rrfs_p GMI1CR
+   DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-1.00"}
+   DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+0.99"}
+
 else
 
 #  ===> For RUN = rrfs, rrfs_e -- full cycle runs (including early at 00/12z)
@@ -1105,10 +1134,14 @@ else
    DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-3.00"}
    DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 
+# Time window is guesstimated as -3.00 to +2.99 hours for GMI1CR
+   DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+   DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
+
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 1bhrs4 \
- airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4
+ airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4 gmi1cr
 error7=$?
 echo "$error7" > $DATA/error7
 
