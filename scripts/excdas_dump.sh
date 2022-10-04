@@ -38,7 +38,9 @@ echo "                       file.                                        "
 echo "                     - Copy bufr_dumplist to COMOUT.                "
 echo "         Mar 08 2022 - Enable the dumping of 002017 in vadwnd dump  "
 echo "                       group.                                       "
-echo "         ??? ?? 2022 - Enable dumping of UPRAIR data in group #3.   "
+echo "         Jul 30 2022 - Subpfl, saldrn, snocvr, and gmi1cr added     "
+echo "                       to dump group #9.    "
+echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.   "
 ###########################################################################
 
 set -xau
@@ -78,7 +80,7 @@ set +u
 #               satwnd
 #
 # Dump group #9 (non-pb, TIME_TRIM = default = ON) =
-#               geoimr
+#               geoimr subpfl saldrn snocvr gmi1cr
 #
 # Dump group #10 STATUS FILE
 # -----------------------------------------------------------------------------
@@ -972,6 +974,8 @@ DTIM_earliest_005071=${DTIM_earliest_005071:-"-3.00"}
 DTIM_latest_005071=${DTIM_latest_005071:-"+2.99"}
 DTIM_earliest_005080=${DTIM_earliest_005080:-"-3.00"}
 DTIM_latest_005080=${DTIM_latest_005080:-"+2.99"}
+DTIM_earliest_005081=${DTIM_earliest_005081:-"-1.50"}
+DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
@@ -1018,15 +1022,27 @@ export DUMP_NUMBER=9
 #
 #--------------------------------------------------------------------------
 # Dump # 9 : GEOIMR: 1 subtype(s)
+#            SUBPFL: 1 subtype(s)
+#            SALDRN: 1 subtype(s)
+#            SNOCVR: 1 subtype(s)
+#            GMI1CR: 1 subtype(s)
 #            ------------------------ 
-#            TOTAL NUMBER OF SUBTYPES = 1
+#            TOTAL NUMBER OF SUBTYPES = 5
 #
 #=======================================================================
 
 DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
 DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
+DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-3.00"}
+DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+2.99"}
+DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-3.00"}
+DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
+DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-3.00"}
+DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
+DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr subpfl saldrn snocvr gmi1cr
 error9=$?
 echo "$error9" > $DATA/error9
 

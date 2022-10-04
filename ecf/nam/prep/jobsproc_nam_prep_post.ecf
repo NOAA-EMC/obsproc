@@ -16,12 +16,11 @@ export cyc=%CYC%
 JTYP=%JTYP% #=nam
 export tmmark=%TMMARK%
 
-export job=${JTYP}_prep_post_${tmmark}_${cyc}
-
 #########################################
 #Now load the modules
 #########################################
 module load intel/${intel_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 $HOMEobsproc/jobs/JOBSPROC_NAM_PREP_POST
