@@ -5,7 +5,7 @@
 #PBS -q dev
 #PBS -l walltime=00:20:00
 #PBS -A OBSPROC-DEV
-#PBS -l place=vscatter,select=1:ncpus=14:mem=60gb
+#PBS -l place=vscatter,select=1:ncpus=14:mem=66gb
 #PBS -l debug=true
 
 ##############################################
@@ -93,7 +93,7 @@ export COMOUT_ROOT=${DATAROOT}/CRON/${DESC}/com
 export COMPONENT=atmos
 
 export DEBUG_LEVEL=3
-export LOUD=ON
+export LOUD=on
 export KEEPDATA=YES
 
 
