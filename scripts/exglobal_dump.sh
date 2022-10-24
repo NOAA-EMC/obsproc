@@ -85,6 +85,8 @@ echo "                       b005/xx081 added to satwnd                     "
 echo "                       subpfl aadded to nsstbufr file                 "
 echo "	                     DBN alerts are also enabled for subpfl,saldrn, "
 echo "                       gmi1cr,and snocvr                              "
+echo "         Oct 17 2022 - Split up groups 1 and 10 into a new group 12   "
+echo "                       for better optimization.                       "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -113,8 +115,8 @@ set +u
 # JOB_NUMBER not present indicates dump BOTH prepbufr and non-prepbufr data.
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcsam eshrs3 ssmisu saphir atms 1bhrs4 sevcsr tesac mls
-#               esatms crisfs gsrcsr ahicsr sstvcw subpfl saldrn
+#               avcsam eshrs3 ssmisu saphir 1bhrs4 sevcsr tesac mls
+#               esatms gsrcsr ahicsr sstvcw subpfl saldrn
 #
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
 #               sfcshp tideg atovs* adpsfc ascatt
@@ -143,13 +145,16 @@ set +u
 #               geoimr
 #
 # Dump group #10 (non-pb, TIME_TRIM defaults to OFF) =
-#               esiasi mtiasi esamua crsfdb iasidb sevasr 1bamua bathy osbuv8
+#               esiasi mtiasi esamua sevasr 1bamua bathy osbuv8
 #               ompst8 ompsn8 gsrasr ompslp sstvpw
 #
 # Dump group #11 (non-pb, TIME_TRIM defaults to OFF) =
 #               amsr2
 #
-# Dump group #12 STATUS FILE
+# Dump group #12 crisfs atms (previously group1)
+#                crsfdb iasidb (previously group10)
+#
+# Dump group #13 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -178,6 +183,7 @@ set -u
       DUMP_group9=${DUMP_group9:-"YES"}
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
+      DUMP_group12=${DUMP_group12:-"YES"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -191,6 +197,7 @@ set -u
       DUMP_group9=${DUMP_group9:-"NO"}
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
+      DUMP_group12=${DUMP_group12:-"NO"}
    fi
 else
    dump_ind=DUMP
@@ -205,6 +212,7 @@ else
    DUMP_group9=${DUMP_group9:-"YES"}
    DUMP_group10=${DUMP_group10:-"YES"}
    DUMP_group11=${DUMP_group11:-"YES"}
+   DUMP_group12=${DUMP_group12:-"YES"}
 fi
 
 if [ "$NET" = 'gfs' ]; then
@@ -510,6 +518,8 @@ echo "=======> Dump group 8 (thread_8) not executed." > $DATA/8.out
 echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
 echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
+echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
+
 
 err1=0
 err2=0
@@ -522,6 +532,7 @@ err8=0
 err9=0
 err10=0
 err11=0
+err12=0
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -563,13 +574,11 @@ export DUMP_NUMBER=1
 #            ESHRS3: 1 subtype(s)
 #            SSMISU: 1 subtype(s)
 #            SAPHIR: 1 subtype(s)
-#            ATMS:   1 subtype(s) (if present in past 10 days of tanks)
 #            1BHRS4: 1 subtype(s)
 #            SEVCSR: 1 subtype(s)
 #            TESAC:  1 subtype(s)
 #            MLS:    1 subtype(s) (if present in past 10 days of tanks)
 #            ESATMS: 1 subtype(s) (if present in past 10 days of tanks)
-#            CRISFS: 1 subtype(s) (if present in past 10 days of tanks)
 #            GSRCSR: 1 subtype(s)
 #            AHICSR: 1 subtype(s)
 #            SSTVCW: 1 subtype(s)
@@ -581,19 +590,7 @@ export DUMP_NUMBER=1
 DTIM_latest_avcsam=${DTIM_latest_avcsam:-"+2.99"}
 DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+2.99"}
 DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+2.99"}
-#-----------------------------------------------
 DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
-#-----------------------------------------------
-# check for atms tank presence in past 10 days
-atms=""
-err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh atms
-err_check_tanks=$?
-if [ $err_check_tanks -eq 0 ];then
-   atms=atms
-   DTIM_latest_atms=${DTIM_latest_atms:-"+2.99"}
-fi
-#-----------------------------------------------
 DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
 DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
 DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
@@ -620,17 +617,6 @@ if [ $err_check_tanks -eq 0 ];then
    DTIM_latest_esatms=${DTIM_latest_esatms:-"+2.99"}
 fi
 #-----------------------------------------------
-#-----------------------------------------------
-# check for crisfs tank presence in past 10 days
-crisfs=""
-err_check_tanks=0
-sh $USHbufr_dump/check_tanks.sh crisfs
-err_check_tanks=$?
-if [ $err_check_tanks -eq 0 ];then
-   crisfs=crisfs
-   DTIM_latest_crisfs=${DTIM_latest_crisfs:-"+2.99"}
-fi
-#-----------------------------------------------
 DTIM_latest_gsrcsr=${DTIM_latest_gsrcsr:-"+2.99"}
 DTIM_latest_ahicsr=${DTIM_latest_ahicsr:-"+2.99"}
 DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
@@ -638,7 +624,7 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- saphir $atms 1bhrs4 sevcsr tesac $mls $esatms $crisfs gsrcsr ahicsr sstvcw subpfl saldrn
+ saphir 1bhrs4 sevcsr tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -652,10 +638,6 @@ if [ "$SENDDBN" = "YES" ]; then
    if [ "${NET}" = "gdas" ]; then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
        ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
-   fi
-   if [ "$atms" = atms ];then
-      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_atms $job \
-       ${COMSP}atms.tm00.bufr_d
    fi
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bhrs4 $job \
     ${COMSP}1bhrs4.tm00.bufr_d
@@ -675,12 +657,6 @@ if [ "$SENDDBN" = "YES" ]; then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_esatms $job \
        ${COMSP}esatms.tm00.bufr_d
    fi
-####### ALERTS TURNED OFF UNTIL REQUESTED BY USER #########################
-#  if [ "$crisfs" = crisfs ];then
-#     $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_crisfs $job \
-#      ${COMSP}crisfs.tm00.bufr_d
-#  fi
-###########################################################################
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gsrcsr $job \
     ${COMSP}gsrcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ahicsr $job \
@@ -1494,8 +1470,6 @@ export DUMP_NUMBER=10
 # Dump #10 : ESIASI: 1 subtype(s)
 #            MTIASI: 1 subtype(s)
 #            ESAMUA: 1 subtype(s)
-#            CRSFDB: 1 subtype(s)
-#            IASIDB: 1 subtype(s)
 #            SEVASR: 1 subtype(s)
 #            1BAMUA: 1 subtype(s)
 #            BATHY:  1 subtype(s)
@@ -1512,8 +1486,6 @@ export DUMP_NUMBER=10
 DTIM_latest_esiasi=${DTIM_latest_esiasi:-"+2.99"}
 DTIM_latest_mtiasi=${DTIM_latest_mtiasi:-"+2.99"}
 DTIM_latest_esamua=${DTIM_latest_esamua:-"+2.99"}
-DTIM_latest_crsfdb=${DTIM_latest_crsfdb:-"+2.99"}
-DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+2.99"}
 DTIM_latest_sevasr=${DTIM_latest_sevasr:-"+2.99"}
 DTIM_latest_1bamua=${DTIM_latest_1bamua:-"+2.99"}
 DTIM_latest_bathy=${DTIM_latest_bathy:-"+2.99"}
@@ -1527,8 +1499,7 @@ DTIM_latest_sstvpw=${DTIM_latest_sstvpw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM10:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 esiasi mtiasi esamua \
- crsfdb iasidb sevasr 1bamua bathy osbuv8 ompsn8 ompst8 gsrasr ompslp \
- sstvpw
+ sevasr 1bamua bathy osbuv8 ompsn8 ompst8 gsrasr ompslp sstvpw
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1539,10 +1510,6 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}mtiasi.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_esamua $job \
     ${COMSP}esamua.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_crsfdb $job \
-    ${COMSP}crsfdb.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_iasidb $job \
-    ${COMSP}iasidb.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevasr $job \
     ${COMSP}sevasr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bamua $job \
@@ -1630,6 +1597,100 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_12; chmod +x thread_12
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_12
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=12
+
+#=========================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump # 12 : ATMS:   1 subtype(s) (if present in past 10 days of tanks)
+#             CRISFS: 1 subtype(s) (if present in past 10 days of tanks)
+#             CRSFDB: 1 subtype(s)
+#             IASIDB: 1 subtype(s)
+#             --------------------
+#             TOTAL NUMBER OF SUBTYPES = 4
+#
+#=========================================================================
+#-----------------------------------------------
+#-----------------------------------------------
+# check for atms tank presence in past 10 days
+atms=""
+err_check_tanks=0
+sh $USHbufr_dump/check_tanks.sh atms
+err_check_tanks=$?
+if [ $err_check_tanks -eq 0 ];then
+   atms=atms
+   DTIM_latest_atms=${DTIM_latest_atms:-"+2.99"}
+fi
+#-----------------------------------------------
+#-----------------------------------------------
+# check for crisfs tank presence in past 10 days
+crisfs=""
+err_check_tanks=0
+sh $USHbufr_dump/check_tanks.sh crisfs
+err_check_tanks=$?
+if [ $err_check_tanks -eq 0 ];then
+   crisfs=crisfs
+   DTIM_latest_crisfs=${DTIM_latest_crisfs:-"+2.99"}
+fi
+#-----------------------------------------------
+
+DTIM_latest_crsfdb=${DTIM_latest_crsfdb:-"+2.99"}
+DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+2.99"}
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 $atms $crisfs crsfdb iasidb
+error12=$?
+echo "$error12" > $DATA/error12
+
+if [ "$SENDDBN" = "YES" ]; then
+   if [ "$atms" = atms ];then
+      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_atms $job \
+       ${COMSP}atms.tm00.bufr_d
+   fi
+####### ALERTS TURNED OFF UNTIL REQUESTED BY USER #########################
+#  if [ "$crisfs" = crisfs ];then
+#     $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_crisfs $job \
+#      ${COMSP}crisfs.tm00.bufr_d
+#  fi
+###########################################################################
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_crsfdb $job \
+    ${COMSP}crsfdb.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_iasidb $job \
+    ${COMSP}iasidb.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_12
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/12.out 2>&1
+EOF
+set -x
 
 #----------------------------------------------------------------
 # Now launch the threads
@@ -1657,6 +1718,7 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
+   [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
 
 
    if [ -s $DATA/poe.cmdfile ]; then
@@ -1685,6 +1747,7 @@ else
    [ $DUMP_group9 = YES ]  &&  ./thread_9 
    [ $DUMP_group10 = YES ]  &&  ./thread_10 
    [ $DUMP_group11 = YES ]  &&  ./thread_11 
+   [ $DUMP_group12 = YES ]  &&  ./thread_12 
 #     wait
 fi
 
@@ -1695,7 +1758,7 @@ fi
 
 [ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
 
 set +x
 echo " "
@@ -1713,12 +1776,13 @@ set -x
 [ -s $DATA/error9 ] && err9=`cat $DATA/error9`
 [ -s $DATA/error10 ] && err10=`cat $DATA/error10`
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
+[ -s $DATA/error12 ] && err12=`cat $DATA/error12`
 
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=12
+export DUMP_NUMBER=13
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
@@ -1738,8 +1802,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' -o "$err11" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1750,7 +1814,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1768,7 +1832,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
