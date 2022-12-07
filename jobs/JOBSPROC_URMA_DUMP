@@ -66,7 +66,19 @@ set -x
 ###########################
 export obsNET=${obsNET:-obsproc}
 export NET=${NET:-urma}
-export RUN=${RUN:-urma}
+
+echo $job | grep "_ru_"
+err_ru=$?
+if [ $err_ru = 0 ]; then
+  export RUN=${RUN:-urma_ru}  # rapid update w/ sub-hourly cycles
+  set +x
+  echo
+  echo cycM is ${cycM:?"###FATAL ERROR \"cycM\" is not set"}
+  echo
+  set -x 
+else
+  export RUN=${RUN:-urma}     # normal, hourly cycle run
+fi
 
 set +x
 echo
@@ -81,6 +93,16 @@ set -x
 ##############################
 export cycle=t${cyc}z
 export tmmark=tm00
+
+# Imported variable cycM, if it exists, contains cycle time minutes
+#   if cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+#   (Note: the reset here applies only to references to $cycle, changed now to
+#          $cycle_here, in this script; downstream script exrtma_dump.sh.ecf
+#          will later reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
 
 ###############################
 # Create new working directory
@@ -248,17 +270,17 @@ $SCRIPTSobsproc/exurma_dump.sh
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_dump_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 [ -n "$obsproc_urma_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 [ -n "$bufr_dump_ver" ]  &&  \
  echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
- >> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ >> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT
