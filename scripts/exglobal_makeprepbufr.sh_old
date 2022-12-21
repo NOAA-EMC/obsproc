@@ -40,7 +40,6 @@ CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
 MAKE_NSSTBUFR=${MAKE_NSSTBUFR:-YES}
 
 export COMSP=${COMSP:-$COMIN/${RUN}.${cycle}.}
-export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.}
 export tstsp=${tstsp:-/tmp/null/}
 
 if [ "$DO_QC" = 'YES' -a "$CQCBUFR" = 'YES' -a -n "$COM1" -a -n "$CQCC" ]; then
@@ -75,7 +74,7 @@ if [ "$DO_QC" = 'YES' -a "$CQCBUFR" = 'YES' -a -n "$COM1" -a -n "$CQCC" ]; then
    fi
 fi
 
-cdate10=${cdate10:-`cut -c7-16 ncepdate`}
+cdate10=`cut -c7-16 ncepdate`
 
 msg="CENTER TIME FOR PREPBUFR PROCESSING IS $cdate10"
 $DATA/postmsg "$jlogfile" "$msg"
@@ -557,7 +556,7 @@ if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
    err_ch=$?
    if [ $err_ch -eq 0 ]; then
 
-      DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
+      DTYPS_nsst='sfcshp tesac bathy trkob'
 
       echo "xglm: DTYPS_nsst='$DTYPS_nsst'"
 
