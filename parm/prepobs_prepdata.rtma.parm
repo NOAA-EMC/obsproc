@@ -11,12 +11,12 @@
    UWINDO    = 050., RWINDO    = 050., DWINDO    = 050.,
    FLDMGS    = TRUE, FLDMAF    = TRUE, FLDMFR    = TRUE,
    KTEMP     = TRUE, AWINDO    = 6*050.,2*050., 10*050.,
-   JAMASS    = 6*9999, 6*9999, 6*9999, 3*9999, 3*9999, 6*9999, 6*9999,
-               6*9999, 6*9999, 6*9999,
-   JAWIND    = 6*9999, 6*9999, 6*9999, 3*9999, 3*9999, 6*9999, 6*9999,
-               6*9999, 6*9999, 6*9999,
+   JAMASS    = 6*0, 6*0, 6*0, 3*0, 3*0, 6*0, 6*0, 6*0, 6*0, 6*0,
+   JAWIND    = 6*0, 6*0, 6*0, 3*0, 3*0, 6*0, 6*0, 6*0, 6*0, 6*0,
    IACFTL    =  100,-200,-200,-200,-200,-200,-200,-200,-200,
-   FLACMS    =9*FALSE,
+   FLACMS    = TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE,
+   AWINDO    = 6*325.,2*325.,10*325.,
+   AIFNOW    =9*TRUE,
 
              !goes-o/e  insat   jma    eumt-o/e aqua/terra
              !-------- ------- ------- -------- ----------
@@ -83,9 +83,9 @@
             6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! hd s dl WV
             6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,6*9999,! pic trplet
 
-   PRFLER    =FALSE,FALSE,FALSE,FALSE,  PWINDO    = 4*050.,
-   VADWIN    =FALSE, VWINDO    = 050., IVADFL    =5,     IVADSP    =2,
-   RASS      =FALSE, TWINDO    = 050.,
+   PRFLER    = TRUE, TRUE, TRUE,FALSE,  PWINDO    = 4*050.,
+   VADWIN    = TRUE, VWINDO    = 050., IVADFL    =5,     IVADSP    =2,
+   RASS      = TRUE, TWINDO    = 050.,
 
    TOVEDS    =FALSE,FALSE,               ! TOVS eds     rtovs/atovs
    TOVBFR    =FALSE,FALSE,               ! TOVS bufr    rtovs/atovs

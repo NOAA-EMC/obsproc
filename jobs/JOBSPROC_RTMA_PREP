@@ -234,7 +234,9 @@ export BACK=NO
 
 #  BUFRLIST indicates the list of BUFR data dump file names to process
 
-export BUFRLIST=${BUFRLIST:-"adpsfc sfcshp msonet ascatw wdsatr satwnd"}
+#export BUFRLIST=${BUFRLIST:-"adpsfc sfcshp msonet ascatw wdsatr satwnd"}
+
+export BUFRLIST=${BUFRLIST:-"adpsfc adpupa aircar aircft ascatw goesnd gpsipw msonet proflr rassda satwnd sfcshp vadwnd wdsatr"}
 
 export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
                            # center hour (cycle) times if foreground exit
