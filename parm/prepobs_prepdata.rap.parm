@@ -131,10 +131,10 @@
    KTOP      = 20*23,                    ! TOVS sndg
                60*0,                     ! GOES sndg
 
-   NPKRPT    = 12*TRUE,
-   FWINDO    = 12*150.,
+   NPKRPT    = 13*TRUE,
+   FWINDO    = 13*150.,
    JSURFM(3) = 9999, JSURFM(7) = 9999, JSURFM(11) = 9999,
-   JSURFW    = 0,0,9999,0,9999,0,9999,0,0,0,9999,0,
+   JSURFW    = 0,0,9999,0,9999,0,9999,0,0,0,9999,0,0,
    PFRALT    = TRUE,
    JPSSMI    = 6*9999, 6*9999, 6*9999, 6*9999, XWINDO = 24*150.,
    JPERSD    = 6*9999,
