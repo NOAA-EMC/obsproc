@@ -69,14 +69,9 @@ set +u
 # ------------------------------------------------------------------------
 # Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
-<<<<<<< HEAD
-# Dump group #2 (pb) = vadwnd satwnd adpupa uprair
-# Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg
-=======
 #                          subpfl saldrn
-# Dump group #2 (pb) = vadwnd satwnd adpupa
+# Dump group #2 (pb) = vadwnd satwnd adpupa uprair
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
->>>>>>> origin/release/obsproc.v1.1.0
 # Dump group #4 (pb) = msonet gpsipw
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
