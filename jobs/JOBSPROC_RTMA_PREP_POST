@@ -95,6 +95,16 @@ set -x
 export cycle=t${cyc}z
 export tmmark=tm00
 
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+#   (Note: the reset here applies only to references to $cycle, changed now to
+#          $cycle_here, in this script; downstream script exrtma_dump.sh.ecf
+#          will later reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
+
 ###############################
 # Create new working directory
 ###############################
@@ -201,12 +211,12 @@ $SCRIPTSprepobs/exprep_post.sh
 eval err_${RUN}_prep_post=$?
 eval [[ \$err_${RUN}_prep_post -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep_post_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_prep_post_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_post_run
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_post_run
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_post_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_post_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

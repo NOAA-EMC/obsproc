@@ -14,7 +14,7 @@ export cray_mpich_ver=8.1.7
 export cray_pals_ver=1.0.12
 export cfp_ver=2.0.4
 
-export gfs_ver=v16.2
+export gfs_ver=v16.3
 export nam_ver=v4.2
 export dictionaries_ver=v3.4.0
 export seaice_analysis_ver=v4.5		#engice, seaice.*5min.grb  file		
