@@ -16,7 +16,7 @@ INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
 BUILD_4NCO=${BUILD_4NCO:-"YES"}
 
 target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
-if [[ "$target" =~ ^(wcoss2|hera|orion)$ ]]; then
+if [[ "$target" =~ ^(wcoss2|hera|orion|jet)$ ]]; then
   source $pkg_root/versions/build.ver
   set +x
   module use $pkg_root/modulefiles
