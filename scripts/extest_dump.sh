@@ -1,7 +1,7 @@
 #!/bin/bash
 #####################################################################
 echo "----------------------------------------------------------    "
-echo "exrtma_dump.sh - RTMA model data dump processing              "
+echo "extest_dump.sh - TEST model data dump processing              "
 echo "----------------------------------------------------------    "
 echo "History:                                                      "
 echo " May 19 2006 - Original script.                               "
@@ -9,12 +9,12 @@ echo " Sep 10 2014 - Use parallel scripting to process dump groups. "
 echo " Feb  3 2015 - Dump new satwnd types NC005019, NC005080,      "
 echo "                NC005090. Dump new type efclam.               "
 echo " Jul  2 2017 - enabled potential for minute-precison cycles   "
-echo " Jun 29 2018 - removed efclam dumps in rtma_ru runs           "
+echo " Jun 29 2018 - removed efclam dumps in test_ru runs           "
 echo " May 23 2019 - Updated to run on Dell-p3. Disabled background "
 echo "                threading.                                    "
 echo " Oct 22 2019 - Temporary bug fix to limit adpsfc processing to"
-echo "                previous day's tank for rtma_ru 0000z cylce.  "
-echo " Feb 13 2020 - enabled efclam dumps in rtma_ru runs           "
+echo "                previous day's tank for test_ru 0000z cylce.  "
+echo " Feb 13 2020 - enabled efclam dumps in test_ru runs           "
 echo "             - disabled (SKIP) NC005090, NC005091 (VIIRS AMVs)"
 echo " Sep 14 2020 - Updated Dump group #1 to skip legacy           "
 echo "                Meteosat AMV subsets: 005064, 005065,         "
@@ -29,7 +29,7 @@ echo "             - Copy bufr_dumplist to COMOUT.                  "
 echo " Dec 15 2021 - set for use on WCOSS2.                         "
 echo " Jul 31 2022 - Subpfl,saldrn,snocvr & gmi1cr dump group added "
 echo " Dec 07 2022 - Re-Added in Dumps 3 through 11 to match a      "
-echo "                previous version of 3drtma available on       "
+echo "                previous version of 3dtest available on       "
 echo "		      WCOSS1. Also removed saphir from Group11.     "
 #####################################################################
 
@@ -67,13 +67,13 @@ export dumptime=`cut -c7-16 ncepdate`$hr_fraction
 
 tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
 
-msg="RTMA ANALYSIS TIME IS $PDY$cyc"
+msg="TEST ANALYSIS TIME IS $PDY$cyc"
 [ -n "$cycM" ]  &&  msg="$msg:${cycM}"
 postmsg "$jlogfile" "$msg"
 
 set +x
 echo
-echo "CENTER DATA DUMP DATE-TIME FOR $tmmark_uc RTMA IS $dumptime"
+echo "CENTER DATA DUMP DATE-TIME FOR $tmmark_uc TEST IS $dumptime"
 echo
 set -x
  
@@ -98,7 +98,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 ###################################
 ###################################
 
-msg="START THE $tmmark_uc RTMA DATA DUMP CENTERED ON $dumptime"
+msg="START THE $tmmark_uc TEST DATA DUMP CENTERED ON $dumptime"
 postmsg "$jlogfile" "$msg"
 
 set +x
@@ -253,9 +253,9 @@ DTIM_latest_subpfl=+0.50
 DTIM_earliest_saldrn=-0.50
 DTIM_latest_saldrn=+0.50
 
-# for rtma_ru_0000 read only from previous day's tank
+# for test_ru_0000 read only from previous day's tank
 # Temporary bug fix
-if [ $RUN = "rtma_ru" -a $cycle = "t0000z" ]; then
+if [ $RUN = "test_ru" -a $cycle = "t0000z" ]; then
   DTIM_latest_000000=-0.01
 fi
 
@@ -713,7 +713,7 @@ def_time_window_10=0.5 # default time window for dump 10 is -0.5 to +0.5 hours
 DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+0.49"}         # earliest is default
 # NEXRAD tanks are hourly
 # Process only those hourly tanks w/i requested dump center cycle time window
-# !!! this needs adjusting for 15min cycling RTMA_RU -JW !!!
+# !!! this needs adjusting for 15min cycling TEST_RU -JW !!!
 SKIP_006010=YES # radial wind  00Z
 SKIP_006011=YES # radial wind  01Z
 SKIP_006012=YES # radial wind  02Z
@@ -1117,15 +1117,15 @@ $err1, $err2, $err3, $err4, $err5, $err6, $err7, $err8, $err9, $err10, $err11"
 #  endif loop $PROCESS_DUMP
 fi
 
-if [ "$RUN" == "rtma_ru" ] && [ "${SENDDBN^^}" = YES ] && [ -s ${COMSP}satwnd.tm00.bufr_d ]; then
-   $DBNROOT/bin/dbn_alert MODEL RTMA_RU_BUFR_satwnd $job ${COMSP}satwnd.tm00.bufr_d
+if [ "$RUN" == "test_ru" ] && [ "${SENDDBN^^}" = YES ] && [ -s ${COMSP}satwnd.tm00.bufr_d ]; then
+   $DBNROOT/bin/dbn_alert MODEL TEST_RU_BUFR_satwnd $job ${COMSP}satwnd.tm00.bufr_d
 fi
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
-if [ $RUN = 'rtma_ru' ]; then
+if [ $RUN = 'test_ru' ]; then
    LIST_cp=$COMOUT/${RUN}.t${cyc}${cycM}z.bufr_dumplist.${tmmark}
 else
    LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
