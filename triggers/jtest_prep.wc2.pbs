@@ -26,13 +26,7 @@ export cyc=%CC%
 JTYP=%JTYP%
 type=%DESC%
 DESC=%DESC%
-if [ $JTYP = "rap_e" ]; then
-  export job=$(echo $JTYP | cut -c1-3)_prep_erly_$cyc
-elif [ $JTYP = "rap_p" ]; then
-  export job=$(echo $JTYP | cut -c1-3)_prep_pcyc_$cyc
-else
 export job=${JTYP}_prep_$cyc
-fi
 export jobid=$job.$PBS_JOBID
 export PDY=%PDY%
 
@@ -129,7 +123,7 @@ fi
 if [ $err -eq 0 ]; then
   echo "submit jtest_prep_post:"
   jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/ashley.stanfield/git/revamp_3drtma/triggers/jrap_prep_post.wc2.pbs
+  /lfs/h2/emc/obsproc/noscrub/ashley.stanfield/git/revamp_3drtma/triggers/jtest_prep_post.wc2.pbs
 fi
 
 exit

@@ -7,7 +7,7 @@
 
  /
  &LDTA
-   IRNMRK    =    4,
+   IRNMRK    =    9,
    PG4243    =FALSE,
      ! Note: Current dump window for ADPUPA is +/- 1.0 hours
    UWINDO    = 150., RWINDO   = 150., RECSLM    = TRUE,
