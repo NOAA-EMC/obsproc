@@ -84,7 +84,7 @@ if [ $err_ru = 0 ]; then
   echo
   set -x
 else
-  export RUN=${RUN:-rtma}     # normal, hourly cycle run
+  export RUN=${RUN:rtma}     # normal, hourly cycle run
 fi
 
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
