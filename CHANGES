@@ -1,3 +1,5 @@
--updated versions for obsproco, b-d, prepobs
+-updated versions/* for obsproc
+-merged in develop (which had Ashley's new global dumping, i.e. add new group to utilize all CPUs)
+
 
 
