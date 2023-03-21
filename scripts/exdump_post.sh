@@ -353,14 +353,14 @@ EOFparm
          $DATA/postmsg "$jlogfile" "$msg"
          cp $filestem $COMOUT/$filestem.nr
          chmod 664 $COMOUT/$filestem.nr
-         if [ "$SENDDBN" = "YES" ] ; then
+	 if [ "$SENDDBN" = "YES" ] ; then
            NETUP=`echo $RUN | tr {a-z} {A-Z}`
            if  [[ $NETUP != 'GDAS' ]] || [[ $file != "saphir" ]]; then    ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr 
              if [[ $NETUP != 'CDAS' ]] || [[ $file != "gpsro" ]]; then    ### no alert cdas.tCCz.gpsro.tm00.bufr_d.nr
                if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then   ### no alert rap.tCCz.gpsro.tm00.bufr_d.nr
                   $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
                   $COMOUT/$filestem.nr
-               fi
+	       fi
              fi
            fi
          fi
@@ -462,13 +462,16 @@ from 2-days ago (rc = $rc) -- existing file made 2-days ago is not overwritten"
          msg="Successful generation of non-restricted $file BUFR file from \
 2-days ago -- overwrite existing file made 2-days ago"
          $DATA/postmsg "$jlogfile" "$msg"
-         cp $filestem $COMOUTm2/$filestem.nr
-         chmod 664 $COMOUTm2/$filestem.nr
-         if [ $SENDDBN = "YES" ] ; then
+#         cp $filestem $COMOUTm2/$filestem.nr
+#         chmod 664 $COMOUTm2/$filestem.nr
+         cp $filestem $COMOUTm2/$filestem.ur #IG do not overwrite
+         chmod 664 $COMOUTm2/$filestem.ur
+	 if [ $SENDDBN = "YES" ] ; then
              NETUP=`echo $RUN | tr {a-z} {A-Z}`           # can this be net_uc?
              $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
-             $COMOUTm2/$filestem.nr
-         fi
+#             $COMOUTm2/$filestem.nr
+             $COMOUTm2/$filestem.ur #IG do not overwrite
+	 fi
       fi
 
    done
