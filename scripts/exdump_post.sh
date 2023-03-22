@@ -371,8 +371,12 @@ EOFparm
 fi #  endif loop $PROCESS_REMOREST
 
 
-if [ $PROCESS_REMOREST_dm2 = YES ]; then
+# PROCESS_REMOREST_dm2 = YES runs only on demand, on dev machines
+# Unrestrict 48h old aircraft obs(exc. TAMDAR), add *.ur file to $COMOUTm2 
+dev_m=$(grep backup /lfs/h1/ops/prod/config/prodmachinefile | cut -d: -f2)
+this_m=$(cat /etc/cluster_name)
 
+if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
 ########################################################################
 #     Remove Restriction on Data in 2-day old "aircar" and "aircft"    #
 #                         BUFR Data Dump files                         #
@@ -462,15 +466,12 @@ from 2-days ago (rc = $rc) -- existing file made 2-days ago is not overwritten"
          msg="Successful generation of non-restricted $file BUFR file from \
 2-days ago -- overwrite existing file made 2-days ago"
          $DATA/postmsg "$jlogfile" "$msg"
-#         cp $filestem $COMOUTm2/$filestem.nr
-#         chmod 664 $COMOUTm2/$filestem.nr
-         cp $filestem $COMOUTm2/$filestem.ur #IG do not overwrite
+         cp $filestem $COMOUTm2/$filestem.ur
          chmod 664 $COMOUTm2/$filestem.ur
 	 if [ $SENDDBN = "YES" ] ; then
              NETUP=`echo $RUN | tr {a-z} {A-Z}`           # can this be net_uc?
              $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
-#             $COMOUTm2/$filestem.nr
-             $COMOUTm2/$filestem.ur #IG do not overwrite
+             $COMOUTm2/$filestem.ur 
 	 fi
       fi
 
@@ -495,7 +496,7 @@ $dumptime"
 ########################################################################
 
    aircraft_nr_dm2=""
-   [ $PROCESS_REMOREST_dm2 = YES ] && \
+   [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ] && \
     aircraft_nr_dm2="aircar_nr_dm2 aircft_nr_dm2"
 
    for file in adpsfc adpupa aircar aircft satwnd sfcshp spssmi proflr \
@@ -511,7 +512,7 @@ $dumptime"
 
    do
       file_orig=$file
-      if [ $PROCESS_REMOREST_dm2 = YES ]; then
+      if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
 	 if [ $file = aircar_nr_dm2 -o $file = aircft_nr_dm2 ]; then
             file=`echo $file | cut -d"_" -f1`
 	    COMIN_save=$COMIN
@@ -600,7 +601,7 @@ a null file is copied in its place"
          fi
 
       done
-      if [ $PROCESS_REMOREST_dm2 = YES ]; then
+      if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
 	 if [ $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 ]; then
             COMIN=$COMIN_save
 	    COMOUT=$COMOUT_save
