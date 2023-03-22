@@ -119,7 +119,7 @@ set +u
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
 #
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
-#               sfcshp tideg atovs* adpsfc ascatt
+#               sfcshp tideg atovs* adpsfc ascatt snocvr
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
@@ -142,8 +142,7 @@ set +u
 #               satwnd
 #
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
-#               geoimr
-#
+#               geoimr gmi1cr satwhr
 # Dump group #10 (non-pb, TIME_TRIM defaults to OFF) =
 #               esiasi mtiasi esamua sevasr 1bamua bathy osbuv8
 #               ompst8 ompsn8 gsrasr ompslp sstvpw
@@ -582,6 +581,8 @@ export DUMP_NUMBER=1
 #            GSRCSR: 1 subtype(s)
 #            AHICSR: 1 subtype(s)
 #            SSTVCW: 1 subtype(s)
+#            SUBPFL: 1 subtype(s)
+#            SALDRN: 1 subtype(s)
 #            --------------------
 #            TOTAL NUMBER OF SUBTYPES = 14
 #
@@ -711,11 +712,12 @@ export DUMP_NUMBER=2
 #            ATOVS:  1 subtype(s)
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
+#            SNOCVR: 1 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 20 - 21
+#            TOTAL NUMBER OF SUBTYPES = 21 - 22
 #
 #--------------------------------------------------------------------------
 # GFS:
@@ -723,11 +725,12 @@ export DUMP_NUMBER=2
 #            TIDEG:  1 subtype(s)
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
+#            SNOCVR: 1 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES =  19 - 20
+#            TOTAL NUMBER OF SUBTYPES =  21 - 22
 #
 #==========================================================================
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
@@ -1406,19 +1409,24 @@ export DUMP_NUMBER=9
 #
 #--------------------------------------------------------------------------
 # Dump # 9 : GEOIMR: 1 subtype(s)
+#            GMI1CR: 1 subtype(s)
+#            SATWHR: 1 subtype(s)
 #            -------------------- 
-#            TOTAL NUMBER OF SUBTYPES = 1
+#            TOTAL NUMBER OF SUBTYPES = 3
 #
 #=======================================================================
 DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
 DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
+
+DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-3.00"}
+DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+2.99"}
 
 DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
 DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr satwhr
 
 error9=$?
 echo "$error9" > $DATA/error9
