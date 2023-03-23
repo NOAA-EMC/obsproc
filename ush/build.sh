@@ -13,7 +13,7 @@ INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"$pkg_root/install"}
 
 # By default; build as if NCO is executing this script
-BUILD_4NCO=${BUILD_4NCO:-"YES"}
+BUILD_4NCO=${BUILD_4NCO:-"NO"}
 
 target=$(echo $INSTALL_TARGET | tr [:upper:] [:lower:])
 if [[ "$target" =~ ^(wcoss2|hera|orion|jet)$ ]]; then
