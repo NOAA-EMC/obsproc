@@ -40,9 +40,10 @@ echo
 echo "####################################################################"
 echo
 set -x
+
 #####################################################################
-# List modules loaded for this job
-#####################################################################
+## List modules loaded for this job
+######################################################################
 set +x
 echo
 echo "####################################################################"
@@ -53,18 +54,36 @@ echo "####################################################################"
 echo
 set -x
 
-###########################
-# Specify NET and RUN Name
-###########################
+######################
+# Specify NET and RUN
+######################
 export obsNET=${obsNET:-obsproc}
 export NET=${NET:-urma}
-export RUN=${RUN:-urma}
 
 set +x
 echo
 echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+#echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+echo
+set -x
+
+echo $job | grep "_ru_"
+err_ru=$?
+if [ $err_ru = 0 ]; then
+  export RUN=${RUN:-urma_ru}  # rapid update w/ sub-hourly cycles
+  set +x
+  echo
+  echo cycM is ${cycM:?"###FATAL ERROR \"cycM\" is not set"}
+  echo
+  set -x
+else
+  export RUN=${RUN:-urma}     # normal, hourly cycle run
+fi
+set +x
+echo
+echo NET is ${NET}
+echo RUN is ${RUN}
 echo
 set -x
 
@@ -73,6 +92,17 @@ set -x
 ##############################
 export cycle=t${cyc}z
 export tmmark=tm00
+
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+#   (Note: the reset here applies only to references to $cycle, changed now to
+#          $cycle_here, in this script; downstream scripts
+#          exurma_makeprepbufr.sh.ecf and prepobs_makeprepbufr.sh will later
+#          reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
 
 ###############################
 # Create new working directory
@@ -106,14 +136,13 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc & prepobs items
 # ----------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSprepobs=${SCRIPTSprepobs:\
--$HOMEprepobs/scripts}
-
+export SCRIPTSprepobs=${SCRIPTSprepobs:-$HOMEprepobs/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
+export FIXprepobs=${FIXprepobs:-$HOMEprepobs/fix}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -128,9 +157,8 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 ##########################################
 # Run setpdy and initialize PDY variables
 ##########################################
-set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
-setpdy.sh
-. $DATA/PDY
+./setpdy.sh
+. PDY
 
 #########################
 # Define COM directories
@@ -144,19 +172,18 @@ if [[ "$RUN_ENVIR" == nco ]]; then
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
-
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
-#  prevent job from writing into a non-unique directory that might already have 
-#  output in it from a previous checkout run for the same cycle 
+#  prevent job from writing into a non-unique directory that might already have
+#  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
   export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
   mkdir -m 755 -p $COMOUT
 fi
 
-#########################################################
-# SETUP URMA POST-ANALYSIS PREPBUFR PROCESSING VARIABLES
-#########################################################
+##################################################
+# SETUP URMA POST-PREPBUFR PROCESSING VARIABLES
+##################################################
 
 #########################################################
 # Specify variables specific to this execution of script
@@ -171,15 +198,16 @@ env
 # Execute the script
 #####################
 $SCRIPTSprepobs/exprep_post.sh
-eval err_${RUN}_prep_post=$?
-eval [[ \$err_${RUN}_prep_post -ne 0 ]] && $DATA/err_exit
+err_prep_post=$?
+eval err_${RUN}_prep_post=${err_prep_post}
+[[ $err_prep_post -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep_post_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_prep_post_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_post_run
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_post_run
 [ -n "$obsproc_ver" ]  &&  \
- echo "Current OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_post_run
+ echo "OBSPROC version is $obsproc_ver" >> \
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_post_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

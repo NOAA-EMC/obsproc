@@ -37,7 +37,7 @@ echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
 echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
-       "${bufr_dump_ver:-not set}"
+     "${bufr_dump_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
      then echo "bufr_dump is required but not loaded! Exiting...";
@@ -48,9 +48,9 @@ echo "####################################################################"
 echo
 set -x
 
-######################################################
-# List modules needed by this job
-######################################################
+#######################################################
+# List modules loaded for this job
+#######################################################
 set +x
 echo
 echo "####################################################################"
@@ -61,26 +61,49 @@ echo "####################################################################"
 echo
 set -x
 
-###########################
-# Specify NET and RUN Name
-###########################
+######################
+# Specify NET and RUN
+######################
 export obsNET=${obsNET:-obsproc}
 export NET=${NET:-urma}
-export RUN=${RUN:-urma}
+#export RUN=${RUN:-urma}
 
 set +x
 echo
 echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+#echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
+
+echo $job | grep "_ru_"
+err_ru=$?
+if [ $err_ru = 0 ]; then
+  export RUN=${RUN:-urma_ru}  # rapid update w/ sub-hourly cycles
+  set +x
+  echo
+  echo cycM is ${cycM:?"###FATAL ERROR \"cycM\" is not set"}
+  echo
+  set -x
+else
+  export RUN=${RUN:-urma}     # normal, hourly cycle run
+fi
 
 ##############################
 # Specify cycle and time-mark
 ##############################
 export cycle=t${cyc}z
 export tmmark=tm00
+
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+#   (Note: the reset here applies only to references to $cycle, changed now to
+#          $cycle_here, in this script; downstream script exurma_dump.sh.ecf
+#          will later reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
 
 ###############################
 # Create new working directory
@@ -117,22 +140,14 @@ export SENDDBN=${SENDDBN:-YES}
 ##########################
 
 # -------------------------------
-# Paths for obsproc_network items
+# Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:\
 -$HOMEobsproc/scripts}
-
-# -----------------------------------------------------
-# Paths for dump and bufr_dumplist items
-# Variables pre-defined when bufr_dump module is loaded
-# -----------------------------------------------------
-
-export USHbufr_dump=${USHbufr_dump:-$HOMEbufr_dump/ush}
-export FIXbufr_dump=${FIXbufr_dump:-$HOMEbufr_dump/fix}
 
 # NOTE: path to dump executables defaults to $HOMEbufr_dump/exec in dumpjb
 
@@ -169,9 +184,9 @@ export FIXbufr=${FIXbufr:-$HOMEbufr_dump/fix}
 # Paths for non-obsproc items
 # ---------------------------
 
+# TANK is root directory path to observational database used in dumpjb
 # --------------------------------------------------------------------
 export DCOMROOT=${DCOMROOT:-/lfs/h1/ops/${envir}/dcom}
-echo $DCOMROOT
 export TANK=${TANK:-${DCOMROOT}}
 
 #########################################################################
@@ -203,7 +218,6 @@ if [[ "$RUN_ENVIR" == nco ]]; then
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
-
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have 
 #  output in it from a previous checkout run for the same cycle
@@ -214,7 +228,7 @@ else
 fi
 
 ############################################
-# SETUP URMA DATA DUMP PROCESSING VARIABLES
+# SETUP RMTA DATA DUMP PROCESSING VARIABLES
 ############################################
 
 #########################################################
@@ -237,6 +251,7 @@ export PREPSSMI_PROD_TYPE=NEURAL_NET3
 #   nam_expdomain_guam_halfdeg_imask.gbl
 export LALO=${LALO:-"F$FIXPREP/nam_expdomain_guam_halfdeg_imask.gbl"}
 
+
 export BACK=off # background threads not allowed
 
 env
@@ -248,17 +263,17 @@ $SCRIPTSobsproc/exurma_dump.sh
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_dump_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
-[ -n "$obsproc_urma_ver" ]  &&  \
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
+[ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 [ -n "$bufr_dump_ver" ]  &&  \
  echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
- >> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ >> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

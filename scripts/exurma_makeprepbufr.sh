@@ -20,14 +20,22 @@ cat break > $pgmout
 
 CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
 
-export COMSP=${COMSP:-$COMIN/${RUN}.${cycle}.}
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
+
+export COMSP=${COMSP:-$COMIN/${RUN}.${cycle_here}.}
 
 cdate10=`cut -c7-16 ncepdate`
 
 msg="CENTER TIME FOR PREPBUFR PROCESSING IS $cdate10"
+[ -n "$cycM" ]  &&  msg="$msg:${cycM}"
 postmsg "$jlogfile" "$msg"
 
-ksh $ushscript_prep/prepobs_makeprepbufr.sh $cdate10
+#  Add variable cycM as 2nd argument below (may or may not be set)
+ksh $ushscript_prep/prepobs_makeprepbufr.sh $cdate10 $cycM
 errsc=$?
 
 [ "$errsc" -ne '0' ]  &&  exit $errsc
@@ -47,32 +55,32 @@ warning=no
 if [ "$PREPDATA" = 'YES' ]; then
 
 # save snapshot of prepbufr file after PREPOBS_PREPDATA in COMOUT
-   cp prepda.prepdata $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
+   cp prepda.prepdata $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
 
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
-      chgrp rstprod $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
+      chgrp rstprod $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
       errch=$?
       if [ $errch -eq 0 ]; then
-         chmod 640 $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
+         chmod 640 $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
       else
-         cp /dev/null $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
+         cp /dev/null $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
          warning=yes
       fi
    fi
 #bsm - troubleshooting
 echo "is the prepbufr file good?"
-echo `ls -l $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark`
+echo `ls -l $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark`
 
 # save current prepbufr mnemonic table in COMOUT if either it isn't already
 #  there for a previous cycle or if it has changed from a previous cycle
    if [ ! -s $COMOUT/*prep.bufrtable ]; then
-      cp prep.bufrtable  $COMOUT/${RUN}.${cycle}.prep.bufrtable
+      cp prep.bufrtable  $COMOUT/${RUN}.${cycle_here}.prep.bufrtable
    else
       diff `ls -t  $COMOUT/*prep.bufrtable | head -n1` prep.bufrtable \
        > /dev/null 2>&1
       errdiff=$?
       [ "$errdiff" -ne '0' ]  &&  \
-       cp prep.bufrtable  $COMOUT/${RUN}.${cycle}.prep.bufrtable
+       cp prep.bufrtable  $COMOUT/${RUN}.${cycle_here}.prep.bufrtable
    fi
 fi
 

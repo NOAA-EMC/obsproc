@@ -36,8 +36,8 @@ echo
 echo "####################################################################"
 echo
 echo "OBSPROC version is ${obsproc_ver:-not set}"
-echo "BUFR_DUMP version used by this job, for dumplist, is " \
-       "${bufr_dump_ver:-not set}"
+echo "BUFR_DUMP version used by this job, for dump and dumplist, is" \
+     "${bufr_dump_ver:-not set}"
 echo "grib_util module version used by this job is ${grib_util_ver:-not set}"
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]];
      then echo "bufr_dump is required but not loaded! Exiting...";
@@ -49,8 +49,8 @@ echo
 set -x
 
 #####################################################################
-### List modules loaded for this job.
-#######################################################################
+## List modules loaded for this job.
+######################################################################
 set +x
 echo
 echo "####################################################################"
@@ -66,15 +66,29 @@ set -x
 ###########################
 export obsNET=${obsNET:-obsproc}
 export NET=${NET:-urma}
-export RUN=${RUN:-urma}
 
 set +x
 echo
 echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
+
+echo $job | grep "_ru_"
+err_ru=$?
+if [ $err_ru = 0 ]; then
+  export RUN=${RUN:-urma_ru}  # rapid update w/ sub-hourly cycles
+  set +x
+  echo
+  echo cycM is ${cycM:?"###FATAL ERROR \"cycM\" is not set"}
+  echo
+  set -x
+else
+  export RUN=${RUN:-urma}     # normal, hourly cycle run
+fi
+
+echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+
 
 ##############################
 # Specify cycle and time-mark
@@ -110,20 +124,20 @@ export SENDDBN=${SENDDBN:-YES}
 # Specify Execution Areas
 ##########################
 
-# -------------------------------
+# ------------------------
 # Paths for obsproc items
-# -------------------------------
+# ------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
-"###FATAL ERROR \"obsproc_urma_ver\" is not set"}}
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
+"###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export EXECobsproc=${EXECobsproc:-$HOMEobsproc/exec}
 export USHobsproc=${USHobsproc:-$HOMEobsproc/ush}
 
 #########################################################################
-### Add some prod utilities to working directory
-###########################################################################
+## Add some prod utilities to working directory
+##########################################################################
 echo "step ############# break ##############################" > ./break
 cp $UTILROOT/ush/err_chk   .; chmod +x err_chk
 cp $UTILROOT/ush/err_exit  .; chmod +x err_exit
@@ -138,6 +152,13 @@ set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
 setpdy.sh
 . $DATA/PDY
 
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset exported cycle to 4-digit value t<HHMM>z
+#  (Note: This value for $cycle will now be used in this script and in
+#         downstream script exdump_post.sh.ecf)
+
+[ -n "$cycM" ]  &&  cycle=t${cyc}${cycM}z
+
 #########################
 # Define COM directories
 #########################
@@ -145,8 +166,7 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  #export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/$obsproc_ver/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py -o  ${obsNET}/$obsproc_ver/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/$obsproc_ver/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
@@ -171,16 +191,14 @@ export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN
 # directory path to data count averaging executed in model script and in
 #  bufr_avgdata.sh
 # ----------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN})}
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/sdm_rtdm/${NET})}
 
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export AVGDarch_IN=$HOMEarch/avgdata
   export AVGDarch_OUT=$HOMEarch/avgdata
+  mkdir -p $AVGDarch_OUT
 else
-  [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
-  export AVGDarch_IN=${AVGDarch_IN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
   export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
   mkdir -p $AVGDarch_OUT
 fi
@@ -205,7 +223,7 @@ export PROCESS_LISTERS=${PROCESS_LISTERS:-YES}
 export MPMD=${MPMD:-"NO"}   # do not run listdumps in parallel by default
 
 # Data count average tables are generated in the 23Z run only
-if [ "$cyc" = '23' ]; then
+if [ "$cyc" = '23' -a -z "$cycM" ]; then
    export PROCESS_AVGTABLES=${PROCESS_AVGTABLES:-YES}
 else
    export PROCESS_AVGTABLES=${PROCESS_AVGTABLES:-NO}
@@ -218,7 +236,7 @@ env
 #####################
 $SCRIPTSobsproc/exdump_post.sh
 eval err_${RUN}_dump_post=$?
-eval [[ \$err_${RUN}_dump_post -ne 0 ]]  && $DATA/err_exit
+eval [[ \$err_${RUN}_dump_post -ne 0 ]] && $DATA/err_exit
 
 echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_post_ran
 
@@ -228,8 +246,9 @@ echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_post
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
 
 [ -n "$bufr_dump_ver" ]  &&  \
- echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
+ echo "BUFR_DUMP version used by this job is  $bufr_dump_ver" >> \
  $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_post_run
+
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT

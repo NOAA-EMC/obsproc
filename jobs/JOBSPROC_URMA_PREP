@@ -42,8 +42,8 @@ echo
 set -x
 
 #####################################################################
-## List modules loaded for this job.
-######################################################################
+# List modules loaded for this job
+#####################################################################
 set +x
 echo
 echo "####################################################################"
@@ -59,13 +59,33 @@ set -x
 ###########################
 export obsNET=${obsNET:-obsproc}
 export NET=${NET:-urma}
-export RUN=${RUN:-urma}
 
 set +x
 echo
 echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo
+set -x
+
+echo $job | grep "_ru_"
+err_ru=$?
+if [ $err_ru = 0 ]; then
+  export RUN=${RUN:-urma_ru}  # rapid update w/ sub-hourly cycles
+  set +x
+  echo
+  echo cycM is ${cycM:?"###FATAL ERROR \"cycM\" is not set"}
+  echo
+  set -x
+else
+  export RUN=${RUN:-urma}     # normal, hourly cycle run
+fi
+
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
+
+set +x
+echo
+echo NET is ${NET}
+echo RUN is ${RUN}
 echo
 set -x
 
@@ -75,17 +95,26 @@ set -x
 export cycle=t${cyc}z
 export tmmark=tm00
 
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+#   (Note: the reset here applies only to references to $cycle, changed now to
+#          $cycle_here, in this script; downstream scripts
+#          exurma_makeprepbufr.sh.ecf and prepobs_makeprepbufr.sh will later
+#          reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
+
 ###############################
 # Create new working directory
 ###############################
-jobid=${jobid:-${job}.$(hostname -s).$$}
+jobid=${jobid:=${job}.$(hostname -s).$$}
 export DATA=${DATA:-$DATAROOT/${jobid}}
 rm -rf $DATA
 mkdir -p $DATA
 cd $DATA
 export pgmout=OUTPUT.$$
-
-echo dummy > sgesprep # to avoid copying unnecessary GFS file into $DATA
 
 ######################################
 # Set job log file for postmsg output
@@ -109,12 +138,10 @@ export SENDDBN=${SENDDBN:-YES}
 # Paths for obsproc items
 # -------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/obsproc/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:\
--$HOMEobsproc/scripts}
-
+export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
 export USHprepobs=${USHprepobs:-$HOMEprepobs/ush}
 
 # directory path to data prep script executed in model script
@@ -132,11 +159,17 @@ export PARMPREP=${PARMPREP:-${HOMEobsproc}/parm}
 # Paths for non-obsproc items
 # ---------------------------
 
-export TANK=${TANK:-${DCOMROOT}}
 # DICTPREP is directory path to metar.tbl dictionary used in
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
 export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
+
+# export specific urma OBSPROC variables here
+# ------------------------------------------
+export PRPC=${PRPC:-$PARMPREP/prepobs_prepdata.urma.parm}
+export CQCC=${CQCC:-$PARMPREP/prepobs_cqcbufr.urma.parm}
+export AQCC=${AQCC:-$PARMPREP/prepobs_prepacqc.urma.parm}
+export PQCC=${PQCC:-$PARMPREP/prepobs_profcqc.urma.parm}
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -151,9 +184,8 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 ##########################################
 # Run setpdy and initialize PDY variables
 ##########################################
-set +x; echo -e "\n---> path to setpdy.sh below is: `which setpdy.sh`"; set -x
-setpdy.sh
-. $DATA/PDY
+./setpdy.sh
+. PDY
 
 #########################
 # Define COM directories
@@ -163,14 +195,13 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  #export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMOUT=${COMOUT:-$(compath.py -o  ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
-#  prevent job from writing into a non-unique directory that might already have 
+#  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
@@ -178,42 +209,48 @@ else
   mkdir -m 755 -p $COMOUT
 fi
 
-export NEMSIO_IN=${NEMSIO_IN:-.false.}        # switch for nemsio vs sigio guess
-export NETCDF_IN=${NETCDF_IN:-.true.}         # switch for netcdf history guess
-                                              # NOTE: only NESMIO_IN or NETCDF_IN can be .true.
+export NEMSIO_IN=${NEMSIO_IN:-.false.}      # switch for nemsio vs sigio guess
+export NETCDF_IN=${NETCDF_IN:-.true.}       # switch for netcdf history guess
+                                            # NOTE: only NESMIO_IN or NETCDF_IN can be .true.
 #export envir_getges=${envir_getges:-prod}
 export envir_getges=${envir_getges:-${envir:-prod}}
+export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges}
 export COMINgdas=${COMINgdas:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gdas.$PDY/${cyc}/${COMPONENT}}
 export COMINgfs=${COMINgfs:-$(compath.py ${envir_getges}/gfs/${gfs_ver})/gfs.$PDY/${cyc}/${COMPONENT}}
-if [[ "$NEMSIO_IN" == .true. || "$NETCDF_IN" == .true. ]]; then 
-  export GETGES_NWG=${GETGES_NWG:-$COMROOT/nwges} 
-  export GETGES_COM=${GETGES_COM:-$COMROOT}
-fi
 
-###########################################
+##############################################
 # SETUP URMA PREPBUFR PROCESSING VARIABLES
-###########################################
+##############################################
 
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
 
-#  Set both POE and BACK to NO in order to run this job in a serial environment
+#  Set POE *or* BACK to YES in order to run this job in a parallel environment
 
-export POE=NO
-export BACK=NO
+export POE=${POE:-NO}
+##export BACK=YES  # set BACK to YES for an alternate method of running this
+                   #  job in a parallel environment (in this case POE must be
+                   #  NO)
+
+#  NSPLIT indicates the number of parts into which the PREPDATA
+#         processing will will be split in order to run in parallel
+#         for computational efficiency (either under poe tasks when
+#         POE=YES or in background threads when BACK=YES)
+#   (Applies only when either POE=YES or BACK=YES, and PREPDATA=YES)
+#   Consider the size of the backgrounds fields if using threads.
+
+export NSPLIT=${NSPLIT:-1}
 
 #  BUFRLIST indicates the list of BUFR data dump file names to process
 
-export BUFRLIST=${BUFRLIST:-"adpsfc sfcshp msonet ascatw wdsatr satwnd"}
+export BUFRLIST=${BUFRLIST:-"adpupa proflr aircar aircft satwnd adpsfc \
+ sfcshp vadwnd goesnd msonet gpsipw rassda ascatw wdsatr"}
 
 export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
                            # center hour (cycle) times if foreground exit
                            # status is 4 (i.e., when either either "ADPUPA" or
                            # "ADPSFC" dump is empty)
-
-export email_GLERL="matthew.t.morris@noaa.gov"   # glerladj.sh alert recipient
-
 
 # VARIABLES THAT CONTROL PROCESSING OF INDIVIDUAL PROGRAMS
 # --------------------------------------------------------
@@ -224,45 +261,51 @@ export email_GLERL="matthew.t.morris@noaa.gov"   # glerladj.sh alert recipient
 #       if job fails in one of these programs, set offending program
 #       to NO and resubmit to "work-around" problem)
 
-export SYNDATA=NO     # NEVER execute program SYNDAT_SYNDATA
+export SYNDATA=NO                # NEVER execute program SYNDAT_SYNDATA
 
-export GLERLBUFR=YES  # Execute program PREPOBS_GLERLADJ (GLERL adjustment
-                      #  processing)
+export PREPACQC=${PREPACQC:-YES} # Execute PREPACQC script processing if YES
+   export PROCESS_ACQC=${PROCESS_ACQC:-YES} # Execute program PREPOBS_PREPACQC
+                                            #  if YES
+   export PROCESS_ACPF=${PROCESS_ACPF:-YES} # Execute program PREPOBS_PREPACPF
+                                            #  if YES
 
-export PREPACQC=NO    # NEVER execute PREPACQC script processing
-export PROCESS_ACQC=NO  # NEVER execute program PREPOBS_PREPACQC
-export PROCESS_ACPF=NO  # NEVER execute program PREPOBS_PREPACPF
+export PROFCQC=${PROFCQC:-YES}   # Execute program PREPOBS_PROFCQC  if YES
 
-export PROFCQC=NO     # NEVER execute program PREPOBS_PROFCQC
+export CQCVAD=${CQCVAD:-YES}     # Execute program PREPOBS_CQCVAD   if YES
 
-export CQCVAD=NO      # NEVER execute program PREPOBS_CQCVAD
+export CQCBUFR=${CQCBUFR:-YES}   # Execute program PREPOBS_CQCBUFR  if YES
 
-export CQCBUFR=NO     # NEVER execute program PREPOBS_CQCBUFR
+export OIQCBUFR=NO               # NEVER execute program PREPOBS_OIQCBUFR
 
-export OIQCBUFR=NO    # NEVER execute program PREPOBS_OIQCBUFR
-
-export DO_QC=NO       # NO, programs PREPOBS_PREPACQC, PREPOBS_PREPACPF,
-                      # PREPOBS_PROFCQC, PREPOBS_CQCVAD, PREPOBS_CQCBUFR and
-                      # PREPOBS_OIQCBUFR will NEVER execute regardless of
-                      # switches above
-
-export GETGUESS=${GETGUESS:-YES}
-                      # Encode first guess (background) values interpolated to
-                      # observation locations in the PREPBUFR file for use by
-                      # the q.c. programs.  This guess is always from a global
-                      # sigma guess file valid at the center PREPBUFR
-                      # processing date/time.
-                      # Defaults to "YES" in URMA runs (will only do virt.
-                      #  temp. processing here)
 
 #  -- If any of these are switched to NO it will affect the success of
 #      other programs and the success of the complete job
 #      (these are set-up only for CHECKOUT runs - they should always
 #       be set to YES for operational runs)
 
-export PREPDATA=${PREPDATA:-YES}
+export PREPDATA=${PREPDATA:-YES}  
                       # Execute programs PREPOBS_MPCOPYBUFR, PREPOBS_PREPDATA,
                       # PREPOBS_LISTHEADERS and PREPOBS_MONOPREPBUFR if YES
+
+export GETGUESS=${GETGUESS:-YES}
+                      # Encode first guess (background) values interpolated to
+                      # observation locations in the PREPBUFR file for use by
+                      # the q.c. programs.  If the center PREPBUFR processing
+                      # date/time is a multiple of 3-hrs, this guess is always
+                      # from a global sigma guess file valid at the center
+                      # PREPBUFR processing date/time.  Otherwise, this guess
+                      # is created by a linear interpolation of spectral
+                      # coefficients from global sigma guess files that span
+                      # the PREPBUFR processing date/time.  This is necessary
+                      # because global sigma guess files are valid only at
+                      # hours which are a multiple of 3.
+
+export DO_QC=${DO_QC:-YES}
+                      # IF NO, programs PREPOBS_PREPACQC, PREPOBS_PREPACPF,
+                      # PREPOBS_PROFCQC, PREPOBS_CQCVAD, PREPOBS_CQCBUFR and
+                      # PREPOBS_OIQCBUFR will NEVER execute regardless of
+                      # switches above -
+                      # should be set to NO only as a last resort!!!
 
 env
 
@@ -270,19 +313,16 @@ env
 # Execute the script
 #####################
 $SCRIPTSobsproc/exurma_makeprepbufr.sh
-eval err_${RUN}_makeprepbufr=$?
-eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
+err_urma_makeprepbufr=$?
+eval err_${RUN}_prep=${err_urma_makeprepbufr}
+[[ $err_urma_makeprepbufr -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_prep_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_run
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_run
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_run
-
-# Adding time lag to the end of the job to allow PREPBUFR to be copied
-#  completely before the start of the next job in the trigger's sequence
-sleep 10
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT
