@@ -176,7 +176,7 @@ set -u
       DUMP_group3=${DUMP_group3:-"NO"}
       DUMP_group4=${DUMP_group4:-"NO"}
       DUMP_group5=${DUMP_group5:-"NO"}
-      DUMP_group6=${DUMP_group6:-"NO"}
+      DUMP_group6=${DUMP_group6:-"YES"} # for WEI
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"YES"}
@@ -190,7 +190,7 @@ set -u
       DUMP_group3=${DUMP_group3:-"YES"}
       DUMP_group4=${DUMP_group4:-"YES"}
       DUMP_group5=${DUMP_group5:-"NO"}
-      DUMP_group6=${DUMP_group6:-"NO"}
+      DUMP_group6=${DUMP_group6:-"YES"} # for WEI
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"NO"}
@@ -205,7 +205,7 @@ else
    DUMP_group3=${DUMP_group3:-"YES"}
    DUMP_group4=${DUMP_group4:-"YES"}
    DUMP_group5=${DUMP_group5:-"NO"}
-   DUMP_group6=${DUMP_group6:-"NO"}
+   DUMP_group6=${DUMP_group6:-"YES"} # for WEI
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
@@ -1047,7 +1047,10 @@ export DUMP_NUMBER=6
 #
 #--------------------------------------------------------------------------
 # Currently not executed in GDAS or GFS:
-# Dump # 6 : NEXRAD: 8 subtype(s)
+# Dump # 6 : NEXRAD: 8 subtype(s) DON'T DUMP NEXRAD!!!
+#            AXBT  : 1 subtype(s) MARINE
+#            XBTCTD: 1 subtype(s) MARINE
+#            ALTKOB: 1 subtype(s) MARINE
 #            --------------------
 #            TOTAL NUMBER OF SUBTYPES = 8
 #
@@ -1148,7 +1151,12 @@ elif [ $cycp -eq 18 ]; then # (16.5 - 19.5 Z)
    unset SKIP_006059 # reflectivity 19Z
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 nexrad
+
+echo "USED to be: $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 nexrad"
+echo "NOW it is $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 axbt xbtctd altkob"
+echo "TEMPORARY configuration for Wei / Marine testing"
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 axbt xbtctd altkob
 error6=$?
 echo "$error6" > $DATA/error6
 
