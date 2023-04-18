@@ -243,9 +243,10 @@ DTIM_earliest_saldrn=-0.50
 DTIM_latest_saldrn=+0.50
 
 # for rtma_ru_0000 read only from previous day's tank
-# Temporary bug fix
+echo "DTIM_latest_000000=-0.01 changed to DTIM_latest_000000=0.5 by Praveen on 03/13/23"
 if [ $RUN = "rtma_ru" -a $cycle = "t0000z" ]; then
-  DTIM_latest_000000=-0.01
+  DTIM_latest_000000=0.5
+#  DTIM_latest_000000=-0.01
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc subpfl saldrn
