@@ -1056,6 +1056,14 @@ export DUMP_NUMBER=6
 #
 #===================================================================
 
+DTIM_earliest_axbt=${DTIM_earliest_axbt:-"-5.99"}
+DTIM_earliest_xbtctd=${DTIM_earliest_xbtctd:-"-5.99"}
+DTIM_earliest_altkob=${DTIM_earliest_altkob:-"-5.99"}
+
+DTIM_latest_axbt=${DTIM_latest_axbt:-"+2.99"}
+DTIM_latest_xbtctd=${DTIM_latest_xbtctd:-"+2.99"}
+DTIM_latest_altkob=${DTIM_latest_altkob:-"+2.99"}
+
 DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM6:-off}}
@@ -1211,6 +1219,8 @@ export DUMP_NUMBER=7
 #            TOTAL NUMBER OF SUBTYPES = 10
 #
 #=========================================================================
+
+DTIM_earliest_trkob=${DTIM_earliest_trkob:-"-5.99"}
 
 DTIM_latest_avcspm=${DTIM_latest_avcspm:-"+2.99"}
 DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+2.99"}
