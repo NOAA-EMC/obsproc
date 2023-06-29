@@ -377,6 +377,7 @@ dev_m=$(grep backup /lfs/h1/ops/prod/config/prodmachinefile | cut -d: -f2)
 this_m=$(cat /etc/cluster_name)
 
 if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
+#BAD if [ $PROCESS_REMOREST_dm2 = YES -a "$RUN_ENVIR" != nco ]; then 
 ########################################################################
 #     Remove Restriction on Data in 2-day old "aircar" and "aircft"    #
 #                         BUFR Data Dump files                         #
@@ -497,7 +498,8 @@ $dumptime"
 
    aircraft_nr_dm2=""
    [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ] && \
-    aircraft_nr_dm2="aircar_nr_dm2 aircft_nr_dm2"
+#BAD   [ $PROCESS_REMOREST_dm2 = YES -a "$RUN_ENVIR" != nco ] && \
+   aircraft_nr_dm2="aircar_nr_dm2 aircft_nr_dm2"
 
    for file in adpsfc adpupa aircar aircft satwnd sfcshp spssmi proflr \
                vadwnd goesnd erscat sfcbog erswnd ssmip  ssmipn ssmit  \
@@ -513,7 +515,8 @@ $dumptime"
    do
       file_orig=$file
       if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
-	 if [ $file = aircar_nr_dm2 -o $file = aircft_nr_dm2 ]; then
+#BAD      if [ $PROCESS_REMOREST_dm2 = YES -a "$RUN_ENVIR" != nco ]; then
+         if [ $file = aircar_nr_dm2 -o $file = aircft_nr_dm2 ]; then
             file=`echo $file | cut -d"_" -f1`
 	    COMIN_save=$COMIN
 	    COMIN=$COMINm2
@@ -601,6 +604,7 @@ a null file is copied in its place"
          fi
 
       done
+#BAD      if [ $PROCESS_REMOREST_dm2 = YES -a "$RUN_ENVIR" != nco ]; then
       if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
 	 if [ $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 ]; then
             COMIN=$COMIN_save
