@@ -54,6 +54,7 @@ echo "         Dec 09 2021 - Updated to run on WCOSS2                          "
 echo "         Aug 10 2022 - Added subpfl,saldn to dump #1,snocvr to dump #3.  "
 echo "                       added gmi1cr dump group #7                        "
 echo "                       b005/xx081 added to satwnd                        "
+echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #2.        "
 ################################################################################
 
 set -xau
@@ -68,9 +69,9 @@ set +u
 # ------------------------------------------------------------------------
 # Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
-#                          subpfl saldrn
-# Dump group #2 (pb) = vadwnd satwnd adpupa
+# Dump group #2 (pb) = vadwnd satwnd adpupa uprair
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
+#                          subpfl saldrn
 # Dump group #4 (pb) = msonet gpsipw
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
@@ -417,9 +418,9 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #==========================================================================
-# Dump # 2 : VADWND, SATWND, ADPUPA
-#              (2)    (19)     (6)
-#            -- TOTAL NUMBER OF SUBTYPES = 27
+# Dump # 2 : VADWND, SATWND, ADPUPA, UPRAIR
+#              (2)    (19)     (6)     (5)
+#            -- TOTAL NUMBER OF SUBTYPES = 32
 #==========================================================================
 
 # Skip all Indian satellite winds in SATWND (not in domain)
@@ -436,13 +437,15 @@ For testing, skip in ecflow or obsproc_rap.ver file
 #export SKIP_005065=YES
 #export SKIP_005066=YES
 
-# Add GOES-16/17 DMW data to SATWND
+# Add GOES-16/17/18 DMW data to SATWND
 export ADD_satwnd="005030 005031 005032 005034 005039"
 
-# Time window -1.00 to +1.00 hours for ADPUPA for full and partial cycle runs
+# Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
 DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
 DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
+DTIM_earliest_uprair=${DTIM_earliest_uprair:-"-1.00"}
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+1.00"}
 
 # Time window -1.50 to +1.49 hours for EUMETSAT SATWND for full and partial
 #  cycle runs
@@ -517,7 +520,7 @@ else
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_2} 1 vadwnd \
- satwnd adpupa
+ satwnd adpupa uprair
 error2=$?
 echo "$error2" > $DATA/error2
 

@@ -40,6 +40,7 @@ echo "         Mar 08 2022 - Enable the dumping of 002017 in vadwnd dump  "
 echo "                       group.                                       "
 echo "         Jul 30 2022 - Subpfl, saldrn, snocvr, and gmi1cr added     "
 echo "                       to dump group #9.    "
+echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.   "
 ###########################################################################
 
 set -xau
@@ -61,7 +62,7 @@ set +u
 #               sfcshp tideg atovs adpsfc
 #
 # Dump group #3 (pb, TIME_TRIM = OFF) =
-#               adpupa gpsipw ascatt
+#               adpupa uprair gpsipw ascatt
 #
 # Dump group #4 (pb, TIME_TRIM = default = ON) =
 #               aircar aircft proflr vadwnd rassda
@@ -497,22 +498,24 @@ export DUMP_NUMBER=3
 #
 #--------------------------------------------------------------------------
 # Dump #3:   ADPUPA: 6 subtype(s)
+#            UPRAIR: 5 subtype(s)
 #            GPSIPW: 1 subtype(s)
 #            ASCATT: 1 subtype(s)
 #            ---------------------
-#            TOTAL NUMBER OF SUBTYPES = 8
+#            TOTAL NUMBER OF SUBTYPES = 13
 #
 #====================================================================
 
 # other dump types
 # ----------------
 DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+2.99"}
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+2.99"}
 DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+2.99"}
 DTIM_latest_ascatt=${DTIM_latest_ascatt:-"+2.99"}
 
 TIME_TRIM=off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa gpsipw ascatt
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa uprair gpsipw ascatt
 error3=$?
 echo "$error3" > $DATA/error3
 
