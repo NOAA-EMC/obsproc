@@ -15,11 +15,7 @@ else
 fi
 
 # cd to destination output dir for logfiles to be written there w/ pid
-<<<<<<< HEAD
-outdir=/lfs/h2/emc/ptmp/$USER/CRON/$desc/output
-=======
 outdir=/lfs/h2/emc/stmp/$USER/CRON/$desc/output
->>>>>>> 21d7d9a2d2983684f4403c7ee9023a38c152c3c3
 echo $outdir
 mkdir -p $outdir
 cd $outdir
