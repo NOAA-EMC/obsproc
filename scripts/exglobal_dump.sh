@@ -121,6 +121,7 @@ set +u
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
 #               sfcshp tideg atovs* adpsfc ascatt snocvr
 #                   * - for GDAS only
+#               IG: for WEI, dump sfcshp components
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
 #               adpupa
@@ -132,7 +133,11 @@ set +u
 #               msonet
 #
 # Dump group #6 (non-pb, TIME_TRIM defaults to OFF) =
-#               nexrad
+#               nexrad (IG: turned off)
+#               axbt (IG: but often no tank for it)
+#               xbtctd
+#               altkob
+#               (trkob is Dump group #7)
 #
 # Dump group #7 (non-pb, TIME_TRIM defaults to OFF) =
 #               avcspm esmhs 1bmhs airsev atmsdb gome omi trkob gpsro
@@ -714,6 +719,8 @@ export DUMP_NUMBER=2
 #            ASCATT: 1 subtype(s)
 #            SNOCVR: 1 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
+#  IG: add for WEI: sfcshp componets - 11 of them
+#
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
@@ -733,6 +740,9 @@ export DUMP_NUMBER=2
 #            TOTAL NUMBER OF SUBTYPES =  21 - 22
 #
 #==========================================================================
+# ships dbuoy mbuoy lcman cstgd shipsu shipsb dbuoyb mbuoyb cmanb shipub
+
+
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
@@ -761,7 +771,22 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat \
+ ships dbuoy mbuoy lcman cstgd shipsu shipsb dbuoyb mbuoyb cmanb shipub
+
+#_sfcshp    nem 001001 001013 001002 001003 001004 001007 001102 001103 001101 001113 001104
+#_ships     nem 001001  #> Ship - manual and automatic, restricted          |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
+#_dbuoy     nem 001002  #> Buoys decoded from FM-18 fmt (moored or drifting)|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
+#_mbuoy     nem 001003  #> Buoys decoded from FM-13 format (moored)         |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
+#_lcman     nem 001004  #> Land-based CMAN stations decoded from CMAN format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
+#_cstgd     nem 001007  #> Coast Guard                                      | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
+#_shipsu    nem 001013  #> Ship - manual and automatic, unrestricted        |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
+#_shipsb    nem 001101  #> Ship - manual and automatic, restricted (BUFR)   | YEL 50   50 YYYY| YEL 50   50 YYYY| YEL 50   50 YYYY| YEL | YEL |
+#_dbuoyb    nem 001102  #> Drifting buoys (decoded from BUFR)               | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
+#_mbuoyb    nem 001103  #> Moored buoys (decoded from BUFR)                 | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
+#_cmanb     nem 001104  #> Surface Marine CMAN rpts decoded from BUFR format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
+#_shipub    nem 001113  #> Ship - manual and automatic, unrestricted (BUFR) |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
+
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -1058,7 +1083,7 @@ export DUMP_NUMBER=6
 
 DTIM_earliest_axbt=${DTIM_earliest_axbt:-"-5.99"}
 DTIM_earliest_xbtctd=${DTIM_earliest_xbtctd:-"-5.99"}
-DTIM_earliest_altkob=${DTIM_earliest_altkob:-"-5.99"}
+DTIM_earliest_altkob=${DTIM_earliest_altkob:-"-14.99"}
 
 DTIM_latest_axbt=${DTIM_latest_axbt:-"+2.99"}
 DTIM_latest_xbtctd=${DTIM_latest_xbtctd:-"+2.99"}
