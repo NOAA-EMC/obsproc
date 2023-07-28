@@ -116,9 +116,9 @@ set +u
 # JOB_NUMBER not present indicates dump BOTH prepbufr and non-prepbufr data.
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcsam eshrs3 ssmisu saphir 1bhrs4 sevcsr tesac mls
+#               avcsam eshrs3 ssmisu 1bhrs4 tesac mls
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
-#
+#               Stop: sevcsr, saphir in v1.2.0 
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
 #               sfcshp tideg atovs* adpsfc ascatt snocvr
 #                   * - for GDAS only
@@ -145,8 +145,8 @@ set +u
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
 #               geoimr gmi1cr satwhr
 # Dump group #10 (non-pb, TIME_TRIM defaults to OFF) =
-#               esiasi mtiasi esamua sevasr 1bamua bathy osbuv8
-#               ompst8 ompsn8 gsrasr ompslp sstvpw
+#               esiasi mtiasi esamua sevasr 1bamua bathy
+#               osbuv8 ompst8 ompsn8 gsrasr ompslp sstvpw
 #
 # Dump group #11 (non-pb, TIME_TRIM defaults to OFF) =
 #               amsr2
@@ -592,10 +592,10 @@ export DUMP_NUMBER=1
 DTIM_latest_avcsam=${DTIM_latest_avcsam:-"+2.99"}
 DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+2.99"}
 DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+2.99"}
-DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
+#DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
 DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
-DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
+#DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
 DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
 #-----------------------------------------------
 # check for mls tank presence in past 10 days
@@ -626,7 +626,7 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- saphir 1bhrs4 sevcsr tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
+ 1bhrs4 tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -638,13 +638,13 @@ if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ssmisu $job \
     ${COMSP}ssmisu.tm00.bufr_d
    if [ "${NET}" = "gdas" ]; then
-      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
-       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
+#      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
+#       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
    fi
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bhrs4 $job \
     ${COMSP}1bhrs4.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
-    ${COMSP}sevcsr.tm00.bufr_d
+#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
+#    ${COMSP}sevcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tesac $job \
     ${COMSP}tesac.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
