@@ -1,3 +1,157 @@
+obsproc v1.2.0  RELEASED        AUG ??,2023
+        v1.2.?  IMPLEMENTED     ??? ??,2023
+
+FILE CHANGES
+
+
+D docs/ReleaseNotes.txt
+M docs/Release_Notes.txt
+M jobs/JOBSPROC_CDAS_PREP1
+M jobs/JOBSPROC_GLOBAL_DUMP_POST
+M jobs/JOBSPROC_GLOBAL_PREP
+M jobs/JOBSPROC_GLOBAL_PREP_POST
+M jobs/JOBSPROC_RAP_PREP
+A modulefiles/obsproc_jet.lua
+M scripts/excdas_dump.sh 
+M scripts/exdump_post.sh
+M scripts/exglobal_dump.sh
+M scripts/exrap_dump.sh 
+M scripts/exrtma_dump.sh
+M sorc/bufr_remorest.fd/remorest.f 
+M ush/build.sh
+D versions/README
+M versions/run.ver
+M versions/VERSION
+(M-modified; A-added; D-deleted)
+
+DOCS CHANGES
+
+ docs/ReleaseNotes.txt
+ Delete repetitive file with similar name
+
+ docs/Release_Notes.txt
+ Reflect this release changes.
+
+JOBS CHANGES
+
+ jobs/JOBSPROC_CDAS_PREP1
+ Increase errPREPDATA_limit in order to allow code to generate prepbufr file if/when one or more key files 
+ (adpsfc, adpupa, uprair) are missing
+
+ jobs/JOBSPROC_GLOBAL_DUMP_POST
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+
+ jobs/JOBSPROC_GLOBAL_PREP
+ Instruct to add uprair dump files data to GDAS and GFS prepbufr files
+ 
+ jobs/JOBSPROC_GLOBAL_PREP_POST
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2) 
+
+ jobs/JOBSPROC_RAP_PREP
+ Instruct to add uprair dump files data to RAP's prepbufr file
+
+MODULEFILES CHANGES
+
+ modulefiles/obsproc_jet.lua
+ Add support for functionality on Jet
+
+SCRIPTS CHANGES
+
+ scripts/excdas_dump.sh
+ Instruct to dump uprair file for CDAS network
+
+ scripts/exdump_post.sh
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+
+ scripts/exglobal_dump.sh
+ Split groups 1 and 10 and add an additional DUMP_group12 to allow code to run on one more cpu and faster
+ Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
+
+ scripts/exrap_dump.sh
+ Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
+
+ scripts/exrtma_dump.sh
+ Relax  DTIM_latest_000000 for 00:00UTC run
+
+SORC CHANGES
+
+ sorc/bufr_remorest.fd/remorest.f
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+ 
+USH CHANGES
+
+ ush/build.sh
+ Add support for functionality on Jet
+
+VERSIONS CHANGES
+ 
+ versions/README
+ Delete old notes
+
+ versions/run.ver
+ Set bufr_dump_ver=1.2.0 and prepbufr_ver=1.1.0
+
+ versions/VERSION
+ Updated version to 1.2.0
+
+ECF 
+ 
+ Contents of ECF directory are not EMC's responsibility
+ However,note that obsproc.v1.2.0 , bufr-dump,v1.2.0 and prepobs.v1.2.0
+ will require more memory in the PBS card for:
+ gdas, gfs, cdas, rap runs (all 4 steps for each network)
+ See the example logs for : /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/output 
+
+CHANGES TO OUTPUT AND FILE SIZES
+
+ Generate new dumps:
+ *satwhr* (gdas,gfs), *uprair* (gdas,gfs,cdas,rap) 
+ Update dumps (gdas, gfs):
+ *prepbufr* (when this release is synced with bufr-dump.v1.2.0 and prepobs.v1.1.0)
+
+ The newly generated dumps (*satwhr*, *uprair*) vary in size from 20Mb to 500Mb depending on network, cycle time, and season.
+ *uprair* will be largest for 00UTC and 12UTC.
+ *satwhr* will be largest during hurricane season.
+
+ The updated *prepbur* files  are up to ~20% larger in size
+ For examples, see: /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/com
+
+CHANGES TO RESOURCES
+
+ Memory usage was increased for all steps in the processing of:
+ gdas,gfs,cdas, rap
+ See the example logs for : /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/output
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ obsproc needs modules bufr-dump and prepobs in order to run
+ See docs/README.md for build instructions
+ See versions/build.ver and versions/run.ver for libaries
+
+ Run jobs/JOBSPROC_networkname_DUMP and jobs/JOBSPROC_networkname_DUMP_POST
+ for the following networkname values: GLOBAL, NAM, RAP, URMA, RTMA, CDAS
+
+ Good to know:
+ - the RAP uprair dumps might be 0 size for the hours not around 00,06,12,18 UTC
+ - the CDAS prepbufr files are 6 different flavours, it takes about 26 hours for all to be generated
+ - only GDAS and GFS networks will generate  *satwhr*
+ - only GDAS and GFS networks would support the unrestrictiom of aircraft data, and only on a DEV machine
+ - some *bufr_d files might be 0 size until the relevant data stream is recovered (airs, ombusv8) 
+ - please contact obsproc_support@noaa.gov should you have any Qs regarding testing
+
+DISSEMINATION INFORMATION
+
+  For NOMAD proposed changes, a SCN will be issued/submitted to Data Flow
+
+SPECIAL INSTRUCTIONS
+
+ 1.Implement release/obsproc.v1.2.0, release/bufr-dump.v1.2.0, and release/prepobs.v1.1.0 at the same time
+
+ 2.Implement release/obsproc.v1.2.0, release/bufr-dump.v1.2.0, and release/prepobs.v1.1.0 after confirming GFS global-workflow is ready for the new versions (first 2 digits)
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 obsproc v1.1.0	RELEASED	AUG 18,2022
 	v1.1.2	IMPLEMENTED	NOV 30,2022
 
