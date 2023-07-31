@@ -66,9 +66,11 @@ SCRIPTS CHANGES
  scripts/exglobal_dump.sh
  Split groups 1 and 10 and add an additional DUMP_group12 to allow code to run on one more cpu and faster
  Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
+ Add DBNet dbn_alert for uprair and satwhr dump files going to NOMADS
 
  scripts/exrap_dump.sh
  Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
+ Add DBNet dbn_alert for uprair dump files going to NOMADS
 
  scripts/exrtma_dump.sh
  Relax  DTIM_latest_000000 for 00:00UTC run
