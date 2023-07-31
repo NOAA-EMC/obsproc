@@ -1441,6 +1441,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}geoimr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gmi1cr $job \
     ${COMSP}gmi1cr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwhr $job \
+    ${COMSP}satwhr.tm00.bufr_d
 fi
 
 set +x

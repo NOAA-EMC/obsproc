@@ -1522,6 +1522,9 @@ if [ $SENDDBN = YES ]; then
    if [ -s ${COMSP}ssmisu.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_ssmisu $job ${COMSP}ssmisu.tm00.bufr_d
    fi
+   if [ -s ${COMSP}uprair.tm00.bufr_d ]; then
+    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_uprair $job ${COMSP}uprair.tm00.bufr_d
+   fi
 fi
 
 #
