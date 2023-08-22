@@ -110,6 +110,8 @@ CHANGES TO OUTPUT AND FILE SIZES
  *satwhr* (gdas,gfs), *uprair* (gdas,gfs,cdas,rap) 
  Update dumps (gdas, gfs):
  *prepbufr* (when this release is synced with bufr-dump.v1.2.0 and prepobs.v1.1.0)
+ Remove dumps (gdas, gfs):
+ *saphir* , *sevcsr*
 
  The newly generated dumps (*satwhr*, *uprair*) vary in size from 20Mb to 500Mb depending on network, cycle time, and season.
  *uprair* will be largest for 00UTC and 12UTC.
@@ -117,6 +119,8 @@ CHANGES TO OUTPUT AND FILE SIZES
 
  The updated *prepbur* files  are up to ~20% larger in size
  For examples, see: /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/com
+
+ Both *saphir* and *sevcsr* dumps have been removed as they are no longer available.
 
 CHANGES TO RESOURCES
 
