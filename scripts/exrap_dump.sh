@@ -55,6 +55,9 @@ echo "         Aug 10 2022 - Added subpfl,saldn to dump #1,snocvr to dump #3.  "
 echo "                       added gmi1cr dump group #7                        "
 echo "                       b005/xx081 added to satwnd                        "
 echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #2.        "
+echo "         Oct 11 2023 - Split msonet to msonet and msone1, msone1=255.030 "
+echo "                       concatenate msonet and msone1 right after dump    "
+echo "                     - Pull adpupa and uprair into own Dump group        "
 ################################################################################
 
 set -xau
@@ -69,17 +72,19 @@ set +u
 # ------------------------------------------------------------------------
 # Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
-# Dump group #2 (pb) = vadwnd satwnd adpupa uprair
+# Dump group #2 (pb) = vadwnd satwnd
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 #                          subpfl saldrn
-# Dump group #4 (pb) = msonet gpsipw
+# Dump group #4 (pb) = msonet gpsipw 
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
 #                          saphir gmi1cr
 # Dump group #8 (non-pb) = gsrasr gsrcsr
 # Dump group #9 (non-pb) = lghtng
-# Dump group #10 STATUS FILE
+# Dump group #10(pb) = msone1 # ONLY tank b255/xx030, the largest
+# Dump group #11(pb) = adpupa uprair
+# Dump group #11 STATUS FILE
 # ------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -106,6 +111,8 @@ set -u
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"YES"}
+      DUMP_group10=${DUMP_group10:-"NO"}
+      DUMP_group11=${DUMP_group11:-"NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -117,6 +124,8 @@ set -u
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"NO"}
+      DUMP_group10=${DUMP_group10:-"YES"}
+      DUMP_group11=${DUMP_group11:-"YES"}
    fi
 else
    dump_ind=DUMP
@@ -129,6 +138,8 @@ else
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
+   DUMP_group10=${DUMP_group10:-"YES"}
+   DUMP_group11=${DUMP_group11:-"YES"}
 fi
 
 # Oct 2019; disable -- not needed for HRRRv4
@@ -226,6 +237,8 @@ echo "=======> Dump group 6 (thread_6) not executed." > $DATA/6.out
 echo "=======> Dump group 7 (thread_7) not executed." > $DATA/7.out
 echo "=======> Dump group 8 (thread_8) not executed." > $DATA/8.out
 echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
+echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
+echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 
 err1=0
 err2=0
@@ -236,6 +249,9 @@ err6=0
 err7=0
 err8=0
 err9=0
+err10=0
+err11=0
+
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ##################################
@@ -418,9 +434,9 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #==========================================================================
-# Dump # 2 : VADWND, SATWND, ADPUPA, UPRAIR
-#              (2)    (19)     (6)     (5)
-#            -- TOTAL NUMBER OF SUBTYPES = 32
+# Dump # 2 : VADWND, SATWND
+#              (2)    (19)    
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #==========================================================================
 
 # Skip all Indian satellite winds in SATWND (not in domain)
@@ -439,13 +455,6 @@ For testing, skip in ecflow or obsproc_rap.ver file
 
 # Add GOES-16/17/18 DMW data to SATWND
 export ADD_satwnd="005030 005031 005032 005034 005039"
-
-# Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
-#  (note: time window increased over +/- 0.5 hr standard to get more data)
-DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
-DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
-DTIM_earliest_uprair=${DTIM_earliest_uprair:-"-1.00"}
-DTIM_latest_uprair=${DTIM_latest_uprair:-"+1.00"}
 
 # Time window -1.50 to +1.49 hours for EUMETSAT SATWND for full and partial
 #  cycle runs
@@ -520,7 +529,7 @@ else
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_2} 1 vadwnd \
- satwnd adpupa uprair
+ satwnd 
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -1282,6 +1291,101 @@ set -x
 EOF
 set -x
 
+### NEW GROUP MSONET IG #10
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_10; chmod +x thread_10
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_10
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=10
+
+#============================================================================
+# Dump # 10 : MSONE1 -- TOTAL NUMBER OF SUBTYPES = 1
+#              (1)
+#============================================================================
+
+def_time_window_10=0.5 # default time window for dump 10 is -0.5 to +0.5 hours
+
+# Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
+#  (default)
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_10} 1 msone1
+error10=$?
+echo "$error10" > $DATA/error10
+
+set +x
+echo "********************************************************************"
+echo Script thread_10
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/10.out 2>&1
+EOF
+set -x
+### NEW GROUP MSONET IG end #10
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_11; chmod +x thread_11
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=11
+
+#==========================================================================
+# Dump # 11 :  ADPUPA, UPRAIR
+#               (6)     (5)
+#            -- TOTAL NUMBER OF SUBTYPES = 11
+#==========================================================================
+
+# Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
+DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
+DTIM_earliest_uprair=${DTIM_earliest_uprair:-"-1.00"}
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+1.00"}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_11} 1 adpupa uprair
+error11=$?
+echo "$error11" > $DATA/error11
+
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/11.out 2>&1
+EOF
+set -x
+
 
 #----------------------------------------------------------------
 # Now launch the threads
@@ -1307,13 +1411,14 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group5 = YES ]  &&  echo ./thread_5 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group2 = YES ]  &&  echo ./thread_2 >> $DATA/poe.cmdfile
    [ $DUMP_group3 = YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
-
+   [ $DUMP_group10 = YES ]  &&  echo ./thread_10 >> $DATA/poe.cmdfile
+   [ $DUMP_group11 = YES ]  &&  echo ./thread_11 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
       #$launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      NPROCS=${NPROCS:-1}
+      NPROCS=${NPROCS:-11}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
@@ -1335,9 +1440,11 @@ else
       [ $DUMP_group7 = YES ]  &&  ./thread_7
       [ $DUMP_group8 = YES ]  &&  ./thread_8
       [ $DUMP_group9 = YES ]  &&  ./thread_9
+      [ $DUMP_group10 = YES ]  &&  ./thread_10
+      [ $DUMP_group11 = YES ]  &&  ./thread_11
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out
 
 set +x
 echo " "
@@ -1353,12 +1460,13 @@ set -x
 [ -s $DATA/error7 ] && err7=`cat $DATA/error7`
 [ -s $DATA/error8 ] && err8=`cat $DATA/error8`
 [ -s $DATA/error9 ] && err9=`cat $DATA/error9`
-
+[ -s $DATA/error10 ] && err10=`cat $DATA/error10`
+[ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=10
+export DUMP_NUMBER=12
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
@@ -1376,8 +1484,9 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
-        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9
+        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
+	"$err10" -gt '5' -o "$err11" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1388,7 +1497,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7 $err8 $err9 "
+$err5, $err6, $err7 $err8 $err9 $err10 $err11"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1406,7 +1515,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7 $err8 $err9 "
+$err5, $err6, $err7 $err8 $err9 $err10 $err11"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
@@ -1415,6 +1524,10 @@ $err5, $err6, $err7 $err8 $err9 "
 
 #  endif loop $PROCESS_DUMP
 fi
+
+#  concatenate msonet and msone1, b/c prepobs only wants one file
+cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+
 
 grep -q "004.004 in data group aircar for .............-.........\
 .... HAS      0 REPORTS" ${COMSP}status.$tmmark.bufr_d
@@ -1427,6 +1540,7 @@ if [ $err_grep1 -eq 0 -a $err_grep2 -eq 0 ]; then
 (004.007), run assimilation without any ACARS data"
    $DATA/postmsg "$jlogfile" "$msg"
 fi
+
 
 if [ $SENDDBN = YES ]; then
    if [ -s ${COMSP}1bamua.tm00.bufr_d ]; then

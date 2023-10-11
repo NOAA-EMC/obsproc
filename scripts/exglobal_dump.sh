@@ -637,10 +637,10 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}eshrs3.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ssmisu $job \
     ${COMSP}ssmisu.tm00.bufr_d
-   if [ "${NET}" = "gdas" ]; then
+#   if [ "${NET}" = "gdas" ]; then
 #      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
 #       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
-   fi
+#   fi
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bhrs4 $job \
     ${COMSP}1bhrs4.tm00.bufr_d
 #   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
@@ -1739,7 +1739,9 @@ if [ "$launcher" = cfp ]; then
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
       launcher_DUMP=${launcher_DUMP:-mpiexec} 
-      $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
+      #$launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 # 1)
+      #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 2) 3)
+      $launcher_DUMP -np 14 cfp $DATA/poe.cmdfile 2>&1 # 4)
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
