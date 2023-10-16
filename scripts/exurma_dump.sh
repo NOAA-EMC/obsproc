@@ -30,6 +30,10 @@ echo "                     - Copy bufr_dumplist to COMOUT.          "
 echo "         Dec 15 2021 - set for use on WCOSS2.                 "
 echo "         Aug  1 2022 - Added SUBPFL, SALDRN, SNOCVR,          "
 echo "                       and GMI1CR types.                      "
+echo "         Oct 12 2023 - Split msonet to msonet and msone1,     "
+echo "                       where msone1=255.030; concatenate      "
+echo "                       msonet and msone1 right after dump.    "
+echo "                       Seperated satwnd to its own dump group."
 #####################################################################
 
 set -x
@@ -61,6 +65,8 @@ err1=0
 err2=0
 err3=0
 err4=0
+err5=0
+err6=0
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ###################################
@@ -93,58 +99,15 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #========================================================================
-# Dump # 1 : ASCATT, SATWND, EFCLAM, GMI1CR
-#              (1)    (14)     (1)    (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 17
+# Dump # 1 : ASCATT, EFCLAM, GMI1CR
+#              (1)    (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 3
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -6.00 to 0.00 hours)
 #
 #            time window radius is -6.00 to 0.00 hours for ASCATT
-#            for SATWND subtypes 005/010, 005/011, 005/012 and 005/019 at all
-#            times:
-#              time window radius is -1.00 to -0.01 hours
-#            for SATWND subtypes 005/064, 005/065, 005/066, 005/067, 005/068,
-#            and 005/069 at all times:
-#            time window radius is -1.50 to +1.49 hours
-#            for all other SATWND subtypes:
-#              time window radius is +/- 2.5 hours
-#            for EFCLAM:
-#              time window radius is +/- 0.5 hours
+#            time window radius is +/- 0.5 hours for EFCLAM
 #=======================================================================
-
-# Skip all Indian satellite winds in SATWND (not in domain)
-export SKIP_005021=YES
-export SKIP_005022=YES
-export SKIP_005023=YES
-
-# Skip legacy Meteosat AMV subsets.  Replaced by new BUFR sequence subsets Oct 2020.
-# for testing skip in trigger or version file
-#export SKIP_005064=YES
-#export SKIP_005065=YES
-#export SKIP_005066=YES
-
-DTIM_earliest_005010=-1.00
-DTIM_latest_005010=-0.01
-DTIM_earliest_005011=-1.00
-DTIM_latest_005011=-0.01
-DTIM_earliest_005012=-1.00
-DTIM_latest_005012=-0.01
-DTIM_earliest_005019=-1.00
-DTIM_latest_005019=-0.01
-
-DTIM_earliest_005064=-1.50
-DTIM_latest_005064=+1.49
-DTIM_earliest_005065=-1.50
-DTIM_latest_005065=+1.49
-DTIM_earliest_005066=-1.50
-DTIM_latest_005066=+1.49
-
-DTIM_earliest_005067=-1.50
-DTIM_latest_005067=+1.49
-DTIM_earliest_005068=-1.50
-DTIM_latest_005068=+1.49
-DTIM_earliest_005069=-1.50
-DTIM_latest_005069=+1.49
 
 DTIM_earliest_ascatt=-6.00
 DTIM_latest_ascatt=0.00
@@ -154,15 +117,11 @@ DTIM_latest_efclam=+0.50
 
 #DTIM_earliest_infav1=-2.50
 #DTIM_latest_infav1=+2.49
-#DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
-#DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
-DTIM_earliest_005081=-3.00
-DTIM_latest_005081=+1.00
 
 DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
 DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam gmi1cr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt efclam gmi1cr
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -311,6 +270,137 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_5; chmod +x thread_5
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_5
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=5
+
+#===========================================================================
+# Dump # 5 : SATWND -- TOTAL NUMBER OF SUBTYPES = 14
+#            for SATWND subtypes 005/010, 005/011, 005/012 and 005/019 at all
+#            times:
+#              time window radius is -1.00 to -0.01 hours
+#            for SATWND subtypes 005/064, 005/065, 005/066, 005/067, 005/068,
+#            and 005/069 at all times:
+#              time window radius is -1.50 to +1.49 hours
+#            for all other SATWND subtypes:
+#              time window radius is +/- 2.5 hours
+#===========================================================================
+
+# Skip all Indian satellite winds in SATWND (not in domain)
+export SKIP_005021=YES
+export SKIP_005022=YES
+export SKIP_005023=YES
+
+# Skip legacy Meteosat AMV subsets.  Replaced by new BUFR sequence subsets Oct 2020.
+# for testing skip in trigger or version file
+#export SKIP_005064=YES
+#export SKIP_005065=YES
+#export SKIP_005066=YES
+
+DTIM_earliest_005010=-1.00
+DTIM_latest_005010=-0.01
+DTIM_earliest_005011=-1.00
+DTIM_latest_005011=-0.01
+DTIM_earliest_005012=-1.00
+DTIM_latest_005012=-0.01
+DTIM_earliest_005019=-1.00
+DTIM_latest_005019=-0.01
+
+DTIM_earliest_005064=-1.50
+DTIM_latest_005064=+1.49
+DTIM_earliest_005065=-1.50
+DTIM_latest_005065=+1.49
+DTIM_earliest_005066=-1.50
+DTIM_latest_005066=+1.49
+
+DTIM_earliest_005067=-1.50
+DTIM_latest_005067=+1.49
+DTIM_earliest_005068=-1.50
+DTIM_latest_005068=+1.49
+DTIM_earliest_005069=-1.50
+DTIM_latest_005069=+1.49
+
+#DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
+#DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
+DTIM_earliest_005081=-3.00
+DTIM_latest_005081=+1.00
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 satwnd
+error5=$?
+echo "$error5" > $DATA/error5
+
+set +x
+echo "********************************************************************"
+echo Script thread_5
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/5.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_6; chmod +x thread_6
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_6
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=6
+
+#============================================================================
+# Dump # 6 : MSONE1 -- TOTAL NUMBER OF SUBTYPES = 1
+#              (1)
+#============================================================================
+
+def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
+
+# Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
+#  (default)
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 msone1
+error6=$?
+echo "$error6" > $DATA/error6
+
+set +x
+echo "********************************************************************"
+echo Script thread_6
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/6.out 2>&1
+EOF
+set -x
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -329,11 +419,13 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_1 >> $DATA/poe.cmdfile
    echo ./thread_2 >> $DATA/poe.cmdfile
    echo ./thread_4 >> $DATA/poe.cmdfile
+   echo ./thread_5 >> $DATA/poe.cmdfile
+   echo ./thread_6 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      $launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      $launcher_DUMP -np 6 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -349,10 +441,12 @@ else
    ./thread_2
    ./thread_3
    ./thread_4
+   ./thread_5
+   ./thread_6
 fi
    
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out
 
 set +x
 echo " "
@@ -363,12 +457,14 @@ err1=`cat $DATA/error1`
 err2=`cat $DATA/error2`
 err3=`cat $DATA/error3`
 err4=`cat $DATA/error4`
+err5=`cat $DATA/error5`
+err6=`cat $DATA/error6`
 
 
 #================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=5
+export DUMP_NUMBER=7
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 
@@ -381,8 +477,9 @@ fi
 
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
-   if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o "$err4" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4
+   if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' \
+     -o "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -392,7 +489,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
                set +x
 echo
 echo " ###################################################### "
-echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4"
+echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5, $err6"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -409,7 +506,7 @@ echo
       set +x
       echo
       echo " ###################################################### "
-      echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4"
+      echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5, $err6"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
@@ -418,6 +515,9 @@ echo
 
 #  endif loop $PROCESS_DUMP
 fi
+
+#  concatenate msonet and msone1, b/c prepobs only wants one file
+cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
