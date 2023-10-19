@@ -1255,6 +1255,10 @@ export DUMP_NUMBER=9
 # Time window -1.00 to +0.50 hours for LGHTNG for all cycle runs
 DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.00"}
 DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+0.50"}
+DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-1.00"}
+DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+1.00"}
+DTIM_earliest_wndtwr=${DTIM_earliest_wndtwr:-"-1.00"}
+DTIM_latest_wndtwr=${DTIM_latest_wndtwr:-"+1.00"}
 
 if [ "$RUN" = 'rrfs_p' ]; then
 #  ===> For RUN = rrfs_p -- partial cycle runs
@@ -1266,7 +1270,7 @@ else
    def_time_window_9=3.0 # default time window for dump 9 is -3.0 to +3.0 hours
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng satwhr wndtwr
 error9=$?
 echo "$error9" > $DATA/error9
 
@@ -1312,7 +1316,7 @@ if [ "$launcher" = cfp ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
       #$launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      NPROCS=${NPROCS:-3}
+      NPROCS=${NPROCS:-9}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
