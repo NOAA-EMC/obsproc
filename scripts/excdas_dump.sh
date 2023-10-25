@@ -1,4 +1,5 @@
 #!/bin/ksh
+#
 ###########################################################################
 echo "--------------------------------------------------------------------"
 echo "excdas_dump.sh - CDAS network data dump processing              "
@@ -41,6 +42,8 @@ echo "                       group.                                       "
 echo "         Jul 30 2022 - Subpfl, saldrn, snocvr, and gmi1cr added     "
 echo "                       to dump group #9.    "
 echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.   "
+echo "         Oct 17 2023 - Split msonet to msonet (#5) and msone1 (#10) "
+echo "                      concatenate msonet and msone1 right after dump"
 ###########################################################################
 
 set -xau
@@ -82,7 +85,10 @@ set +u
 # Dump group #9 (non-pb, TIME_TRIM = default = ON) =
 #               geoimr subpfl saldrn snocvr gmi1cr
 #
-# Dump group #10 STATUS FILE
+# Dump group #10 (pb, TIME_TRIM = OFF) =
+#               msone1 # ONLY tank b255/xx030, the largest
+#
+# Dump group #11 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -109,6 +115,7 @@ set -u
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"YES"}
+      DUMP_group10=${DUMP_group10:="NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -120,6 +127,7 @@ set -u
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"NO"}
+      DUMP_group10=${DUMP_group10:="YES"}
    fi
 else
    dump_ind=DUMP
@@ -132,6 +140,7 @@ else
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
+   DUMP_group10=${DUMP_group10:="YES"}
 fi
 
 
@@ -294,6 +303,7 @@ echo "=======> Dump group 6 (thread_6) not executed." > $DATA/6.out
 echo "=======> Dump group 7 (thread_7) not executed." > $DATA/7.out
 echo "=======> Dump group 8 (thread_8) not executed." > $DATA/8.out
 echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
+echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 
 err1=0
 err2=0
@@ -304,6 +314,8 @@ err6=0
 err7=0
 err8=0
 err9=0
+err10=0
+
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -1057,6 +1069,56 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_10; chmod +x thread_10
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_10
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=10
+
+#===================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is -3.00 to +2.99 hours on all types 
+#   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP
+#
+#--------------------------------------------------------------------------
+# Dump # 10 : MSONET: 1 subtype(s) 255/030
+#            ------------------------
+#            TOTAL NUMBER OF SUBTYPES = 1
+#
+#===================================================================
+
+DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.99"}
+
+TIME_TRIM=off
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
+error10=$?
+echo "$error10" > $DATA/error10
+
+set +x
+echo "********************************************************************"
+echo Script thread_10
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/10.out 2>&1
+EOF
+set -x
 
 #----------------------------------------------------------------
 # Now launch the threads
@@ -1082,12 +1144,13 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
+   [ $DUMP_group10 = YES ] &&  echo ./thread_10 >> $DATA/poe.cmdfile #msone1
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      #$launcher_DUMP -np 8 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      NPROCS=${NPROCS:-8}
+      #$launcher_DUMP -np 10 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      NPROCS=${NPROCS:-10}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
@@ -1109,9 +1172,10 @@ else
   [ $DUMP_group7 = YES ]  &&  ./thread_7
   [ $DUMP_group8 = YES ]  &&  ./thread_8
   [ $DUMP_group9 = YES ]  &&  ./thread_9
+  [ $DUMP_group10 = YES ]  &&  ./thread_10
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out
 
 set +x
 echo " "
@@ -1127,11 +1191,11 @@ set -x
 [ -s $DATA/error7 ] && err7=`cat $DATA/error7`
 [ -s $DATA/error8 ] && err8=`cat $DATA/error8`
 [ -s $DATA/error9 ] && err9=`cat $DATA/error9`
-
+[ -s $DATA/error10 ] && err10=`cat $DATA/error10`
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=10
+export DUMP_NUMBER=11
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
    if [ "$SENDCOM" = 'YES' -a "$COPY_TO_ARKV" = 'YES' ]; then
@@ -1173,8 +1237,9 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
-        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9
+        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
+        "$err10" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1185,7 +1250,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9 "
+$err5, $err6, $err7, $err8, $err9 $err10"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1203,7 +1268,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9 "
+$err5, $err6, $err7, $err8, $err9 $err10 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
@@ -1212,6 +1277,9 @@ $err5, $err6, $err7, $err8, $err9 "
 
 #  endif loop $PROCESS_DUMP
 fi
+
+#  concatenate msonet and msone1, b/c prepobs only wants one file
+cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

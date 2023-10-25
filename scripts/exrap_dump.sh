@@ -84,7 +84,7 @@ set +u
 # Dump group #9 (non-pb) = lghtng
 # Dump group #10(pb) = msone1 # ONLY tank b255/xx030, the largest
 # Dump group #11(pb) = adpupa uprair
-# Dump group #11 STATUS FILE
+# Dump group #12 STATUS FILE
 # ------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -1363,9 +1363,32 @@ export DUMP_NUMBER=11
 #               (6)     (5)
 #            -- TOTAL NUMBER OF SUBTYPES = 11
 #==========================================================================
+#
+if [ "$RUN" = 'rap_p' ]; then
+
+#  ===> For RUN = rap_p -- partial cycle runs
+#       -------------------------------------
+
+   def_time_window_11=1.5 # default time window for dump 11 is -1.5 to +1.5 hours
+
+else
+
+#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
+#       -------------------------------------------------------------------
+
+   if [ $cyc -eq 00 -o $cyc -eq 12 ]; then
+      def_time_window_11=1.5  # default time window for dump 11 is -1.5 to +1.5
+                              # hours for 00 or 12z
+   else
+      def_time_window_11=2.5  # default time window for dump 11 is -2.5 to +2.5
+                              # hours for all other cycles
+   fi
+
+fi
 
 # Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
+
 DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
 DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
 DTIM_earliest_uprair=${DTIM_earliest_uprair:-"-1.00"}
