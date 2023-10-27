@@ -174,8 +174,8 @@ fi
 
 # The following are used by $PROCESS_TIMETWINS in the GDAS when it is YES
 # -----------------------------------------------------------------------
-export COMINgdas=${COMINgfs:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
-export COMINGFS=${COMINgfs:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
+export COMINGFS=${COMINGFS:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
 #export COMIN1=${COMIN1:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
 export COMIN1=${COMIN1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver})/${RUN}.} #twinwind file now write in obsproc package
 
