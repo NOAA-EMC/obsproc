@@ -65,8 +65,8 @@ set +u
 #               sfcshp tideg atovs adpsfc
 #
 # Dump group #3 (pb, TIME_TRIM = OFF) =
-#               adpupa uprair gpsipw ascatt
-#
+#               adpupa gpsipw ascatt
+#               # pull out uprair, too slow
 # Dump group #4 (pb, TIME_TRIM = default = ON) =
 #               aircar aircft proflr vadwnd rassda
 #
@@ -316,6 +316,25 @@ err8=0
 err9=0
 err10=0
 
+#restrict processing of unexpected big tanks
+#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
+TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
+TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
+if [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
+ export SKIP_255003=YES
+ echo "WARNING: TANK b005/xx003 exceeds TANK_MAX_255003 => not dumped" | mail iliana.genkova@noaa.gov
+fi
+if [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx004)" -gt "$TANK_MAX_255004" ]; then
+ export SKIP_255004=YES
+ echo "WARNING: TANK b005/xx004 exceeds TANK_MAX_255004 => not dumped" | mail iliana.genkova@noaa.gov
+fi
+if [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx030)" -gt "$TANK_MAX_255030" ]; then
+ export SKIP_255030=YES
+ echo "WARNING: TANK b005/xx030 exceeds TANK_MAX_255030 => not dumped" | mail iliana.genkova@noaa.gov
+fi
+#end of block
+
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -510,7 +529,7 @@ export DUMP_NUMBER=3
 #
 #--------------------------------------------------------------------------
 # Dump #3:   ADPUPA: 6 subtype(s)
-#            UPRAIR: 5 subtype(s)
+#            #UPRAIR: 5 subtype(s) - pull out, too slow
 #            GPSIPW: 1 subtype(s)
 #            ASCATT: 1 subtype(s)
 #            ---------------------
@@ -527,7 +546,8 @@ DTIM_latest_ascatt=${DTIM_latest_ascatt:-"+2.99"}
 
 TIME_TRIM=off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa uprair gpsipw ascatt
+# $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa uprair gpsipw ascatt
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa gpsipw ascatt
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -654,12 +674,17 @@ export DUMP_NUMBER=5
 #
 #===================================================================
 
-DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
+#IG
+DTIM_earliest_msonet=${DTIM_latest_msonet:-"-1.99"}
+DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.00"}
+
+#DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
 
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers. 
 
-TIME_TRIM=off
+TIME_TRIM=on
+#TIME_TRIM=off
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
 error5=$?
@@ -1101,9 +1126,10 @@ export DUMP_NUMBER=10
 #
 #===================================================================
 
-DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.99"}
+DTIM_earliest_msone1=${DTIM_latest_msone1:-"-1.99"}
+DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.00"}
 
-TIME_TRIM=off
+TIME_TRIM=on #off
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
 error10=$?

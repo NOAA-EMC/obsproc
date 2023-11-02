@@ -13,10 +13,13 @@ M jobs/JOBSPROC_GLOBAL_PREP_POST
 M jobs/JOBSPROC_RAP_PREP
 A modulefiles/obsproc_jet.lua
 M scripts/excdas_dump.sh 
+M scripts/exdump_monitor.sh
 M scripts/exdump_post.sh
 M scripts/exglobal_dump.sh
+M scripts/exnam_dump.sh
 M scripts/exrap_dump.sh 
 M scripts/exrtma_dump.sh
+M scripts/exurma_dump.sh
 M sorc/bufr_remorest.fd/remorest.f 
 M ush/build.sh
 D versions/README
@@ -40,12 +43,14 @@ JOBS CHANGES
 
  jobs/JOBSPROC_GLOBAL_DUMP_POST
  Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+ Separate processing of uprair to its own dump group
 
  jobs/JOBSPROC_GLOBAL_PREP
  Instruct to add uprair dump files data to GDAS and GFS prepbufr files
  
  jobs/JOBSPROC_GLOBAL_PREP_POST
  Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2) 
+ Correct COMIN1 and COMINgdas patha
 
  jobs/JOBSPROC_RAP_PREP
  Instruct to add uprair dump files data to RAP's prepbufr file
@@ -58,7 +63,8 @@ MODULEFILES CHANGES
 SCRIPTS CHANGES
 
  scripts/excdas_dump.sh
- Instruct to dump uprair file for CDAS network
+ Instruct NOT to dump uprair file for CDAS network (too slow)
+ Introduce msone1 group and redistribute group
 
  scripts/exdump_post.sh
  Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
@@ -67,13 +73,21 @@ SCRIPTS CHANGES
  Split groups 1 and 10 and add an additional DUMP_group12 to allow code to run on one more cpu and faster
  Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
  Add DBNet dbn_alert for uprair and satwhr dump files going to NOMADS
+ Redistribute groups
 
  scripts/exrap_dump.sh
  Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
  Add DBNet dbn_alert for uprair dump files going to NOMADS
+ Introduce msone1 group and redistribute groups
+
+ scripts/exnam_dump.sh
+ Introduce msone1 group and redistribute groups/add cpus
 
  scripts/exrtma_dump.sh
- Relax  DTIM_latest_000000 for 00:00UTC run
+ Introduce msone1 group and redistribute groups
+
+ scripts/exurma_dump.sh
+ Introduce msone1 group and redistribute groups
 
 SORC CHANGES
 
