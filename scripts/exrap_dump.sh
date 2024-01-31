@@ -81,9 +81,9 @@ set +u
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
 #                          saphir gmi1cr
 # Dump group #8 (non-pb) = gsrasr gsrcsr
-# Dump group #9 (non-pb) = lghtng
+# Dump group #9 (non-pb) = lghtng + adpupa
 # Dump group #10(pb) = msone1 # ONLY tank b255/xx030, the largest
-# Dump group #11(pb) = adpupa uprair
+# Dump group #11(pb) = adpupa uprair - adpupa
 # Dump group #12 STATUS FILE
 # ------------------------------------------------------------------------
 
@@ -300,6 +300,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -450,6 +451,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -581,6 +583,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -674,6 +677,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -763,6 +767,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -850,6 +855,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1074,6 +1080,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1204,6 +1211,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1274,17 +1282,24 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
 #==========================================================================
-# Dump # 9 : LGHTNG
-#             TOTAL NUMBER OF SUBTYPES = 1
+# Dump # 9 : LGHTNG + ADPUPA
+#             TOTAL NUMBER OF SUBTYPES = 1 + 1
 #=========================================================================
- 
+
 # Time window -1.00 to +0.50 hours for LGHTNG for all cycle runs
 DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.00"}
 DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+0.50"}
+
+# Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+
+DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
+DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
 
 if [ "$RUN" = 'rap_p' ]; then
 #  ===> For RUN = rap_p -- partial cycle runs
@@ -1296,7 +1311,7 @@ else
    def_time_window_9=3.0 # default time window for dump 9 is -3.0 to +3.0 hours
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng adpupa
 error9=$?
 echo "$error9" > $DATA/error9
 
@@ -1329,6 +1344,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1375,13 +1391,15 @@ echo "********************************************************************"
 echo
 set -x
 
+# UPRAIR need to start early
+#sleep 120 # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
 #==========================================================================
-# Dump # 11 :  ADPUPA, UPRAIR
-#               (6)     (5)
-#            -- TOTAL NUMBER OF SUBTYPES = 11
+# Dump # 11 :  ADPUPA minus UPRAIR
+#               (6)   minus  (5)
+#            -- TOTAL NUMBER OF SUBTYPES = 11-5
 #==========================================================================
 #
 if [ "$RUN" = 'rap_p' ]; then
@@ -1409,12 +1427,10 @@ fi
 # Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
 
-DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
-DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
 DTIM_earliest_uprair=${DTIM_earliest_uprair:-"-1.00"}
 DTIM_latest_uprair=${DTIM_latest_uprair:-"+1.00"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_11} 1 adpupa uprair
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_11} 1 uprair
 error11=$?
 echo "$error11" > $DATA/error11
 
@@ -1445,6 +1461,7 @@ if [ "$launcher" = cfp ]; then
 
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
+   [ $DUMP_group11 = YES ]  &&  echo ./thread_11 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile  # lghtng 1st
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group1 = YES ]  &&  echo ./thread_1 >> $DATA/poe.cmdfile
@@ -1455,7 +1472,7 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group2 = YES ]  &&  echo ./thread_2 >> $DATA/poe.cmdfile
    [ $DUMP_group3 = YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
    [ $DUMP_group10 = YES ]  &&  echo ./thread_10 >> $DATA/poe.cmdfile
-   [ $DUMP_group11 = YES ]  &&  echo ./thread_11 >> $DATA/poe.cmdfile
+   #[ $DUMP_group11 = YES ]  &&  echo ./thread_11 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??

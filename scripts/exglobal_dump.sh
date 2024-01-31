@@ -124,7 +124,7 @@ set +u
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
-#               adpupa uprair
+#               adpupa
 #
 # Dump group #4 (pb, TIME_TRIM defaults to ON) =
 #               aircar aircft proflr vadwnd rassda gpsipw hdob 
@@ -153,8 +153,10 @@ set +u
 #
 # Dump group #12 crisfs atms (previously group1)
 #                crsfdb iasidb (previously group10)
+# Dump group #13 (pb, TIME_TRIM defaults to OFF) = 
+#                uprair
 #
-# Dump group #13 STATUS FILE
+# Dump group #14 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -184,6 +186,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
+      DUMP_group13=${DUMP_group12:-"NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -198,6 +201,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
+      DUMP_group13=${DUMP_group12:-"YES"}
    fi
 else
    dump_ind=DUMP
@@ -213,15 +217,19 @@ else
    DUMP_group10=${DUMP_group10:-"YES"}
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
+   DUMP_group13=${DUMP_group12:-"YES"}
 fi
 
+# NAP and NAP_adpupa instroduced so that uprair can run early on his own
+NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
 if [ "$NET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
+   NAP_adpupa==${NAP_adpupa:-900} #600s(compensate early cron) + 300s(for adpupa data to come)
 ########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
+   NAP_adpupa==${NAP_adpupa:-600} #like other dump groups
 fi
-
 
 # send extra output of DUMP2 for monitoring purposes.
 set +u
@@ -519,7 +527,7 @@ echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
 echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
-
+echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
 
 err1=0
 err2=0
@@ -533,6 +541,7 @@ err9=0
 err10=0
 err11=0
 err12=0
+err13=0
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -561,6 +570,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -695,6 +705,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -821,6 +832,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP_adpupa} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -831,26 +843,22 @@ export DUMP_NUMBER=3
 #
 #--------------------------------------------------------------------------
 # Dump #3:   ADPUPA: 6 subtype(s)
-#            UPRAIR: 5 subtype(s)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 11
+#            TOTAL NUMBER OF SUBTYPES = 6
 #
 #====================================================================
 
 DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+2.99"}
-DTIM_latest_uprair=${DTIM_latest_uprair:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM3:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa uprair
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 adpupa
 error3=$?
 echo "$error3" > $DATA/error3
 
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_adpupa $job \
     ${COMSP}adpupa.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_uprair $job \
-    ${COMSP}uprair.tm00.bufr_d
 fi
 
 set +x
@@ -881,6 +889,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -990,6 +999,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -1042,6 +1052,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1185,6 +1196,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1292,6 +1304,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1403,6 +1416,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1473,6 +1487,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1573,6 +1588,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
@@ -1629,6 +1645,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=12
 
@@ -1707,6 +1724,65 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_13; chmod +x thread_13
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+# UPRAIR requires early start, no need to NAP
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=13
+
+#====================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump #13:   UPRAIR: 5 subtype(s)
+#            --------------------
+#            TOTAL NUMBER OF SUBTYPES = 5
+#
+#====================================================================
+
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+2.99"}
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM13:-off}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 uprair 
+error13=$?
+echo "$error13" > $DATA/error13
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_uprair $job \
+    ${COMSP}uprair.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/13.out 2>&1
+EOF
+set -x
+
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -1720,8 +1796,14 @@ launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
+   echo "Running threads in parallel IG2023"
+   myPDY=`date +\%Y\%m\%d\%H\%M\%S`
+   echo "DATE IG2023 start " $myPDY
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
+
+   #[ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
+   [ $DUMP_group13 = YES ]  &&  echo ./thread_13 >> $DATA/poe.cmdfile
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group1 = YES ]  &&  echo ./thread_1 >> $DATA/poe.cmdfile
    [ $DUMP_group5 = YES ]  &&  echo ./thread_5 >> $DATA/poe.cmdfile  # moved up
@@ -1730,19 +1812,18 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group11 = YES ] &&  echo ./thread_11 >> $DATA/poe.cmdfile # moved up
    [ $DUMP_group10 = YES ] &&  echo ./thread_10 >> $DATA/poe.cmdfile # moved up
    [ $DUMP_group2 = YES ]  &&  echo ./thread_2 >> $DATA/poe.cmdfile
-   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
-
+   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      NPROCS=${NPROCS:-14} 
-      #$launcher_DUMP -np 12 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 # 1)
-      #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 2) 3)
-      $launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4)
+      NPROCS=${NPROCS:-14} # was 12
+      $launcher_DUMP -np ${NPROCS} --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 
+      #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 1) 3)
+      #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti tips
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1754,9 +1835,9 @@ if [ "$launcher" = cfp ]; then
    fi
 else
    echo "Running threads serially"
+   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3
    [ $DUMP_group1 = YES ]  &&  ./thread_1 
    [ $DUMP_group2 = YES ]  &&  ./thread_2 
-   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3 
    [ $DUMP_group4 = YES ]  &&  ./thread_4 
    [ $DUMP_group5 = YES ]  &&  ./thread_5 
    [ $DUMP_group6 = YES ]  &&  ./thread_6 
@@ -1766,18 +1847,20 @@ else
    [ $DUMP_group10 = YES ]  &&  ./thread_10 
    [ $DUMP_group11 = YES ]  &&  ./thread_11 
    [ $DUMP_group12 = YES ]  &&  ./thread_12 
+   [ $DUMP_group13 = YES ]  &&  ./thread_13
 #     wait
 fi
 
-#  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
-#   threads have run (normally done in real-time GFS runs to dump as late as
-#   possible in order to maximize data availability in GFS network,
-#   particularly DROPs)
-#  --------------------------------------------------------------------------
+# long run times for uprair lead to use of NAP and NAP_adpupa variables (see code above) instead of this code
+##  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
+##   threads have run (normally done in real-time GFS runs to dump as late as
+##   possible in order to maximize data availability in GFS network,
+##   particularly DROPs)
+##  --------------------------------------------------------------------------
+##
+#[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
 
-[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
-
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
 
 set +x
 echo " "
@@ -1796,12 +1879,13 @@ set -x
 [ -s $DATA/error10 ] && err10=`cat $DATA/error10`
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
+[ -s $DATA/error13 ] && err13=`cat $DATA/error13`
 
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=13
+export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
@@ -1821,8 +1905,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o "$err13" -gt '5']; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1833,7 +1917,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1851,7 +1935,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
