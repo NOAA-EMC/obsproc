@@ -143,6 +143,19 @@ CHANGES TO OUTPUT AND FILE SIZES
 
 CHANGES TO RESOURCES
 
+ 1.
+ The gfs and gdas processing must start 10 min earlier than current processing. 
+ The NAP(600s) and NAP_adpupa(800s) variables in the obsproc script exglobal_dump.sh compensate for the earlier start,
+ such that only "uprair" dump stars early. This approach will be revisited in future obsproc updates. 
+ 
+ The rap processing must start 2 min earlier than current processing.
+ The NAP(120s) variables in the obsproc scripts exrap_dump.sh compensate for the earlier start,
+ such that only "uprair" dump stars early. This approach will be revisited in future obsproc updates.
+
+ Tests with this approach shows no loss of current opertaional obs data for gdas, gfs and rap.
+ The new uprair data will be captured and instrodyced with no loss for gdas and rap, and possibly minimal loss for gfs.
+
+ 2.
  Memory and CPU usage was expanded for many steps in the processing.
  EMC tests ran with the following recomended configurations (keep the ncpus values!)
  gdas/gfs dump:      ncpus=14 mem=500gb 
