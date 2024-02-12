@@ -224,11 +224,11 @@ fi
 NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
 if [ "$NET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
-   NAP_adpupa==${NAP_adpupa:-900} #600s(compensate early cron) + 300s(for adpupa data to come)
+   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
 ########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
-   NAP_adpupa==${NAP_adpupa:-600} #like other dump groups
+   NAP_adpupa=${NAP_adpupa:-600} #like other dump groups
 fi
 
 # send extra output of DUMP2 for monitoring purposes.
@@ -1803,6 +1803,7 @@ if [ "$launcher" = cfp ]; then
 # Some reordering was done here based on recent sample runtimes.
 
    #[ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
+   [ $DUMP_group3 = YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile # NAP_adpupa covers for ADPUPA_wait 
    [ $DUMP_group13 = YES ]  &&  echo ./thread_13 >> $DATA/poe.cmdfile
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group1 = YES ]  &&  echo ./thread_1 >> $DATA/poe.cmdfile
@@ -1815,7 +1816,6 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
-   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
@@ -1823,7 +1823,7 @@ if [ "$launcher" = cfp ]; then
       NPROCS=${NPROCS:-14} # was 12
       $launcher_DUMP -np ${NPROCS} --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 
       #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 1) 3)
-      #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti tips
+      #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti suggestions
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1852,6 +1852,7 @@ else
 fi
 
 # long run times for uprair lead to use of NAP and NAP_adpupa variables (see code above) instead of this code
+#
 ##  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
 ##   threads have run (normally done in real-time GFS runs to dump as late as
 ##   possible in order to maximize data availability in GFS network,

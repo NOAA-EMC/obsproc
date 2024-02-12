@@ -764,7 +764,7 @@ EOFthread
       else
          which cfp
          which_cfp_err=$?
-         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
+         mpiexec -np 14 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
    fi
 else
    echo

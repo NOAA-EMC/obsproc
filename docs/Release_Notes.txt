@@ -47,6 +47,7 @@ JOBS CHANGES
 
  jobs/JOBSPROC_GLOBAL_PREP
  Instruct to add uprair dump files data to GDAS and GFS prepbufr files
+ Increase NSPLIT for faster prep step
  
  jobs/JOBSPROC_GLOBAL_PREP_POST
  Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2) 
@@ -54,6 +55,7 @@ JOBS CHANGES
 
  jobs/JOBSPROC_RAP_PREP
  Instruct to add uprair dump files data to RAP's prepbufr file
+ Increase NSPLIT for faster prep step
 
 MODULEFILES CHANGES
 
@@ -73,21 +75,24 @@ SCRIPTS CHANGES
  Split groups 1 and 10 and add an additional DUMP_group12 to allow code to run on one more cpu and faster
  Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
  Add DBNet dbn_alert for uprair and satwhr dump files going to NOMADS
- Redistribute groups
+ Redistribute groups, introduce NAP and NAP_adpupa to allow earlier job/cron kickoff
 
  scripts/exrap_dump.sh
  Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
  Add DBNet dbn_alert for uprair dump files going to NOMADS
  Introduce msone1 group and redistribute groups
+ Redistribute groups, introduce NAP to allow earlier job/cron kickoff
 
  scripts/exnam_dump.sh
  Introduce msone1 group and redistribute groups/add cpus
 
  scripts/exrtma_dump.sh
  Introduce msone1 group and redistribute groups
+ Introduce max size treshold for mesonet tanks
 
  scripts/exurma_dump.sh
  Introduce msone1 group and redistribute groups
+ Introduce max size treshold for mesonet tanks
 
 SORC CHANGES
 
@@ -138,9 +143,41 @@ CHANGES TO OUTPUT AND FILE SIZES
 
 CHANGES TO RESOURCES
 
- Memory usage was increased for all steps in the processing of:
- gdas,gfs,cdas, rap
- See the example logs for : /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/output
+ Memory and CPU usage was expanded for many steps in the processing.
+ EMC tests ran with the following recomended configurations (keep the ncpus values!)
+ gdas/gfs dump:      ncpus=14 mem=500gb 
+ gdas/gfs dump_post: ncpus=14 mem=4gb
+ gdas/gfs prep:      ncpus=14 mem=520gb
+ gdas/gfs prep_post: ncpus=14 mem=4gb
+
+ rap dump:      ncpus=11 mem=50gb
+ rap dump_post: ncpus=14 mem=6b
+ rap prep:      ncpus=4 mem=100gb
+ rap prep_post: ncpus=1 mem=3gb
+ 
+ cdas dump:      ncpus=10 mem=200gb
+ cdas dump_post: ncpus=12 mem=300gb
+ cdas prep1:     ncpus=12 mem=100gb
+ cdas prep2:     ncpus=16 mem=120gb
+ cdas prep1_post: ncpus=1 mem=6gb
+
+ nam dump:      ncpus=7 mem=20gb
+ nam dump2:     ncpus=3 mem=15gb
+ nam dump_post: ncpus=1 mem=3gb
+ nam prep:      ncpus=4 mem=220gb
+ nam prep_post: ncpus=1 mem=500Mb
+
+ rtma dump:     ncpus=5 mem=40gb
+ rtma dump_post:ncpus=1 mem=5000MB
+ rtma prep:     ncpus=1 mem=2gb
+ rtma prep_post:ncpus=1 mem=2gb
+
+ urma dump:     ncpus=6:mem=40gb
+ urma dump_post:ncpus=1:mem=6gb
+ urma prep:     ncpus=1:mem=6gb
+ urma prep_post:ncpus=1:mem=2gb
+
+ dump monitor:  ncpus=15:mem=400GB
 
 PRE-IMPLEMENTATION TESTING REQUIREMENTS
 

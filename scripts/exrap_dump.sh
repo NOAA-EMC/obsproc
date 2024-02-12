@@ -227,6 +227,8 @@ to ${COMSP}${i}"
    done
 fi  #  endif loop $PROCESS_GRIBFLDS
 
+# NAP is introduced so that uprair can run early on his own
+NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
@@ -300,7 +302,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -451,7 +453,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -583,7 +585,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -677,7 +679,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -767,7 +769,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -855,7 +857,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1080,7 +1082,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1211,7 +1213,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1282,7 +1284,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1344,7 +1346,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep 120 # to reverse 2min early start of jrap_dump in cron
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1392,7 +1394,7 @@ echo
 set -x
 
 # UPRAIR need to start early
-#sleep 120 # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
