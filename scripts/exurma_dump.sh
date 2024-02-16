@@ -55,6 +55,9 @@ echo "                     - re-added 12th dump: various other      "
 echo "                       brightness temperatures and radiances  "
 echo "                     - re-added urma_ru component             "
 echo "                     - Removed saphir data from Group12.      "
+echo "         Feb 16 2024 - Adjusted dump windows based on         "
+echo "                       RTMA/URMA team feedback. Added SATWHR  "
+echo "                       to new dump group 13.                  "
 #####################################################################
 
 set -x
@@ -115,6 +118,7 @@ err9=0
 err10=0
 err11=0
 err12=0
+err13=0
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ###################################
@@ -200,8 +204,8 @@ DTIM_latest_005068=+1.49
 DTIM_earliest_005069=-1.50
 DTIM_latest_005069=+1.49
 
-DTIM_earliest_ascatt=-6.00
-DTIM_latest_ascatt=0.00
+DTIM_earliest_ascatt=-3.00
+DTIM_latest_ascatt=3.00
 
 DTIM_earliest_efclam=-0.50
 DTIM_latest_efclam=+0.50
@@ -216,7 +220,7 @@ DTIM_latest_005081=+1.00
 DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
 DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt satwnd efclam gmi1cr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 ascatt satwnd efclam gmi1cr
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -262,10 +266,10 @@ export DUMP_NUMBER=2
 
 export SKIP_000002=YES
 
-DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-2.00"}
-DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.99"}
-DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-2.00"}
-DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+1.99"}
+DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-1.50"}
+DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.50"}
+DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-0.50"}
+DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+0.50"}
 DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-2.00"}
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+1.99"}
 
@@ -434,16 +438,16 @@ export DUMP_NUMBER=6
 #==========================================================================
 # Time window -1.00 to +1.00 hours for ADPUPA
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
-DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.00"}
-DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.00"}
+DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.50"}
+DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.50"}
 
 def_time_window_6=2.5  # default time window for dump 5 is -2.5 to +2.5
                        # hours for all cycles
 
 # Time window is -1.00 to +1.00 hours for VADWND
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
-DTIM_earliest_vadwnd=${DTIM_earliest_vadwnd:-"-1.00"}
-DTIM_latest_vadwnd=${DTIM_latest_vadwnd:-"+1.00"}
+DTIM_earliest_vadwnd=${DTIM_earliest_vadwnd:-"-1.50"}
+DTIM_latest_vadwnd=${DTIM_latest_vadwnd:-"+1.50"}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 vadwnd adpupa
 error6=$?
@@ -489,7 +493,7 @@ export DUMP_NUMBER=7
 # Skip Japanese profiler reports in PROFLR (not in domain)
 export SKIP_002013=YES
 
-def_time_window_7=0.5 # default time window for dump 7 is -0.5 to +0.5 hours
+def_time_window_7=1.5 # default time window for dump 7 is -1.5 to +1.5 hours
 
 # Time window -1.50 to +1.50 hours for PROFLR
 #  (note: time window increased over +/- 0.5 hr standard to improve
@@ -595,7 +599,7 @@ export DUMP_NUMBER=9
 export LALO=0  # GLOBAL dumps here (AIRCFT and AIRCAR dumped globally to
                # improve PREPOBS_PREPACQC track-check performance)
 
-def_time_window_9=3.25 # default time window for dump 9 is -3.25 to +3.25 hours
+def_time_window_9=0.75 # default time window for dump 9 is -0.75 to +0.75 hours
 
 # Time window -3.25 to +3.25 hours for AIRCFT and AIRCAR for full and partial
 #    cycle runs (default)
@@ -737,10 +741,10 @@ export LALO=0  # GLOBAL dumps here (NEXRAD dumped globally to allow job to run
                # much quicker w/o the need for geographical filtering (all
                # radar reports are over CONUS anyway)
 
-def_time_window_11=0.5 # default time window for dump 11 is -0.5 to +0.5 hours
+def_time_window_11=1.5 # default time window for dump 11 is -1.5 to +1.5 hours
 
 # Time window -0.50 to +0.49 hours for NEXRAD for full and partial cycle runs
-DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+0.49"}         # earliest is default
+#DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+0.49"}         # earliest is default
 # NEXRAD tanks are hourly
 # Process only those hourly tanks w/i requested dump center cycle time window
 # !!! this needs adjusting for 15min cycling RTMA_RU -JW !!!
@@ -957,12 +961,12 @@ export DUMP_NUMBER=12
 #             TOTAL NUMBER OF SUBTYPES = 11
 #=========================================================================
 # Time window -1.00 to +0.50 hours for LGHTNG for all cycle runs
-DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.00"}
-DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+0.50"}
+DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.50"}
+DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+1.50"}
 
 # Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
-DTIM_earliest_lgycld=${DTIM_earliest_lgycld:-"-0.50"}
-DTIM_latest_lgycld=${DTIM_latest_lgycld:-"+0.50"}
+DTIM_earliest_lgycld=${DTIM_earliest_lgycld:-"-1.50"}
+DTIM_latest_lgycld=${DTIM_latest_lgycld:-"+1.50"}
 def_time_window_12=3.0 # default time window for dump 12 is -3.0 to +3.0 hours
 
 # Time window is -3.00 to +2.99 hours for 1BHRS4
@@ -1011,6 +1015,46 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_13; chmod +x thread_13
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=13
+
+#========================================================================
+# Dump # 13 : SATWHR
+#            time window radius is +/- 1.00 hour for SATWHR
+#=======================================================================
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.0 1 satwhr
+error13=$?
+echo "$error13" > $DATA/error13
+
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/13.out 2>&1
+EOF
+set -x
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -1037,6 +1081,7 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_10 >> $DATA/poe.cmdfile
    echo ./thread_11 >> $DATA/poe.cmdfile
    echo ./thread_12 >> $DATA/poe.cmdfile
+   echo ./thread_13 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
@@ -1065,10 +1110,12 @@ else
    ./thread_10
    ./thread_11
    ./thread_12
+   ./thread_13
 fi
    
 cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out \
-    $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
+    $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out \
+    $DATA/13.out
 
 set +x
 echo " "
@@ -1087,11 +1134,12 @@ err9=`cat $DATA/error9`
 err10=`cat $DATA/error10`
 err11=`cat $DATA/error11`
 err12=`cat $DATA/error12`
+err13=`cat $DATA/error13`
 
 #================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=13
+export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 
@@ -1106,8 +1154,9 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o "$err4" -gt '5' \
      -o "$err5" -gt '5' -o "$err6" -gt '5' -o "$err7" -gt '5' -o "$err8" -gt '5' \
-     -o "$err9" -gt '5' -o "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4
+     -o "$err9" -gt '5' -o "$err10" -gt '5' -o "$err11" -gt '5' \
+     -o "$err12" -gt '5' -o "$err13" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1117,7 +1166,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
                set +x
 echo
 echo " ###################################################### "
-echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
+echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5, $err6, $err7, \
+	                                    $err8, $err9, $err10, $err11, $err12, $err13"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1134,7 +1184,8 @@ echo
       set +x
       echo
       echo " ###################################################### "
-      echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
+      echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5, $err6, $err7, \
+	                                         $err8, $err9, $err10, $err11, $err12, $err13"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
