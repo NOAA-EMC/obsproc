@@ -1016,6 +1016,9 @@ export DUMP_NUMBER=12
 #            time window radius is 1.00 hour
 #===========================================================================
 
+DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-1.00"}
+DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+1.00"}
+
 $ushscript_dump/bufr_dump_obs.sh $dumptime 1.0 1 satwhr
 error12=$?
 echo "$error12" > $DATA/error12
@@ -1061,7 +1064,7 @@ if [ "$launcher" = cfp ]; then
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      $launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      $launcher_DUMP -np 12 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
