@@ -186,7 +186,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
-      DUMP_group13=${DUMP_group12:-"NO"}
+      DUMP_group13=${DUMP_group13:-"NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -201,7 +201,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
-      DUMP_group13=${DUMP_group12:-"YES"}
+      DUMP_group13=${DUMP_group13:-"YES"}
    fi
 else
    dump_ind=DUMP
@@ -217,7 +217,7 @@ else
    DUMP_group10=${DUMP_group10:-"YES"}
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
-   DUMP_group13=${DUMP_group12:-"YES"}
+   DUMP_group13=${DUMP_group13:-"YES"}
 fi
 
 # NAP and NAP_adpupa instroduced so that uprair can run early on his own
