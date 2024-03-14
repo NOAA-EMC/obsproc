@@ -41,9 +41,11 @@ echo "         Mar 08 2022 - Enable the dumping of 002017 in vadwnd dump  "
 echo "                       group.                                       "
 echo "         Jul 30 2022 - Subpfl, saldrn, snocvr, and gmi1cr added     "
 echo "                       to dump group #9.    "
-echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.   "
+echo "         Sep 30 2022 - Don't / Enable dumping of UPRAIR data in     "
+echo "                       group #3./ b/c it is too slow                "
 echo "         Oct 17 2023 - Split msonet to msonet (#5) and msone1 (#10) "
 echo "                      concatenate msonet and msone1 right after dump"
+echo "                      Turn off msonet and msone1 - not needed       "
 ###########################################################################
 
 set -xau
@@ -122,12 +124,14 @@ set -u
       DUMP_group2=${DUMP_group2:-"YES"}
       DUMP_group3=${DUMP_group3:-"YES"}
       DUMP_group4=${DUMP_group4:-"YES"}
-      DUMP_group5=${DUMP_group5:-"YES"}
+      #DUMP_group5=${DUMP_group5:-"YES"}
+      DUMP_group5=${DUMP_group5:-"NO"}
       DUMP_group6=${DUMP_group6:-"NO"}
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"NO"}
-      DUMP_group10=${DUMP_group10:="YES"}
+      #DUMP_group10=${DUMP_group10:="YES"}
+      DUMP_group10=${DUMP_group10:="NO"}
    fi
 else
    dump_ind=DUMP
@@ -135,12 +139,14 @@ else
    DUMP_group2=${DUMP_group2:-"YES"}
    DUMP_group3=${DUMP_group3:-"YES"}
    DUMP_group4=${DUMP_group4:-"YES"}
-   DUMP_group5=${DUMP_group5:-"YES"}
+   #DUMP_group5=${DUMP_group5:-"YES"}
+   DUMP_group5=${DUMP_group5:-"NO"}
    DUMP_group6=${DUMP_group6:-"YES"}
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
-   DUMP_group10=${DUMP_group10:="YES"}
+   #DUMP_group10=${DUMP_group10:="YES"}
+   DUMP_group10=${DUMP_group10:="NO"}
 fi
 
 
@@ -1257,6 +1263,7 @@ echo " " >> $pgmout
 
 #================================================================
 #================================================================
+
 
 
 if [ "$PROCESS_DUMP" = 'YES' ]; then
