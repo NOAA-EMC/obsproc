@@ -1311,8 +1311,8 @@ $err5, $err6, $err7, $err8, $err9 $err10 "
 #  endif loop $PROCESS_DUMP
 fi
 
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+##  concatenate msonet and msone1, b/c prepobs only wants one file
+#cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
