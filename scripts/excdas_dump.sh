@@ -327,17 +327,17 @@ err10=0
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
 TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
-if [ -s ${TANK}/${PDY}/b255/xx003) && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
+if [ -s ${TANK}/${PDY}/b255/xx003 && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
  msg="WARNING: TANK b255/xx003 exceeds TANK_MAX_255003 => not dumped"
  echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
 fi
-if [ -s ${TANK}/${PDY}/b255/xx004) && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx004)" -gt "$TANK_MAX_255004" ]; then
+if [ -s ${TANK}/${PDY}/b255/xx004 && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx004)" -gt "$TANK_MAX_255004" ]; then
  export SKIP_255004=YES
  msg="WARNING: TANK b255/xx004 exceeds TANK_MAX_255004 => not dumped"
  echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
  fi
-if [ -s ${TANK}/${PDY}/b255/xx030) && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx030)" -gt "$TANK_MAX_255030" ]; then
+if [ -s ${TANK}/${PDY}/b255/xx030 && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx030)" -gt "$TANK_MAX_255030" ]; then
  export SKIP_255030=YES
  msg="WARNING: TANK b255/xx030 exceeds TANK_MAX_255030 => not dumped"
  echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
