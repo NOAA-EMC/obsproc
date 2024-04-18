@@ -211,7 +211,8 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
-  export COMINtcvital=${COMINtcvital:-$(compath.py ${envir}/${NET}/${nam_ver}/${RUN}.${PDY})/${cyc}/${COMPONENT}/${RUN}.${cycle}.}
+  #secure turn off SYNDAT for nam
+  #export COMINtcvital=${COMINtcvital:-$(compath.py ${envir}/${NET}/${nam_ver}/${RUN}.${PDY})}
   export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else
@@ -289,7 +290,7 @@ export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
 #       if job fails in one of these programs, set offending program
 #       to NO and resubmit to "work-around" problem)
 
-export SYNDATA=${SYNDATA:-YES}   # Execute program SYNDAT_SYNDATA   if YES
+export SYNDATA=${SYNDATA:-NO}   # NEVER execute program SYNDAT_SYNDATA in nam
 
 export PREPACQC=${PREPACQC:-YES} # Execute PREPACQC script processing if YES
    export PROCESS_ACQC=${PROCESS_ACQC:-YES} # Execute program PREPOBS_PREPACQC

@@ -17,6 +17,7 @@ JTYP=%JTYP%
 
 #Load the modules
 module load intel/${intel_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_PREP1_POST

@@ -4,11 +4,14 @@ echo "----------------------------------------------------------"
 echo "exdump_post.sh version $obsproc_ver - If requested:       "
 echo "       1) Generates combined dump STATUS file             "
 echo "       2) Prepares data counts for the SDM                "
-echo "       3) Removes or masks restricted data from dump files"
-echo "       4) Converts dump files to unblocked format         "
+echo "       3) Removes or masks restricted data from today's   "
+echo "          dump files                                      "
+echo "       4) Removes restricted data from 2-day old aircar   "
+echo "          and aircft dump files                           "
+echo "       5) Converts dump files to unblocked format         "
 echo "          (meaningless on WCOSS)                          "
-echo "       5) Lists the contents of dump files                "
-echo "       6) Updates dump data count average tables          "
+echo "       6) Lists the contents of dump files                "
+echo "       7) Updates dump data count average tables          "
 echo "----------------------------------------------------------"
 #####################################################################
 #
@@ -59,6 +62,8 @@ echo "----------------------------------------------------------"
 #                        whose reports are retained and instead station IDs
 #                        are masked.
 # 09 Dec 2021 Esposito - Updated for use on WCOSS2.
+# ?? ??? 202? Keyser   - Added new "remorest" processing to remove restricted
+#                        data from 2-day old "aircar" and "aircft" dump files.
 #####################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
@@ -81,6 +86,7 @@ SITE=${SITE:-""}
 
 cat break > $pgmout
 
+PROCESS_REMOREST_dm2=${PROCESS_REMOREST_dm2:-NO}
 MPMD=${MPMD:-YES}
 CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
 UPDATE_AVERAGE_FILE=${UPDATE_AVERAGE_FILE:-YES}
@@ -204,25 +210,60 @@ fi
 
 if [ "$PROCESS_REMOREST" = 'YES' ]; then
 
+########################################################################
+#   Remove or Mask Restricted Data from today's BUFR Data Dump Files   #
+########################################################################
+
+#  For dump files "adpsfc", "aircar", "aircft", "msonet", "lghtng" and "sfcshp"
+#  for today (this network, run and cycle):
+#  If either the restriction indicator (mnemonic RSRD) is set for a report, or
+#  the report is in a Table A entry pre-determined to contain only restricted
+#  reports, then the report is always restricted {regardless of the time in
+#  hours for the expiration on restriction (mnemonic EXPRSRD)}.
+#    ---> Since we are running in near-realtime, there is no need to test on
+#         the value of EXPRSRD.  This will always be > current time difference.
+#    ---> For all Table A entries listed in parm card namelist switch
+#         "MSG_RESTR" (see below):
+#            All reports are considered to be restricted by definition of this
+#            switch. They will be skipped by program BUFR_REMOREST.
+#    ---> For all Table A entries listed in parm card namelist switch
+#         "MSG_MIXED" (see below):
+#            RSRD may not be set for all reports. Those with RSRD set are
+#            considered to be restricted regardless of EXPRSRD because
+#            "DIFF_HR" (the difference in hours between the current UTC wall-
+#            clock date and the dump file center date),is exported as 0 into
+#            program BUFR_REMOREST (EXPRSRD will always be > actual DIFF_HR
+#            since we are running in near-realtime).  They will be skipped by
+#            program BUFR_REMOREST.  Those reports that do not have RSRD set
+#            are considered to be non-restricted and will be retained by
+#            program BUFR_REMOREST.
+#    ---> For all Table A entries listed in parm card namelist switch
+#         "MSG_MASKA" (see below):
+#            All reports are considered to be restricted by definition of this
+#            switch.  Reports are not removed but all occurrences of their
+#            report ids are unilaterally masked out by program BUFR_REMOREST.
+#            In addition, program BUFR_REMOREST re-sets their values for RSRD
+#            and EXPRSRD to missing so that the reports are no longer
+#            considered to be restricted.
+# -----------------------------------------------------------------------------
+
    msg="REMOVE OR MASK RESTRICTED DATA FROM $tmmark_uc $net_uc DATA DUMPS \
 CENTERED ON $dumptime"
    $DATA/postmsg "$jlogfile" "$msg"
 
-########################################################################
-#      Remove or Mask Restricted Data from BUFR Data Dump Files        #
-########################################################################
+   export DIFF_HR=0
 
 cat <<\EOFparm > bufr_remorest.datadump.parm
 =========================================================================
 
-  Cards for DUMP Version of BUFR_REMOREST -- Version 18 November 2008
+  Cards for DUMP Version of BUFR_REMOREST -- Version 18 November 202?
 
  &SWITCHES
-   MSG_RESTR = 'NC000000',   ! These are the Table A Entries for
-               'NC000100',   !  BUFR messages for which ALL reports
-               'NC004003',   !  are RESTRICTED and will be REMOVED.
-               'NC004004',   !  (up to 20)
-               'NC004006',
+   MSG_RESTR = 'NC000000',   ! These are the Table A Entries for BUFR messages
+               'NC000100',   !  for which ALL reports are considered to be
+               'NC004003',   !  restricted. All reports will be REMOVED by
+               'NC004004',   !  program BUFR_REMOREST.
+	       'NC004006',   !  (up to 20 Tabel A entries)
                'NC004007',
                'NC004008',
                'NC004009',
@@ -234,56 +275,64 @@ cat <<\EOFparm > bufr_remorest.datadump.parm
                'NC007001',
                'NC007002',
                'NC021242',
-               'NC255xxx',
-   MSG_MIXED = 'NC012004',   ! These are the Table A Entries for
-               'NC003010',   !  BUFR messages which contain a MIXTURE
-               '        ',   !  of restricted and unrestricted
-               '        ',   !  reports (based on mnemonic "RSRD").  All
-               '        ',   !  restricted reports will be REMOVED.
-               '        ',   !  (up to 20)
+               'NC255xxx',   ! move this to MSG_MIXED when we know for sure that RSRD values are correct for each provider/sub-provider
+   MSG_MIXED = 'NC012004',   ! These are the Table A Entries for BUFR messages
+               'NC003010',   !  which may contain a MIXTURE of reports with and
+               '        ',   !  without mnemonic "RSRD" being set. If "RSRD" is
+               '        ',   !  not set -or- it is set and mnemonic "EXPRSRD"
+               '        ',   !  is also set and has a value less than "DIFF_HR"
+               '        ',   !  (the difference in hrs between the current UTC
+	       '        ',   !  wall-clock date and the dump file center date)
+               '        ',   !  minus 4, the report will be RETAINED by program
+               '        ',   !  BUFR_REMOREST. Otherwise, it will be REMOVED by
+               '        ',   !  program BUFR_REMOREST.
+               '        ',   !  (up to 20 Tabel A entries)
                '        ',
-   MSG_MASKA = 'NC001001',   ! These are the Table A Entries for
-               'NC001101'    !  BUFR messages for which ALL reports
-                             !  are RESTRICTED.  They will not be removed,
-                             !  but all occurrences of their report ids will be
-                             !  unilaterally changed to either "MASKSTID"
-                             !  (where the id is stored by itself)  or to all
-                             !  "X"'s where the number of "X"'s corresponds to
-                             !  the number of characters in the original report
-                             !  id (where the id is embedded in the raw report
-                             !  bulletin header string)
-                             !  (up to 20)
+   MSG_MASKA = 'NC001001',   ! These are the Table A Entries for BUFR messages
+               'NC001101'    !  for which ALL reports are considered to be 
+                             !  restricted.  They will not be removed, but all
+                             !  occurrences of their report ids will be
+                             !  unilaterally CHANGED, by program BUFR_REMOREST,
+                             !  to either "MASKSTID" (where the id is stored by
+                             !  itself)  or to all "X"'s where the number of
+                             !  "X"'s corresponds to the number of characters
+                             !  in the original report id (where the id is
+                             !  embedded in the raw report bulletin header
+                             !  string). In addition, program BUFR_REMOREST re-
+                             !  sets their values for "RSRD" and "EXPRSRD" to
+                             !  missing so that the reports are no longer
+                             !  considered to be restricted.
+                             !  (up to 20 Table A entries)
 
  /
 
-    Note 1: A particular Table A entry should NEVER appear in more than one
-            of MSG_RESTR, MSG_MIXED or MSG_MASKA.
+    Note 1: A particular Table A entry should NEVER appear in more than one of
+            MSG_RESTR, MSG_MIXED or MSG_MASKA.
     Note 2: Any Table A entry not in either MSG_RESTR, MSG_MIXED or MSG_MASKA
-            is assumed to be a Table A entry for BUFR messages for which
-            ALL reports are UNRESTRICTED (these messages are copied
-            intact, no reports are unpacked).
-    Note 3: Always fill in these arrays beginning with word 1.  If
-            there are less than 20 words filled in an array, either set
-            the extra words to "        " (8 blank characters) or do not
-            specify them here (they default to "        ").
-    Note 4: For data dump Table A entries in the form "NCtttsss",
-            where "ttt" is the BUFR message type and "sss" is the
-            BUFR message subtype, if the last three characters (the
-            subtype) is specified as 'xxx', then ALL BUFR messages
-            of that type are either treated as having all restricted
-            data all which is to be removed (if in MSG_RESTR), mixed data
-            some of which is to be removed (if in MSG_MIXED) or all restricted
-            data all of which is to have its report id masked (if in
-            MSG_MASKA), regardless of the message subtype. (For example,
-            if MSG_RESTR(1)='NC255xxx', then ALL mesonet BUFR messages are
+            is assumed to be a Table A entry for BUFR messages for which ALL
+            reports are NON-RESTRICTED (these messages are copied intact, no
+            reports are unpacked).
+    Note 3: Always fill in these arrays beginning with word 1.  If there are
+            less than 20 words filled in an array, either set the extra words
+            to "        " (8 blank characters) or do not specify them here
+            (they default to "        ").
+    Note 4: For data dump Table A entries in the form "NCtttsss", where "ttt"
+            is the BUFR message type and "sss" is the BUFR message subtype, if
+            the last three characters (the subtype) is specified as 'xxx', then
+            ALL BUFR messages of that type are either treated as having all
+            restricted data all which is to be removed (if in MSG_RESTR), mixed
+            data some of which is to be removed (if in MSG_MIXED) or all
+            restricted data all of which is to have its report id masked (if in
+            MSG_MASKA), regardless of the message subtype. (For example, if
+            MSG_RESTR(1)='NC255xxx', then ALL mesonet BUFR messages are
             considered to have all restricted data and are all removed
             regardless of their subtype.)
 
 =========================================================================
 EOFparm
 
-REMX=${REMX:-$EXECobsproc/bufr_remorest}
-REMC=${REMC:-bufr_remorest.datadump.parm}
+   REMX=${REMX:-$EXECobsproc/bufr_remorest}
+   REMC=${REMC:-bufr_remorest.datadump.parm}
 
    for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro
    do
@@ -296,22 +345,22 @@ REMC=${REMC:-bufr_remorest.datadump.parm}
       rc=$?
       if [ $rc -gt 0 ] ; then
          [ $rc -gt $retcode ]  && retcode=$rc
-         msg="**WARNING: ERROR generating unrestricted $file BUFR file \
+         msg="**WARNING: ERROR generating non-restricted $file BUFR file \
 (rc = $rc)"
          $DATA/postmsg "$jlogfile" "$msg"
       else
-         msg="Successful generation of unrestricted $file BUFR file"
+         msg="Successful generation of non-restricted $file BUFR file"
          $DATA/postmsg "$jlogfile" "$msg"
          cp $filestem $COMOUT/$filestem.nr
          chmod 664 $COMOUT/$filestem.nr
-         if [ "$SENDDBN" = "YES" ] ; then
+	 if [ "$SENDDBN" = "YES" ] ; then
            NETUP=`echo $RUN | tr {a-z} {A-Z}`
            if  [[ $NETUP != 'GDAS' ]] || [[ $file != "saphir" ]]; then    ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr 
              if [[ $NETUP != 'CDAS' ]] || [[ $file != "gpsro" ]]; then    ### no alert cdas.tCCz.gpsro.tm00.bufr_d.nr
                if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then   ### no alert rap.tCCz.gpsro.tm00.bufr_d.nr
                   $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
                   $COMOUT/$filestem.nr
-               fi
+	       fi
              fi
            fi
          fi
@@ -319,9 +368,116 @@ REMC=${REMC:-bufr_remorest.datadump.parm}
 
    done
 
-#  endif loop $PROCESS_REMOREST
-fi
+fi #  endif loop $PROCESS_REMOREST
 
+
+# PROCESS_REMOREST_dm2 = YES runs only on demand, on dev machines
+# Unrestrict 48h old aircraft obs(exc. TAMDAR), add *.ur file to $COMOUTm2 
+dev_m=$(grep backup /lfs/h1/ops/prod/config/prodmachinefile | cut -d: -f2)
+this_m=$(cat /etc/cluster_name)
+
+if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
+########################################################################
+#     Remove Restriction on Data in 2-day old "aircar" and "aircft"    #
+#                         BUFR Data Dump files                         #
+########################################################################
+
+#  For dump files "aircar" and "aircft" for 2-days ago (this network, run and
+#  cycle):
+#    ---> For all Table A entries listed in parm card namelist switch
+#         "MSG_MIXED" (see below):
+#            If the restriction indicator (mnemonic RSRD) is set for a report,
+#            then its value for time in hours for the expiration on restriction
+#            (mnemonic EXPRSRD) is examined. If "DIFF_HR" (the difference in
+#            hours between the current UTC wall-clock date and the dump file
+#            center date, exported into program BUFR_REMOREST) minus 4 is less
+#            than or equal to EXPRSRD, then the report is considered to be
+#            restricted and will be skipped by program BUFR_REMOREST.
+#            Otherwise, the report is considered to be non-restricted and will
+#            be retained by program BUFR_REMOREST.
+#    ---> Since we are running 2-days late, we want to test on the value of
+#         EXPRSRD (which currently should be set to 48 hours for any reports in
+#         these dumps which have RSRD set).  This will allow non-rstprod users
+#         to have access to full "aircar" and "aircft" dumps after EXPRSRD + 4
+#         (52) hours.
+# -----------------------------------------------------------------------------
+
+   dumptimeM2=`$NDATE -$tmhr $PDYm2$cyc`
+
+   msg="REMOVE OR MASK RESTRICTED DATA FROM $tmmark_uc $net_uc DATA DUMPS \
+CENTERED ON $dumptimeM2 (2-days ago)"
+   $DATA/postmsg "$jlogfile" "$msg"
+
+   ymdh=$(date -u +'%Y%m%d%H')
+   export DIFF_HR=`$NHOUR $ymdh            $dumptimeM2`
+#                         current_date       dump_date
+
+   msg="Any reports with EXPRSRD less than `expr $DIFF_HR - 4 ` hrs will now \
+be retained"
+   $DATA/postmsg "$jlogfile" "$msg"
+
+cat <<\EOF_EXPRSRDparm > bufr_remorest.datadump_EXPRSRD.parm
+=========================================================================
+
+  Cards for DUMP Version of BUFR_REMOREST -- Version 1.1.0 (09 September 2015)
+  (documentation in bufr_remorest.datadump.parm above for $PROCESS_REMOREST
+   also applies here)
+
+ &SWITCHES
+   MSG_RESTR = '        ',
+   MSG_MIXED = 'NC004003',
+               'NC004004',
+               'NC004006',
+               'NC004007',
+               'NC004008',
+               'NC004009',
+               'NC004010',
+               'NC004011',
+               'NC004012',
+               'NC004013',
+               'NC004014',
+               'NC004015',
+               'NC004103',
+   MSG_MASKA = '        '
+
+ /
+
+=========================================================================
+EOF_EXPRSRDparm
+
+   REMX=${REMX:-$EXECobsproc_shared_bufr_remorest/bufr_remorest}
+   REMC=${REMC_EXPRSRD:-bufr_remorest.datadump_EXPRSRD.parm}
+
+   for file in aircar aircft
+   do
+      filestem=$RUN.$cycle.$file.$tmmark.bufr_d
+      [ -f $COMINm2/$filestem ]  ||  continue
+
+      cp $COMINm2/$filestem $filestem
+
+      $USHobsproc/bufr_remorest.sh $filestem
+      rc=$?
+      if [ $rc -gt 0 ] ; then
+         [ $rc -gt $retcode ]  && retcode=$rc
+         msg="**WARNING: ERROR generating non-restricted $file BUFR file \
+from 2-days ago (rc = $rc) -- existing file made 2-days ago is not overwritten"
+         $DATA/postmsg "$jlogfile" "$msg"
+      else
+         msg="Successful generation of non-restricted $file BUFR file from \
+2-days ago -- overwrite existing file made 2-days ago"
+         $DATA/postmsg "$jlogfile" "$msg"
+         cp $filestem $COMOUTm2/$filestem.ur
+         chmod 664 $COMOUTm2/$filestem.ur
+	 if [ $SENDDBN = "YES" ] ; then
+             NETUP=`echo $RUN | tr {a-z} {A-Z}`           # can this be net_uc?
+             $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
+             $COMOUTm2/$filestem.ur 
+	 fi
+      fi
+
+   done
+
+fi #  endif loop $PROCESS_REMOREST_dm2
 
 
 if [ "$PROCESS_UNBLKBUFR" = 'YES' ]; then
@@ -332,9 +488,16 @@ $dumptime"
 
 ########################################################################
 #                  Unblock BUFR Data Dump Files                        #
+# {Note: will also unblock non-restricted aircar and aircft dump files #
+#        from 2-days ago if they were overwritten in REMOREST above    #
+#        (when $PROCESS_REMOREST_dm2 = YES)}                           #
 # ---> ON WCOSS dump files are already unblocked, so this whole set of #
 #      processing can hopefully be removed someday!!                   #
 ########################################################################
+
+   aircraft_nr_dm2=""
+   [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ] && \
+    aircraft_nr_dm2="aircar_nr_dm2 aircft_nr_dm2"
 
    for file in adpsfc adpupa aircar aircft satwnd sfcshp spssmi proflr \
                vadwnd goesnd erscat sfcbog erswnd ssmip  ssmipn ssmit  \
@@ -342,13 +505,26 @@ $dumptime"
                1bhrs3 1bmhs  1bhrs4 airs   airswm amsre  gpsipw msonet \
                rassda nexrad gpsro  airsev goesfv wndsat wdsatr osbuv8 \
                ascatt ascatw mtiasi avcsam avcspm gome   lghtng omi    \
-               esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam
+               esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam \
+	       $aircraft_nr_dm2
 #  --> don't add any new dumps here since files are already unblocked
 #      on WCOSS!!
 
    do
+      file_orig=$file
+      if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
+	 if [ $file = aircar_nr_dm2 -o $file = aircft_nr_dm2 ]; then
+            file=`echo $file | cut -d"_" -f1`
+	    COMIN_save=$COMIN
+	    COMIN=$COMINm2
+	    COMOUT_save=$COMOUT
+	    COMOUT=$COMOUTm2
+	 fi
+      fi
       for qual in "" ".nr"
       do
+	 [ \( $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 \) -a \
+	    "$qual" != .nr ] && continue
          qualdbn=$qual
          COMIN_here=$COMIN
          if [ "$qual" = .nr ]; then
@@ -372,7 +548,12 @@ $dumptime"
 $file.unblock$qual (rc = $rc)"
             $DATA/postmsg "$jlogfile" "$msg"
          else
-            msg="$file$qual BUFR file SUCCESSFULLY copied to $file.unblock$qual"
+            if [ $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 ];then
+	       msg="$file$qual BUFR file from 2-days ago SUCCESSFULLY copied \
+to $file.unblock$qual -- overwrite existing file made 2-days ago"
+            else
+               msg="$file$qual BUFR file SUCCESSFULLY copied to $file.unblock$qual"
+	    fi
             $DATA/postmsg "$jlogfile" "$msg"
             cp $file.unblock$qual $COMOUT/$filestem.unblok$qual
             chmod 664 $COMOUT/$filestem.unblok$qual
@@ -420,11 +601,16 @@ a null file is copied in its place"
          fi
 
       done
+      if [ $PROCESS_REMOREST_dm2 = YES -a $this_m = $dev_m ]; then
+	 if [ $file_orig = aircar_nr_dm2 -o $file_orig = aircft_nr_dm2 ]; then
+            COMIN=$COMIN_save
+	    COMOUT=$COMOUT_save
+	 fi
+      fi
 
    done
 
-#  endif loop $PROCESS_UNBLKBUFR
-fi
+fi #  endif loop $PROCESS_UNBLKBUFR
 
 
 
@@ -447,9 +633,9 @@ $dumptime"
 EOFlistdumps
 
    cat <<\EOFthread > $DATA/thread
-#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-#  Make herefile "thread" which will run in background shells to list dumps
-#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+#  Herefile "thread" which can run in parallel (via MPMD methods) to list dumps
+#VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 { echo
       set -x
       mkdir -p $DATA/thread${1}
@@ -578,7 +764,7 @@ EOFthread
       else
          which cfp
          which_cfp_err=$?
-         mpiexec -np 1 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
+         mpiexec -np 14 --cpu-bind verbose,core cfp $DATA/mpmd.cmdfile   
    fi
 else
    echo
@@ -601,8 +787,7 @@ fi
       [ $err -gt $retcode ]  && retcode=$err
    done
 
-#  endif loop $PROCESS_LISTERS
-fi
+fi #  endif loop $PROCESS_LISTERS
 
 
 
@@ -690,8 +875,7 @@ by choice"
       fi
    done
 
-#  endif loop $PROCESS_AVGTABLES
-fi
+fi #  endif loop $PROCESS_AVGTABLES
 
 #######################
  
