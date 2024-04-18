@@ -20,8 +20,8 @@ module load intel/${intel_ver}
 
 module load netcdf/${netcdf_ver}
 
-module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
 module load bufr_dump/${bufr_dump_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 # CALL executable job script here

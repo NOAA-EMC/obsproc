@@ -1,55 +1,52 @@
-#!/bin/bash
+#!/bin/sh  
 #PBS -N obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%
 #PBS -j oe
-#PBS -l walltime=00:15:00
+#PBS -S /bin/bash
+#PBS -q dev
+#PBS -l walltime=00:20:00
 #PBS -A OBSPROC-DEV
-#PBS -q dev 
-#PBS -l place=vscatter,select=1:ncpus=3:mem=4gb
+#PBS -l place=vscatter,select=1:ncpus=14:mem=60gb
 #PBS -l debug=true
 
 ##############################################
-## Submit notes:
-## Run from [ps]tmp when running manually
-## When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
-## For specific PDY:
-## > jtyp=rtma cyc=14 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jrtma_dump.wc2.pbs
-## cycqsub location: /u/Shelley.Melchior/bin
-###############################################
+# Submit notes:%
+# Run from [ps]tmp when running manually
+# When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
+# For specific PDY:
+# > jtyp=[gdas][gfs] cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_dump.wc2.pbs
+# For latest/current PDY:
+# > jtyp=[gdas][gfs] cyc=00 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_dump.wc2.pbs
+# cycqsub location: /u/Shelley.Melchior/bin 
+##############################################
 
 set -xu
 
-echo "NCPUS=$NCPUS"
-
 export envir=prod
+
 export cyc=%CC%
-export cycM=%CCM%
 DESC=%DESC%
 JTYP=%JTYP%
-# Test if this is an hourly RTMA run or a Rapid Update RTMA run; assign job accordingly
-if [ -z "$cycM" ]; then
-  export job=${JTYP}_dump_$cyc
-else
-  export job=${JTYP}_ru_dump_${cyc}${cycM}
-fi
+export job=${JTYP}_dump_$cyc
+export jobid=$job.$PBS_JOBID
 export PDY=%PDY%
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsproc_ver=v1.0
-export obsproc_ver_pckg=v1.0.0
 export bufr_dump_ver=1.0.0
 export obsNET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
-#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
-#export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver_pckg}       # NCO prod
-export HOMEobsproc=${userROOT}/install/obsproc-rmprep     # local
+#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}        # NCO prod
+export HOMEobsproc=${userROOT}/wrapper_scripts/JOBS/SNOW_issue94042/obsproc_run_SNOW_issue94042      # local
 
-VERSION_FILE=${HOMEobsproc}/versions/run.ver
+#VERSION_FILE=$HOMEobsproc/versions/run.ver
+VERSION_FILE=${userROOT}/wrapper_scripts/JOBS/SNOW_issue94042/obsproc/versions/run.ver
 if [ -f $VERSION_FILE ]; then
-  . $VERSION_FILE
+   . $VERSION_FILE
 else
-  echo "Need version info ... Exiting"
-  exit 7
+  echo Need version info...  Exiting...
+ exit 7
 fi
 
 # Load the modules specified in $VERSION_FILE
@@ -62,16 +59,15 @@ module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
 # use para installation
-#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
-# use local bufr_dump installation
 module unload bufr_dump
-#module use ${userROOT}/install/bufr_dump/modulefiles
-module use ${userROOT}/install/bufr-dump-rel.1.0.0/modulefiles
+#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
+module use ${userROOT}/githubrun/bufr_dump_run/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 
 # Be sure the modules are loaded 
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_util/") -eq 0 ]]; then echo "prod_util is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_envir/") -eq 0 ]]; then echo "prod_envir is not loaded!"; fi
+if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)libjpeg/") -eq 0 ]]; then echo "libjpeg is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)grib_util/") -eq 0 ]]; then echo "grib_util is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)netcdf/") -eq 0 ]]; then echo "netcdf is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)bufr_dump/") -eq 0 ]]; then echo "bufr_dump is not loaded!"; fi
@@ -81,58 +77,55 @@ if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
 
-export SENDECF=NO
-export SENDDBN=NO
-export SENDSDM=NO
 
-export TANK=$DCOMROOT
+export SENDECF=NO   # developer
+export SENDDBN=NO   # developer
+export SENDSDM=NO   # developer
 
-export DATAROOT=/lfs/h2/emc/stmp/${USER}
-if [ -z "$cycM" ]; then
-  export jlogfile=/lfs/h2/emc/stmp/${USER}/${JTYP}.${PDY}.jlogfile
-else
-  export jlogfile=/lfs/h2/emc/stmp/${USER}/${JTYP}_ru.${PDY}.jlogfile
-fi
+#export TANK=$DCOMROOT
+#export TANK_000015=$DCOMROOT			#echo $DCOMROOT /lfs/h1/ops/prod/dcom   prod tanks?
+export TANK_000015=/lfs/h1/ops/dev/dcom        #dev tanks?
 
-export COMOUT_ROOT=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/com
-if [ -z "$cycM" ]; then
-  export COMOUT=${DATAROOT}/CRON/${DESC}/com/${obsNET}/$obsproc_ver/${JTYP}.${PDY}
-else
-  export COMOUT=${DATAROOT}/CRON/${DESC}/com/${obsNET}/$obsproc_ver/${JTYP}_ru.${PDY}
-fi
+export DATAROOT=/lfs/h2/emc/ptmp/$USER 
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}.$PDY.jlogfile
 
-export LOUD=on
+export COMOUT_ROOT=${DATAROOT}/CRON/${DESC}/com
+export COMPONENT=atmos
+
 export DEBUG_LEVEL=3
+export LOUD=ON
 export KEEPDATA=YES
 
-$HOMEobsproc/jobs/JOBSPROC_RTMA_DUMP
+
+$HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP
 err=$?
 
 # When run from cron, the stdout is written to /u/$USER
 # mv to stmp
 pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
 cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
-outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+#cronlogfile=/lfs/h2/emc/ptmp/$USER/$PBS_JOBNAME.o$pbsjobid
+outputdir=/lfs/h2/emc/ptmp/${USER}/CRON/${DESC}/output
 if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
 fi
 
 # If you wish to only run the dump job, un-comment the exit line below
-#exit
+exit
 
 # Kick off dump_post job
 if [ $err -eq 0 ]; then
-  echo "submit jrtma_dump_post"
+  echo "submit jglobal_dump_post"
   jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jrtma_dump_post.wc2.pbs
+  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jglobal_dump_post.wc2.pbs
 fi
 
 # Kick off prep job
 if [ $err -eq 0 ]; then
-  echo "submit jrtma_prep"
+  echo "submit jglobal_prep"
   jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jrtma_prep.wc2.pbs
+  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jglobal_prep.wc2.pbs
 fi
 
 exit

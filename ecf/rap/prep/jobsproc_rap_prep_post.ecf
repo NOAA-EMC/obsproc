@@ -17,6 +17,7 @@ JTYP=%JTYP% # '', erly_, pcyc_
 
 #Load the modules
 module load intel/${intel_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 $HOMEobsproc/jobs/JOBSPROC_RAP_PREP_POST

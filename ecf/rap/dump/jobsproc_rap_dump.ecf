@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:30:00
-#PBS -l place=vscatter,select=1:ncpus=8:mem=5gb
+#PBS -l place=vscatter,select=1:ncpus=8:mem=20gb
 #PBS -l debug=true
 
 export model=obsproc
@@ -28,7 +28,6 @@ module load cfp/${cfp_ver}
 module load libjpeg/$libjpeg_ver
 module load grib_util/${grib_util_ver}
 
-module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 module list
 

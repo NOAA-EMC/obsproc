@@ -221,11 +221,11 @@ export POE=${POE:-NO}
 #   (Applies only when either POE=YES or BACK=YES, and PREPDATA=YES)
 #   Consider the size of the backgrounds fields if using threads.
 
-export NSPLIT=${NSPLIT:-1}
+export NSPLIT=${NSPLIT:-4}
 
 #  BUFRLIST indicates the list of BUFR data dump file names to process
 
-export BUFRLIST=${BUFRLIST:-"adpupa proflr aircar aircft satwnd adpsfc \
+export BUFRLIST=${BUFRLIST:-"uprair adpupa proflr aircar aircft satwnd adpsfc \
  sfcshp saldrn vadwnd goesnd msonet gpsipw rassda ascatw wdsatr"}
 
 export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all

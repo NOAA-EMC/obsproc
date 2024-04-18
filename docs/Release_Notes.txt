@@ -1,0 +1,604 @@
+obsproc v1.2.0  RELEASED        AUG ??,2023
+        v1.2.?  IMPLEMENTED     ??? ??,2023
+
+FILE CHANGES
+
+
+D docs/ReleaseNotes.txt
+M docs/Release_Notes.txt
+M jobs/JOBSPROC_CDAS_PREP1
+M jobs/JOBSPROC_GLOBAL_DUMP_POST
+M jobs/JOBSPROC_GLOBAL_PREP
+M jobs/JOBSPROC_GLOBAL_PREP_POST
+M jobs/JOBSPROC_RAP_PREP
+A modulefiles/obsproc_jet.lua
+M scripts/excdas_dump.sh 
+M scripts/exdump_monitor.sh
+M scripts/exdump_post.sh
+M scripts/exglobal_dump.sh
+M scripts/exnam_dump.sh
+M scripts/exrap_dump.sh 
+M scripts/exrtma_dump.sh
+M scripts/exurma_dump.sh
+M sorc/bufr_remorest.fd/remorest.f 
+M ush/build.sh
+D versions/README
+M versions/run.ver
+M versions/VERSION
+(M-modified; A-added; D-deleted)
+
+DOCS CHANGES
+
+ docs/ReleaseNotes.txt
+ Delete repetitive file with similar name
+
+ docs/Release_Notes.txt
+ Reflect this release changes.
+
+JOBS CHANGES
+
+ jobs/JOBSPROC_CDAS_PREP1
+ Increase errPREPDATA_limit in order to allow code to generate prepbufr file if/when one or more key files 
+ (adpsfc, adpupa, uprair) are missing
+
+ jobs/JOBSPROC_GLOBAL_DUMP_POST
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+ Separate processing of uprair to its own dump group
+
+ jobs/JOBSPROC_GLOBAL_PREP
+ Instruct to add uprair dump files data to GDAS and GFS prepbufr files
+ Increase NSPLIT for faster prep step
+ 
+ jobs/JOBSPROC_GLOBAL_PREP_POST
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2) 
+ Correct COMIN1 and COMINgdas patha
+
+ jobs/JOBSPROC_RAP_PREP
+ Instruct to add uprair dump files data to RAP's prepbufr file
+ Increase NSPLIT for faster prep step
+
+MODULEFILES CHANGES
+
+ modulefiles/obsproc_jet.lua
+ Add support for functionality on Jet
+
+SCRIPTS CHANGES
+
+ scripts/excdas_dump.sh
+ Instruct NOT to dump uprair file for CDAS network (too slow)
+ Introduce msone1 group and redistribute group;add MAX_TANK* tank size check; Turn off msonet and msone1 for the time being.
+
+ scripts/exdump_monitor.sh
+ Add MAX_TANK* tank size check
+
+ scripts/exdump_post.sh
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+
+ scripts/exglobal_dump.sh
+ Split groups 1 and 10 and add an additional DUMP_group12 to allow code to run on one more cpu and faster
+ Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
+ Add DBNet dbn_alert for uprair and satwhr dump files going to NOMADS
+ Redistribute groups, introduce NAP and NAP_adpupa to allow earlier job/cron kickoff
+
+ scripts/exrap_dump.sh
+ Dump BUFR formated high-res rawinsonde profiles into *uprair* dump files
+ Add DBNet dbn_alert for uprair dump files going to NOMADS
+ Introduce msone1 group and redistribute groups; add MAX_TANK* tank size check 
+ Redistribute groups, introduce NAP to allow earlier job/cron kickoff
+
+ scripts/exnam_dump.sh
+ Introduce msone1 group and redistribute groups/add cpus; add MAX_TANK* tank size check
+
+ scripts/exrtma_dump.sh
+ Introduce msone1 group and redistribute groups
+ Introduce max size treshold for mesonet tanks;add MAX_TANK* tank size check
+
+ scripts/exurma_dump.sh
+ Introduce msone1 group and redistribute groups
+ Introduce max size treshold for mesonet tanks;add MAX_TANK* tank size check
+
+SORC CHANGES
+
+ sorc/bufr_remorest.fd/remorest.f
+ Add functionality to unrestrict aircraft data (PROCESS_REMOREST_dm2)
+ 
+USH CHANGES
+
+ ush/build.sh
+ Add support for functionality on Jet
+
+VERSIONS CHANGES
+ 
+ versions/README
+ Delete old notes
+
+ versions/run.ver
+ Set bufr_dump_ver=1.2.0 and prepbufr_ver=1.1.0
+
+ versions/VERSION
+ Updated version to 1.2.0
+
+ECF 
+ 
+ Contents of ECF directory are not EMC's responsibility
+ However,note that obsproc.v1.2.0 , bufr-dump,v1.2.0 and prepobs.v1.2.0
+ will require more memory in the PBS card for:
+ gdas, gfs, cdas, rap runs (all 4 steps for each network)
+ See the example logs for : /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/output 
+
+CHANGES TO OUTPUT AND FILE SIZES
+
+ Generate new dumps:
+ *satwhr* (gdas,gfs), *uprair* (gdas,gfs,cdas,rap) 
+ Update dumps (gdas, gfs):
+ *prepbufr* (when this release is synced with bufr-dump.v1.2.0 and prepobs.v1.1.0)
+ Remove dumps (gdas, gfs):
+ *saphir* , *sevcsr*
+
+ The newly generated dumps (*satwhr*, *uprair*) vary in size from 20Mb to 500Mb depending on network, cycle time, and season.
+ *uprair* will be largest for 00UTC and 12UTC.
+ *satwhr* will be largest during hurricane season.
+
+ The updated *prepbur* files  are up to ~20% larger in size
+ For examples, see: /lfs/h2/emc/stmp/iliana.genkova/CRON/R12/com
+
+ Both *saphir* and *sevcsr* dumps have been removed as they are no longer available.
+
+CHANGES TO RESOURCES
+
+ 1.
+ The gfs and gdas processing must start 10 min earlier than current processing. 
+ The NAP(600s) and NAP_adpupa(800s) variables in the obsproc script exglobal_dump.sh compensate for the earlier start,
+ such that only "uprair" dump stars early. This approach will be revisited in future obsproc updates. 
+ 
+ The rap processing must start 2 min earlier than current processing.
+ The NAP(120s) variables in the obsproc scripts exrap_dump.sh compensate for the earlier start,
+ such that only "uprair" dump stars early. This approach will be revisited in future obsproc updates.
+
+ Tests with this approach shows no loss of current opertaional obs data for gdas, gfs and rap.
+ The new uprair data will be captured and instrodyced with no loss for gdas and rap, and possibly minimal loss for gfs.
+
+ 2.
+ Memory and CPU usage was expanded for many steps in the processing.
+ EMC tests ran with the following recomended configurations (keep the ncpus values!)
+ gdas/gfs dump:      ncpus=14 mem=500gb 
+ gdas/gfs dump_post: ncpus=14 mem=4gb
+ gdas/gfs prep:      ncpus=14 mem=520gb
+ gdas/gfs prep_post: ncpus=14 mem=4gb
+
+ rap dump:      ncpus=11 mem=50gb
+ rap dump_post: ncpus=14 mem=6b
+ rap prep:      ncpus=4 mem=100gb
+ rap prep_post: ncpus=1 mem=3gb
+ 
+ cdas dump:      ncpus=10 mem=200gb
+ cdas dump_post: ncpus=12 mem=300gb
+ cdas prep1:     ncpus=12 mem=100gb
+ cdas prep2:     ncpus=16 mem=120gb
+ cdas prep1_post: ncpus=1 mem=6gb
+
+ nam dump:      ncpus=7 mem=20gb
+ nam dump2:     ncpus=3 mem=15gb
+ nam dump_post: ncpus=1 mem=3gb
+ nam prep:      ncpus=4 mem=220gb
+ nam prep_post: ncpus=1 mem=500Mb
+
+ rtma dump:     ncpus=5 mem=40gb
+ rtma dump_post:ncpus=1 mem=5000MB
+ rtma prep:     ncpus=1 mem=2gb
+ rtma prep_post:ncpus=1 mem=2gb
+
+ urma dump:     ncpus=6:mem=40gb
+ urma dump_post:ncpus=1:mem=6gb
+ urma prep:     ncpus=1:mem=6gb
+ urma prep_post:ncpus=1:mem=2gb
+
+ dump monitor:  ncpus=15:mem=400GB
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ obsproc needs modules bufr-dump and prepobs in order to run
+ See docs/README.md for build instructions
+ See versions/build.ver and versions/run.ver for libaries
+
+ Run jobs/JOBSPROC_networkname_DUMP and jobs/JOBSPROC_networkname_DUMP_POST
+ for the following networkname values: GLOBAL, NAM, RAP, URMA, RTMA, CDAS
+
+ Parallel Production Testing (PPT)
+ After testing obsproc v1.2 in the /para space, we recommend doing for at least a month,
+ it is best to do a single cycle Parallel Production Testing (PPT) (i.e. obsproc + GFS + other models).
+ Copy the following directoris:
+ $model.YYYYMMDD, where model: gfs,gdas,nam,rap,rap_e,rap_p,urma,cdas,rtma,rtma_ru,dump
+ $model.YYYYMM,   where model: cdas
+ $model.YYYY,     where model:mods
+ $model,          where:gdas, sdm_rtdm
+ from the para run:
+ /para/com/obsproc/v1.2/
+ to
+ /prod/com/obsproc/v1.2/  for the PPT.
+
+ Good to know:
+ - the RAP uprair dumps might be 0 size for the hours not around 00,06,12,18 UTC
+ - the CDAS prepbufr files are 6 different flavours, it takes about 26 hours for all to be generated
+ - only GDAS and GFS networks will generate  *satwhr*
+ - only GDAS and GFS networks would support the unrestrictiom of aircraft data, and only on a DEV machine
+ - some *bufr_d files might be 0 size until the relevant data stream is recovered (airs, ombusv8) 
+ - please contact obsproc_support@noaa.gov should you have any Qs regarding testing
+
+DISSEMINATION INFORMATION
+
+  For NOMAD proposed changes, a SCN will be issued/submitted to Data Flow
+
+SPECIAL INSTRUCTIONS
+
+ 1.Implement release/obsproc.v1.2.0, release/bufr-dump.v1.2.0, and release/prepobs.v1.1.0 at the same time
+
+ 2.Implement release/obsproc.v1.2.0, release/bufr-dump.v1.2.0, and release/prepobs.v1.1.0 after confirming GFS global-workflow is ready for the new versions (first 2 digits)
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.1.0	RELEASED	AUG 18,2022
+	v1.1.2	IMPLEMENTED	NOV 30,2022
+
+FILE CHANGES
+
+M CMakeLists.txt
+D build-obsproc/
+A cmake/FindMKL.cmake
+A cmake/FindNetCDF.cmake
+M docs/README.md
+A docs/Release_Notes.txt
+M ecf/global/dump/jobsproc_global_atmos_dump.ecf
+M jobs/JOBSPROC_AIRNOW_DUMP
+M jobs/JOBSPROC_NAM_PREP
+D release_notes/CMakeLists.txt
+D release_notes/Release_Notes.txt
+M scripts/excdas_dump.sh
+M scripts/exglobal_dump.sh
+M scripts/exglobal_makeprepbufr.sh
+M scripts/exnam_makeprepbufr.sh
+M scripts/exrap_dump.sh
+M scripts/exrtma_dump.sh
+M scripts/exurma_dump.sh
+A ush/build.sh
+M versions/run.ver
+M versions/VERSION
+(M-modified; A-added; D-deleted)
+
+DOCS CHANGES
+
+ docs/README.md
+ Update build instructions
+
+ docs//Release_Notes.txt
+ Update structre and shorten contents
+
+ECF CHANGES
+
+ ecf/global/dump/jobsproc_global_atmos_dump.ecf
+ Increase memory usage
+
+JOBS CHANGES
+
+ jobs/JOBSPROC_AIRNOW_DUMP
+ Correct COMIN path 
+
+ jobs/JOBSPROC_NAM_PREP
+ Correct COMINtcvital path; Turn off SYNDATA in prepbufr
+
+SCRIPTS CHANGES
+
+ scripts/exglobal_dump.sh
+ scripts/exrap_dump.sh
+ scripts/exurma_dump.sh
+ scripts/exrtma_dump.sh
+ scripts/excdas_dump.sh
+ Add dump groups: gmi1cr, snocvr, saldrn, subpfl
+ Add Sentinel-6 data to gpsro (via dev to prod tank update)
+ Add Metop-B/C AMVs data from tank b005/xx081 to satwnd dump group
+
+ scripts/exglobal_makeprepbufr.sh
+ Add subpfl and saldrn to nsst bufr dump
+
+ scripts/exnam_makeprepbufr.sh
+ Comment out COMSPtcvital path to turn off SYNDAT for nam
+
+USH CHANGES
+
+ ush/build.sh
+ Move build.sh from obsolete /build-obsproc to /ush
+
+VERSIONS CHANGES
+
+ versions/run.ver
+ Secure turn off SYNDAT for nam
+
+CHANGES TO OUTPUT AND FILE SIZES
+
+ Generate new dumps:
+ *gmi1cr*, *snocvr*, *saldrn*, *subpfl*
+ Update dumps:
+ *gpsro*, *satwnd* and *nsstbufr (*nsstbufr is generatd only in global) 
+
+ The newly generated dumps ( *gmi1cr*, *snocvr*, *saldrn*, *subpfl* ) vary in size from 1Mb to 200Mb
+ depending on network, cycle time, time dump window. 0 size dumps are possible
+ The updated dumps (*gpsro*, *satwnd* and *nsstbufr) are up to ~25% larger in size
+ For examples, see: /lfs/h2/emc/stmp/iliana.genkova/CRON/RELv1.1.0/com
+
+CHANGES TO RESOURCES
+
+ Memory usage was increased, from 60 to 120gb, when testing with triggers/jglobal_dump.wc2.pbs
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+
+ obsproc needs modules bufr-dump and prepobs in order to run
+ See docs/README.md for build instructions
+ See versions/build.ver and versions/run.ver for libaries
+ Run jobs/JOBSPROC_networkname_DUMP and jobs/JOBSPROC_networkname_DUMP_POST
+ for the following networkname values: GLOBAL, RAP, URMA, RTMA, CDAS
+
+DISSEMINATION INFORMATION
+
+ No changes 
+
+SPECIAL INSTRUCTIONS
+
+ 1.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0 at the same time
+ 2.Implement release/obsproc.v1.1.0 and release/bufr-dump.v1.1.0 before or at the same time as GFS v16.3 
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.0.0	RELEASED	DEC 21,2021
+        v1.0.2  IMPLEMENTED	JUN 28, 2022             
+
+Transition from WCOSS Cray and Phase3 to WCOSS2
+======================================
+https://docs.google.com/document/d/1U4pu4iSlLOnbNrcBqBlOU7bnNcTFfe_MpjV8uKN4S40/edit
+
+Where is the release tag on subversion/git/vlab? 
+ git clone https://github.com/NOAA-EMC/obsproc
+ git checkout release/obsproc.v1.0.0
+
+List of external software used (anything outside of your vertical structure), including compilers and version numbers for everything.
+Software used must be a minimal list of modules/versions specified per job:
+ hdf5_ver=1.10.6
+ netcdf_ver=4.7.4
+ bacio_ver=2.4.1
+ w3emc_ver=2.7.3
+ sp_ver=2.3.3
+ sigio_ver=2.3.2
+ nemsio_ver=2.5.2
+ bufr_ver=11.5.0
+ prod_util_ver=2.0.8
+ prod_envir_ver=2.0.5
+ cfp_ver=2.0.4
+ grib_util_ver=1.2.2
+ util_shared_ver=1.4.0
+ w3nco_ver=2.4.1
+ bacio_ver=2.4.1
+ bufr_dump_ver=1.0.0
+ gfs_ver=v16.2.0
+ omb_ver=v4.4.0
+ dictionaries_ver=v3.4.0
+
+List of all code/scripts modified with this release:
+A CMakeLists.txt
+A VERSION
+A build.sh
+A cmake/FindMKL.cmake
+A cmake/FindNetCDF.cmake
+A fix/CMakeLists.txt
+  fix/bufrtab.mods
+  fix/prepobs_anow.bufrtable
+A jobs/CMakeLists.txt
+M jobs/JOBSPROC_AIRNOW_DUMP
+M jobs/JOBSPROC_CDAS_DUMP
+M jobs/JOBSPROC_CDAS_DUMP_POST
+M jobs/JOBSPROC_CDAS_PREP1
+M jobs/JOBSPROC_CDAS_PREP1_POST
+M jobs/JOBSPROC_CDAS_PREP2
+M jobs/JOBSPROC_CDAS_PREP2_POST
+M jobs/JOBSPROC_DUMP_ALERT
+M jobs/JOBSPROC_DUMP_MONITOR
+M jobs/JOBSPROC_GLOBAL_DUMP
+M jobs/JOBSPROC_GLOBAL_DUMP_POST
+M jobs/JOBSPROC_GLOBAL_PREP
+M jobs/JOBSPROC_GLOBAL_PREP_POST
+M jobs/JOBSPROC_MODS
+M jobs/JOBSPROC_NAM_DUMP
+M jobs/JOBSPROC_NAM_DUMP2
+M jobs/JOBSPROC_NAM_DUMP_POST
+M jobs/JOBSPROC_NAM_PREP
+M jobs/JOBSPROC_NAM_PREP_POST
+M jobs/JOBSPROC_RAP_DUMP
+M jobs/JOBSPROC_RAP_DUMP_POST
+M jobs/JOBSPROC_RAP_PREP
+M jobs/JOBSPROC_RAP_PREP_POST
+M jobs/JOBSPROC_RTMA_DUMP
+M jobs/JOBSPROC_RTMA_DUMP_POST
+M jobs/JOBSPROC_RTMA_PREP
+M jobs/JOBSPROC_RTMA_PREP_POST
+M jobs/JOBSPROC_URMA_DUMP
+M jobs/JOBSPROC_URMA_DUMP_POST
+M jobs/JOBSPROC_URMA_PREP
+M jobs/JOBSPROC_URMA_PREP_POST
+A modulefiles/dumpmb/1.0.1
+A modulefiles/obsproc_common.lua
+A modulefiles/obsproc_hera.lua
+A modulefiles/obsproc_orion.lua
+A modulefiles/obsproc_wcoss2.lua
+A parm/CMakeLists.txt
+  parm/prepobs_cqcbufr.cdas.parm
+  parm/prepobs_cqcbufr.gdas.parm
+  parm/prepobs_cqcbufr.gfs.parm
+  parm/prepobs_cqcbufr.nam.parm
+  parm/prepobs_cqcbufr.rap.parm
+  parm/prepobs_prepacqc.cdas.parm
+  parm/prepobs_prepacqc.gdas.parm
+  parm/prepobs_prepacqc.gfs.parm
+  parm/prepobs_prepacqc.nam.parm
+  parm/prepobs_prepacqc.rap.parm
+  parm/prepobs_prepdata.cdas.parm
+  parm/prepobs_prepdata.gdas.parm
+  parm/prepobs_prepdata.gfs.parm
+  parm/prepobs_prepdata.nam.parm
+  parm/prepobs_prepdata.rap.parm
+  parm/prepobs_prepdata.rtma.parm
+  parm/prepobs_prepdata.urma.parm
+  parm/prepobs_prepssmi.cdas.parm
+  parm/prepobs_prepssmi.gdas.parm
+  parm/prepobs_prepssmi.gfs.parm
+  parm/prepobs_prepssmi.nam.parm
+  parm/prepobs_prepssmi.rap.parm
+  parm/prepobs_prepssmi.rtma.parm
+  parm/prepobs_prevents.cdas.parm
+  parm/prepobs_profcqc.gdas.parm
+  parm/prepobs_profcqc.gfs.parm
+  parm/prepobs_profcqc.nam.parm
+  parm/prepobs_profcqc.rap.parm
+  parm/syndat_syndata.gdas.parm
+  parm/syndat_syndata.gfs.parm
+  parm/syndat_syndata.nam.parm
+  parm/transfer_airnow.list
+  parm/transfer_hourly.list.old0203
+  parm/wave_dcodquikscat.rtma.parm
+A scripts/CMakeLists.txt
+M scripts/exairnow_dump.sh
+M scripts/excdas_dump.sh
+M scripts/excdas_makeprepbufr.sh
+M scripts/exdump_alert.sh
+M scripts/exdump_monitor.sh
+M scripts/exdump_post.sh
+M scripts/exglobal_dump.sh
+M scripts/exglobal_makeprepbufr.sh
+M scripts/exmods.sh
+M scripts/exnam_dump.sh
+M scripts/exnam_makeprepbufr.sh
+M scripts/exprep_post.sh
+M scripts/exrap_dump.sh
+M scripts/exrap_makeprepbufr.sh
+M scripts/exrtma_dump.sh
+M scripts/exrtma_makeprepbufr.sh
+M scripts/exurma_dump.sh
+M scripts/exurma_makeprepbufr.sh
+A sorc/CMakeLists.txt
+A sorc/bufr_avgdata.fd/CMakeLists.txt
+  sorc/bufr_avgdata.fd/avgdata.f
+A sorc/bufr_datacount.fd/CMakeLists.txt
+  sorc/bufr_datacount.fd/datacount.f
+A sorc/bufr_listdumps.fd/CMakeLists.txt
+  sorc/bufr_listdumps.fd/inc_w3unpkb7.inc
+  sorc/bufr_listdumps.fd/iw3unpbf.f
+  sorc/bufr_listdumps.fd/listdumps.f
+  sorc/bufr_listdumps.fd/w3unpkb7.f
+  sorc/bufr_listdumps.fd/wordlength.f
+ A sorc/bufr_prepmods.fd/CMakeLists.txt
+  sorc/bufr_prepmods.fd/bufr_prepmods.f
+  sorc/bufr_prepmods.fd/clonlat.f
+  sorc/bufr_prepmods.fd/mbuoyb.f
+  sorc/bufr_prepmods.fd/mnemonics.f
+  sorc/bufr_prepmods.fd/obname.f
+  sorc/bufr_prepmods.fd/raddate.f
+  sorc/bufr_prepmods.fd/ssmipn.f
+  sorc/bufr_prepmods.fd/tideg.f
+A sorc/bufr_remorest.fd/CMakeLists.txt
+  sorc/bufr_remorest.fd/remorest.f
+A sorc/prepobs_prepanow.fd/CMakeLists.txt
+  sorc/prepobs_prepanow.fd/prepanow.f
+A triggers/ (30)
+A ush/CMakeLists.txt
+M ush/bufr_avgdata.sh
+M ush/bufr_datacount.sh
+  ush/bufr_prepmods.sh
+  ush/bufr_remorest.sh
+  ush/dumpmb
+A versions/README
+A versions/build.ver
+A versions/run.ver
+M-modified; A-added; D-deleted
+
+What changes were made to the above code/scripts to support the new architecture?
+ The obsproc software has been consolidated into its own network. As such, the directories are bigger. 
+ However, because code is under one umbrella, the PBS trigger / ecflow scripts and J-job scripts are more streamlined.
+ The obsproc software has been moved to github and now utilizes cmake to build and install the package. 
+ https://github.com/NOAA-EMC/obsproc and build obsproc repo with cmake
+ The obsproc software no longer includes bufr_dump. 
+ bufr_dump has been moved to its own github repository and is installed as its own module. 
+ Separate bufr_dump.v1.0.0 Release Notes. See https://github.com/NOAA-EMC/bufr-dump
+
+Were any other changes made that aren’t directly related to the transition? 
+ No
+
+Are there any changes to incoming data needs or outgoing products? 
+ Network bufr dump and prepbufr files are now written to obsproc’s com, not each network’s com. See notes in the next section.
+
+If output filenames are changing, list the current and new filename. 
+ Output file names are not changing; however, their destination directory ($COMOUT) is changing. 
+ Network data produced by obsproc processing will be located in $COMROOT/obsproc/v1.0/${RUN}.YYYYMMDD, 
+ where ${RUN} is entities such as cdas, gfs, gdas, nam, rap, rtma, urma, dump (for dump_monitor).
+
+Compute resource information, for every job 
+ See triggers/ directory
+ Total tasks
+ Tasks per node
+ Serial or parallel or mpmd
+ Memory requirements (exclusive or shared)
+
+List any other PBS resource information requirements or MPI tunables
+ *** Providing PBS and/or ecFlow submission scripts as part of release tag is preferred; 
+ if they are provided then resource information is not needed in the release notes.
+
+Runtime changes compared to current production (/gpfs/dell1/nco/ops/com/logs/runtime/daily/* for current stats)
+ Optimization was not performed prior to release because of the team reshuffling and resultant tight deadline. 
+ Obsproc developers will work with assigned SPA to meet optimization goals.
+ JOBSPROC_CDAS_PREP2* was not fully tested.This processing requires more days than were available in /canned com. 
+ We also could not use live dcom data once it became available since this processing requires sice.YYYYMMDD data files, which are not yet available in realtime.
+
+Disk space required per day or per cycle; data retention on disk will remain the same unless otherwise requested.
+ Same as WCOSS1
+
+Dissemination will remain the same unless otherwise communicated to NCO and a PNS/SCN issued
+
+HPSS archive retention will remain the same unless approval granted by HPCRAC
+
+What are your up and downstream dependencies?
+ Upstream: decoders, satingest ($DCOMROOT)
+ Downstream: gfs and gdas model and analysis runs; omb sice data
+
+Provide a pointer to your COMOUT, temp directory and pbspro output file that was used during testing:
+ -gfs/gdas
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/ptmp_copy2keep/global_wcoss2/com
+ logs in  /lfs/h2/emc/obsproc/noscrub/Iliana.Genkova/ptmp_copy2keep/obsproc_g*s_*_Rel_*.o*     
+ -cdas
+ NOTE: Incomplete; not fully tested because canned com was not sufficiently long in duration. All cdas components are vetted except for prep2. This process needs to look back 48 hours.
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/OUTPUTS/com/obsproc/v1.0.0/cdas.20210824
+ log in /lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/LOGS
+ -rtma
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/OUTPUTS/com/obsproc/v1.0.0/rtma.20210824
+ log in /lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/LOGS
+ -urma
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/OUTPUTS/com/obsproc/v1.0.0/urma.20210824
+ log in /lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/LOGS
+ -mods
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/OUTPUTS/com/obsproc/v1.0.0/mods.20210824
+ MODSDIR=/lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/OUTPUTS/mods/dcom/prod/mods
+ log in /lfs/h2/emc/obsproc/noscrub/Praveen.Kumar/prerelease/LOGS
+ -nam
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/com/obsproc/v1.0.0/nam.20210824
+ log in /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/logs
+ -rap    
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/com/obsproc/v1.0.0/rap_p.20210824
+ log in /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/logs
+ -dump_alert  
+ COMOUT = /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/nam_dump_alert_12.nid001126.16584
+ log in /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/logs
+ -dump_monitor
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/com/obsproc/v1.0.0/dump.20210824
+ log in /lfs/h2/emc/obsproc/noscrub/Nicholas.Esposito/outputs/logs
+ -airnow
+ COMOUT=/lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/outputs/com/obsproc/v1.0.0/hourly.*
+ log in /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/outputs/logs
+===========================================================================
+WCOSS1 RN:https://github.com/ShelleyMelchior-NOAA/smelchior/tree/main/RNs
+
+END

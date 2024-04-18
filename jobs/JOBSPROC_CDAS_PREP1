@@ -251,6 +251,13 @@ export NSPLIT=${NSPLIT:-12}
 export BUFRLIST=${BUFRLIST:-"adpupa proflr aircar aircft satwnd adpsfc \
  sfcshp atovs"}
 
+# I.G. 07/27/2023
+export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
+                           # center hour (cycle) times if foreground exit
+                           # status is 4 (i.e., when either either "ADPUPA" or
+                           # "ADPSFC" dump is empty)
+
+
 # VARIABLES THAT CONTROL PROCESSING OF INDIVIDUAL PROGRAMS
 # --------------------------------------------------------
 

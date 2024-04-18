@@ -1,26 +1,28 @@
-#!/bin/bash
+#!/bin/sh  
 #PBS -N obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%
 #PBS -j oe
-#PBS -l walltime=1:00:00
-#PBS -A OBSPROC-DEV
+#PBS -S /bin/bash
 #PBS -q dev
-#PBS -l place=vscatter,select=1:ncpus=3:mem=8gb
-#BPS -l debug=true
+#PBS -l walltime=00:20:00
+#PBS -A OBSPROC-DEV
+#PBS -l place=vscatter,select=1:ncpus=14:mem=60gb
+#PBS -l debug=true
 
 ##############################################
-# Submit notes:
+# Submit notes:%
 # Run from [ps]tmp when running manually
 # When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=cdas cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jcdas_dump.wc2.pbs
+# > jtyp=[gdas][gfs] cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_dump.wc2.pbs
 # For latest/current PDY:
-# > jtyp=cdas cyc=00 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jcdas_dump.wc2.pbs
-# cycqsub location: /u/Shelley.Melchior/bin
+# > jtyp=[gdas][gfs] cyc=00 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_dump.wc2.pbs
+# cycqsub location: /u/Shelley.Melchior/bin 
 ##############################################
 
 set -xu
 
 export envir=prod
+
 export cyc=%CC%
 DESC=%DESC%
 JTYP=%JTYP%
@@ -31,15 +33,15 @@ export PDY=%PDY%
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsproc_ver=v1.0
-export obsproc_ver_pckg=v1.0.0
 export bufr_dump_ver=1.0.0
 export obsNET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
-#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
-#export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver_pckg}        # NCO prod
-export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
+#export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver}        # NCO prod
+export HOMEobsproc=${userROOT}/wrapper_scripts/JOBS/nsst_sldrn_subpfl/obsproc_run.iss51959.nsst_subpfl      # local
 
-VERSION_FILE=$HOMEobsproc/versions/run.ver
+#VERSION_FILE=$HOMEobsproc/versions/run.ver
+VERSION_FILE=${userROOT}/wrapper_scripts/JOBS/nsst_sldrn_subpfl/obsproc/versions/run.ver
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
@@ -57,11 +59,9 @@ module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
 # use para installation
-#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
-# use local bufr_dump installation
 module unload bufr_dump
-#module use ${userROOT}/install/bufr_dump/modulefiles
-module use ${userROOT}/install/bufr-dump-rel.1.0.0/modulefiles
+#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
+module use ${userROOT}/githubrun/bufr_dump_run/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 
 # Be sure the modules are loaded 
@@ -82,50 +82,52 @@ export SENDECF=NO   # developer
 export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
-export TANK=$DCOMROOT
+#export TANK=$DCOMROOT
+#export TANK_000015=$DCOMROOT			#echo $DCOMROOT /lfs/h1/ops/prod/dcom   prod tanks?
+#export TANK_000015=/lfs/h1/ops/dev/dcom        #dev tanks?
+export TANK_031005=/lfs/h1/ops/dev/dcom
+ 
 
-export DATAROOT=/lfs/h2/emc/stmp/$USER
-export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
+export DATAROOT=/lfs/h2/emc/ptmp/$USER 
+export jlogfile=/lfs/h2/emc/ptmp/$USER/${JTYP}.$PDY.jlogfile
+
+export COMOUT_ROOT=${DATAROOT}/CRON/${DESC}/com
+export COMPONENT=atmos
 
 export DEBUG_LEVEL=3
 export LOUD=ON
 export KEEPDATA=YES
 
 
-#export COM_ENGICE=$CANCOMROOT/omb/v4.4/sice
-#export COM_SSTOI=$CANCOMROOT/gfs/v16.2/sst
-#export COMIN=$COMROOT/obsproc/${JTYP}.${PDY}
-export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
-export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com 
-
-$HOMEobsproc/jobs/JOBSPROC_CDAS_DUMP
+$HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP
 err=$?
 
 # When run from cron, the stdout is written to /u/$USER
 # mv to stmp
 pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
 cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
-outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
+#cronlogfile=/lfs/h2/emc/ptmp/$USER/$PBS_JOBNAME.o$pbsjobid
+outputdir=/lfs/h2/emc/ptmp/${USER}/CRON/${DESC}/output
 if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
 fi
 
 # If you wish to only run the dump job, un-comment the exit line below
-#exit
+
 
 # Kick off dump_post job
-if [ $err -eq 0 ]; then
-  echo "submit jcdas_dump_post"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jcdas_dump_post.wc2.pbs
-fi
+#if [ $err -eq 0 ]; then
+#  echo "submit jglobal_dump_post"
+#  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/cycqsub \
+#  /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/jglobal_dump_post.wc2.pbs.Sentinel_6
+#fi
 
-# Kick off prep1 job
+# Kick off prep job
 if [ $err -eq 0 ]; then
-  echo "submit jcdas_dump_post"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/Shelley.Melchior/triggers/jcdas_prep1.wc2.pbs
+  echo "submit jglobal_prep"
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/Sentinel_6_issue97485/obsproc/triggers/cycqsub \
+  /lfs/h2/emc/obsproc/noscrub/Steve.Stegall/wrapper_scripts/JOBS/nsst_sldrn_subpfl/obsproc/triggers/jglobal_prep.wc2.pbs.NSST_subpfl
 fi
 
 exit

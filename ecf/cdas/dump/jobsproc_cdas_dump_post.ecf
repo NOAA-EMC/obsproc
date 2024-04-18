@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:30:00
-#PBS -l place=vscatter,select=1:ncpus=3:mem=500mb
+#PBS -l place=vscatter,select=1:ncpus=3:mem=2GB
 #PBS -l debug=true
 
 ##PBS -l place=vscatter,select=1:ncpus=7:mem=4gb
@@ -21,13 +21,12 @@ JTYP=%JTYP% #=cdas
 
 #Load the modules
 module load intel/${intel_ver}
-#module load craype/${craype_ver}
-#module load cray-mpich/${cray_mpich_ver}
-#module load cray-pals/${cray_pals_ver}
-#module load cfp/${cfp_ver}
+module load craype/${craype_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
 
 # to do: install bufr_dump for lmod
-module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
 module load bufr_dump/${bufr_dump_ver}
 module list
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 # Get the version from the VERSION file.
-file(STRINGS "VERSION" pVersion)
+file(STRINGS "versions/VERSION" pVersion)
 
 project(
   obsproc
@@ -28,19 +28,20 @@ if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
 endif()
 
 # Build and install code.
-add_subdirectory(../sorc sorc)
+add_subdirectory(sorc)
 
 # Install jobs.
-add_subdirectory(../jobs jobs)
+add_subdirectory(jobs)
 
 # Install scripts.
-add_subdirectory(../scripts scripts)
+add_subdirectory(scripts)
 
 # Install utility scripts.
-add_subdirectory(../ush ush)
+add_subdirectory(ush)
 
 # Install fix files.
-add_subdirectory(../fix fix)
+add_subdirectory(fix)
 
 # Install parm files.
-add_subdirectory(../parm parm)
+add_subdirectory(parm)
+
