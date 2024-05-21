@@ -88,7 +88,7 @@ echo "                       gmi1cr,and snocvr                              "
 echo "         Oct 17 2022 - Split up groups 1 and 10 into a new group 12   "
 echo "                       for better optimization.                       "
 echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.     "
-echo "         May 22 2024 - sfcsno added to dump group #2
+echo "         May 22 2024 - sfcsno added to dump group #2                  "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
