@@ -87,6 +87,8 @@ echo "	                     DBN alerts are also enabled for subpfl,saldrn, "
 echo "                       gmi1cr,and snocvr                              "
 echo "         Oct 17 2022 - Split up groups 1 and 10 into a new group 12   "
 echo "                       for better optimization.                       "
+echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.     "
+echo "         May 22 2024 - sfcsno added to dump group #2
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -115,11 +117,11 @@ set +u
 # JOB_NUMBER not present indicates dump BOTH prepbufr and non-prepbufr data.
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcsam eshrs3 ssmisu saphir 1bhrs4 sevcsr tesac mls
+#               avcsam eshrs3 ssmisu 1bhrs4 tesac mls
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
-#
+#               Stop: sevcsr, saphir in v1.2.0 
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
-#               sfcshp tideg atovs* adpsfc ascatt
+#               sfcshp tideg atovs* adpsfc ascatt snocvr sfcsno
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
@@ -142,19 +144,20 @@ set +u
 #               satwnd
 #
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
-#               geoimr
-#
+#               geoimr gmi1cr satwhr
 # Dump group #10 (non-pb, TIME_TRIM defaults to OFF) =
-#               esiasi mtiasi esamua sevasr 1bamua bathy osbuv8
-#               ompst8 ompsn8 gsrasr ompslp sstvpw
+#               esiasi mtiasi esamua sevasr 1bamua bathy
+#               osbuv8 ompst8 ompsn8 gsrasr ompslp sstvpw
 #
 # Dump group #11 (non-pb, TIME_TRIM defaults to OFF) =
 #               amsr2
 #
 # Dump group #12 crisfs atms (previously group1)
 #                crsfdb iasidb (previously group10)
+# Dump group #13 (pb, TIME_TRIM defaults to OFF) = 
+#                uprair
 #
-# Dump group #13 STATUS FILE
+# Dump group #14 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -184,6 +187,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
+      DUMP_group13=${DUMP_group13:-"NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -198,6 +202,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
+      DUMP_group13=${DUMP_group13:-"YES"}
    fi
 else
    dump_ind=DUMP
@@ -213,15 +218,19 @@ else
    DUMP_group10=${DUMP_group10:-"YES"}
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
+   DUMP_group13=${DUMP_group13:-"YES"}
 fi
 
+# NAP and NAP_adpupa instroduced so that uprair can run early on his own
+NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
 if [ "$NET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
+   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
 ########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
+   NAP_adpupa=${NAP_adpupa:-600} #like other dump groups
 fi
-
 
 # send extra output of DUMP2 for monitoring purposes.
 set +u
@@ -519,7 +528,7 @@ echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
 echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
-
+echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
 
 err1=0
 err2=0
@@ -533,6 +542,7 @@ err9=0
 err10=0
 err11=0
 err12=0
+err13=0
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -561,6 +571,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -582,6 +593,8 @@ export DUMP_NUMBER=1
 #            GSRCSR: 1 subtype(s)
 #            AHICSR: 1 subtype(s)
 #            SSTVCW: 1 subtype(s)
+#            SUBPFL: 1 subtype(s)
+#            SALDRN: 1 subtype(s)
 #            --------------------
 #            TOTAL NUMBER OF SUBTYPES = 14
 #
@@ -590,10 +603,10 @@ export DUMP_NUMBER=1
 DTIM_latest_avcsam=${DTIM_latest_avcsam:-"+2.99"}
 DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+2.99"}
 DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+2.99"}
-DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
+#DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
 DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
-DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
+#DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
 DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
 #-----------------------------------------------
 # check for mls tank presence in past 10 days
@@ -624,7 +637,7 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- saphir 1bhrs4 sevcsr tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
+ 1bhrs4 tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -635,14 +648,14 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}eshrs3.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ssmisu $job \
     ${COMSP}ssmisu.tm00.bufr_d
-   if [ "${NET}" = "gdas" ]; then
-      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
-       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
-   fi
+#   if [ "${NET}" = "gdas" ]; then
+#      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
+#       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
+#   fi
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bhrs4 $job \
     ${COMSP}1bhrs4.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
-    ${COMSP}sevcsr.tm00.bufr_d
+#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
+#    ${COMSP}sevcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tesac $job \
     ${COMSP}tesac.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
@@ -693,6 +706,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -711,11 +725,13 @@ export DUMP_NUMBER=2
 #            ATOVS:  1 subtype(s)
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
+#            SNOCVR: 1 subtype(s)
+#            SFCSNO: 7 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 20 - 21
+#            TOTAL NUMBER OF SUBTYPES = 29 - 30
 #
 #--------------------------------------------------------------------------
 # GFS:
@@ -723,16 +739,19 @@ export DUMP_NUMBER=2
 #            TIDEG:  1 subtype(s)
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
+#            SNOCVR: 1 subtype(s)
+#            SFCSNO: 7 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES =  19 - 20
+#            TOTAL NUMBER OF SUBTYPES =  29 - 30
 #
 #==========================================================================
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
+DTIM_latest_sfcsno=${DTIM_latest_sfcsno:-"+2.99"}
 
 atovs=""
 if [ "$NET" = 'gdas' ]; then
@@ -758,7 +777,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat sfcsno
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -776,6 +795,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}ascatt.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_snocvr $job \
     ${COMSP}snocvr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sfcsno $job \
+    ${COMSP}sfcsno.tm00.bufr_d
    if [ "$NET" = 'gdas' ]; then
     ####### ALERT TURNED ON for GDAS only ########################
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatw $job \
@@ -817,6 +838,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP_adpupa} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -873,6 +895,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -982,6 +1005,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -1034,6 +1058,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1177,6 +1202,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1284,6 +1310,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1395,6 +1422,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1406,19 +1434,24 @@ export DUMP_NUMBER=9
 #
 #--------------------------------------------------------------------------
 # Dump # 9 : GEOIMR: 1 subtype(s)
+#            GMI1CR: 1 subtype(s)
+#            SATWHR: 1 subtype(s)
 #            -------------------- 
-#            TOTAL NUMBER OF SUBTYPES = 1
+#            TOTAL NUMBER OF SUBTYPES = 3
 #
 #=======================================================================
 DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
 DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
+
+DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-3.00"}
+DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+2.99"}
 
 DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
 DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr satwhr
 
 error9=$?
 echo "$error9" > $DATA/error9
@@ -1428,6 +1461,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}geoimr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gmi1cr $job \
     ${COMSP}gmi1cr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwhr $job \
+    ${COMSP}satwhr.tm00.bufr_d
 fi
 
 set +x
@@ -1458,6 +1493,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1558,6 +1594,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
@@ -1614,6 +1651,7 @@ echo "********************************************************************"
 echo
 set -x
 
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=12
 
@@ -1692,6 +1730,65 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_13; chmod +x thread_13
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+# UPRAIR requires early start, no need to NAP
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=13
+
+#====================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump #13:   UPRAIR: 5 subtype(s)
+#            --------------------
+#            TOTAL NUMBER OF SUBTYPES = 5
+#
+#====================================================================
+
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+2.99"}
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM13:-off}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 uprair 
+error13=$?
+echo "$error13" > $DATA/error13
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_uprair $job \
+    ${COMSP}uprair.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/13.out 2>&1
+EOF
+set -x
+
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -1705,8 +1802,15 @@ launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
+   echo "Running threads in parallel IG2023"
+   myPDY=`date +\%Y\%m\%d\%H\%M\%S`
+   echo "DATE IG2023 start " $myPDY
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
+
+   #[ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
+   [ $DUMP_group3 = YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile # NAP_adpupa covers for ADPUPA_wait 
+   [ $DUMP_group13 = YES ]  &&  echo ./thread_13 >> $DATA/poe.cmdfile
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group1 = YES ]  &&  echo ./thread_1 >> $DATA/poe.cmdfile
    [ $DUMP_group5 = YES ]  &&  echo ./thread_5 >> $DATA/poe.cmdfile  # moved up
@@ -1715,16 +1819,17 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group11 = YES ] &&  echo ./thread_11 >> $DATA/poe.cmdfile # moved up
    [ $DUMP_group10 = YES ] &&  echo ./thread_10 >> $DATA/poe.cmdfile # moved up
    [ $DUMP_group2 = YES ]  &&  echo ./thread_2 >> $DATA/poe.cmdfile
-   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  echo ./thread_3 >> $DATA/poe.cmdfile
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
 
-
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
-      launcher_DUMP=${launcher_DUMP:-mpiexec} 
-      $launcher_DUMP -np 14 --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1
+      launcher_DUMP=${launcher_DUMP:-mpiexec}
+      NPROCS=${NPROCS:-14} # was 12
+      $launcher_DUMP -np ${NPROCS} --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 
+      #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 1) 3)
+      #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti suggestions
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -1736,9 +1841,9 @@ if [ "$launcher" = cfp ]; then
    fi
 else
    echo "Running threads serially"
+   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3
    [ $DUMP_group1 = YES ]  &&  ./thread_1 
    [ $DUMP_group2 = YES ]  &&  ./thread_2 
-   [ $DUMP_group3 = YES -a $ADPUPA_wait != YES ]  &&  ./thread_3 
    [ $DUMP_group4 = YES ]  &&  ./thread_4 
    [ $DUMP_group5 = YES ]  &&  ./thread_5 
    [ $DUMP_group6 = YES ]  &&  ./thread_6 
@@ -1748,17 +1853,21 @@ else
    [ $DUMP_group10 = YES ]  &&  ./thread_10 
    [ $DUMP_group11 = YES ]  &&  ./thread_11 
    [ $DUMP_group12 = YES ]  &&  ./thread_12 
+   [ $DUMP_group13 = YES ]  &&  ./thread_13
 #     wait
 fi
 
-#  if ADPUPA_wait is YES, adpupa is dumped AFTER all other dump threads have
-#   run (normally done in real-time GFS runs to dump as late as possible in
-#   order to maximize data availability in GFS network, particularly DROPs)
-#  --------------------------------------------------------------------------
+# long run times for uprair lead to use of NAP and NAP_adpupa variables (see code above) instead of this code
+#
+##  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
+##   threads have run (normally done in real-time GFS runs to dump as late as
+##   possible in order to maximize data availability in GFS network,
+##   particularly DROPs)
+##  --------------------------------------------------------------------------
+##
+#[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
 
-[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
-
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
 
 set +x
 echo " "
@@ -1777,12 +1886,13 @@ set -x
 [ -s $DATA/error10 ] && err10=`cat $DATA/error10`
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
+[ -s $DATA/error13 ] && err13=`cat $DATA/error13`
 
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=13
+export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
@@ -1802,8 +1912,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o "$err13" -gt '5']; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1814,7 +1924,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1832,7 +1942,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
