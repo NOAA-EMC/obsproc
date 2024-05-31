@@ -204,6 +204,19 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
  Run jobs/JOBSPROC_networkname_DUMP and jobs/JOBSPROC_networkname_DUMP_POST
  for the following networkname values: GLOBAL, NAM, RAP, URMA, RTMA, CDAS
 
+ Parallel Production Testing (PPT)
+ After testing obsproc v1.2 in the /para space, we recommend doing for at least a month,
+ it is best to do a single cycle Parallel Production Testing (PPT) (i.e. obsproc + GFS + other models).
+ Copy the following directoris:
+ $model.YYYYMMDD, where model: gfs,gdas,nam,rap,rap_e,rap_p,urma,cdas,rtma,rtma_ru,dump
+ $model.YYYYMM,   where model: cdas
+ $model.YYYY,     where model:mods
+ $model,          where:gdas, sdm_rtdm
+ from the para run:
+ /para/com/obsproc/v1.2/
+ to
+ /prod/com/obsproc/v1.2/  for the PPT.
+
  Good to know:
  - the RAP uprair dumps might be 0 size for the hours not around 00,06,12,18 UTC
  - the CDAS prepbufr files are 6 different flavours, it takes about 26 hours for all to be generated
