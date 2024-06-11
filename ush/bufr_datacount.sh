@@ -105,7 +105,7 @@ echo $RETC > $COMOUT/${RUN}.${cycle}.dump_alert_flag.$tmmark
 #  and 12-month ago 30-day avg files
 # ------------------------------------------------------------------------
 
-grep -e "^_" -e "^:" $LIST_CNT | grep -Fe "#>" > dumplist
+grep --text -e "^_" -e "^:" $LIST_CNT | grep -Fe "#>" > dumplist
 
 if [ -s $COMIN/${RUN}.${cycle}.status.tm00.bufr_d ]; then
    status_bufr_d=$COMIN/${RUN}.${cycle}.status.tm00.bufr_d
@@ -114,7 +114,7 @@ elif [ -s $COMOUT/${RUN}.${cycle}.status.tm00.bufr_d ]; then
 else
    status_bufr_d=/dev/null
 fi
-grep -Fe " REPORTS" $status_bufr_d  | grep -Fe " in data group " | \
+grep --text -Fe " REPORTS" $status_bufr_d  | grep -Fe " in data group " | \
  grep -Fe " HAS" | grep -v -Fe "Domain" > delete
 awk -F" HAS" '{print$2}' delete | awk -F" REPORTS" '{print$1}' | \
  sed "s/[^0-9]/ /g" > delete.r
@@ -126,7 +126,7 @@ rm delete delete.l delete.r
 
 > obcount_30davg.${NET}.current
 if [ -s $AVGDarch_IN/obcount_30davg.${NET}.current ]; then
-   grep "^#   " $AVGDarch_IN/obcount_30davg.${NET}.current | \
+   grep --text "^#   " $AVGDarch_IN/obcount_30davg.${NET}.current | \
     sed "s/#  ......./     /g" | sed "s/[^0-9]/ /g" \
     > obcount_30davg.${NET}.current
 fi
@@ -146,7 +146,7 @@ for months_ago in 3 6 9 12; do
 
    > obcount_30davg.${NET}.${months_ago}months_ago
    if [ -s $AVGDarch_IN/obcount_30davg.${NET}.${arch_year}${arch_month} ]; then
-     grep "^#   " $AVGDarch_IN/obcount_30davg.${NET}.${arch_year}${arch_month} | \
+     grep --text "^#   " $AVGDarch_IN/obcount_30davg.${NET}.${arch_year}${arch_month} | \
        sed "s/#  ......./     /g" | sed "s/[^0-9]/ /g" \
        > obcount_30davg.${NET}.${months_ago}months_ago
    fi

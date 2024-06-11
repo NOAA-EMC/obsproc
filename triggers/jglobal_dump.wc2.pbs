@@ -93,7 +93,7 @@ export COMOUT_ROOT=${DATAROOT}/CRON/${DESC}/com
 export COMPONENT=atmos
 
 export DEBUG_LEVEL=3
-export LOUD=ON
+export LOUD=on
 export KEEPDATA=YES
 
 

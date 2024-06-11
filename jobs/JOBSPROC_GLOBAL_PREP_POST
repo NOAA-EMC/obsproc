@@ -151,6 +151,10 @@ if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
+# The following are used by $PROCESS_REMOREST_dm2 when it is YES
+# --------------------------------------------------------------
+  export COMINm2=${COMINm2:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
+  export COMOUTm2=${COMOUTm2:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
 else
   export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
@@ -161,12 +165,17 @@ else
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
   export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
+# The following are used by $PROCESS_REMOREST_dm2 when it is YES
+# --------------------------------------------------------------
+  export COMINm2=${COMINm2:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
+  export COMOUTm2=${COMOUTm2:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
+  mkdir -m 755 -p $COMOUTm2
 fi
 
 # The following are used by $PROCESS_TIMETWINS in the GDAS when it is YES
 # -----------------------------------------------------------------------
-export COMINgdas=${COMINgfs:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
-export COMINGFS=${COMINgfs:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
+export COMINGFS=${COMINGFS:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${NET}.${PDY}/${cyc}/${COMPONENT})}
 #export COMIN1=${COMIN1:-$(compath.py ${envir}/${NET}/${gfs_ver})/${RUN}.}
 export COMIN1=${COMIN1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver})/${RUN}.} #twinwind file now write in obsproc package
 
