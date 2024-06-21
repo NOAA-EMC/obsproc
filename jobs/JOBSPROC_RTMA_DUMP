@@ -228,7 +228,7 @@ else
 fi
 
 ############################################
-# SETUP RTMA DATA DUMP PROCESSING VARIABLES
+# SETUP RMTA DATA DUMP PROCESSING VARIABLES
 ############################################
 
 #########################################################

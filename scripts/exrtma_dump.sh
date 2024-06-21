@@ -79,13 +79,24 @@ echo
 set -x
  
 export COMSP=$COMOUT/$RUN.${cycle}.
- 
+
+NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
+
 err1=0
 err2=0
 err3=0
 err4=0
 err5=0
-
+err6=0
+err7=0
+err8=0
+err9=0
+err10=0
+err11=0
+err12=0
+err13=0
+err14=0
+err15=0
 
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1 
@@ -140,6 +151,7 @@ echo "********************************************************************"
 echo
 set -x
 
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -157,21 +169,21 @@ export DUMP_NUMBER=1
 #            time window radius is +/- 0.5 hours for EFCLAM
 #=======================================================================
 
-DTIM_earliest_ascatt=-6.00
-DTIM_latest_ascatt=0.00
+DTIM_earliest_ascatt=${DTIM_earliest_ascatt:-"-3.00"}
+DTIM_latest_ascatt=${DTIM_latest_ascatt:-"+3.00"}
 
-DTIM_earliest_efclam=-0.50
-DTIM_latest_efclam=+0.50
+DTIM_earliest_efclam=${DTIM_earliest_efclam:-"-0.50"}
+DTIM_latest_efclam=${DTIM_latest_efclam:-"+0.50"}
 
 DTIM_earliest_snocvr=${DTIM_earliest_snocvr:-"-2.00"}
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.00"}
 #DTIM_earliest_snocvr=-1.50
 #DTIM_latest_snocvr=+1.49
 
-DTIM_earliest_gmi1cr=-1.50
-DTIM_latest_gmi1cr=+1.49
+DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
+DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 2.5 1 ascatt efclam snocvr gmi1cr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 ascatt efclam snocvr gmi1cr
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -203,6 +215,7 @@ echo "********************************************************************"
 echo
 set -x
 
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -217,10 +230,10 @@ export DUMP_NUMBER=2
 
 export SKIP_000002=YES
 
-DTIM_earliest_subpfl=-0.50
-DTIM_latest_subpfl=+0.50
-DTIM_earliest_saldrn=-0.50
-DTIM_latest_saldrn=+0.50
+DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-1.50"}
+DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.50"}
+DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-0.50"}
+DTIM_latest_saldrn=${DTIM_latest_saldrn:="+0.50"}
 
 # for rtma_ru_0000 read only from previous day's tank
 # Temporary bug fix
@@ -260,6 +273,7 @@ echo "********************************************************************"
 echo
 set -x
 
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -301,6 +315,7 @@ echo "********************************************************************"
 echo
 set -x
 
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -390,6 +405,7 @@ echo "********************************************************************"
 echo
 set -x
 
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -418,6 +434,789 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_6; chmod +x thread_6
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_6
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=6
+
+#========================================================================
+# Dump # 6 : METARH
+#              (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 1
+#            time window radius is +/- 0.50 hours for METARH
+#=======================================================================
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 metarh
+error6=$?
+echo "$error6" > $DATA/error6
+
+set +x
+echo "********************************************************************"
+echo Script thread_6
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/6.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_7; chmod +x thread_7
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_7
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=7
+
+#==========================================================================
+# Dump # 7 : VADWND,  ...    ADPUPA
+#              (2)             (6)
+#            -- TOTAL NUMBER OF SUBTYPES = 8
+#==========================================================================
+
+# Time window -1.00 to +1.00 hours for ADPUPA for full and partial cycle runs
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+DTIM_earliest_adpupa=${DTIM_earliest_adpupa:-"-1.50"}
+DTIM_latest_adpupa=${DTIM_latest_adpupa:-"+1.50"}
+
+def_time_window_7=2.5  # default time window for dump 5 is -2.5 to +2.5
+                       # hours for all other cycles
+
+# Time window is -1.00 to +1.00 hours for VADWND
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+i  DTIM_earliest_vadwnd=${DTIM_earliest_vadwnd:-"-1.50"}
+  DTIM_latest_vadwnd=${DTIM_latest_vadwnd:-"+1.50"}
+
+# Time window is -1.50 to +1.50 hours for NON-EUMETSAT & NON-GOES SATWND at 00
+#  or 12z (default)
+
+# Time window is -2.50 to +2.50 hours for NON-EUMETSAT & NON-GOES SATWND at
+#  all other cycles (default)
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 vadwnd adpupa
+error7=$?
+echo "$error7" > $DATA/error7
+
+set +x
+echo "********************************************************************"
+echo Script thread_7
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/7.out 2>&1
+EOF
+set -x
+
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_8; chmod +x thread_8
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_8
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=8
+
+#========================================================================
+# Dump # 8 : PROFLR, RASSDA, SATMAR     ...     ...
+#              (3)     (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 4
+#
+#========================================================================
+
+# Skip Japanese profiler reports in PROFLR (not in domain)
+export SKIP_002013=YES
+
+def_time_window_8=1.5 # default time window for dump 5 is -0.5 to +0.5 hours
+
+# Time window -1.50 to +1.50 hours for PROFLR for full and partial cycle runs
+#  (note: time window increased over +/- 0.5 hr standard to improve
+#         PREPOBS_PROFCQC performance, it will be winnowed back down to
+#         -0.50 to +0.50 hours in output from PREPOBS_PROFCQC)
+DTIM_earliest_proflr=${DTIM_earliest_proflr:-"-1.50"}
+DTIM_latest_proflr=${DTIM_latest_proflr:-"+1.50"}
+
+DTIM_earliest_satmar=${DTIM_earliest_satmar:-"-3.00"}
+DTIM_latest_satmar=${DTIM_latest_satmar:-"+3.00"}
+i
+# Time window -0.50 to +0.50 hours for RASSDA   ...     ...   for full and
+#  partial cycle runs (default)
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_8} 1 proflr rassda satmar
+error8=$?
+echo "$error8" > $DATA/error8
+
+set +x
+echo "********************************************************************"
+echo Script thread_8
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/8.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_9; chmod +x thread_9
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_9
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=9
+
+#============================================================================
+# Dump # 9 :  ...    GPSIPW -- TOTAL NUMBER OF SUBTYPES = 1
+#                      (1)
+#============================================================================
+
+def_time_window_9=0.5 # default time window for dump 9 is -0.5 to +0.5 hours
+
+# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
+DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
+DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
+#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
+#         providers) is currently limited to obs closest to cycle-time that
+#         result in a U.S.-ENI dump count that is not too much larger than that
+#         from the previous U.S. (only) GSD-feed, since the ENI reports are
+#         available every 5 min while the GSD reports were available only every
+#         30 min. Also accounts for an approximate 80-min latency present in
+#         the U.S.-ENI reports.}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 gpsipw
+error9=$?
+echo "$error9" > $DATA/error9
+
+set +x
+echo "********************************************************************"
+echo Script thread_9
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/9.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_10; chmod +x thread_10
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_10
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=10
+
+#===========================================================================
+# Dump # 10 : AIRCFT, AIRCAR, GOESND -- TOTAL NUMBER OF SUBTYPES = 12
+#              (8)     (2)     (2)
+#===========================================================================
+export LALO=0  # GLOBAL dumps here (AIRCFT and AIRCAR dumped globally to
+               # improve PREPOBS_PREPACQC track-check performance; GOESND
+               # dumped globally to allow job to run much quicker w/o the need
+               # for geographical filtering (all GOES reports are in expanded
+               # NAM domain anyway)
+
+def_time_window_10=0.75 # default time window for dump 10 is -3.25 to +3.25 hours
+
+# Time window -3.25 to +3.25 hours for AIRCFT and AIRCAR for full and partial
+#  cycle runs (default)
+#  {note: time window increased to improve PREPOBS_PREPACQC track-check
+#         performance; time window will be winnowed down to +/- 1.00 hours in
+#         output from PREPOBS_PREPACQC (for full and partial cycle runs), and
+#         geographical domain will be limited to north of 20S latitude)
+
+# Time window -1.25 to -0.01 hours for GOESND cloud (only) for full and partial
+#  cycle runs
+#  (note: going back -1.25 hours is necessary to gather a complete set of
+#         GOES-E information, while the cutting off at -0.01 hours avoids a
+#         duplication of GOES-W data from the next input dataset time)
+DTIM_earliest_003002=${DTIM_earliest_003002:-"-1.25"}
+DTIM_latest_003002=${DTIM_latest_003002:-"-0.01"}
+
+#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
+#       -------------------------------------------------------------------
+# Time window is -1.00 to +1.00 hours for GOESND soundings/radiances (only)
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+DTIM_earliest_003003=${DTIM_earliest_003003:-"-1.00"}
+DTIM_latest_003003=${DTIM_latest_003003:-"+1.00"}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_10} 1 aircft \
+                                                                  aircar
+
+error10=$?
+echo "$error10" > $DATA/error10
+set +x
+echo "********************************************************************"
+echo Script thread_10
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x                                                                   
+} > $DATA/10.out 2>&1
+EOF
+set -x
+
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_11; chmod +x thread_11
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=11
+
+#===============================================================================
+# Dump # 11 : 1BAMUA, 1BMHS,  ESAMUA, ESMHS, ATMS, MTIASI, SEVCSR, GPSRO,
+#              (1)    (1)      (1)     (1)   (1)    (1)    (1)     (1)
+#            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2
+#              (1)    (1)     (1)     (1)     (1)     (1)
+#             TOTAL NUMBER OF SUBTYPES = 16
+#===============================================================================
+#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
+#       -------------------------------------------------------------------
+
+def_time_window_11=3.0 # default time window for dump 11 is -3.0 to +3.0 hours
+
+# Time window is -3.00 to +2.99 hours for 1BAMUA, 1BMHS
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_latest_1bamua=${DTIM_latest_1bamua:-"+2.99"}      # earliest is default
+  DTIM_latest_1bmhs=${DTIM_latest_1bmhs:-"+2.99"}       # earliest is default
+
+# Time window is -3.00 to -2.01 hours for AMSR2
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_latest_amsr2=${DTIM_latest_amsr2:-"-2.01"}        # earliest is default
+
+# Time window is -2.00 to +1.99 hours for ATMS, ESATMS, ATMSDB,
+#  MTIASI, ESIASI, IASIDB
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_earliest_atms=${DTIM_earliest_atms:-"-2.00"}
+  DTIM_latest_atms=${DTIM_latest_atms:-"+1.99"}
+  DTIM_earliest_esatms=${DTIM_earliest_esatms:-"-2.00"}
+  DTIM_latest_esatms=${DTIM_latest_esatms:-"+1.99"}
+  DTIM_earliest_atmsdb=${DTIM_earliest_atmsdb:-"-2.00"}
+  DTIM_latest_atmsdb=${DTIM_latest_atmsdb:-"+1.99"}
+  DTIM_earliest_mtiasi=${DTIM_earliest_mtiasi:-"-2.00"}
+  DTIM_latest_mtiasi=${DTIM_latest_mtiasi:-"+1.99"}
+  DTIM_earliest_esiasi=${DTIM_earliest_esiasi:-"-2.00"}
+  DTIM_latest_esiasi=${DTIM_latest_esiasi:-"+1.99"}
+  DTIM_earliest_iasidb=${DTIM_earliest_iasidb:-"-2.00"}
+  DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+1.99"}
+
+# Time window is -2.00 to +1.99 hours for SEVCSR, SEVASR, GPSRO
+  DTIM_earliest_sevcsr=${DTIM_earliest_sevcsr:-"-2.00"}
+  DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+1.99"}
+  DTIM_earliest_sevasr=${DTIM_earliest_sevasr:-"-2.00"}
+  DTIM_latest_sevasr=${DTIM_latest_sevasr:-"+1.99"}
+  DTIM_earliest_gpsro=${DTIM_earliest_gpsro:-"-2.00"}
+  DTIM_latest_gpsro=${DTIM_latest_gpsro:-"+1.99"}
+
+# Time window is -1.00 to +1.00 hours for ESAMUA, ESMHS
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_earliest_esamua=${DTIM_earliest_esamua:-"-1.00"}
+  DTIM_latest_esamua=${DTIM_latest_esamua:-"+1.00"}
+  DTIM_earliest_esmhs=${DTIM_earliest_esmhs:-"-1.00"}
+  DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+1.00"}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_11} 1 1bamua \
+        1bmhs esamua esmhs atms mtiasi sevcsr gpsro esiasi iasidb esatms \
+        atmsdb sevasr amsr2
+error11=$?
+echo "$error11" > $DATA/error11
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/11.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_12; chmod +x thread_12
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_12
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=12
+
+#===========================================================================
+# Dump # 12 : NEXRAD -- TOTAL NUMBER OF SUBTYPES = 4
+#              (4)
+#===========================================================================
+export LALO=0  # GLOBAL dumps here (NEXRAD dumped globally to allow job to run
+               # much quicker w/o the need for geographical filtering (all
+               # radar reports are over CONUS anyway)
+
+def_time_window_12=1.5 # default time window for dump 12 is -0.5 to +0.5 hours
+
+# Time window -0.50 to +0.49 hours for NEXRAD for full and partial cycle runs
+DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+0.49"}         # earliest is default
+
+# NEXRAD tanks are hourly
+# Process only those hourly tanks w/i requested dump center cycle time window
+
+# !!! this needs adjusting for 15min cycling RTMA_RU -JW !!!
+SKIP_006010=YES # radial wind  00Z
+SKIP_006011=YES # radial wind  01Z
+SKIP_006012=YES # radial wind  02Z
+SKIP_006013=YES # radial wind  03Z
+SKIP_006014=YES # radial wind  04Z
+SKIP_006015=YES # radial wind  05Z
+SKIP_006016=YES # radial wind  06Z
+SKIP_006017=YES # radial wind  07Z
+SKIP_006018=YES # radial wind  08Z
+SKIP_006019=YES # radial wind  09Z
+SKIP_006020=YES # radial wind  10Z
+SKIP_006021=YES # radial wind  11Z
+SKIP_006022=YES # radial wind  12Z
+SKIP_006023=YES # radial wind  13Z
+SKIP_006024=YES # radial wind  14Z
+SKIP_006025=YES # radial wind  15Z
+SKIP_006026=YES # radial wind  16Z
+SKIP_006027=YES # radial wind  17Z
+SKIP_006028=YES # radial wind  18Z
+SKIP_006029=YES # radial wind  19Z
+SKIP_006030=YES # radial wind  20Z
+SKIP_006031=YES # radial wind  21Z
+SKIP_006032=YES # radial wind  22Z
+SKIP_006033=YES # radial wind  23Z
+
+SKIP_006040=YES # reflectivity 00Z
+SKIP_006041=YES # reflectivity 01Z
+SKIP_006042=YES # reflectivity 02Z
+SKIP_006043=YES # reflectivity 03Z
+SKIP_006044=YES # reflectivity 04Z
+SKIP_006045=YES # reflectivity 05Z
+SKIP_006046=YES # reflectivity 06Z
+SKIP_006047=YES # reflectivity 07Z
+SKIP_006048=YES # reflectivity 08Z
+SKIP_006049=YES # reflectivity 09Z
+SKIP_006050=YES # reflectivity 10Z
+SKIP_006051=YES # reflectivity 11Z
+SKIP_006052=YES # reflectivity 12Z
+SKIP_006053=YES # reflectivity 13Z
+SKIP_006054=YES # reflectivity 14Z
+SKIP_006055=YES # reflectivity 15Z
+SKIP_006056=YES # reflectivity 16Z
+SKIP_006057=YES # reflectivity 17Z
+SKIP_006058=YES # reflectivity 18Z
+SKIP_006059=YES # reflectivity 19Z
+SKIP_006060=YES # reflectivity 20Z
+SKIP_006061=YES # reflectivity 21Z
+SKIP_006062=YES # reflectivity 22Z
+SKIP_006063=YES # reflectivity 23Z
+
+if [ $cyc -eq 00 ]; then   # (23.50 - 00.49 Z)
+   unset SKIP_006033 # radial wind  23Z
+   unset SKIP_006010 # radial wind  00Z
+###unset SKIP_006063 # reflectivity 23Z
+###unset SKIP_006040 # reflectivity 00Z
+elif [ $cyc -eq 01 ]; then   # (00.50 - 01.49 Z)
+   unset SKIP_006010 # radial wind  00Z
+   unset SKIP_006011 # radial wind  01Z
+###unset SKIP_006040 # reflectivity 00Z
+###unset SKIP_006041 # reflectivity 01Z
+elif [ $cyc -eq 02 ]; then   # (01.50 - 02.49 Z)
+   unset SKIP_006011 # radial wind  01Z
+   unset SKIP_006012 # radial wind  02Z
+###unset SKIP_006041 # reflectivity 01Z
+###unset SKIP_006042 # reflectivity 02Z
+elif [ $cyc -eq 03 ]; then   # (02.50 - 03.49 Z)
+   unset SKIP_006012 # radial wind  02Z
+   unset SKIP_006013 # radial wind  03Z
+###unset SKIP_006042 # reflectivity 02Z
+###unset SKIP_006043 # reflectivity 03Z
+elif [ $cyc -eq 04 ]; then   # (03.50 - 04.49 Z)
+   unset SKIP_006013 # radial wind  03Z
+   unset SKIP_006014 # radial wind  04Z
+###unset SKIP_006043 # reflectivity 03Z
+###unset SKIP_006044 # reflectivity 04Z
+elif [ $cyc -eq 05 ]; then   # (04.50 - 05.49 Z)
+   unset SKIP_006014 # radial wind  04Z
+   unset SKIP_006015 # radial wind  05Z
+###unset SKIP_006044 # reflectivity 04Z
+###unset SKIP_006045 # reflectivity 05Z
+elif [ $cyc -eq 06 ]; then   # (05.50 - 06.49 Z)
+   unset SKIP_006015 # radial wind  05Z
+   unset SKIP_006016 # radial wind  06Z
+###unset SKIP_006045 # reflectivity 05Z
+###unset SKIP_006046 # reflectivity 06Z
+elif [ $cyc -eq 07 ]; then   # (06.50 - 07.49 Z)
+   unset SKIP_006016 # radial wind  06Z
+   unset SKIP_006017 # radial wind  07Z
+###unset SKIP_006046 # reflectivity 06Z
+###unset SKIP_006047 # reflectivity 07Z
+elif [ $cyc -eq 08 ]; then   # (07.50 - 08.49 Z)
+   unset SKIP_006017 # radial wind  07Z
+   unset SKIP_006018 # radial wind  08Z
+###unset SKIP_006047 # reflectivity 07Z
+###unset SKIP_006048 # reflectivity 08Z
+elif [ $cyc -eq 09 ]; then   # (08.50 - 09.49 Z)
+   unset SKIP_006018 # radial wind  08Z
+   unset SKIP_006019 # radial wind  09Z
+###unset SKIP_006048 # reflectivity 08Z
+###unset SKIP_006049 # reflectivity 09Z
+elif [ $cyc -eq 10 ]; then   # (09.50 - 10.49 Z)
+   unset SKIP_006019 # radial wind  09Z
+   unset SKIP_006020 # radial wind  10Z
+###unset SKIP_006049 # reflectivity 09Z
+###unset SKIP_006050 # reflectivity 10Z
+elif [ $cyc -eq 11 ]; then   # (10.50 - 11.49 Z)
+   unset SKIP_006020 # radial wind  10Z
+   unset SKIP_006021 # radial wind  11Z
+###unset SKIP_006050 # reflectivity 10Z
+###unset SKIP_006051 # reflectivity 11Z
+elif [ $cyc -eq 12 ]; then   # (11.50 - 12.49 Z)
+   unset SKIP_006021 # radial wind  11Z
+   unset SKIP_006022 # radial wind  12Z
+###unset SKIP_006051 # reflectivity 11Z
+###unset SKIP_006052 # reflectivity 12Z
+elif [ $cyc -eq 13 ]; then   # (12.50 - 13.49 Z)
+   unset SKIP_006022 # radial wind  12Z
+   unset SKIP_006023 # radial wind  13Z
+###unset SKIP_006052 # reflectivity 12Z
+###unset SKIP_006053 # reflectivity 13Z
+elif [ $cyc -eq 14 ]; then   # (13.50 - 14.49 Z)
+   unset SKIP_006023 # radial wind  13Z
+   unset SKIP_006024 # radial wind  14Z
+###unset SKIP_006053 # reflectivity 13Z
+###unset SKIP_006054 # reflectivity 14Z
+elif [ $cyc -eq 15 ]; then   # (14.50 - 15.49 Z)
+   unset SKIP_006024 # radial wind  14Z
+   unset SKIP_006025 # radial wind  15Z
+###unset SKIP_006054 # reflectivity 14Z
+###unset SKIP_006055 # reflectivity 15Z
+elif [ $cyc -eq 16 ]; then   # (15.50 - 16.49 Z)
+   unset SKIP_006025 # radial wind  15Z
+   unset SKIP_006026 # radial wind  16Z
+###unset SKIP_006055 # reflectivity 15Z
+###unset SKIP_006056 # reflectivity 16Z
+elif [ $cyc -eq 17 ]; then   # (16.50 - 17.49 Z)
+   unset SKIP_006026 # radial wind  16Z
+   unset SKIP_006027 # radial wind  17Z
+###unset SKIP_006056 # reflectivity 16Z
+###unset SKIP_006057 # reflectivity 17Z
+elif [ $cyc -eq 18 ]; then   # (17.50 - 18.49 Z)
+   unset SKIP_006027 # radial wind  17Z
+   unset SKIP_006028 # radial wind  18Z
+###unset SKIP_006057 # reflectivity 17Z
+###unset SKIP_006058 # reflectivity 18Z
+elif [ $cyc -eq 19 ]; then   # (18.50 - 19.49 Z)
+   unset SKIP_006028 # radial wind  18Z
+   unset SKIP_006029 # radial wind  19Z
+###unset SKIP_006058 # reflectivity 18Z
+###unset SKIP_006059 # reflectivity 19Z
+elif [ $cyc -eq 20 ]; then   # (19.50 - 20.49 Z)
+   unset SKIP_006029 # radial wind  19Z
+   unset SKIP_006030 # radial wind  20Z
+###unset SKIP_006059 # reflectivity 19Z
+###unset SKIP_006060 # reflectivity 20Z
+elif [ $cyc -eq 21 ]; then   # (20.50 - 21.49 Z)
+   unset SKIP_006030 # radial wind  20Z
+   unset SKIP_006031 # radial wind  21Z
+###unset SKIP_006060 # reflectivity 20Z
+###unset SKIP_006061 # reflectivity 21Z
+elif [ $cyc -eq 22 ]; then   # (21.50 - 22.49 Z)
+   unset SKIP_006031 # radial wind  21Z
+   unset SKIP_006032 # radial wind  22Z
+###unset SKIP_006061 # reflectivity 21Z
+###unset SKIP_006062 # reflectivity 22Z
+elif [ $cyc -eq 23 ]; then   # (22.50 - 23.49 Z)
+   unset SKIP_006032 # radial wind  22Z
+   unset SKIP_006033 # radial wind  23Z
+###unset SKIP_006062 # reflectivity 22Z
+###unset SKIP_006063 # reflectivity 23Z
+fi
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_12} 1 nexrad
+error12=$?
+echo "$error12" > $DATA/error12
+
+set +x
+echo "********************************************************************"
+echo Script thread_12
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/12.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_13; chmod +x thread_13
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=13
+
+#==========================================================================
+# Dump # 13 : 1BHRS4, AIRSEV, LGHTNG, ESHRS3, LGYCLD, CRISF4, SSMISU, OSBUV8,
+#               (1)     (1)     (2)     (1)     (1)    (1)     (1)     (1)
+#             CRSFDB
+#               (1) 
+#             TOTAL NUMBER OF SUBTYPES = 11
+#=========================================================================
+# Time window -1.00 to +0.50 hours for LGHTNG for all cycle runs
+  DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.50"}
+  DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+1.50"}      
+
+# Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
+  DTIM_earliest_lgycld=${DTIM_earliest_lgycld:-"-1.50"}
+  DTIM_latest_lgycld=${DTIM_latest_lgycld:-"+1.50"}               
+
+def_time_window_13=3.0 # default time window for dump 13 is -3.0 to +3.0 hours
+
+# Time window is -3.00 to +2.99 hours for 1BHRS4
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}      # earliest is default
+
+# Time window is -3.00 to +2.99 hours for AIRSEV
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_latest_airsev=${DTIM_latest_airsev:-"+2.99"}      # earliest is default
+
+# Time window is -2.00 to +1.99 hours for CRISF4, CRSFDB
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_earliest_crisf4=${DTIM_earliest_crisf4:-"-2.00"}
+  DTIM_latest_crisf4=${DTIM_latest_crisf4:-"+1.99"}
+  DTIM_earliest_crsfdb=${DTIM_earliest_crsfdb:-"-2.00"}
+  DTIM_latest_crsfdb=${DTIM_latest_crsfdb:-"+1.99"}
+
+# Time window is -1.00 to +1.00 hours for ESHRS3
+#  (note: time window increased over +/- 0.5 hr standard to get more data)
+  DTIM_earliest_eshrs3=${DTIM_earliest_eshrs3:-"-1.00"}
+  DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+1.00"}
+
+# Time window is -2.00 to +1.99 hours for SSMISU, OSBUV8
+  DTIM_earliest_ssmisu=${DTIM_earliest_ssmisu:-"-2.00"}
+  DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+1.99"}
+  DTIM_earliest_osbuv8=${DTIM_earliest_osbuv8:-"-2.00"}
+  DTIM_latest_osbuv8=${DTIM_latest_osbuv8:-"+0.99"}
+
+# Time window is -3.00 to +2.99 hours for SAPHIR
+  DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-3.00"}
+  DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_13} 1 1bhrs4 \
+                  airsev lghtng eshrs3 lgycld crisf4 ssmisu osbuv8 crsfdb
+error13=$?
+echo "$error13" > $DATA/error13
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/13.out 2>&1
+EOF
+set -x
+
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_14; chmod +x thread_14
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+# UPRAIR needs to start early
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=14
+
+#==========================================================================
+# Dump # 14 :  SATWHR
+#              time window radius is 1.00 hour
+#==========================================================================
+#
+
+DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-1.00"}
+DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+1.00"}
+                                                                                    
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.0 1 satwhr
+error14=$?
+echo "$error14" > $DATA/error14
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/14.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_15; chmod +x thread_15
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_15
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+# UPRAIR needs to start early
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=15
+
+#==========================================================================
+# Dump # 15 :  ADPUPA minus UPRAIR
+#               (6)   minus  (5)
+#            -- TOTAL NUMBER OF SUBTYPES = 6-5
+#==========================================================================
+#
+
+def_time_window_15=1.0 # default time window for dump 15 is -1.0 to +1.0 hours
+
+DTIM_earliest_uprair=${DTIM_earliest_uprair:-"-1.00"}
+DTIM_latest_uprair=${DTIM_latest_uprair:-"+1.00"}
+                                                                                    
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_15} 1 uprair
+error15=$?
+echo "$error15" > $DATA/error15
+set +x
+echo "********************************************************************"
+echo Script thread_15
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/15.out 2>&1
+EOF
+set -x
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -437,11 +1236,21 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_2 >> $DATA/poe.cmdfile
    echo ./thread_4 >> $DATA/poe.cmdfile
    echo ./thread_5 >> $DATA/poe.cmdfile
+   echo ./thread_6 >> $DATA/poe.cmdfile
+   echo ./thread_7 >> $DATA/poe.cmdfile
+   echo ./thread_8 >> $DATA/poe.cmdfile
+   echo ./thread_9 >> $DATA/poe.cmdfile
+   echo ./thread_10 >> $DATA/poe.cmdfile
+   echo ./thread_11 >> $DATA/poe.cmdfile
+   echo ./thread_12 >> $DATA/poe.cmdfile
+   echo ./thread_13 >> $DATA/poe.cmdfile
+   echo ./thread_14 >> $DATA/poe.cmdfile
+   echo ./thread_15 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      $launcher_DUMP -np 5 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
+      $launcher_DUMP -np 16 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
          $DATA/err_exit "***FATAL: EXIT STATUS $errpoe RUNNING POE COMMAND FILE"
@@ -458,10 +1267,20 @@ else
    ./thread_3
    ./thread_4
    ./thread_5
+   ./thread_6
+   ./thread_7
+   ./thread_8
+   ./thread_9
+   ./thread_10
+   ./thread_11
+   ./thread_12
+   ./thread_13
+   ./thread_14
+   ./thread_15
 #  wait
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out $DATA/14.out $DATA/15.out
 
 set +x
 echo " "
@@ -473,11 +1292,21 @@ err2=`cat $DATA/error2`
 err3=`cat $DATA/error3`
 err4=`cat $DATA/error4`
 err5=`cat $DATA/error5` 
+err6=`cat $DATA/error6` 
+err7=`cat $DATA/error7` 
+err8=`cat $DATA/error8` 
+err9=`cat $DATA/error9` 
+err10=`cat $DATA/error10` 
+err11=`cat $DATA/error11` 
+err12=`cat $DATA/error12` 
+err13=`cat $DATA/error13` 
+err14=`cat $DATA/error14` 
+err15=`cat $DATA/error15` 
 
 #================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=6
+export DUMP_NUMBER=16
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 
@@ -491,8 +1320,11 @@ fi
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' \
-     -o "$err4" -gt '5' -o "$err5" -gt '5' ] ; then
-      for n in $err1 $err2 $err3 $err4 $err5
+     -o "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' \
+     -o "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' \
+     -o "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' \
+     -o "$err13" -gt '5' -o "$err14" -gt '5' -o "$err15" -gt '5' ] ; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13 $err14 $err15
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -502,7 +1334,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
                set +x
 echo
 echo " ###################################################### "
-echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5"
+echo " --> > 22 RETURN CODE FROM DATA DUMP, \
+	$err1, $err2, $err3, $err4, $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err15"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -519,7 +1352,8 @@ echo
       set +x
       echo
       echo " ###################################################### "
-      echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, $err5"
+      echo " --> > 5 RETURN CODE FROM DATA DUMP, \
+	      $err1, $err2, $err3, $err4, $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err15"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
