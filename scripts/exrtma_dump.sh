@@ -233,7 +233,7 @@ export SKIP_000002=YES
 DTIM_earliest_subpfl=${DTIM_earliest_subpfl:-"-1.50"}
 DTIM_latest_subpfl=${DTIM_latest_subpfl:-"+1.50"}
 DTIM_earliest_saldrn=${DTIM_earliest_saldrn:-"-0.50"}
-DTIM_latest_saldrn=${DTIM_latest_saldrn:="+0.50"}
+DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+0.50"}
 
 # for rtma_ru_0000 read only from previous day's tank
 # Temporary bug fix
