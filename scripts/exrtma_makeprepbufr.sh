@@ -70,25 +70,18 @@ warning=no
 if [ "$PREPDATA" = 'YES' ]; then
 
 # save snapshot of prepbufr file after PREPOBS_PREPDATA in COMOUT
-   cp prepda.prepdata $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+   cp prepda.prepdata ${COMOUT}/${RUN}.${cycle_here}.prepbufr_pre-qc.tm00
 
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
-      chgrp rstprod $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+      chgrp rstprod ${COMOUT}/${RUN}.${cycle_here}.prepbufr_pre-qc.tm00
       errch=$?
-      if [ $errch -eq 0 ]; then
-         chmod 640 $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+      if [ $errch -eq 0 ]; the           
+         chmod 640 ${COMOUT}/${RUN}.${cycle_here}.prepbufr_pre-qc.tm00
       else
-         cp /dev/null $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+         cp /dev/null ${COMOUT}/${RUN}.${cycle_here}.prepbufr_pre-qc.tm00
          warning=yes
       fi
    fi
-#bsm - troubleshooting
-echo "is the prepbufr file good?"
-echo `ls -l $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark`
-
-if [ "$RUN" = "rtma_ru" ] && [ "$SENDDBN" = YES ]; then
-   $DBNROOT/bin/dbn_alert MODEL RTMA_RU_BUFR_PREPda $job $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
-fi
 
 # save current prepbufr mnemonic table in COMOUT if either it isn't already
 #  there for a previous cycle or if it has changed from a previous cycle
