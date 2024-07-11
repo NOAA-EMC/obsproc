@@ -233,19 +233,10 @@ fi
 # Specify variables specific to this execution of script
 ##########################################################
 export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO} # normally runs
-export PROCESS_OCEAN=${PROCESS_OCEAN:-NO}         # normally runs
-echo "Ocean group thread executed." > $COMOUT/ocean.txt
-
-
-####################################################
-# SETUP GDAS OR GFS DATA DUMP PROCESSING VARIABLES
-####################################################
-
-#########################################################
-# Specify variables specific to this execution of script
-#########################################################
-export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO} # normally runs
-export PROCESS_DUMP=${PROCESS_DUMP:-NO}         # normally runs
+export PROCESS_OCEAN=${PROCESS_OCEAN:-YES}      # normally runs
+if [ "$PROCESS_OCEAN" = 'YES' ]; then
+   echo "Ocean group thread executed." > $COMOUT/ocean.txt
+fi
 export prepssmi=NO # "spssmi" reprocessed dump no longer generated
                    # since SSM/I instrument on F-13 has failed (11/2009)
 export KEEP_NEARDUP_ACFT=${KEEP_NEARDUP_ACFT:-NO} # toss near-dupl. acft rpts
@@ -270,9 +261,9 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exglobal_dump.sh
-eval err_${RUN}_dump=$?
-eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
+$SCRIPTSobsproc/test_ocean.sh
+eval err_${RUN}_ocean=$?
+eval [[ \$err_${RUN}_ocean -ne 0 ]] && $DATA/err_exit
 
 #echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
 
