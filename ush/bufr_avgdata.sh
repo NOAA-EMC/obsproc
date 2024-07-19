@@ -338,7 +338,7 @@ for cycle_avg in $cycles; do
    > accum.obs.counts.${cycle_avg}
    for dtg in "${arr30d[@]}"; do
      set +x
-     grep -h -e " REPORTS" -e "^EOF @@@" \
+     grep --text -h -e " REPORTS" -e "^EOF @@@" \
      $OBCNTarch/${net}.${dtg}/*${cycle_avg}.status.*bufr_d | \
      grep -e " in data group " -e "^EOF @@@" | grep -e " HAS" -e "^EOF @@@" | \
      grep -v -e "Domain" >> delete
@@ -354,7 +354,7 @@ for cycle_avg in $cycles; do
    done
 done
 
-grep -e "^_" -e "^:" $DUMPLIST | grep -Fe "#>" > dumplist
+grep --text -e "^_" -e "^:" $DUMPLIST | grep -Fe "#>" > dumplist
 
 
 #  Generate a new average file
