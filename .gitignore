@@ -15,10 +15,10 @@ fort.*
 *.log
 
 # Ignore the contents of these directories
-exec/
-bin/
-build/
-install/
+bin*/
+build*/
+exec*/
+install*/
 
 # Ignore these specific binary fix files (from adding to repository)
 fix/syndat_syndata.slmask.t126.gaussian
