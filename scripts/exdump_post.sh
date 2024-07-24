@@ -742,7 +742,7 @@ EOFthread
 
    for file in msonet satwnd goesfv aircar ascatw adpsfc gpsipw sfcshp \
                aircft adpupa proflr vadwnd rassda goesnd wdsatr spssmi \
-               sfcbog qkswnd erscat 
+               sfcbog qkswnd erscat sofar 
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue

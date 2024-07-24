@@ -88,6 +88,10 @@ echo "                       gmi1cr,and snocvr                              "
 echo "         Oct 17 2022 - Split up groups 1 and 10 into a new group 12   "
 echo "                       for better optimization.                       "
 echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.     "
+echo "         Jul 20 2024 - Turn on group #6, do not run nexrad, run marine"
+echo "                       obs instead-axbt,xbtctd,altkob - longer windows"
+echo "                       Add sofarw                                     "
+echo "                     - Add snomad to group #2                         "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -120,7 +124,7 @@ set +u
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
 #               Stop: sevcsr, saphir in v1.2.0 
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
-#               sfcshp tideg atovs* adpsfc ascatt snocvr
+#               sfcshp tideg atovs* adpsfc ascatt snocvr snomad
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
@@ -133,7 +137,7 @@ set +u
 #               msonet
 #
 # Dump group #6 (non-pb, TIME_TRIM defaults to OFF) =
-#               nexrad
+#               nexrad, axbt, xbtctd, altkob, sofarw
 #
 # Dump group #7 (non-pb, TIME_TRIM defaults to OFF) =
 #               avcspm esmhs 1bmhs airsev atmsdb gome omi trkob gpsro
@@ -179,7 +183,7 @@ set -u
       DUMP_group3=${DUMP_group3:-"NO"}
       DUMP_group4=${DUMP_group4:-"NO"}
       DUMP_group5=${DUMP_group5:-"NO"}
-      DUMP_group6=${DUMP_group6:-"NO"}
+      DUMP_group6=${DUMP_group6:-"YES"}
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"YES"}
@@ -210,7 +214,7 @@ else
    DUMP_group3=${DUMP_group3:-"YES"}
    DUMP_group4=${DUMP_group4:-"YES"}
    DUMP_group5=${DUMP_group5:-"NO"}
-   DUMP_group6=${DUMP_group6:-"NO"}
+   DUMP_group6=${DUMP_group6:-"YES"}
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
@@ -514,6 +518,13 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
+# Save NIC.IMS_v?_???????00_4km.asc 
+  asciifile=NIC.IMS
+  grib_source='$TANK_GRIBFLDS/$DDATE/wgrbbul';
+  target_filename=nic.imssnow4km.asc
+  #cp $grib_source/${asciifile}_v?_???????00_4km.asc  ${COMSP}$target_filename
+  cp  $grib_source/${asciifile}_\*_4km.asc  ${COMSP}$target_filename
+  echo 'IG SAVED ASCII NIC.IMS'
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
@@ -738,16 +749,18 @@ export DUMP_NUMBER=2
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
 #            SNOCVR: 1 subtype(s)
+#            SNOMAD: 1 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES =  21 - 22
+#            TOTAL NUMBER OF SUBTYPES =  22 - 23
 #
 #==========================================================================
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
+DTIM_latest_snomad=${DTIM_latest_snomad:-"+2.99"}
 
 atovs=""
 if [ "$NET" = 'gdas' ]; then
@@ -773,7 +786,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat snomad
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -1058,18 +1071,32 @@ export DUMP_NUMBER=6
 
 #===================================================================
 # NOTES ABOUT THIS DUMP GROUP:
-#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (1) time window radius is -3.00 to +2.99 hours NOT on all types
 #   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
 #
 #--------------------------------------------------------------------------
 # Currently not executed in GDAS or GFS:
 # Dump # 6 : NEXRAD: 8 subtype(s)
+#            AXBT:   1 subtype
+#            XBTCTD: 1 subtype
+#            ALTKOB: 1 subtype
+#            SOFAR:  1 subtype
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 8
-#
+#            TOTAL NUMBER OF SUBTYPES = 12
 #===================================================================
 
 DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+2.99"}
+
+DTIM_earliest_axbt=${DTIM_earliest_axbt:-"-5.99"}
+DTIM_earliest_xbtctd=${DTIM_earliest_xbtctd:-"-5.99"}
+DTIM_earliest_altkob=${DTIM_earliest_altkob:-"-14.99"}
+
+DTIM_latest_axbt=${DTIM_latest_axbt:-"+2.99"}
+DTIM_latest_xbtctd=${DTIM_latest_xbtctd:-"+2.99"}
+DTIM_latest_altkob=${DTIM_latest_altkob:-"+2.99"}
+
+DTIM_earliest_sofarw=${DTIM_earliest_sofarw:-"-3.00"}
+DTIM_latest_sofarw=${DTIM_latest_sofarw:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM6:-off}}
 
@@ -1164,7 +1191,8 @@ elif [ $cycp -eq 18 ]; then # (16.5 - 19.5 Z)
    unset SKIP_006059 # reflectivity 19Z
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 nexrad
+#$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 nexrad
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 axbt xbtctd altkob sofarw
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -1891,6 +1919,34 @@ $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
 fi
+
+#_sfcshp    nem 001001 001013 001002 001003 001004 001007 001102 001103 001101 001113 001104
+#
+#_ships     nem 001001  #> Ship - manual and automatic, restricted          |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
+#_shipsu    nem 001013  #> Ship - manual and automatic, unrestricted 
+#_dbuoy     nem 001002  #> Buoys decoded from FM-18 fmt (moored or drifting)|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
+#_mbuoy     nem 001003  #> Buoys decoded from FM-13 format (moored)         |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
+#_lcman     nem 001004  #> Land-based CMAN stations decoded from CMAN format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
+#_cstgd     nem 001007  #> Coast Guard                                      | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
+#_shipsb    nem 001101  #> Ship - manual and automatic, restricted (BUFR)   | YEL 50   50 YYYY| YEL 50   50 YYYY| YEL 50   50 YYYY| YEL | YEL |
+#_dbuoyb    nem 001102  #> Drifting buoys (decoded from BUFR)               | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
+#_mbuoyb    nem 001103  #> Moored buoys (decoded from BUFR)                 | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
+#_cmanb     nem 001104  #> Surface Marine CMAN rpts decoded from BUFR format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
+#_shipub    nem 001113  #> Ship - manual and automatic, unrestricted (BUFR) |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
+
+echo "IG SPLIT sfcshp..."
+${bufr_ROOT}/bin/split_by_subset  ${COMSP}sfcshp.${tmmark}.bufr_d
+mv $PWD/NC001001  ${COMSP}ships.${tmmark}.bufr_d
+mv $PWD/NC001013  ${COMSP}shipsu.${tmmark}.bufr_d
+mv $PWD/NC001002  ${COMSP}dbuoy.${tmmark}.bufr_d
+mv $PWD/NC001003  ${COMSP}mbuoy.${tmmark}.bufr_d
+mv $PWD/NC001004  ${COMSP}lcman.${tmmark}.bufr_d
+mv $PWD/NC001007  ${COMSP}cstgd.${tmmark}.bufr_d
+mv $PWD/NC001101  ${COMSP}shipsb.${tmmark}.bufr_d
+mv $PWD/NC001102  ${COMSP}dbuoyb.${tmmark}.bufr_d
+mv $PWD/NC001103  ${COMSP}mbuoybs.${tmmark}.bufr_d
+mv $PWD/NC001104  ${COMSP}cmanb.${tmmark}.bufr_d
+mv $PWD/NC001113  ${COMSP}shipub.${tmmark}.bufr_d
 
 echo " " >> $pgmout
 echo "##################################################################\
