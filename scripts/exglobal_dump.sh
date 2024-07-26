@@ -88,6 +88,7 @@ echo "                       gmi1cr,and snocvr                              "
 echo "         Oct 17 2022 - Split up groups 1 and 10 into a new group 12   "
 echo "                       for better optimization.                       "
 echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.     "
+echo "         May 22 2024 - sfcsno added to dump group #2                  "
 echo "         Jul 20 2024 - Turn on group #6, do not run nexrad, run marine"
 echo "                       obs instead-axbt,xbtctd,altkob - longer windows"
 echo "                       Add sofarw                                     "
@@ -124,7 +125,7 @@ set +u
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
 #               Stop: sevcsr, saphir in v1.2.0 
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
-#               sfcshp tideg atovs* adpsfc ascatt snocvr snomad
+#               sfcshp tideg atovs* adpsfc ascatt snocvr snomad sfcsno
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
@@ -736,11 +737,12 @@ export DUMP_NUMBER=2
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
 #            SNOCVR: 1 subtype(s)
+#            SFCSNO: 7 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 21 - 22
+#            TOTAL NUMBER OF SUBTYPES = 29 - 30
 #
 #--------------------------------------------------------------------------
 # GFS:
@@ -750,17 +752,19 @@ export DUMP_NUMBER=2
 #            ASCATT: 1 subtype(s)
 #            SNOCVR: 1 subtype(s)
 #            SNOMAD: 1 subtype(s)
+#            SFCSNO: 7 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES =  22 - 23
+#            TOTAL NUMBER OF SUBTYPES =  30 - 31
 #
 #==========================================================================
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
 DTIM_latest_snomad=${DTIM_latest_snomad:-"+2.99"}
+DTIM_latest_sfcsno=${DTIM_latest_sfcsno:-"+2.99"}
 
 atovs=""
 if [ "$NET" = 'gdas' ]; then
@@ -786,7 +790,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat snomad
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat snomad sfcsno
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -804,6 +808,8 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}ascatt.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_snocvr $job \
     ${COMSP}snocvr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sfcsno $job \
+    ${COMSP}sfcsno.tm00.bufr_d
    if [ "$NET" = 'gdas' ]; then
     ####### ALERT TURNED ON for GDAS only ########################
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatw $job \
