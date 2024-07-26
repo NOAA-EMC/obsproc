@@ -116,6 +116,8 @@ net=$NET
 
 [[ $RUN == rap_p ]]  &&  net=$RUN
 [[ $RUN == rap_e ]]  &&  net=$RUN
+[[ $RUN == rrfs_p ]]  &&  net=$RUN
+[[ $RUN == rrfs_e ]]  &&  net=$RUN
 
 net_uc=$(echo $net | tr [a-z] [A-Z])
 set +u
@@ -357,9 +359,11 @@ EOFparm
            NETUP=`echo $RUN | tr {a-z} {A-Z}`
            if  [[ $NETUP != 'GDAS' ]] || [[ $file != "saphir" ]]; then    ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr 
              if [[ $NETUP != 'CDAS' ]] || [[ $file != "gpsro" ]]; then    ### no alert cdas.tCCz.gpsro.tm00.bufr_d.nr
-               if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then   ### no alert rap.tCCz.gpsro.tm00.bufr_d.nr
-                  $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
-                  $COMOUT/$filestem.nr
+               if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then   ### no alert rrfs.tCCz.gpsro.tm00.bufr_d.nr
+                 if [[ $NETUP != 'RRFS' ]] || [[ $file != "gpsro" ]]; then   ### no alert rrfs.tCCz.gpsro.tm00.bufr_d.nr
+                   $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
+                   $COMOUT/$filestem.nr
+	         fi
 	       fi
              fi
            fi
@@ -624,6 +628,7 @@ $dumptime"
    [ "$NET" = 'gfs' -o "$NET" = 'gdas' ]  &&  retr=FALSE
    radn=TRUE
    [ "$NET" = 'rap' ]  &&  radn=FALSE
+   [ "$NET" = 'rrfs' ]  &&  radn=FALSE
 
    cat << EOFlistdumps > parms
  &PDATA
@@ -737,7 +742,7 @@ EOFthread
 
    for file in msonet satwnd goesfv aircar ascatw adpsfc gpsipw sfcshp \
                aircft adpupa proflr vadwnd rassda goesnd wdsatr spssmi \
-               sfcbog qkswnd erscat 
+               sfcbog qkswnd erscat sofar 
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
@@ -821,6 +826,8 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
       networks=rtma
    elif [ "$NET" = 'urma' ]; then
       networks=urma
+   elif [ "$NET" = 'rrfs' ]; then
+      networks=rrfs  
    fi
 
    mkdir -p $AVGDarch_OUT
