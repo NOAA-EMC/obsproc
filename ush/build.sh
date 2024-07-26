@@ -53,10 +53,10 @@ make install
 # directory to `pkg_root` and then remove `$INSTALL_PREFIX/`
 mkdir -p $pkg_root/exec
 cp -f $INSTALL_PREFIX/exec/* $pkg_root/exec/
-rm -rf $INSTALL_PREFIX
+#R13 rm -rf $INSTALL_PREFIX
 #############################################################################
 
 # Remove build directory upon successfull build and install
-rm -rf ${BUILD_DIR}
+#R13 rm -rf ${BUILD_DIR}
 
 exit 0
