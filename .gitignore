@@ -19,6 +19,8 @@ bin*/
 build*/
 exec*/
 install*/
+versions/build.ver
+versions/run.ver
 
 # Ignore these specific binary fix files (from adding to repository)
 fix/syndat_syndata.slmask.t126.gaussian
