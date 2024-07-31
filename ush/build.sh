@@ -12,9 +12,6 @@ CMAKE_OPTS=${CMAKE_OPTS:-}
 INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"${pkg_root}/install"}
 
-# By default; build as if NCO is executing this script
-BUILD_4NCO=${BUILD_4NCO:-"YES"}
-
 target="${INSTALL_TARGET,,}"
 if [[ "${target}" =~ ^(wcoss2|hera|orion|jet|hercules)$ ]]; then
   # prepare the target specific build.ver and run.ver
