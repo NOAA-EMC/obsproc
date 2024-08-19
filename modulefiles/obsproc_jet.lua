@@ -2,7 +2,7 @@ help([[
 Load environment to build obsproc on Jet
 ]])
 
-prepend_path("MODULEPATH", pathJoin("/mnt/lfs4/HFIP/hfv3gfs/role.epic/spack-stack/spack-stack-" .. (os.getenv("spack_stack_ver") or "None"), "/envs/" .. (os.getenv("spack_env") or "None"), "-dev-rocky8/install/modulefiles/Core"))
+prepend_path("MODULEPATH", pathJoin("/contrib/spack-stack/spack-stack-" .. (os.getenv("spack_stack_ver") or "None"), "/envs/" .. (os.getenv("spack_env") or "None"), "-intel/install/modulefiles/Core"))
 
 stack_intel_ver=os.getenv("stack_intel_ver") or "2021.5.0"
 stack_impi_ver=os.getenv("stack_impi_ver") or "2021.5.1"
