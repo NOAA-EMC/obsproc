@@ -17,6 +17,6 @@ load(pathJoin("cmake", cmake_ver))
 load("obsproc_common")
 
 -- On Hercules, MKL needs to be loaded separately
-load("intel-oneapi-mkl/2022.2.1")
+load(pathJoin("intel-oneapi-mkl", intel_mkl_ver))
 
 whatis("Description: obsproc build environment")
