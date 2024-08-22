@@ -2,7 +2,7 @@ help([[
 Load environment to build obsproc on Hera
 ]])
 
-prepend_path("MODULEPATH", pathJoin("/scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-" .. (os.getenv("spack_stack_ver") or "None"), "/envs/" .. (os.getenv("spack_env") or "None"), "-dev-rocky8/install/modulefiles/Core"))
+prepend_path("MODULEPATH", os.getenv("spack_stack_mod_path"))
 
 stack_intel_ver=os.getenv("stack_intel_ver")
 stack_impi_ver=os.getenv("stack_impi_ver")

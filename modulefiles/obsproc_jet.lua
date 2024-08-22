@@ -2,7 +2,7 @@ help([[
 Load environment to build obsproc on Jet
 ]])
 
-prepend_path("MODULEPATH", pathJoin("/contrib/spack-stack/spack-stack-" .. (os.getenv("spack_stack_ver") or "None"), "/envs/" .. (os.getenv("spack_env") or "None"), "-intel/install/modulefiles/Core"))
+prepend_path("MODULEPATH", os.getenv("spack_stack_mod_path"))
 
 stack_intel_ver=os.getenv("stack_intel_ver")
 stack_impi_ver=os.getenv("stack_impi_ver")
