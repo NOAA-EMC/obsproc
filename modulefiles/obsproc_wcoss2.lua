@@ -8,14 +8,14 @@ cmake_ver=os.getenv("cmake_ver")
 craype_ver=os.getenv("craype_ver")
 cray_mpich_ver=os.getenv("cray_mpich_ver")
 
-hdf5_ver=os.getenv("hdf5_ver") or "default"
-netcdf_ver=os.getenv("netcdf_ver") or "default"
-bacio_ver=os.getenv("bacio_ver") or "default"
-w3emc_ver=os.getenv("w3emc_ver") or "default"
-sp_ver=os.getenv("sp_ver") or "default"
-sigio_ver=os.getenv("sigio_ver") or "default"
-nemsio_ver=os.getenv("nemsio_ver") or "default"
-bufr_ver=os.getenv("bufr_ver") or "default"
+hdf5_ver=os.getenv("hdf5_ver")
+netcdf_ver=os.getenv("netcdf_ver")
+bacio_ver=os.getenv("bacio_ver")
+w3emc_ver=os.getenv("w3emc_ver")
+sp_ver=os.getenv("sp_ver")
+sigio_ver=os.getenv("sigio_ver")
+nemsio_ver=os.getenv("nemsio_ver")
+bufr_ver=os.getenv("bufr_ver")
 
 load("envvar")
 load(pathJoin("PrgEnv-intel", PrgEnv_intel_ver))
