@@ -2,12 +2,15 @@ help([[
 Load environment to build obsproc on Hera
 ]])
 
-load("cmake/3.20.1")
+prepend_path("MODULEPATH", os.getenv("spack_stack_mod_path"))
 
-prepend_path("MODULEPATH", "/scratch2/NCEPDEV/nwprod/hpc-stack/libs/hpc-stack/modulefiles/stack")
-load("hpc/1.1.0")
-load("hpc-intel/18.0.5.274")
-load("hpc-impi/2018.0.4")
+stack_intel_ver=os.getenv("stack_intel_ver") or "None"
+stack_impi_ver=os.getenv("stack_impi_ver") or "None"
+cmake_ver=os.getenv("cmake_ver") or "None"
+
+load(pathJoin("stack-intel", stack_intel_ver))
+load(pathJoin("stack-intel-oneapi-mpi", stack_impi_ver))
+load(pathJoin("cmake", cmake_ver))
 
 -- Load common modules for this package
 load("obsproc_common")

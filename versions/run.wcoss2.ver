@@ -17,7 +17,7 @@ export cfp_ver=2.0.4
 export gfs_ver=v16.3
 #export nam_ver=v4.2                    # secure turn off SYNDAT for nam
 export dictionaries_ver=v3.4.0
-export seaice_analysis_ver=v4.5		#engice, seaice.*5min.grb  file		
+export seaice_analysis_ver=v4.5		#engice, seaice.*5min.grb file
 export cdas_ver=v1.2
 export nsst_ver=v1.2	                #rtgsst file
 
@@ -26,4 +26,3 @@ export BACK=off
 
 #export SENDSDM=NO # only YES for prod anyways
 #export TIME_CHECK=NO # dump_monitor testing
-
