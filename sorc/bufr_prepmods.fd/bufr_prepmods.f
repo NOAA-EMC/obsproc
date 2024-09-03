@@ -103,7 +103,7 @@ C  ------------------------------------
       CALL OPENBF(LUBFR,'IN ',LUBFR)
       CALL OPENBF(LUBFO,'OUT',LUNDX)
  
-      call maxout(15000)
+      call maxout(50000)
 
 C  READ THE MESSAGES FROM THE INPUT FILE
 C  -------------------------------------
