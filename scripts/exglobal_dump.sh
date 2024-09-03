@@ -519,13 +519,45 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
-# Save NIC.IMS_v?_???????00_4km.asc 
-  asciifile=NIC.IMS
-  grib_source='$TANK_GRIBFLDS/$DDATE/wgrbbul';
-  target_filename=nic.imssnow4km.asc
-  #cp $grib_source/${asciifile}_v?_???????00_4km.asc  ${COMSP}$target_filename
-  cp  $grib_source/${asciifile}_\*_4km.asc  ${COMSP}$target_filename
-  echo 'IG SAVED ASCII NIC.IMS'
+## STUMP - delete after testing IG Ig IG
+#eval tryfile=$grib_source/$gribfile
+#if [ -s $tryfile ];then
+#   set +x; echo -e "\nPicking up file $tryfile\n"; set -x
+#   cp $tryfile ${COMSP}$target_filename
+#else
+#   set +x;echo -e "\n$tryfile not available.\n";set -x
+#fi
+
+# Save ascii NIC.IMS_v?_???????00_4km.asc 
+  ascii_file=NIC.IMS
+  ascii_file_var=_v*_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
+  ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
+  target_filename=imssnow96.asc
+  #eval tryfile=${ascii_source}/${ascii_file}${ascii_file_var}
+  #if [ -s $tryfile ];then
+  if [ -s ${ascii_source}/${ascii_file}${ascii_file_var} ]; then
+    set +x; echo -e "\nPicking up IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
+    cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}${target_filename}
+    #cp $tryfile ${COMSP}$target_filename
+  else
+    set +x; echo -e "\nPicking up a day old IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
+    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
+    cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}$target_filename
+  fi
+
+# Copy/Rename new 557th USAF 0.09 deg global snow AN files
+  ascii_file1=${ascii_file1:-"PS.557WW_SC.U_DI.C_GP.USAFSI_GR.C0P09DEG_AR.GLOBAL_PA.SNOW-ICE"}
+  ascii_file1_var=${ascii_file1_var:-"_DD.${PDY}_DT.${cyc}00_DF.GR2"}
+  ascii_source=${TANK_GRIBFLDS}/${PDY}/wgrbbul/557thWW_snow
+  target_filename=snow.usaf.grib2
+  if [ -s ${ascii_source}/${ascii_file1}${ascii_file1_var} ]; then
+    set +x; echo -e "\nPicking up 557th USAF snow file ${ascii_source}/${ascii_file1}${ascii_file1_var}\n"; set -x
+    cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}${target_filename}
+  else
+    set +x; echo -e "\nPicking up a day old 557th USAF snow file ${ascii_source}/${ascii_file}${ascii_file1_var}\n"; set -x
+    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul/557thWW_snow
+    cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}$target_filename
+  fi
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
