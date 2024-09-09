@@ -13,7 +13,7 @@ INSTALL_TARGET=${INSTALL_TARGET:-"wcoss2"}
 INSTALL_PREFIX=${INSTALL_PREFIX:-"${pkg_root}/install"}
 
 target="${INSTALL_TARGET,,}"
-if [[ "${target}" =~ ^(wcoss2|hera|orion|jet|hercules)$ ]]; then
+if [[ "${target}" =~ ^(wcoss2|hera|orion|jet|hercules|gaea)$ ]]; then
   # prepare the target specific build.ver and run.ver
   cd "${pkg_root}/versions" || exit 1
   rm -f build.ver run.ver
