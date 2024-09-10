@@ -93,6 +93,8 @@ echo "         Jul 20 2024 - Turn on group #6, do not run nexrad, run marine"
 echo "                       obs instead-axbt,xbtctd,altkob - longer windows"
 echo "                       Add sofarw                                     "
 echo "                     - Add snomad to group #2                         "
+echo "         Sep 05 2024 - Split group #8 - SATWND into two new groups:   "
+echo "                       SATWN1 -> group #14, SATWN2 -> group #15.      "
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -161,7 +163,13 @@ set +u
 # Dump group #13 (pb, TIME_TRIM defaults to OFF) = 
 #                uprair
 #
-# Dump group #14 STATUS FILE
+# Dump group #14 (pb, TIME_TRIM defaults to ON) =
+#               satwn1
+#
+# Dump group #15 (pb, TIME_TRIM defaults to ON) =
+#               satwn2
+#
+# Dump group #16 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -192,6 +200,8 @@ set -u
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"NO"}
+      DUMP_group14=${DUMP_group14:-"NO"}
+      DUMP_group15=${DUMP_group15:-"NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -207,6 +217,8 @@ set -u
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
       DUMP_group13=${DUMP_group13:-"YES"}
+      DUMP_group14=${DUMP_group14:-"YES"}
+      DUMP_group15=${DUMP_group15:-"YES"}
    fi
 else
    dump_ind=DUMP
@@ -223,6 +235,8 @@ else
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
    DUMP_group13=${DUMP_group13:-"YES"}
+   DUMP_group14=${DUMP_group14:-"YES"}
+   DUMP_group15=${DUMP_group15:-"YES"}
 fi
 
 # NAP and NAP_adpupa instroduced so that uprair can run early on his own
@@ -572,6 +586,8 @@ echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
 echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
+echo "=======> Dump group 14 (thread_14) not executed." > $DATA/14.out
+echo "=======> Dump group 15 (thread_15) not executed." > $DATA/15.out
 
 err1=0
 err2=0
@@ -586,6 +602,8 @@ err10=0
 err11=0
 err12=0
 err13=0
+err14=0
+err15=0
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -1391,7 +1409,8 @@ export DUMP_NUMBER=8
 #
 #=======================================================================
 
-ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
+#ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
+ADD_satwnd="005030 005031 005032 005034 005039 005072"
 
 # Skip old bufr METEOSAT AMVs; for testing skip in trigger or version file
 #export SKIP_005064=YES
@@ -1445,7 +1464,7 @@ DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwnd
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1849,6 +1868,135 @@ EOF
 set -x
 
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_14; chmod +x thread_14
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=14
+
+#=======================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is +/- 1.5 hrs for all SATWND types
+#       EXCEPT: SATWND subtypes 005/030, 005/031, 005/032, 005/034, 005/039,
+#               005/064, 005/065, 005/066, 005/067, 005/068, 005/069,
+#               005/070, 005/071, 005/072, 005/080 and 005/091
+#               where it is
+#               -3.00 to +2.99 hours.
+#   (2) TIME TRIMMING IS DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump # 14 : SATWN1: 16 subtype(s)  (bufr_dumplist.v2.3.0)
+#            --------------------- 
+#            TOTAL NUMBER OF SUBTYPES = 25
+#
+#=======================================================================
+
+#<ADD_satwn1="005030 005031 005032 005034 005039 005072">
+
+# <DTIM Management Here>
+# JMA WINDS ONLY
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn1
+error14=$?
+echo "$error14" > $DATA/error14
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
+    ${COMSP}satwn1.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/14.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_15; chmod +x thread_15
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_15
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=15
+
+#=======================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is +/- 1.5 hrs for all SATWND types
+#       EXCEPT: SATWND subtypes 005/030, 005/031, 005/032, 005/034, 005/039,
+#               005/064, 005/065, 005/066, 005/067, 005/068, 005/069,
+#               005/070, 005/071, 005/072, 005/080 and 005/091
+#               where it is
+#               -3.00 to +2.99 hours.
+#   (2) TIME TRIMMING IS DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump # 15 : SATWN2: 16 subtype(s)  (bufr_dumplist.v2.3.0)
+#            --------------------- 
+#            TOTAL NUMBER OF SUBTYPES = 25
+#
+#=======================================================================
+
+#<ADD_satwn2="005030 005031 005032 005034 005039 005072">
+
+# <DTIM Management Here>
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
+error15=$?
+echo "$error15" > $DATA/error15
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwn2 $job \
+    ${COMSP}satwn2.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_15
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/15.out 2>&1
+EOF
+set -x
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -1882,11 +2030,13 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
+   [ $DUMP_group14 = YES ]  &&  echo ./thread_14 >> $DATA/poe.cmdfile #satwn1
+   [ $DUMP_group15 = YES ]  &&  echo ./thread_15 >> $DATA/poe.cmdfile #satwn2
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      NPROCS=${NPROCS:-14} # was 12
+      NPROCS=${NPROCS:-16} # was 12
       $launcher_DUMP -np ${NPROCS} --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 
       #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 1) 3)
       #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti suggestions
@@ -1914,6 +2064,8 @@ else
    [ $DUMP_group11 = YES ]  &&  ./thread_11 
    [ $DUMP_group12 = YES ]  &&  ./thread_12 
    [ $DUMP_group13 = YES ]  &&  ./thread_13
+   [ $DUMP_group14 = YES ]  &&  ./thread_14
+   [ $DUMP_group15 = YES ]  &&  ./thread_15
 #     wait
 fi
 
@@ -1927,7 +2079,7 @@ fi
 ##
 #[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out $DATA/14.out $DATA/15.out
 
 set +x
 echo " "
@@ -1947,12 +2099,14 @@ set -x
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
 [ -s $DATA/error13 ] && err13=`cat $DATA/error13`
+[ -s $DATA/error14 ] && err14=`cat $DATA/error14`
+[ -s $DATA/error15 ] && err15=`cat $DATA/error15`
 
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=14
+export DUMP_NUMBER=16
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
@@ -2000,8 +2154,9 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o "$err13" -gt '5']; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
+       	"$err13" -gt '5' -o "$err14" -gt '5' -o "$err15" -gt '5']; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13 $err14 $err15
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -2012,7 +2167,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err15 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -2030,7 +2185,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err15 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
@@ -2039,6 +2194,10 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
 
 #  endif loop $PROCESS_DUMP
 fi
+
+#  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
+cat ${COMSP}satwn1.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
+cat ${COMSP}satwn2.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

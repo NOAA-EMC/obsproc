@@ -46,6 +46,8 @@ echo "                       group #3./ b/c it is too slow                "
 echo "         Oct 17 2023 - Split msonet to msonet (#5) and msone1 (#10) "
 echo "                      concatenate msonet and msone1 right after dump"
 echo "                      Turn off msonet and msone1 - not needed       "
+echo "         Sep 05 2024 - Split group #8 - SATWND into two new groups: "
+echo "                       SATWN1 -> group #14, SATWN2 -> group #15.    "
 ###########################################################################
 
 set -xau
@@ -90,7 +92,13 @@ set +u
 # Dump group #10 (pb, TIME_TRIM = OFF) =
 #               msone1 # ONLY tank b255/xx030, the largest
 #
-# Dump group #11 STATUS FILE
+# Dump group #11 (pb, TIME_TRIM = default = ON) =
+#               satwn1
+#
+# Dump group #12 (pb, TIME_TRIM = default = ON) =
+#               satwn2
+#
+# Dump group #13 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -117,7 +125,9 @@ set -u
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"YES"}
-      DUMP_group10=${DUMP_group10:="NO"}
+      DUMP_group10=${DUMP_group10:-"NO"}
+      DUMP_group11=${DUMP_group11:-"NO"}
+      DUMP_group12=${DUMP_group12:-"NO"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -130,8 +140,10 @@ set -u
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"NO"}
-      #DUMP_group10=${DUMP_group10:="YES"}
-      DUMP_group10=${DUMP_group10:="NO"}
+      #DUMP_group10=${DUMP_group10:-"YES"}
+      DUMP_group10=${DUMP_group10:-"NO"}
+      DUMP_group11=${DUMP_group11:-"YES"}
+      DUMP_group12=${DUMP_group12:-"YES"}
    fi
 else
    dump_ind=DUMP
@@ -145,8 +157,10 @@ else
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
-   #DUMP_group10=${DUMP_group10:="YES"}
-   DUMP_group10=${DUMP_group10:="NO"}
+   #DUMP_group10=${DUMP_group10:-"YES"}
+   DUMP_group10=${DUMP_group10:-"NO"}
+   DUMP_group11=${DUMP_group11:-"YES"}
+   DUMP_group12=${DUMP_group12:-"YES"}
 fi
 
 
@@ -310,6 +324,8 @@ echo "=======> Dump group 7 (thread_7) not executed." > $DATA/7.out
 echo "=======> Dump group 8 (thread_8) not executed." > $DATA/8.out
 echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
 echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
+echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
+echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
 
 err1=0
 err2=0
@@ -321,6 +337,8 @@ err7=0
 err8=0
 err9=0
 err10=0
+err11=0
+err12=0
 
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
@@ -1028,7 +1046,7 @@ DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwnd
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1158,6 +1176,128 @@ set -x
 EOF
 set -x
 
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_11; chmod +x thread_11
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=11
+
+#=======================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is +/- 1.5 hrs for all SATWND types
+#       EXCEPT: SATWND subtypes 005/030, 005/031, 005/032, 005/034, 005/039,
+#               005/064, 005/065, 005/066, 005/067, 005/068, 005/069,
+#               005/070, 005/071, 005/072, 005/080 and 005/091
+#               where it is
+#               -3.00 to +2.99 hours.
+#   (2) TIME TRIMMING IS DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump # 11 : SATWN1: 16 subtype(s)  (bufr_dumplist.v2.3.0)
+#            --------------------- 
+#            TOTAL NUMBER OF SUBTYPES = 25
+#
+#=======================================================================
+
+# <DTIM Management Here>
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn1
+error11=$?
+echo "$error11" > $DATA/error11
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
+    ${COMSP}satwn1.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/11.out 2>&1
+EOF
+set -x
+
+set +x
+#----------------------------------------------------------------
+cat<<\EOF>thread_12; chmod +x thread_12
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_12
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=12
+
+#=======================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is +/- 1.5 hrs for all SATWND types
+#       EXCEPT: SATWND subtypes 005/030, 005/031, 005/032, 005/034, 005/039,
+#               005/064, 005/065, 005/066, 005/067, 005/068, 005/069,
+#               005/070, 005/071, 005/072, 005/080 and 005/091
+#               where it is
+#               -3.00 to +2.99 hours.
+#   (2) TIME TRIMMING IS DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump # 12 : SATWN2: 16 subtype(s)  (bufr_dumplist.v2.3.0)
+#            --------------------- 
+#            TOTAL NUMBER OF SUBTYPES = 25
+#
+#=======================================================================
+
+# <DTIM Management Here>
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
+error12=$?
+echo "$error12" > $DATA/error12
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
+    ${COMSP}satwn2.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_12
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/12.out 2>&1
+EOF
+set -x
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -1183,12 +1323,14 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group10 = YES ] &&  echo ./thread_10 >> $DATA/poe.cmdfile #msone1
+   [ $DUMP_group11 = YES ] &&  echo ./thread_11 >> $DATA/poe.cmdfile #satwn1
+   [ $DUMP_group12 = YES ] &&  echo ./thread_12 >> $DATA/poe.cmdfile #satwn2
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
       #$launcher_DUMP -np 10 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      NPROCS=${NPROCS:-10}
+      NPROCS=${NPROCS:-12}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
@@ -1211,9 +1353,11 @@ else
   [ $DUMP_group8 = YES ]  &&  ./thread_8
   [ $DUMP_group9 = YES ]  &&  ./thread_9
   [ $DUMP_group10 = YES ]  &&  ./thread_10
+  [ $DUMP_group11 = YES ]  &&  ./thread_11
+  [ $DUMP_group12 = YES ]  &&  ./thread_12
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
 
 set +x
 echo " "
@@ -1230,10 +1374,12 @@ set -x
 [ -s $DATA/error8 ] && err8=`cat $DATA/error8`
 [ -s $DATA/error9 ] && err9=`cat $DATA/error9`
 [ -s $DATA/error10 ] && err10=`cat $DATA/error10`
+[ -s $DATA/error11 ] && err11=`cat $DATA/error11`
+[ -s $DATA/error12 ] && err12=`cat $DATA/error12`
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=11
+export DUMP_NUMBER=13
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
    if [ "$SENDCOM" = 'YES' -a "$COPY_TO_ARKV" = 'YES' ]; then
@@ -1277,8 +1423,8 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt 5 ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1289,7 +1435,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9 $err10"
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1307,7 +1453,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9 $err10 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
@@ -1317,8 +1463,13 @@ $err5, $err6, $err7, $err8, $err9 $err10 "
 #  endif loop $PROCESS_DUMP
 fi
 
-##  concatenate msonet and msone1, b/c prepobs only wants one file
+#  concatenate msonet and msone1, b/c prepobs only wants one file
 #cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+
+#  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
+cat ${COMSP}satwn1.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
+cat ${COMSP}satwn2.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
+
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
