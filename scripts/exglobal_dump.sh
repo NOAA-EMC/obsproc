@@ -243,7 +243,7 @@ fi
 NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
 if [ "$NET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
-   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
+   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 200s(for adpupa data to come)
 ########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
@@ -1410,7 +1410,7 @@ export DUMP_NUMBER=8
 #=======================================================================
 
 #ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
-ADD_satwnd="005030 005031 005032 005034 005039 005072"
+#ADD_satwnd="005030 005031 005032 005034 005039 005072"
 
 # Skip old bufr METEOSAT AMVs; for testing skip in trigger or version file
 #export SKIP_005064=YES
@@ -1464,7 +1464,7 @@ DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1913,7 +1913,7 @@ export DUMP_NUMBER=14
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn1
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error14=$?
 echo "$error14" > $DATA/error14
 
@@ -1972,6 +1972,7 @@ export DUMP_NUMBER=15
 #=======================================================================
 
 #<ADD_satwn2="005030 005031 005032 005034 005039 005072">
+ADD_satwn2="005030 005031 005032 005034 005039 005072"
 
 # <DTIM Management Here>
 

@@ -1046,7 +1046,7 @@ DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1217,7 +1217,7 @@ export DUMP_NUMBER=11
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn1
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error11=$?
 echo "$error11" > $DATA/error11
 
@@ -1277,6 +1277,11 @@ export DUMP_NUMBER=12
 # <DTIM Management Here>
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
+
+
+export SKIP_005070=YES
+export SKIP_005071=YES
+export SKIP_005080=YES
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
 error12=$?

@@ -484,7 +484,7 @@ For testing, skip in ecflow or obsproc_rrfs.ver file
 #export SKIP_005066=YES
 
 # Add GOES-16/17/18 DMW data to SATWND
-export ADD_satwnd="005030 005031 005032 005034 005039"
+export ADD_satwnd="005030 005031 005032 005034 005039 005067 005068 005069 005070 005071 005072 005081 005091"
 
 # Time window -1.50 to +1.49 hours for EUMETSAT SATWND for full and partial
 #  cycle runs
