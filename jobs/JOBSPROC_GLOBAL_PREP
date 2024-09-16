@@ -239,7 +239,7 @@ export NSPLIT=${NSPLIT:-12} # ${NSPLIT:-8} #16 adds time to MERGE step :(
 #  BUFRLIST indicates the list of BUFR data dump file names to process
 
 export BUFRLIST=${BUFRLIST:-"uprair proflr aircar aircft satwnd adpupa adpsfc \
- sfcshp vadwnd wdsatr ascatw rassda gpsipw"}
+ sfcshp saldrn vadwnd wdsatr ascatw rassda gpsipw"}
 
 export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
                            # center hour (cycle) times if foreground exit
