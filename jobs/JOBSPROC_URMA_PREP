@@ -226,7 +226,8 @@ export email_GLERL="matthew.t.morris@noaa.gov"   # glerladj.sh alert recipient
 
 export SYNDATA=NO     # NEVER execute program SYNDAT_SYNDATA
 
-export GLERLBUFR=YES  # Execute program PREPOBS_GLERLADJ (GLERL adjustment
+export GLERLBUFR=NO   # MDL request, 09/16/2024
+                      # Execute program PREPOBS_GLERLADJ (GLERL adjustment
                       #  processing)
 
 export PREPACQC=NO    # NEVER execute PREPACQC script processing
