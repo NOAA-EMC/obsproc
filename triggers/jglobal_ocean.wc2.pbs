@@ -30,6 +30,8 @@ export job=${JTYP}_ocean_$cyc
 export jobid=$job.$PBS_JOBID
 export PDY=%PDY%
 
+export ins=%ins% # instrument/dataset in create_${INS}_6h.sh
+
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
 export obsproc_ver=v1.3

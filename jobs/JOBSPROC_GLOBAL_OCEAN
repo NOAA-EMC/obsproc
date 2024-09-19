@@ -261,7 +261,10 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/test_ocean.sh
+
+#$SCRIPTSobsproc/test_ocean.sh
+/lfs/h2/emc/obsproc/noscrub/iliana.genkova/GIT/play/MARINE_code/gw_create_${ins}_6h.sh
+
 eval err_${RUN}_ocean=$?
 eval [[ \$err_${RUN}_ocean -ne 0 ]] && $DATA/err_exit
 
