@@ -2127,19 +2127,19 @@ fi
 #_cmanb     nem 001104  #> Surface Marine CMAN rpts decoded from BUFR format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
 #_shipub    nem 001113  #> Ship - manual and automatic, unrestricted (BUFR) |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
 
-echo "IG SPLIT sfcshp..."
+echo " SPLIT sfcshp for Marine/SOCA team..."
 ${bufr_ROOT}/bin/split_by_subset  ${COMSP}sfcshp.${tmmark}.bufr_d
-mv $PWD/NC001001  ${COMSP}ships.${tmmark}.bufr_d
-mv $PWD/NC001013  ${COMSP}shipsu.${tmmark}.bufr_d
-mv $PWD/NC001002  ${COMSP}dbuoy.${tmmark}.bufr_d
-mv $PWD/NC001003  ${COMSP}mbuoy.${tmmark}.bufr_d
-mv $PWD/NC001004  ${COMSP}lcman.${tmmark}.bufr_d
-mv $PWD/NC001007  ${COMSP}cstgd.${tmmark}.bufr_d
-mv $PWD/NC001101  ${COMSP}shipsb.${tmmark}.bufr_d
-mv $PWD/NC001102  ${COMSP}dbuoyb.${tmmark}.bufr_d
-mv $PWD/NC001103  ${COMSP}mbuoybs.${tmmark}.bufr_d
-mv $PWD/NC001104  ${COMSP}cmanb.${tmmark}.bufr_d
-mv $PWD/NC001113  ${COMSP}shipub.${tmmark}.bufr_d
+cpfs $PWD/NC001001  ${COMSP}ships.${tmmark}.bufr_d
+cpfs $PWD/NC001013  ${COMSP}shipsu.${tmmark}.bufr_d
+cpfs $PWD/NC001002  ${COMSP}dbuoy.${tmmark}.bufr_d
+cpfs $PWD/NC001003  ${COMSP}mbuoy.${tmmark}.bufr_d
+cpfs $PWD/NC001004  ${COMSP}lcman.${tmmark}.bufr_d
+cpfs $PWD/NC001007  ${COMSP}cstgd.${tmmark}.bufr_d
+cpfs $PWD/NC001101  ${COMSP}shipsb.${tmmark}.bufr_d
+cpfs $PWD/NC001102  ${COMSP}dbuoyb.${tmmark}.bufr_d
+cpfs $PWD/NC001103  ${COMSP}mbuoybs.${tmmark}.bufr_d
+cpfs $PWD/NC001104  ${COMSP}cmanb.${tmmark}.bufr_d
+cpfs $PWD/NC001113  ${COMSP}shipub.${tmmark}.bufr_d
 
 echo " " >> $pgmout
 echo "##################################################################\

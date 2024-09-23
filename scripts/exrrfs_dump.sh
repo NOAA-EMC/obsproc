@@ -1323,7 +1323,8 @@ else
    def_time_window_9=3.0 # default time window for dump 9 is -3.0 to +3.0 hours
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng satwhr wndtwr adpupa
+#$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng satwhr wndtwr adpupa
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng satwhr adpupa
 error9=$?
 echo "$error9" > $DATA/error9
 
