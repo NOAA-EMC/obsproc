@@ -263,7 +263,6 @@ cat <<\EOFparm > bufr_remorest.datadump.parm
  &SWITCHES
    MSG_RESTR = 'NC000000',   ! These are the Table A Entries for BUFR messages
                'NC000100',   !  for which ALL reports are considered to be
-               'NC001121',   ! 
                'NC004003',   !  restricted. All reports will be REMOVED by
                'NC004004',   !  program BUFR_REMOREST.
 	       'NC004006',   !  (up to 20 Tabel A entries)
@@ -337,7 +336,7 @@ EOFparm
    REMX=${REMX:-$EXECobsproc/bufr_remorest}
    REMC=${REMC:-bufr_remorest.datadump.parm}
 
-   for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro sfcsno
+   for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
@@ -743,7 +742,7 @@ EOFthread
 
    for file in msonet satwnd goesfv aircar ascatw adpsfc gpsipw sfcshp \
                aircft adpupa proflr vadwnd rassda goesnd wdsatr spssmi \
-               sfcbog qkswnd erscat sofarw snomad sfcsno 
+               sfcbog qkswnd erscat 
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
