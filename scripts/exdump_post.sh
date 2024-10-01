@@ -263,6 +263,7 @@ cat <<\EOFparm > bufr_remorest.datadump.parm
  &SWITCHES
    MSG_RESTR = 'NC000000',   ! These are the Table A Entries for BUFR messages
                'NC000100',   !  for which ALL reports are considered to be
+               'NC001121',   ! 
                'NC004003',   !  restricted. All reports will be REMOVED by
                'NC004004',   !  program BUFR_REMOREST.
 	       'NC004006',   !  (up to 20 Tabel A entries)
@@ -336,7 +337,7 @@ EOFparm
    REMX=${REMX:-$EXECobsproc/bufr_remorest}
    REMC=${REMC:-bufr_remorest.datadump.parm}
 
-   for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro
+   for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro sfcsno
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
@@ -510,7 +511,7 @@ $dumptime"
                rassda nexrad gpsro  airsev goesfv wndsat wdsatr osbuv8 \
                ascatt ascatw mtiasi avcsam avcspm gome   lghtng omi    \
                esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam \
-	       $aircraft_nr_dm2
+	       $aircraft_nr_dm2 
 #  --> don't add any new dumps here since files are already unblocked
 #      on WCOSS!!
 
@@ -742,7 +743,7 @@ EOFthread
 
    for file in msonet satwnd goesfv aircar ascatw adpsfc gpsipw sfcshp \
                aircft adpupa proflr vadwnd rassda goesnd wdsatr spssmi \
-               sfcbog qkswnd erscat sofarw snomad 
+               sfcbog qkswnd erscat sofarw snomad sfcsno 
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
