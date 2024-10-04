@@ -533,26 +533,14 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
-## STUMP - delete after testing IG Ig IG
-#eval tryfile=$grib_source/$gribfile
-#if [ -s $tryfile ];then
-#   set +x; echo -e "\nPicking up file $tryfile\n"; set -x
-#   cp $tryfile ${COMSP}$target_filename
-#else
-#   set +x;echo -e "\n$tryfile not available.\n";set -x
-#fi
-
 # Save ascii NIC.IMS_v?_???????00_4km.asc 
   ascii_file=NIC.IMS
   ascii_file_var=_v*_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
   ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
   target_filename=imssnow96.asc
-  #eval tryfile=${ascii_source}/${ascii_file}${ascii_file_var}
-  #if [ -s $tryfile ];then
   if [ -s ${ascii_source}/${ascii_file}${ascii_file_var} ]; then
     set +x; echo -e "\nPicking up IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
     cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}${target_filename}
-    #cp $tryfile ${COMSP}$target_filename
   else
     set +x; echo -e "\nPicking up a day old IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
     ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
