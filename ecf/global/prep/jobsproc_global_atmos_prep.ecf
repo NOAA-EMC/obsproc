@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:20:00
-#PBS -l place=vscatter,select=1:ncpus=4:mem=130gb:prepost=true
+#PBS -l place=vscatter,select=1:ncpus=14:mem=520gb:prepost=true
 #PBS -l debug=true
 
 export model=obsproc
@@ -24,8 +24,8 @@ module load cfp/${cfp_ver}
 
 module load netcdf/${netcdf_ver}
 
-module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles
 module load bufr_dump/${bufr_dump_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 #Uncomment if Serial Run  is desired
