@@ -12,7 +12,7 @@ PRELUDE
  Introduce the sfcship dump file components as stand alone dumps for Marine team -
  ships, shipsu, dbuoy, mbuoy, lcman, cstgd, shipsb, dbuoyb, mbuoybs, cmanb, shipub
  
- Introduces a new observational network RRFS - at the moment it resembles the RAP except for the new wndtwr dump (blank until tanks are resusitated)
+ ON HOLD:Introduces a new observational network RRFS - at the moment it resembles the RAP except for the new wndtwr dump (blank until tanks are resusitated)
  Example triggers for RRFS are in /triggers/jrrfs_* (similar to jrap_*)
 
 
