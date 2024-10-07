@@ -1,0 +1,5 @@
+ jtyp=gfs cyc=00 PDY=20240722 desc=R13  bash -l /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jglobal_dump.wc2.pbs.R13
+
+ jtyp=gfs cyc=00 PDY=20240724 desc=OCEAN bash -l  /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/GIT/play/obsproc.13/triggers/jglobal_ocean.wc2.pbs
+
+ jtyp=gfs cyc=00 PDY=20240724 desc=CHEM bash -l  /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/GIT/play/obsproc.13/triggers/jglobal_chem.wc2.pbs

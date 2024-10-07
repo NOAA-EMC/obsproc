@@ -4,10 +4,8 @@
 #PBS -q prod_transfer
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:05:00
-#PBS -l place=vscatter,select=1:ncpus=1:mem=1gb
+#PBS -l place=vscatter,select=1:ncpus=14:mem=4gb
 #PBS -l debug=true
-
-##PBS -l place=vscatter,select=1:ncpus=1:mem=4gb
 
 export model=obsproc
 
@@ -20,9 +18,8 @@ JTYP=%JTYP% #=[gfs, gdas]
 #Load the modules
 module load intel/${intel_ver}
 
-module use /apps/ops/para/nco/intel/$intel_ver/bufr_dump.v$bufr_dump_ver/modulefiles #in emc version only
-module load prepobs/${prepobs_ver} #in nco version only
 module load bufr_dump/${bufr_dump_ver}
+module load prepobs/${prepobs_ver}
 module list
 
 # CALL executable job script here
