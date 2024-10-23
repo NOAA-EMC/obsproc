@@ -75,6 +75,17 @@ set -x
 export cycle=t${cyc}z
 export tmmark=tm00
 
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#   value t<HHMM>z
+#   (Note: the reset here applies only to references to $cycle, changed now to
+#          $cycle_here, in this script; downstream scripts
+#          exurma_makeprepbufr.sh.ecf and prepobs_makeprepbufr.sh will later
+#          reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
+
 ###############################
 # Create new working directory
 ###############################
@@ -137,6 +148,14 @@ export TANK=${TANK:-${DCOMROOT}}
 #  prepobs_prepacqc.sh if PREPOBS_PREPACPF is executed
 # ----------------------------------------------------------
 export DICTPREP=${DICTPREP:-${OPSROOT}/decoders/decod_shared/dictionaries_${dictionaries_ver}}
+
+# export specific urma OBSPROC variables here
+# ------------------------------------------
+export PRPC=${PRPC:-$PARMPREP/prepobs_prepdata.urma.parm}
+export CQCC=${CQCC:-$PARMPREP/prepobs_cqcbufr.urma.parm}
+export AQCC=${AQCC:-$PARMPREP/prepobs_prepacqc.urma.parm}
+export PQCC=${PQCC:-$PARMPREP/prepobs_profcqc.urma.parm}
+
 
 #########################################################################
 # Add some prod utilities to working directory
@@ -205,7 +224,8 @@ export BACK=NO
 
 #  BUFRLIST indicates the list of BUFR data dump file names to process
 
-export BUFRLIST=${BUFRLIST:-"adpsfc sfcshp msonet ascatw wdsatr satwnd"}
+export BUFRLIST=${BUFRLIST:-"adpupa proflr aircar aircft satwnd adpsfc \
+	 sfcshp vadwnd goesnd msonet gpsipw rassda ascatw wdsatr"}
 
 export errPREPDATA_limit=4 # allow program PREPOBS_PREPDATA to continue at all
                            # center hour (cycle) times if foreground exit
@@ -226,26 +246,27 @@ export email_GLERL="matthew.t.morris@noaa.gov"   # glerladj.sh alert recipient
 
 export SYNDATA=NO     # NEVER execute program SYNDAT_SYNDATA
 
-export GLERLBUFR=NO   # MDL request, 09/16/2024
-                      # Execute program PREPOBS_GLERLADJ (GLERL adjustment
+export GLERLBUFR=YES  # Execute program PREPOBS_GLERLADJ (GLERL adjustment
                       #  processing)
 
-export PREPACQC=NO    # NEVER execute PREPACQC script processing
-export PROCESS_ACQC=NO  # NEVER execute program PREPOBS_PREPACQC
-export PROCESS_ACPF=NO  # NEVER execute program PREPOBS_PREPACPF
+export PREPACQC=${PREPACQC:-YES}    # NEVER execute PREPACQC script processing
+export PROCESS_ACQC=${PROCESS_ACQC:-YES}  # NEVER execute program PREPOBS_PREPACQC
+export PROCESS_ACPF=${PROCSES_ACPF:-YES}  # NEVER execute program PREPOBS_PREPACPF
 
-export PROFCQC=NO     # NEVER execute program PREPOBS_PROFCQC
+export PROFCQC=${PROFCQC:-YES}     # NEVER execute program PREPOBS_PROFCQC
 
-export CQCVAD=NO      # NEVER execute program PREPOBS_CQCVAD
+export CQCVAD=${CQCVAD:-YES}      # NEVER execute program PREPOBS_CQCVAD
 
-export CQCBUFR=NO     # NEVER execute program PREPOBS_CQCBUFR
+export CQCBUFR=${CQCBUFR:-YES}     # NEVER execute program PREPOBS_CQCBUFR
 
 export OIQCBUFR=NO    # NEVER execute program PREPOBS_OIQCBUFR
 
-export DO_QC=NO       # NO, programs PREPOBS_PREPACQC, PREPOBS_PREPACPF,
+export DO_QC=${DO_QC:-YES}       
+                      # IF NO, programs PREPOBS_PREPACQC, PREPOBS_PREPACPF,
                       # PREPOBS_PROFCQC, PREPOBS_CQCVAD, PREPOBS_CQCBUFR and
                       # PREPOBS_OIQCBUFR will NEVER execute regardless of
-                      # switches above
+                      # switches above -
+                      # should be set to NO only as a last resort!!!
 
 export GETGUESS=${GETGUESS:-YES}
                       # Encode first guess (background) values interpolated to
@@ -274,12 +295,12 @@ $SCRIPTSobsproc/exurma_makeprepbufr.sh
 eval err_${RUN}_makeprepbufr=$?
 eval [[ \$err_${RUN}_makeprepbufr -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_prep_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_prep_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_run
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_run
 [ -n "$obsproc_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_prep_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_prep_run
 
 # Adding time lag to the end of the job to allow PREPBUFR to be copied
 #  completely before the start of the next job in the trigger's sequence
