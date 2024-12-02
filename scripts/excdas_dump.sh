@@ -1046,7 +1046,7 @@ DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn0
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1221,11 +1221,6 @@ $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error11=$?
 echo "$error11" > $DATA/error11
 
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwn1.tm00.bufr_d
-fi
-
 set +x
 echo "********************************************************************"
 echo Script thread_11
@@ -1286,11 +1281,6 @@ export SKIP_005080=YES
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
 error12=$?
 echo "$error12" > $DATA/error12
-
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwn2.tm00.bufr_d
-fi
 
 set +x
 echo "********************************************************************"
@@ -1465,15 +1455,14 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
       set -x
    fi
 
-#  endif loop $PROCESS_DUMP
-fi
-
 #  concatenate msonet and msone1, b/c prepobs only wants one file
-#cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+  #cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-cat ${COMSP}satwn1.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
-cat ${COMSP}satwn2.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
+cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm >> ${COMSP}satwnd.tm00.bufr_d
+
+#  endif loop $PROCESS_DUMP
+fi
 
 
 #

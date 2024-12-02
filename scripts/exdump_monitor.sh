@@ -366,7 +366,11 @@ SKIP_005023=YES
 #SKIP_005066=YES
 
 #ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
-ADD_satwnd="005030 005031 005032 005034 005039 005072"
+#ADD_satwnd="005030 005031 005032 005034 005039 005072"
+#last fix IG
+ADD_satwnd="005030 005031 005032 005034 005039 \
+            005067 005068 005069 \
+            005070 005071 005072 005080 005081 005091"
 
 DTIM_earliest_1bamua=-2.00
 DTIM_latest_1bamua=-1.01
@@ -1015,7 +1019,7 @@ export DUMP_NUMBER=10
 DTIM_latest_uprair=+0.49
 DTIM_earliest_uprair=-0.49
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair saldrn
 error10=$?
 echo "$error10" > $DATA/error10
 

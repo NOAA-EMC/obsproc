@@ -484,7 +484,7 @@ export SKIP_005023=YES
 export SKIP_005090=YES
 
 # Skip old bufr EUMETSAT AMVs
-For testing, skip in ecflow or obsproc_rap.ver file
+#For testing, skip in ecflow or obsproc_rap.ver file
 #export SKIP_005064=YES
 #export SKIP_005065=YES
 #export SKIP_005066=YES

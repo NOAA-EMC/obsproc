@@ -22,6 +22,7 @@ FILE CHANGES
 M docs/Release_Notes.txt
 M jobs/JOBSPROC_URMA_PREP
 M jobs/JOBSPROC_GLOBAL_PREP
+M jobs/JOBSPROC_NAM_PREP_POST
 A jobs/JOBSPROC_RRFS_DUMP
 A jobs/JOBSPROC_RRFS_DUMP_POST
 A jobs/JOBSPROC_RRFS_PREP
@@ -34,6 +35,7 @@ A parm/prepobs_prepdata.rrfs.parm
 A parm/prepobs_prepssmi.rrfs.parm
 A parm/prepobs_profcqc.rrfs.parm
 M scripts/excdas_dump.sh
+M scripts/excdas_makeprepbufr.sh
 M scripts/exdump_monitor.sh
 M scripts/exdump_post.sh
 M scripts/exglobal_dump.sh
@@ -61,6 +63,9 @@ JOBS CHANGES
  jobs/JOBSPROC_GLOBAL_PREP
  Add saldrn to prepbufr list
 
+ jobs/JOBSPROC_NAM_PREP_POST
+ Replaced obssolete $utilscript with $UTILROOT
+
  jobs/JOBSPROC_RRFS_DUMP
  jobs/JOBSPROC_RRFS_DUMP_POST
  jobs/JOBSPROC_RRFS_PREP
@@ -82,15 +87,24 @@ PARM CHANGES
 SCRIPTS CHANGES
 
  scripts/excdas_dump.sh
- Split satwnd processing to satwnd, satwn1, and satwn2
+ Split satwnd processing to satwn0, satwn1, and satwn2, and concatenae into satwnd on $COMROOT
+
+ scripts/excdas_makeprepbufr.sh
+ Commented our lines 506-523, to skip obsolete copy to $LSB_OUTPUTFILE
 
  scripts/exdump_monitor.sh
  Remove Indian AMV tanks for faster satwnd processing, i.e.  00502*
+ Due to redefining "satwnd" in bufr_dump/fix/bufr_dumplist (v1.3), used ADD_satwnd to add GOES,MSG, and US polar AMV tanks
+ Intrpduced saldrn tank to monitoring
 
  scripts/exglobal_dump.sh
- Remove Indian AMV tanks for faster satwnd processing, i.e.  00502*; Split satwnd processing to satwnd, satwn1, and satwn2;
+ Remove Indian AMV tanks for faster satwnd processing, i.e.  00502*; Split satwnd processing to satwn0, satwn1, and satwn2;
+ Concat satwn0, satwn1, and satwn2 into satwnd and then dbnet alert it.
  Split sfcshp to dump group components for Marine/SOCA model; Add sfcsno, snomad and sofarw dump groups; 
  Save NIC.IMS*4km.asc ASCII file to COMROOT; Copy and rename  557th/USAF snow AN to COMROOT as *snow.usaf.grib2
+
+ scripts/exrap_dump.sh
+ Commented out line 487 which is comment text
  
  scripts/exrrfs_dump.sh
  scripts/exrrfs_makeprepbufr.sh

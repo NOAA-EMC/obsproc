@@ -147,7 +147,7 @@ set +u
 #               crisf4
 #
 # Dump group #8 (pb, TIME_TRIM defaults to ON) =
-#               satwnd
+#               satwnd->satwn0
 #
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
 #               geoimr gmi1cr satwhr
@@ -526,9 +526,6 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
          $DATA/postmsg "$jlogfile" "$msg"
       fi    
    done
-   if [ "$SENDECF" = "YES" ]; then
-      ecflow_client --event=release_sfcprep
-   fi
 
 #  endif loop $PROCESS_GRIBFLDS
 fi
@@ -556,9 +553,24 @@ fi
     set +x; echo -e "\nPicking up 557th USAF snow file ${ascii_source}/${ascii_file1}${ascii_file1_var}\n"; set -x
     cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}${target_filename}
   else
-    set +x; echo -e "\nPicking up a day old 557th USAF snow file ${ascii_source}/${ascii_file}${ascii_file1_var}\n"; set -x
-    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul/557thWW_snow
-    cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}$target_filename
+    set +x; echo -e "\nReuse prior cycle 557th USAF snow file \n"; set -x
+    prior_yyyymmddCC=$($NDATE -6 ${PDY}${cyc})
+    PDY_p=`echo $prior_yyyymmddCC|cut -c1-8`
+    cyc_p=`echo $prior_yyyymmddCC|cut -c9-10`
+    ascii_source=${TANK_GRIBFLDS}/${PDY_p}/wgrbbul/557thWW_snow
+    ascii_file1_var="_DD.${PDY_p}_DT.${cyc_p}00_DF.GR2"
+    if [ -s  ${ascii_source}/${ascii_file1}${ascii_file1_var} ]; then
+      cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}${target_filename}
+    else
+      export COMSPm1=$COMROOT/${obsNET}/${obsproc_ver}/${RUN}.${PDY_p}/$RUN.${cyc_p}.
+      echo $COMSPm1
+      cp ${COMSPm1}$target_filename ${COMSP}$target_filename
+
+    fi
+  fi
+
+  if [ "$SENDECF" = "YES" ]; then
+     ecflow_client --event=release_sfcprep
   fi
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
@@ -1452,14 +1464,11 @@ DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd0
 error8=$?
 echo "$error8" > $DATA/error8
 
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwnd.tm00.bufr_d
-fi
+# dbn_alert for satwnd moved below, after satwn1 and satwn2 appended
 
 set +x
 echo "********************************************************************"
@@ -1905,11 +1914,6 @@ $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error14=$?
 echo "$error14" > $DATA/error14
 
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwn1.tm00.bufr_d
-fi
-
 set +x
 echo "********************************************************************"
 echo Script thread_14
@@ -1969,11 +1973,6 @@ TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
 error15=$?
 echo "$error15" > $DATA/error15
-
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwn2 $job \
-    ${COMSP}satwn2.tm00.bufr_d
-fi
 
 set +x
 echo "********************************************************************"
@@ -2144,7 +2143,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
         "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
-       	"$err13" -gt '5' -o "$err14" -gt '5' -o "$err15" -gt '5']; then
+       	"$err13" -gt '5' -o "$err14" -gt '5' -o "$err15" -gt '5' ]; then
       for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13 $err14 $err15
       do
          if [ "$n" -gt '5' ]; then
@@ -2181,12 +2180,16 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err1
       set -x
    fi
 
+#  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
+   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm >> ${COMSP}satwnd.tm00.bufr_d
+
+  if [ "$SENDDBN" = "YES" ]; then
+      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
+       ${COMSP}satwnd.tm00.bufr_d
+   fi
+
 #  endif loop $PROCESS_DUMP
 fi
-
-#  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-cat ${COMSP}satwn1.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
-cat ${COMSP}satwn2.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

@@ -1270,7 +1270,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
   if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
        "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-       "$err10" -gt '5' -o "$err11" -gt '5']; then
+       "$err10" -gt '5' -o "$err11" -gt '5' ]; then
       for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11
       do
          if [ "$n" -gt '5' ]; then

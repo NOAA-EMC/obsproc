@@ -158,7 +158,7 @@ if [ -z "$PDY" ]; then
       edate=`cat ${COMDATEROOT}/date/t12z | cut -c7-14`
       if [ $edate -eq $PDY ]
       then
-        export PDY=`$utilscript/finddate.sh $PDY d+1`
+        export PDY=`$UTILROOT/ush/finddate.sh $PDY d+1`
         setpdy.sh
         . $DATA/PDY
       fi
