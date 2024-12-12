@@ -1464,7 +1464,7 @@ DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd0
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn0
 error8=$?
 echo "$error8" > $DATA/error8
 
