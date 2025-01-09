@@ -28,6 +28,8 @@ module load bufr_dump/${bufr_dump_ver}
 module load prepobs/${prepobs_ver}
 module list
 
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
+
 #Uncomment if Serial Run  is desired
 #export BACK=NO
 #export POE=NO

@@ -2100,33 +2100,6 @@ $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 #  endif loop $PROCESS_DUMP
 fi
 
-#_sfcshp    nem 001001 001013 001002 001003 001004 001007 001102 001103 001101 001113 001104
-#
-#_ships     nem 001001  #> Ship - manual and automatic, restricted          |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
-#_shipsu    nem 001013  #> Ship - manual and automatic, unrestricted 
-#_dbuoy     nem 001002  #> Buoys decoded from FM-18 fmt (moored or drifting)|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
-#_mbuoy     nem 001003  #> Buoys decoded from FM-13 format (moored)         |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
-#_lcman     nem 001004  #> Land-based CMAN stations decoded from CMAN format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
-#_cstgd     nem 001007  #> Coast Guard                                      | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
-#_shipsb    nem 001101  #> Ship - manual and automatic, restricted (BUFR)   | YEL 50   50 YYYY| YEL 50   50 YYYY| YEL 50   50 YYYY| YEL | YEL |
-#_dbuoyb    nem 001102  #> Drifting buoys (decoded from BUFR)               | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
-#_mbuoyb    nem 001103  #> Moored buoys (decoded from BUFR)                 | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
-#_cmanb     nem 001104  #> Surface Marine CMAN rpts decoded from BUFR format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
-#_shipub    nem 001113  #> Ship - manual and automatic, unrestricted (BUFR) |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
-
-echo " SPLIT sfcshp for Marine/SOCA team..."
-${bufr_ROOT}/bin/split_by_subset  ${COMSP}sfcshp.${tmmark}.bufr_d
-cpfs $PWD/NC001001  ${COMSP}ships.${tmmark}.bufr_d
-cpfs $PWD/NC001013  ${COMSP}shipsu.${tmmark}.bufr_d
-cpfs $PWD/NC001002  ${COMSP}dbuoy.${tmmark}.bufr_d
-cpfs $PWD/NC001003  ${COMSP}mbuoy.${tmmark}.bufr_d
-cpfs $PWD/NC001004  ${COMSP}lcman.${tmmark}.bufr_d
-cpfs $PWD/NC001007  ${COMSP}cstgd.${tmmark}.bufr_d
-cpfs $PWD/NC001101  ${COMSP}shipsb.${tmmark}.bufr_d
-cpfs $PWD/NC001102  ${COMSP}dbuoyb.${tmmark}.bufr_d
-cpfs $PWD/NC001103  ${COMSP}mbuoybs.${tmmark}.bufr_d
-cpfs $PWD/NC001104  ${COMSP}cmanb.${tmmark}.bufr_d
-cpfs $PWD/NC001113  ${COMSP}shipub.${tmmark}.bufr_d
 
 echo " " >> $pgmout
 echo "##################################################################\
@@ -2183,7 +2156,8 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err1
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
    cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm >> ${COMSP}satwnd.tm00.bufr_d
 
-  if [ "$SENDDBN" = "YES" ]; then
+
+   if [ "$SENDDBN" = "YES" ]; then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
        ${COMSP}satwnd.tm00.bufr_d
    fi

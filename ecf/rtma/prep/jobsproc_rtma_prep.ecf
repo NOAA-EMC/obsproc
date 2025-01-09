@@ -26,6 +26,8 @@ module load intel/${intel_ver}
 module load netcdf/${netcdf_ver}
 module load prepobs/${prepobs_ver}
 
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
+
 $HOMEobsproc/jobs/JOBSPROC_RTMA_PREP
 
 %include <tail.h>

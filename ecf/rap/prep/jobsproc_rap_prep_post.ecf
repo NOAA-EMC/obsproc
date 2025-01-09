@@ -20,6 +20,8 @@ module load intel/${intel_ver}
 module load prepobs/${prepobs_ver}
 module list
 
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
+
 $HOMEobsproc/jobs/JOBSPROC_RAP_PREP_POST
 
 # CALL executable job script here

@@ -317,8 +317,6 @@ export DUMP_NUMBER=4
 #              time window radius is +/- 2.5 hours
 #===========================================================================
 
-ADD_satwnd="005067 005068 005069 005070 005071 005080 005081 005091"
-
 # Skip all Indian satellite winds in SATWND (not in domain)
 export SKIP_005021=YES
 export SKIP_005022=YES
@@ -575,6 +573,9 @@ echo
       set -x
    fi
 
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.tm00.bufr_d
+
 #  endif loop $PROCESS_DUMP
 fi
 
@@ -582,8 +583,6 @@ if [ "$RUN" == "rtma_ru" ] && [ "${SENDDBN^^}" = YES ] && [ -s ${COMSP}satwnd.tm
    $DBNROOT/bin/dbn_alert MODEL RTMA_RU_BUFR_satwnd $job ${COMSP}satwnd.tm00.bufr_d
 fi
 
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

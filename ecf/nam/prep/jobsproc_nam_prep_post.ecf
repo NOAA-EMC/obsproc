@@ -23,6 +23,8 @@ module load intel/${intel_ver}
 module load prepobs/${prepobs_ver}
 module list
 
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
+
 $HOMEobsproc/jobs/JOBSPROC_NAM_PREP_POST
 
 %include <tail.h>

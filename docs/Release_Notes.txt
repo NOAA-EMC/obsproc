@@ -12,28 +12,14 @@ PRELUDE
  Introduce the sfcship dump file components as stand alone dumps for Marine team -
  ships, shipsu, dbuoy, mbuoy, lcman, cstgd, shipsb, dbuoyb, mbuoybs, cmanb, shipub
  
- ON HOLD:Introduces a new observational network RRFS - at the moment it resembles the RAP except for the new wndtwr dump (blank until tanks are resusitated)
- Example triggers for RRFS are in /triggers/jrrfs_* (similar to jrap_*)
-
-
-
 FILE CHANGES
 
 M docs/Release_Notes.txt
 M jobs/JOBSPROC_URMA_PREP
 M jobs/JOBSPROC_GLOBAL_PREP
 M jobs/JOBSPROC_NAM_PREP_POST
-A jobs/JOBSPROC_RRFS_DUMP
-A jobs/JOBSPROC_RRFS_DUMP_POST
-A jobs/JOBSPROC_RRFS_PREP
-A jobs/JOBSPROC_RRFS_PREP_POST
 M parm/prepobs_prepdata.gdas.parm
 M parm/prepobs_prepdata.gfs.parm
-A parm/prepobs_cqcbufr.rrfs.parm
-A parm/prepobs_prepacqc.rrfs.parm
-A parm/prepobs_prepdata.rrfs.parm
-A parm/prepobs_prepssmi.rrfs.parm
-A parm/prepobs_profcqc.rrfs.parm
 M scripts/excdas_dump.sh
 M scripts/excdas_makeprepbufr.sh
 M scripts/exdump_monitor.sh
@@ -41,8 +27,6 @@ M scripts/exdump_post.sh
 M scripts/exglobal_dump.sh
 M scripts/exnam_dump.sh
 M scripts/exrap_dump.sh
-A scripts/exrrfs_dump.sh
-A scripts/exrrfs_makeprepbufr.sh
 M scripts/exrtma_dump.sh
 M scripts/exurma_dump.sh
 M sorc/bufr_prepmods.fd/bufr_prepmods.f
@@ -66,23 +50,10 @@ JOBS CHANGES
  jobs/JOBSPROC_NAM_PREP_POST
  Replaced obssolete $utilscript with $UTILROOT
 
- jobs/JOBSPROC_RRFS_DUMP
- jobs/JOBSPROC_RRFS_DUMP_POST
- jobs/JOBSPROC_RRFS_PREP
- jobs/JOBSPROC_RRFS_PREP_POST
- Introduce processing capability for a new RRFS observations network
-
 PARM CHANGES
  parm/prepobs_prepdata.gdas.parm
  parm/prepobs_prepdata.gfs.parm
  Update the global parm cards to accomodate the saildrone obs in prepbufr
-
- parm/prepobs_cqcbufr.rrfs.parm
- parm/prepobs_prepacqc.rrfs.parm
- parm/prepobs_prepdata.rrfs.parm
- parm/prepobs_prepssmi.rrfs.parm
- parm/prepobs_profcqc.rrfs.parm
- Add parm cards for a  new RRFS observations network
 
 SCRIPTS CHANGES
 
@@ -106,10 +77,6 @@ SCRIPTS CHANGES
  scripts/exrap_dump.sh
  Commented out line 487 which is comment text
  
- scripts/exrrfs_dump.sh
- scripts/exrrfs_makeprepbufr.sh
- Add scripts for a new RRFS observations network
-
  scripts/exrtma_dump.sh
  Split satwnd processing to satwnd, satwn1, and satwn2
 
@@ -143,13 +110,6 @@ CHANGES TO OUTPUT AND FILE SIZES
 
  Update *prepbufr*  dumps (gdas, gfs), filesize up y up to 10%
 
- Add a new obs network RRFS with _E and _P variances. 
- List of generated file:  /lfs/h2/emc/obsproc/noscrub/ashley.stanfield/Data.KEEP/CRON/rrfs_13/com/obsproc/v1.3/rrfs.20240920/*00z*
- File sizes:  
- 24h RRFS data = ~200 GB
- 24h RRFS_E    = ~20  GB
- 24h RRFS_P    = ~110 GB
-
 CHANGES TO RESOURCES
  
  Note expecting increase in walltime; more  CPUs will be needed in the PBS cards for the following JOBSPROC_*_DUMP jobs:
@@ -157,7 +117,6 @@ CHANGES TO RESOURCES
  JOBSPROC_CDAS_DUMP   - 13 
  JOBSPROC_NAM_DUMP    - 12
  JOBSPROC_RAP_DUMP    - 13
- JOBSPROC_RRFS_DUMP   - 13
  JOBSPROC_RTMA_DUMP   - 6
  JOBSPROC_URMA_DUMP   - 7
  JOBSPROC_DUMP_MONITOR- 10
@@ -169,7 +128,7 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
  See versions/build.ver and versions/run.ver for libaries
 
  Run jobs/JOBSPROC_networkname_DUMP and jobs/JOBSPROC_networkname_DUMP_POST
- for the following networkname values: GLOBAL, NAM, RAP, RRFS (new), URMA, RTMA, CDAS
+ for the following networkname values: GLOBAL, NAM, RAP, URMA, RTMA, CDAS
 
  Parallel Production Testing (PPT)
  After testing obsproc v1.3 in the /para space, we recommend doing for at least two weeks,
@@ -186,7 +145,6 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
 
  Good to know:
  - the RAP uprair dumps might be 0 size for the hours not around 00,06,12,18 UTC
- - the new RRFS dumps will be very similar to RAP, obsproc will verify completeness
  - the CDAS prepbufr files are 6 different flavours, it takes about 26 hours for all to be generated
  - some *bufr_d files might be 0 size until the relevant data stream is recovered (wndtwr)
  - please contact obsproc_support@noaa.gov should you have any Qs regarding testing

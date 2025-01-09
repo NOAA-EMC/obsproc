@@ -28,6 +28,8 @@ module load intel/${intel_ver}
 module load bufr_dump/${bufr_dump_ver}
 module list
 
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
+
 # CALL executable job script here
 $HOMEobsproc/jobs/JOBSPROC_RTMA_DUMP_POST
 

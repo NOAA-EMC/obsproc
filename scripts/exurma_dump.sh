@@ -30,7 +30,7 @@ echo "                     - Copy bufr_dumplist to COMOUT.          "
 echo "         Dec 15 2021 - set for use on WCOSS2.                 "
 echo "         Aug  1 2022 - Added SUBPFL, SALDRN, SNOCVR,          "
 echo "                       and GMI1CR types.                      "
-echo "         Oct 12 2023 - Split msonet to msonet and msone1,     "
+echo "         Oct 12 2023 - Split msonet to msone0 and msone1,     "
 echo "                       where msone1=255.030; concatenate      "
 echo "                       msonet and msone1 right after dump.    "
 echo "                       Seperated satwnd to its own dump group."
@@ -71,7 +71,7 @@ err6=0
 err7=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1 
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1 
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
 TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
@@ -241,7 +241,7 @@ export DUMP_NUMBER=3
 #            time window radius is 0.50 hours
 #===========================================================================
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -327,8 +327,6 @@ export DUMP_NUMBER=5
 #            for all other SATWND subtypes:
 #              time window radius is +/- 2.5 hours
 #===========================================================================
-
-ADD_satwnd="005067 005068 005069 005070 005071 005080 005081 005091"
 
 # Skip all Indian satellite winds in SATWND (not in domain)
 export SKIP_005021=YES
@@ -589,11 +587,12 @@ echo
       set -x
    fi
 
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.tm00.bufr_d
+
 #  endif loop $PROCESS_DUMP
 fi
 
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

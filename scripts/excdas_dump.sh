@@ -75,7 +75,7 @@ set +u
 #               aircar aircft proflr vadwnd rassda
 #
 # Dump group #5 (pb, TIME_TRIM = OFF) =
-#               msonet
+#               msonet->msone0
 #
 # Dump group #6 (non-pb, TIME_TRIM = OFF) =
 #               nexrad
@@ -341,7 +341,7 @@ err11=0
 err12=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
 TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
@@ -705,10 +705,8 @@ export DUMP_NUMBER=5
 #===================================================================
 
 #IG
-DTIM_earliest_msonet=${DTIM_latest_msonet:-"-1.99"}
-DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.00"}
-
-#DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
+DTIM_earliest_msone0=${DTIM_latest_msonet:-"-1.99"}
+DTIM_latest_msone0=${DTIM_latest_msonet:-"+2.00"}
 
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers. 
@@ -716,7 +714,7 @@ export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers.
 TIME_TRIM=on
 #TIME_TRIM=off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone0
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1455,8 +1453,8 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
       set -x
    fi
 
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-  #cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.tm00.bufr_d
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
 cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm >> ${COMSP}satwnd.tm00.bufr_d

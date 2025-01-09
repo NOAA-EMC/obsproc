@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=1:00:00
-#PBS -l place=vscatter,select=1:ncpus=10:mem=200gb
+#PBS -l place=vscatter,select=1:ncpus=13:mem=200gb
 #PBS -l debug=true
 
 export model=obsproc
@@ -29,6 +29,8 @@ module load grib_util/${grib_util_ver}
 
 module load bufr_dump/${bufr_dump_ver}
 module list
+
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
 
 $HOMEobsproc/jobs/JOBSPROC_CDAS_DUMP
 

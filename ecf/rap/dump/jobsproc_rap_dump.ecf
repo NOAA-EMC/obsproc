@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:30:00
-#PBS -l place=vscatter,select=1:ncpus=12:mem=50gb
+#PBS -l place=vscatter,select=1:ncpus=13:mem=50gb
 #PBS -l debug=true
 
 export model=obsproc
@@ -30,6 +30,8 @@ module load grib_util/${grib_util_ver}
 
 module load bufr_dump/${bufr_dump_ver}
 module list
+
+export DBNROOT=/lfs/h1/nco/idsb/noscrub/diane.stokes/upgrades/obsproc/fakedbn
 
 # CALL executable job script here
 $HOMEobsproc/jobs/JOBSPROC_RAP_DUMP

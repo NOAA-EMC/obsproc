@@ -76,7 +76,7 @@ set +u
 # Dump group #2 (pb) = vadwnd satwnd
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 #                          subpfl saldrn
-# Dump group #4 (pb) = msonet gpsipw 
+# Dump group #4 (pb) = msonet->msone0 gpsipw 
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
@@ -261,7 +261,7 @@ err11=0
 err12=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1 
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1 
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
 TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
@@ -490,7 +490,7 @@ export SKIP_005090=YES
 #export SKIP_005066=YES
 
 # Add GOES-16/17/18 DMW data to SATWND
-export ADD_satwnd="005030 005031 005032 005034 005039 005067 005068 005069 005070 005071 005072 005081 005091"
+export ADD_satwnd="005030 005031 005032 005034 005039"
 
 # Time window -1.50 to +1.49 hours for EUMETSAT SATWND for full and partial
 #  cycle runs
@@ -749,7 +749,7 @@ fi
 #  (default)
 
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msonet gpsipw
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msone0 gpsipw
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -1662,12 +1662,11 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
       set -x
    fi
 
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.${tmmark}.bufr_d
+
 #  endif loop $PROCESS_DUMP
 fi
-
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
-
 
 grep -q "004.004 in data group aircar for .............-.........\
 .... HAS      0 REPORTS" ${COMSP}status.$tmmark.bufr_d
