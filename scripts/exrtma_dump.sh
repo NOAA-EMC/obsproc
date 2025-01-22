@@ -331,6 +331,8 @@ export DUMP_NUMBER=4
 #              time window radius is +/- 2.5 hours
 #===========================================================================
 
+ADD_satwnd="005067 005068 005069 005070 005071 005080 005081 005091"
+
 # Skip all Indian satellite winds in SATWND (not in domain)
 export SKIP_005021=YES
 export SKIP_005022=YES
