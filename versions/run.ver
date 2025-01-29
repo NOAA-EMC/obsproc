@@ -20,6 +20,7 @@ export dictionaries_ver=v3.4.0
 export seaice_analysis_ver=v4.5		#engice, seaice.*5min.grb  file		
 export cdas_ver=v1.2
 export nsst_ver=v1.2	                #rtgsst file
+export nicims_ver=v3                    #/wgrbbul/NIC.IMS_v*_YYYYJD00_*km.asc
 
 export PROCESS_MASTER_SHIP_STNLST=NO	#for monthly gdas count (run on 2nd of Month)
 export BACK=off

@@ -1087,7 +1087,7 @@ fi
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c NAM is frozen; no new data.
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1144,7 +1144,7 @@ fi
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c NAM is frozen; no new data.
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone1
 error11=$?
 echo "$error11" > $DATA/error11
 
@@ -1307,7 +1307,7 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11"
    fi
 
 #  concatenate msone0 and msone1, b/c prepobs only wants one file
-   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.${tmmark}.bufr_d
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.${tmmark}.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi

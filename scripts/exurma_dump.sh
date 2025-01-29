@@ -241,7 +241,7 @@ export DUMP_NUMBER=3
 #            time window radius is 0.50 hours
 #===========================================================================
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -412,7 +412,7 @@ def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 msone1
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -588,7 +588,7 @@ echo
    fi
 
 #  concatenate msone0 and msone1, b/c prepobs only wants one file
-   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.tm00.bufr_d
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.tm00.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi

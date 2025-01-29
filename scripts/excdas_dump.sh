@@ -714,7 +714,7 @@ export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers.
 TIME_TRIM=on
 #TIME_TRIM=off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone0
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone0
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1159,7 +1159,7 @@ DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.00"}
 
 TIME_TRIM=on #off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1454,10 +1454,10 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
    fi
 
 #  concatenate msone0 and msone1, b/c prepobs only wants one file
-cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.tm00.bufr_d
+cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.tm00.bufr_d
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm >> ${COMSP}satwnd.tm00.bufr_d
+cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.tm00.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi

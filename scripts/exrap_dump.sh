@@ -76,9 +76,9 @@ set +u
 # Dump group #2 (pb) = vadwnd satwnd
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 #                          subpfl saldrn
-# Dump group #4 (pb) = msonet->msone0 gpsipw 
+# Dump group #4 (pb) = msonet->msone0 (gpsipw to #6) 
 # Dump group #5 (pb) = aircft aircar
-# Dump group #6 (non-pb) = nexrad
+# Dump group #6 (non-pb) = nexrad gpsipw
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
 #                          saphir gmi1cr
 # Dump group #8 (non-pb) = gsrasr [gsrcsr]
@@ -696,60 +696,17 @@ export STATUS=NO
 export DUMP_NUMBER=4
 
 #============================================================================
-# Dump # 4 : MSONET, GPSIPW -- TOTAL NUMBER OF SUBTYPES = 31
+# Dump # 4 : MSONET, GPSIPW(moved to Dump#?) -- TOTAL NUMBER OF SUBTYPES = 31
 #             (30)     (1)
 #============================================================================
 
 def_time_window_4=0.5 # default time window for dump 4 is -0.5 to +0.5 hours
 
-if [ "$RUN" = 'rap_p' ]; then
-
-#  ===> For RUN = rap_p -- partial cycle runs
-#       -------------------------------------
-
-   if [ $cyc -ne 08 -a $cyc -ne 20 ]; then
-
-# Time window -0.05 to +0.05 hours (-3 to +3 min) for GPSIPW at all cycles
-#   except 08 and 20z
-
-      DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.05"}
-      DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
-
-   else
-
-# Time window -0.55 to -0.45 hours (-33 to -27 min) for GPSIPW for 08 or 20z
-#  cycle
-
-      DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.55"}
-      DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.45"}
-
-   fi
-
-else
-
-#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
-#       -------------------------------------------------------------------
-
-# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
-
-   DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
-   DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
-
-fi
-#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
-#         providers) is currently limited to obs closest to cycle-time that
-#         result in a U.S.-ENI dump count that is not too much larger than that
-#         from the previous U.S. (only) GSD-feed, since the ENI reports are
-#         available every 5 min while the GSD reports were available only every
-#         30 min. Also accounts for an approximate 80-min latency present in
-#         the U.S.-ENI reports.}
-
-
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msone0 gpsipw
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msone0
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -881,6 +838,50 @@ export DUMP_NUMBER=6
 export LALO=0  # GLOBAL dumps here (NEXRAD dumped globally to allow job to run
                # much quicker w/o the need for geographical filtering (all
                # radar reports are over CONUS anyway)
+
+# gpsipw
+if [ "$RUN" = 'rap_p' ]; then
+
+#  ===> For RUN = rap_p -- partial cycle runs
+#         -------------------------------------
+   
+   if [ $cyc -ne 08 -a $cyc -ne 20 ]; then
+
+# Time window -0.05 to +0.05 hours (-3 to +3 min) for GPSIPW at all cycles
+#   except 08 and 20z
+
+     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.05"}
+     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
+
+   else
+
+# Time window -0.55 to -0.45 hours (-33 to -27 min) for GPSIPW for 08 or 20z
+#  cycle
+
+     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.55"}
+     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.45"}
+
+   fi
+
+else
+
+#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
+#       -------------------------------------------------------------------
+
+# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
+
+     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
+     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
+                                           
+fi
+
+#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
+#         providers) is currently limited to obs closest to cycle-time that
+#         result in a U.S.-ENI dump count that is not too much larger than that
+#         from the previous U.S. (only) GSD-feed, since the ENI reports are
+#         available every 5 min while the GSD reports were available only every
+#         30 min. Also accounts for an approximate 80-min latency present in
+#         the U.S.-ENI reports.}
 
 def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
 
@@ -1062,7 +1063,7 @@ elif [ $cyc -eq 23 ]; then   # (22.50 - 23.49 Z)
 ###unset SKIP_006063 # reflectivity 23Z
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 nexrad
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 nexrad gpsipw
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -1368,7 +1369,7 @@ def_time_window_10=0.5 # default time window for dump 10 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_10} 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_10} 1 msone1
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1663,7 +1664,7 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
    fi
 
 #  concatenate msone0 and msone1, b/c prepobs only wants one file
-   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.${tmmark}.bufr_d
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.${tmmark}.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi

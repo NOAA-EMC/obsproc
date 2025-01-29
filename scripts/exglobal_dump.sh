@@ -532,16 +532,19 @@ fi
 
 # Save ascii NIC.IMS_v?_???????00_4km.asc 
   ascii_file=NIC.IMS
-  ascii_file_var=_v*_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
+  ascii_file_var=_${nicims_ver}_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
   ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
   target_filename=imssnow96.asc
-  if [ -s ${ascii_source}/${ascii_file}${ascii_file_var} ]; then
-    set +x; echo -e "\nPicking up IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
-    cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}${target_filename}
+  # Get a list of files in the directory, sort them, and get the last one
+  last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var}  | sort | tail -n 1)
+  if [ -s ${ascii_source}/${last_file} ]; then
+    set +x; echo -e "\nPicking up IMS ascii file ${ascii_source}/${last_file}\n"; set -x
+    cp ${ascii_source}/${last_file} ${COMSP}${target_filename}
   else
     set +x; echo -e "\nPicking up a day old IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
     ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
-    cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}$target_filename
+    last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var}  | sort | tail -n 1)
+    cp ${ascii_source}/${last_file} ${COMSP}$target_filename
   fi
 
 # Copy/Rename new 557th USAF 0.09 deg global snow AN files
@@ -1089,7 +1092,7 @@ DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM5:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1464,7 +1467,7 @@ DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn0
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn0
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1910,7 +1913,7 @@ export DUMP_NUMBER=14
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
+$SENDCOME=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error14=$?
 echo "$error14" > $DATA/error14
 
@@ -1970,7 +1973,7 @@ ADD_satwn2="005030 005031 005032 005034 005039 005072"
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
 error15=$?
 echo "$error15" > $DATA/error15
 
@@ -2154,7 +2157,7 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err1
    fi
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm >> ${COMSP}satwnd.tm00.bufr_d
+   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.tm00.bufr_d
 
 
    if [ "$SENDDBN" = "YES" ]; then

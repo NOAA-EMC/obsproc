@@ -1170,7 +1170,7 @@ $err5, $err6, $err7 $err8 $err9 $err10 "
    fi
 
 
-cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm >> ${COMSP}msonet.tm00.bufr_d
+cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.tm00.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi
