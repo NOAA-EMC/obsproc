@@ -1913,7 +1913,7 @@ export DUMP_NUMBER=14
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$SENDCOME=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error14=$?
 echo "$error14" > $DATA/error14
 
