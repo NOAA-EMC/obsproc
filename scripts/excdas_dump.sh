@@ -1454,10 +1454,13 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
    fi
 
 #  concatenate msone0 and msone1, b/c prepobs only wants one file
-cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.tm00.bufr_d
+   cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+   cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+   chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+   chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.tm00.bufr_d
+   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.${tmmark}.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi

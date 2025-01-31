@@ -2157,7 +2157,7 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err1
    fi
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.tm00.bufr_d
+   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.${tmmark}.bufr_d
 
 
    if [ "$SENDDBN" = "YES" ]; then
