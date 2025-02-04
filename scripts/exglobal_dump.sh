@@ -530,23 +530,6 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
-# Save ascii NIC.IMS_v?_???????00_4km.asc 
-  ascii_file=NIC.IMS
-  ascii_file_var=_${nicims_ver}_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
-  ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
-  target_filename=imssnow96.asc
-  # Get a list of files in the directory, sort them, and get the last one
-  last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var}  | sort | tail -n 1)
-  if [ -s ${ascii_source}/${last_file} ]; then
-    set +x; echo -e "\nPicking up IMS ascii file ${ascii_source}/${last_file}\n"; set -x
-    cp ${ascii_source}/${last_file} ${COMSP}${target_filename}
-  else
-    set +x; echo -e "\nPicking up a day old IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
-    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
-    last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var}  | sort | tail -n 1)
-    cp ${ascii_source}/${last_file} ${COMSP}$target_filename
-  fi
-
 # Copy/Rename new 557th USAF 0.09 deg global snow AN files
   ascii_file1=${ascii_file1:-"PS.557WW_SC.U_DI.C_GP.USAFSI_GR.C0P09DEG_AR.GLOBAL_PA.SNOW-ICE"}
   ascii_file1_var=${ascii_file1_var:-"_DD.${PDY}_DT.${cyc}00_DF.GR2"}

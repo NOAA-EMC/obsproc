@@ -72,7 +72,7 @@ SCRIPTS CHANGES
  Remove Indian AMV tanks for faster satwnd processing, i.e.  00502*; Split satwnd processing to satwn0, satwn1, and satwn2;
  Concat satwn0, satwn1, and satwn2 into satwnd and then dbnet alert it.
  Add sfcsno, snomad and sofarw dump groups; 
- Save NIC.IMS*4km.asc ASCII file to COMROOT; Copy and rename  557th/USAF snow AN to COMROOT as *snow.usaf.grib2
+  Copy and rename  557th/USAF snow AN to COMROOT as *snow.usaf.grib2
 
  scripts/exrap_dump.sh
  Commented out line 487 which is comment text
