@@ -530,6 +530,27 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
+# Save NIC.IMS_v*_*_4km.ascii as imssnow96.asc in $COMROOT
+  ascii_file=NIC.IMS
+  ascii_file_var=_${nicims_ver}_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
+  ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
+  target_filename=imssnow96.asc
+# Get a list of files in the directory, sort them, and get the last one
+  last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
+  if [ -n "${last_file}" -a -s "${last_file}" ]; then
+    set +x; echo -e "\nPicking up IMS ascii file ${last_file}\n"; set -x	
+    cp ${last_file} ${COMSP}${target_filename}
+  else
+    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
+    last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
+    set +x; echo -e "\nPicking up a day old IMS ascii file ${last_file}\n"; set -x
+    if [ -n "${last_file}" -a -s "${last_file}" ]; then
+      cp ${last_file} ${COMSP}$target_filename
+    else
+      set +x; echo -e "\nNo useful IMS ascii file found\n"; set -x
+    fi
+  fi
+
 # Copy/Rename new 557th USAF 0.09 deg global snow AN files
   ascii_file1=${ascii_file1:-"PS.557WW_SC.U_DI.C_GP.USAFSI_GR.C0P09DEG_AR.GLOBAL_PA.SNOW-ICE"}
   ascii_file1_var=${ascii_file1_var:-"_DD.${PDY}_DT.${cyc}00_DF.GR2"}
@@ -2141,7 +2162,7 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err1
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
    cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${DATA}/satwnd.ibm
-   cpfc ${DATA}/satwnd.ibm  ${COMSP}satwnd.${tmmark}.bufr_d
+   cpfs ${DATA}/satwnd.ibm  ${COMSP}satwnd.${tmmark}.bufr_d
 
    if [ "$SENDDBN" = "YES" ]; then
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
