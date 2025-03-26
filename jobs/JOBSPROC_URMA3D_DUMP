@@ -65,8 +65,8 @@ set -x
 # Specify NET and RUN Name
 ###########################
 export obsNET=${obsNET:-obsproc}
-export NET=${NET:-urma}
-export RUN=${RUN:-urma}
+export NET=${NET:-urma3d}
+export RUN=${RUN:-urma3d}
 
 set +x
 echo
@@ -225,7 +225,7 @@ else
 fi
 
 ############################################
-# SETUP URMA DATA DUMP PROCESSING VARIABLES
+# SETUP URMA3D DATA DUMP PROCESSING VARIABLES
 ############################################
 
 #########################################################
@@ -255,14 +255,14 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exurma_dump.sh
+$SCRIPTSobsproc/exurma3d_dump.sh
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
 echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_dump_ran
 
 > $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
-[ -n "$obsproc_urma_ver" ]  &&  \
+[ -n "$obsproc_urma3d_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
  $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 [ -n "$bufr_dump_ver" ]  &&  \
