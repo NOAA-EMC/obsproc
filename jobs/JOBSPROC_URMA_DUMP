@@ -82,6 +82,18 @@ set -x
 export cycle=t${cyc}z
 export tmmark=tm00
 
+# Imported variable cycM, if it exists, contains cycle time minutes
+#  If cycM is imported, reset cycle in this script only (cycle_here) to 4-digit
+#  value t<HHMM>z
+#  (Note: the reset here applies only to references to $cycle, changed now to 
+#          $cycle_here, in this script; downstream scripts
+#          exurma_makeprepbufr.sh.ecf and prepobs_makeprepbufr.sh will later
+#          reset actual $cycle in the same manner)
+
+cycle_here=$cycle
+[ -n "$cycM" ]  &&  cycle_here=t${cyc}${cycM}z
+
+
 ###############################
 # Create new working directory
 ###############################
@@ -248,17 +260,17 @@ $SCRIPTSobsproc/exurma_dump.sh
 eval err_${RUN}_dump=$?
 eval [[ \$err_${RUN}_dump -ne 0 ]] && $DATA/err_exit
 
-echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle}_${RUN}_dump_ran
+echo "$SITE `hostname`  --  `date -u`" > $COMOUT/where_${cycle_here}_${RUN}_dump_ran
 
-> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 [ -n "$obsproc_urma_ver" ]  &&  \
  echo "OBSPROC version is $obsproc_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 [ -n "$bufr_dump_ver" ]  &&  \
  echo "BUFR_DUMP version used by this job is $bufr_dump_ver" >> \
- $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 echo "Version of module \"grib_util\" used by this job is $grib_util_ver" \
- >> $COMOUT/obsproc_version_for_${cycle}_${RUN}_dump_run
+ >> $COMOUT/obsproc_version_for_${cycle_here}_${RUN}_dump_run
 
 if [ "$KEEPDATA" != YES ]; then
    cd $DATAROOT
