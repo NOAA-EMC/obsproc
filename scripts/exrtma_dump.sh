@@ -28,7 +28,7 @@ echo "                sfcshp dump group to make unique dump file.   "
 echo "             - Copy bufr_dumplist to COMOUT.                  "
 echo " Dec 15 2021 - set for use on WCOSS2.                         "
 echo " Jul 31 2022 - Subpfl,saldrn,snocvr & gmi1cr dump group added "
-echo " Oct 12 2023 - Split msonet to msonet and msone1, where       "
+echo " Oct 12 2023 - Split msonet to msone0 and msone1, where       "
 echo "                msone1=255.030; concatenate msonet and msone1 "
 echo "                right after dump. Seperated satwnd to its own "
 echo "                dump group.                                   "
@@ -101,7 +101,8 @@ err15=0
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1 
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+#TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -278,11 +279,11 @@ export STATUS=NO
 export DUMP_NUMBER=3
 
 #===========================================================================
-# Dump # 3 : MSONET -- TOTAL NUMBER OF SUBTYPES = 30
+# Dump # 3 : MSONE0 -- TOTAL NUMBER OF SUBTYPES = 30
 #            time window radius is 0.50 hours
 #===========================================================================
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -421,7 +422,7 @@ def_time_window_5=0.5 # default time window for dump 5 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 msone1
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1370,7 +1371,10 @@ if [ "$RUN" == "rtma_ru" ] && [ "${SENDDBN^^}" = YES ] && [ -s ${COMSP}satwnd.tm
 fi
 
 #  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+#cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+     cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
