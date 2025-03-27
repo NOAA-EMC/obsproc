@@ -47,7 +47,7 @@ msg="CENTER TIME FOR PREPBUFR PROCESSING IS $cdate10"
 postmsg "$jlogfile" "$msg"
 $DATA/postmsg "$jlogfile" "$msg"
 
-ksh $ushscript_prep/prepobs_makeprepbufr.sh $cdate10
+ksh $ushscript_prep/prepobs_makeprepbufr.sh $cdate10 $cycM
 errsc=$?
 
 [ "$errsc" -ne '0' ]  &&  exit $errsc
