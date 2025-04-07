@@ -147,7 +147,7 @@ set +u
 #               crisf4
 #
 # Dump group #8 (pb, TIME_TRIM defaults to ON) =
-#               satwnd
+#               satwnd->satwn0
 #
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
 #               geoimr gmi1cr satwhr
@@ -526,25 +526,29 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
          $DATA/postmsg "$jlogfile" "$msg"
       fi    
    done
-   if [ "$SENDECF" = "YES" ]; then
-      ecflow_client --event=release_sfcprep
-   fi
 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
-# Save ascii NIC.IMS_v?_???????00_4km.asc 
+# Save NIC.IMS_v*_*_4km.ascii as imssnow96.asc in $COMROOT
   ascii_file=NIC.IMS
-  ascii_file_var=_v*_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
+  ascii_file_var=_${nicims_ver}_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
   ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
   target_filename=imssnow96.asc
-  if [ -s ${ascii_source}/${ascii_file}${ascii_file_var} ]; then
-    set +x; echo -e "\nPicking up IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
-    cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}${target_filename}
+# Get a list of files in the directory, sort them, and get the last one
+  last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
+  if [ -n "${last_file}" -a -s "${last_file}" ]; then
+    set +x; echo -e "\nPicking up IMS ascii file ${last_file}\n"; set -x	
+    cp ${last_file} ${COMSP}${target_filename}
   else
-    set +x; echo -e "\nPicking up a day old IMS ascii file ${ascii_source}/${ascii_file}${ascii_file_var}\n"; set -x
     ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
-    cp ${ascii_source}/${ascii_file}${ascii_file_var} ${COMSP}$target_filename
+    last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
+    set +x; echo -e "\nPicking up a day old IMS ascii file ${last_file}\n"; set -x
+    if [ -n "${last_file}" -a -s "${last_file}" ]; then
+      cp ${last_file} ${COMSP}$target_filename
+    else
+      set +x; echo -e "\nNo useful IMS ascii file found\n"; set -x
+    fi
   fi
 
 # Copy/Rename new 557th USAF 0.09 deg global snow AN files
@@ -556,9 +560,24 @@ fi
     set +x; echo -e "\nPicking up 557th USAF snow file ${ascii_source}/${ascii_file1}${ascii_file1_var}\n"; set -x
     cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}${target_filename}
   else
-    set +x; echo -e "\nPicking up a day old 557th USAF snow file ${ascii_source}/${ascii_file}${ascii_file1_var}\n"; set -x
-    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul/557thWW_snow
-    cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}$target_filename
+    set +x; echo -e "\nReuse prior cycle 557th USAF snow file \n"; set -x
+    prior_yyyymmddCC=$($NDATE -6 ${PDY}${cyc})
+    PDY_p=`echo $prior_yyyymmddCC|cut -c1-8`
+    cyc_p=`echo $prior_yyyymmddCC|cut -c9-10`
+    ascii_source=${TANK_GRIBFLDS}/${PDY_p}/wgrbbul/557thWW_snow
+    ascii_file1_var="_DD.${PDY_p}_DT.${cyc_p}00_DF.GR2"
+    if [ -s  ${ascii_source}/${ascii_file1}${ascii_file1_var} ]; then
+      cp ${ascii_source}/${ascii_file1}${ascii_file1_var} ${COMSP}${target_filename}
+    else
+      export COMSPm1=$COMROOT/${obsNET}/${obsproc_ver}/${RUN}.${PDY_p}/$RUN.${cyc_p}.
+      echo $COMSPm1
+      cp ${COMSPm1}$target_filename ${COMSP}$target_filename
+
+    fi
+  fi
+
+  if [ "$SENDECF" = "YES" ]; then
+     ecflow_client --event=release_sfcprep
   fi
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
@@ -1077,7 +1096,7 @@ DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM5:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1452,14 +1471,11 @@ DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn0
 error8=$?
 echo "$error8" > $DATA/error8
 
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwnd.tm00.bufr_d
-fi
+# dbn_alert for satwnd moved below, after satwn1 and satwn2 appended
 
 set +x
 echo "********************************************************************"
@@ -1901,14 +1917,9 @@ export DUMP_NUMBER=14
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error14=$?
 echo "$error14" > $DATA/error14
-
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwn1.tm00.bufr_d
-fi
 
 set +x
 echo "********************************************************************"
@@ -1966,14 +1977,9 @@ ADD_satwn2="005030 005031 005032 005034 005039 005072"
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
 error15=$?
 echo "$error15" > $DATA/error15
-
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwn2 $job \
-    ${COMSP}satwn2.tm00.bufr_d
-fi
 
 set +x
 echo "********************************************************************"
@@ -2101,33 +2107,6 @@ $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 #  endif loop $PROCESS_DUMP
 fi
 
-#_sfcshp    nem 001001 001013 001002 001003 001004 001007 001102 001103 001101 001113 001104
-#
-#_ships     nem 001001  #> Ship - manual and automatic, restricted          |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
-#_shipsu    nem 001013  #> Ship - manual and automatic, unrestricted 
-#_dbuoy     nem 001002  #> Buoys decoded from FM-18 fmt (moored or drifting)|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
-#_mbuoy     nem 001003  #> Buoys decoded from FM-13 format (moored)         |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
-#_lcman     nem 001004  #> Land-based CMAN stations decoded from CMAN format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY|     |     |
-#_cstgd     nem 001007  #> Coast Guard                                      | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
-#_shipsb    nem 001101  #> Ship - manual and automatic, restricted (BUFR)   | YEL 50   50 YYYY| YEL 50   50 YYYY| YEL 50   50 YYYY| YEL | YEL |
-#_dbuoyb    nem 001102  #> Drifting buoys (decoded from BUFR)               | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
-#_mbuoyb    nem 001103  #> Moored buoys (decoded from BUFR)                 | grn 50   50 YYYY| grn 50   50 YYYY| grn 50   50 YYYY|     |     |
-#_cmanb     nem 001104  #> Surface Marine CMAN rpts decoded from BUFR format|     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| RED | RED |
-#_shipub    nem 001113  #> Ship - manual and automatic, unrestricted (BUFR) |     50   50 YYYY|     50   50 YYYY|     50   50 YYYY| YEL | YEL |
-
-echo " SPLIT sfcshp for Marine/SOCA team..."
-${bufr_ROOT}/bin/split_by_subset  ${COMSP}sfcshp.${tmmark}.bufr_d
-cpfs $PWD/NC001001  ${COMSP}ships.${tmmark}.bufr_d
-cpfs $PWD/NC001013  ${COMSP}shipsu.${tmmark}.bufr_d
-cpfs $PWD/NC001002  ${COMSP}dbuoy.${tmmark}.bufr_d
-cpfs $PWD/NC001003  ${COMSP}mbuoy.${tmmark}.bufr_d
-cpfs $PWD/NC001004  ${COMSP}lcman.${tmmark}.bufr_d
-cpfs $PWD/NC001007  ${COMSP}cstgd.${tmmark}.bufr_d
-cpfs $PWD/NC001101  ${COMSP}shipsb.${tmmark}.bufr_d
-cpfs $PWD/NC001102  ${COMSP}dbuoyb.${tmmark}.bufr_d
-cpfs $PWD/NC001103  ${COMSP}mbuoybs.${tmmark}.bufr_d
-cpfs $PWD/NC001104  ${COMSP}cmanb.${tmmark}.bufr_d
-cpfs $PWD/NC001113  ${COMSP}shipub.${tmmark}.bufr_d
 
 echo " " >> $pgmout
 echo "##################################################################\
@@ -2144,7 +2123,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
         "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
-       	"$err13" -gt '5' -o "$err14" -gt '5' -o "$err15" -gt '5']; then
+       	"$err13" -gt '5' -o "$err14" -gt '5' -o "$err15" -gt '5' ]; then
       for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13 $err14 $err15
       do
          if [ "$n" -gt '5' ]; then
@@ -2181,12 +2160,17 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14, $err1
       set -x
    fi
 
+#  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
+   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${DATA}/satwnd.ibm
+   cpfs ${DATA}/satwnd.ibm  ${COMSP}satwnd.${tmmark}.bufr_d
+
+   if [ "$SENDDBN" = "YES" ]; then
+      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
+       ${COMSP}satwnd.${tmmark}.bufr_d
+   fi
+
 #  endif loop $PROCESS_DUMP
 fi
-
-#  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-cat ${COMSP}satwn1.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
-cat ${COMSP}satwn2.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

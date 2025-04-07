@@ -503,24 +503,24 @@ cat allout
 # rm allout
 
 
-if [ "$SENDCOM" = 'YES' -a "$COPY_TO_ARKV" = 'YES' ]; then
-
-#===========================================================================
-#===========================================================================
-#  Must wait until here to copy "dayfiles" to arkv directory so that stdout
-#   is included (preserve ownership & group id but update timestamp)
-#===========================================================================
-#===========================================================================
-
-   msg="Copy dayfile to $COMARC"
-   $DATA/postmsg "$jlogfile" "$msg"
-
-   if [ $JOB_NUMBER -eq 1 ]; then
-      cp --preserve=mode,ownership $LSB_OUTPUTFILE ${COMARC}/prep1${PDY}${cyc}.out
-   elif [ $JOB_NUMBER -eq 2 ]; then
-      cp --preserve=mode,ownership $LSB_OUTPUTFILE ${COMARC}/prep2${PDY}${cyc}.out
-   fi
-fi
+#if [ "$SENDCOM" = 'YES' -a "$COPY_TO_ARKV" = 'YES' ]; then
+#
+##===========================================================================
+##===========================================================================
+##  Must wait until here to copy "dayfiles" to arkv directory so that stdout
+##   is included (preserve ownership & group id but update timestamp)
+##===========================================================================
+##===========================================================================
+#
+#   msg="Copy dayfile to $COMARC"
+#   $DATA/postmsg "$jlogfile" "$msg"
+#
+#   if [ $JOB_NUMBER -eq 1 ]; then
+#      cp --preserve=mode,ownership $LSB_OUTPUTFILE ${COMARC}/prep1${PDY}${cyc}.out
+#   elif [ $JOB_NUMBER -eq 2 ]; then
+#      cp --preserve=mode,ownership $LSB_OUTPUTFILE ${COMARC}/prep2${PDY}${cyc}.out
+#   fi
+#fi
 
 sleep 10
 

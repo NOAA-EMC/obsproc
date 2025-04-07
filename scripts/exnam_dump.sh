@@ -54,7 +54,7 @@ set +u
 # Dump group #7 (non-pb) = goesfv lgycld     --> dump is GLOBAL
 # Dump group #8 (non-pb) = 1bhrs4 airsev osbuv8 esmhs ssmisu cris lghtng
 # Dump group #9 (pb) = adpupa
-# Dump group #10 (pb)= msonet
+# Dump group #10 (pb)= msonet->msone0
 # Dump group #11 (pb)= msone1
 # Dump group #12 STATUS FILE
 # -----------------------------------------------------------------------------
@@ -399,7 +399,6 @@ export DUMP_NUMBER=2
 export SKIP_005021=YES
 export SKIP_005022=YES
 export SKIP_005023=YES
-export ADD_satwnd="005067 005068 005069 005070 005071 005080 005081 005091"
 
 if [ "$tmhr" = "00" ]; then
   for dump_file in vadwnd 005070 005071 005080 005090 005044 005045 005046; do
@@ -1081,14 +1080,14 @@ export DUMP_NUMBER=10
 #===========================================================================
 
 if [ "$tmhr" = "00" ]; then
-  DTIM_earliest_msonet=${DTIM_earliest_msonet:-"-0.75"}
-  DTIM_latest_msonet=${DTIM_latest_msonet:-"+1.50"}
+  DTIM_earliest_msone0=${DTIM_earliest_msone0:-"-0.75"}
+  DTIM_latest_msone0=${DTIM_latest_msone0:-"+1.50"}
 fi
 
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c NAM is frozen; no new data.
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1145,7 +1144,7 @@ fi
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c NAM is frozen; no new data.
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone1
 error11=$?
 echo "$error11" > $DATA/error11
 
@@ -1270,7 +1269,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
   if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
        "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-       "$err10" -gt '5' -o "$err11" -gt '5']; then
+       "$err10" -gt '5' -o "$err11" -gt '5' ]; then
       for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11
       do
          if [ "$n" -gt '5' ]; then
@@ -1307,11 +1306,17 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11"
       set -x
    fi
 
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+   cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.${tmmark}.bufr_d
+
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+   cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+   cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+   chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+   chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
+
 #  endif loop $PROCESS_DUMP
 fi
-
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

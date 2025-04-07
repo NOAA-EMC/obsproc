@@ -75,7 +75,7 @@ set +u
 #               aircar aircft proflr vadwnd rassda
 #
 # Dump group #5 (pb, TIME_TRIM = OFF) =
-#               msonet
+#               msonet->msone0
 #
 # Dump group #6 (non-pb, TIME_TRIM = OFF) =
 #               nexrad
@@ -341,9 +341,9 @@ err11=0
 err12=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -705,10 +705,8 @@ export DUMP_NUMBER=5
 #===================================================================
 
 #IG
-DTIM_earliest_msonet=${DTIM_latest_msonet:-"-1.99"}
-DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.00"}
-
-#DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
+DTIM_earliest_msone0=${DTIM_latest_msonet:-"-1.99"}
+DTIM_latest_msone0=${DTIM_latest_msonet:-"+2.00"}
 
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers. 
@@ -716,7 +714,7 @@ export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers.
 TIME_TRIM=on
 #TIME_TRIM=off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone0
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1046,7 +1044,7 @@ DTIM_latest_005081=${DTIM_latest_005081:-"+1.49"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwnd
+$ushscript_dump/bufr_dump_obs.sh $dumptime 1.5 1 satwn0
 error8=$?
 echo "$error8" > $DATA/error8
 
@@ -1161,7 +1159,7 @@ DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.00"}
 
 TIME_TRIM=on #off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1220,11 +1218,6 @@ TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn1
 error11=$?
 echo "$error11" > $DATA/error11
-
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwn1.tm00.bufr_d
-fi
 
 set +x
 echo "********************************************************************"
@@ -1286,11 +1279,6 @@ export SKIP_005080=YES
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3 1 satwn2
 error12=$?
 echo "$error12" > $DATA/error12
-
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwnd $job \
-    ${COMSP}satwn2.tm00.bufr_d
-fi
 
 set +x
 echo "********************************************************************"
@@ -1465,15 +1453,18 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12 "
       set -x
    fi
 
-#  endif loop $PROCESS_DUMP
-fi
-
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-#cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+#  Uncomment when msone* generation resumes   
+##  concatenate msone0 and msone1, b/c prepobs only wants one file
+#   cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+#   cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+#   chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+#   chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
 
 #  concatenate satwnd, satwn1, and satwn2, b/c prepobs only wants one file
-cat ${COMSP}satwn1.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
-cat ${COMSP}satwn2.tm00.bufr_d >> ${COMSP}satwnd.tm00.bufr_d
+   cat ${DATA}/satwn0.ibm  ${DATA}/satwn1.ibm  ${DATA}/satwn2.ibm > ${COMSP}satwnd.${tmmark}.bufr_d
+
+#  endif loop $PROCESS_DUMP
+fi
 
 
 #

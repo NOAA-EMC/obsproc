@@ -121,9 +121,9 @@ err9=0
 err10=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -570,7 +570,7 @@ export DUMP_NUMBER=5
 #  time window radius is -1.00 to -0.01 hours on GPSIPW, AHICSR
 #===================================================================
 
-DTIM_latest_msonet=+0.49
+DTIM_latest_msone0=+0.49
 DTIM_latest_gsrcsr=+0.49
 DTIM_latest_gsrasr=+0.49
 
@@ -579,7 +579,7 @@ DTIM_latest_gpsipw=-0.01
 DTIM_earliest_ahicsr=-1.00
 DTIM_latest_ahicsr=-0.01
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msonet gpsipw \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msone0 gpsipw \
  gsrcsr gsrasr ahicsr
 error5=$?
 echo "$error5" > $DATA/error5
@@ -1015,7 +1015,7 @@ export DUMP_NUMBER=10
 DTIM_latest_uprair=+0.49
 DTIM_earliest_uprair=-0.49
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair saldrn
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1168,6 +1168,12 @@ $err5, $err6, $err7 $err8 $err9 $err10 "
       echo
       set -x
    fi
+
+
+   cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+   cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+   chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+   chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
 
 #  endif loop $PROCESS_DUMP
 fi
