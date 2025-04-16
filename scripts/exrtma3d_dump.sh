@@ -278,11 +278,11 @@ export STATUS=NO
 export DUMP_NUMBER=3
 
 #===========================================================================
-# Dump # 3 : MSONET -- TOTAL NUMBER OF SUBTYPES = 30
+# Dump # 3 : MSONE0 -- TOTAL NUMBER OF SUBTYPES = 30
 #            time window radius is 0.50 hours
 #===========================================================================
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -1370,7 +1370,11 @@ if [ "$RUN" == "rtma3d_ru" ] && [ "${SENDDBN^^}" = YES ] && [ -s ${COMSP}satwnd.
 fi
 
 #  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+#cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
+
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+     cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${COMSP}msonet.tm00.bufr_d
+
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
