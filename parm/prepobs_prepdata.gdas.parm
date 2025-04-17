@@ -13,9 +13,9 @@
    KTEMP     = TRUE, AWINDO    = 6*325., 2*325., 10*325.,
    JAMASS    = 60*0,
    JAWIND    = 60*0,
-   IACFTL    =  100,-200,-200,-200,-200,-200,-200,-200,-200,-200
+   IACFTL    =  100,-200,-200,-200,-200,-200,-200,-200,-200,-200,
    AIFNOW    =10*TRUE,
-   FLACMS    = TRUE, TRUE, TRUE,FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE
+   FLACMS    = TRUE, TRUE, TRUE,FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE,
 
              !goes-o/e  insat   jma    eumt-o/e aqua/terra
              !-------- ------- ------- -------- ----------
