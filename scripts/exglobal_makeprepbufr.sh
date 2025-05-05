@@ -553,47 +553,49 @@ fi  # end [ "$DO_QC" = 'YES' ]
 ## create combined ocean data dump file expected by NSST
 if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
    > nsstbufr
-
-   DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
-
-   echo "xglm: DTYPS_nsst='$DTYPS_nsst'"
-    
-   for type in $DTYPS_nsst ; do
-      if [ -f ${tstsp}$type.$tmmark.bufr_d ]; then
-         file=${tstsp}$type.$tmmark.bufr_d
-      elif [ -s ${COMSP}$type.$tmmark.bufr_d ]; then
-         file=${COMSP}$type.$tmmark.bufr_d
-      fi
-
-      if [ -s $file ]; then
-           cat $file >> nsstbufr
-           err_cat=$?
-        if [ $err_cat -ne 0 ]; then
-           msg="**WARNING: exit status $err_cat from cat of $file to nsstbufr"
-           $DATA/postmsg "$jlogfile" "$msg"
-         fi
-      else
-         echo $file is empty or does not exist
-      fi # [ -s $file ]
-
-   done # for type in $DTYPS_nsst
+   chmod 664 nsstbufr
    
-   cp nsstbufr $COMOUT/${RUN}.${cycle}.nsstbufr
-   chmod 664 $COMOUT/${RUN}.${cycle}.nsstbufr
-
+   err_ch=0 # allowing nsstbufr file be created on machines that do not support rstprod
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
-      chgrp rstprod $COMOUT/${RUN}.${cycle}.nsstbufr
+      chgrp rstprod nsstbufr
       err_ch=$?
-      if [ $err_ch -eq 0 ]; then
-         chmod 640 $COMOUT/${RUN}.${cycle}.nsstbufr
-	 msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
+   fi
+
+   if [ $err_ch -eq 0 ]; then
+
+      DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
+
+      echo "xglm: DTYPS_nsst='$DTYPS_nsst'"
+    
+      for type in $DTYPS_nsst ; do
+         if [ -f ${tstsp}$type.$tmmark.bufr_d ]; then
+            file=${tstsp}$type.$tmmark.bufr_d
+         elif [ -s ${COMSP}$type.$tmmark.bufr_d ]; then
+            file=${COMSP}$type.$tmmark.bufr_d
+         fi
+
+         if [ -s $file ]; then
+              cat $file >> nsstbufr
+              err_cat=$?
+           if [ $err_cat -ne 0 ]; then
+              msg="**WARNING: exit status $err_cat from cat of $file to nsstbufr"
+              $DATA/postmsg "$jlogfile" "$msg"
+           fi
+         else
+            echo $file is empty or does not exist
+         fi # [ -s $file ]
+
+      done # for type in $DTYPS_nsst
+
+      chmod 640 nsstbufr
+      msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
 rstprod group have read permission"
-         $DATA/postmsg "$jlogfile" "$msg"
-      else
-	 cp /dev/null $COMOUT/${RUN}.${cycle}.nsstbufr
-	 warning=yes
-      fi
-   fi # if [ "CHGRP_RSTPROD" = 'YES' ]
+      $DATA/postmsg "$jlogfile" "$msg"
+   else
+      warning=yes
+   fi # [ $err_ch -eq 0 ]
+   
+   cp -p nsstbufr $COMOUT/${RUN}.${cycle}.nsstbufr
 
 fi # if [[ "$MAKE_NSSTBUFR" == 'YES' ]]
 
