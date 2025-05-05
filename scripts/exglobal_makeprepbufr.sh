@@ -553,7 +553,6 @@ fi  # end [ "$DO_QC" = 'YES' ]
 ## create combined ocean data dump file expected by NSST
 if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
    > nsstbufr
-   chmod 664 nsstbufr
 
    DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
 
@@ -583,17 +582,14 @@ if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
    chmod 664 $COMOUT/${RUN}.${cycle}.nsstbufr
 
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
-      chgrp rstprod nsstbufr
       chgrp rstprod $COMOUT/${RUN}.${cycle}.nsstbufr
       err_ch=$?
       if [ $err_ch -eq 0 ]; then
-	 chmod 640 nsstbufr
          chmod 640 $COMOUT/${RUN}.${cycle}.nsstbufr
 	 msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
 rstprod group have read permission"
          $DATA/postmsg "$jlogfile" "$msg"
       else
-         cp /dev/null nsstbufr
 	 cp /dev/null $COMOUT/${RUN}.${cycle}.nsstbufr
 	 warning=yes
       fi
