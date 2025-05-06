@@ -566,7 +566,7 @@ if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
       DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
 
       echo "xglm: DTYPS_nsst='$DTYPS_nsst'"
-    
+
       for type in $DTYPS_nsst ; do
          if [ -f ${tstsp}$type.$tmmark.bufr_d ]; then
             file=${tstsp}$type.$tmmark.bufr_d
@@ -588,9 +588,11 @@ if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
       done # for type in $DTYPS_nsst
 
       chmod 640 nsstbufr
-      msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
+      if [ "$CHGRP_RSTPROD" = 'YES' ]; then
+         msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
 rstprod group have read permission"
-      $DATA/postmsg "$jlogfile" "$msg"
+         $DATA/postmsg "$jlogfile" "$msg"
+      fi
    else
       warning=yes
    fi # [ $err_ch -eq 0 ]
