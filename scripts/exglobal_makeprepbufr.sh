@@ -553,8 +553,14 @@ fi  # end [ "$DO_QC" = 'YES' ]
 ## create combined ocean data dump file expected by NSST
 if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
    > nsstbufr
-   chgrp rstprod nsstbufr
-   err_ch=$?
+   chmod 664 nsstbufr
+   
+   err_ch=0 # allowing nsstbufr file be created on machines that do not support rstprod
+   if [ "$CHGRP_RSTPROD" = 'YES' ]; then
+      chgrp rstprod nsstbufr
+      err_ch=$?
+   fi
+
    if [ $err_ch -eq 0 ]; then
 
       DTYPS_nsst='sfcshp tesac bathy trkob subpfl saldrn'
@@ -571,26 +577,28 @@ if [[ "$MAKE_NSSTBUFR" == 'YES' ]]; then
          if [ -s $file ]; then
               cat $file >> nsstbufr
               err_cat=$?
-            if [ $err_cat -ne 0 ]; then
+           if [ $err_cat -ne 0 ]; then
               msg="**WARNING: exit status $err_cat from cat of $file to nsstbufr"
               $DATA/postmsg "$jlogfile" "$msg"
-            fi
+           fi
          else
             echo $file is empty or does not exist
          fi # [ -s $file ]
 
-      done # for type in $DTYPS_nsst 
+      done # for type in $DTYPS_nsst
 
-      cp nsstbufr $COMOUT/${RUN}.${cycle}.nsstbufr
-      chgrp rstprod $COMOUT/${RUN}.${cycle}.nsstbufr
-      chmod 640 $COMOUT/${RUN}.${cycle}.nsstbufr
-      msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
+      chmod 640 nsstbufr
+      if [ "$CHGRP_RSTPROD" = 'YES' ]; then
+         msg="NOTE: nsstbufr file contains RESTRICTED data, only users in \
 rstprod group have read permission"
-      $DATA/postmsg "$jlogfile" "$msg"
+         $DATA/postmsg "$jlogfile" "$msg"
+      fi
    else
-      cp /dev/null $COMOUT/${RUN}.${cycle}.nsstbufr
       warning=yes
-   fi # if [ $err_ch -eq 0 ]
+   fi # [ $err_ch -eq 0 ]
+   
+   cp -p nsstbufr $COMOUT/${RUN}.${cycle}.nsstbufr
+
 fi # if [[ "$MAKE_NSSTBUFR" == 'YES' ]]
 
 if [ "$warning" = 'yes' ]; then
