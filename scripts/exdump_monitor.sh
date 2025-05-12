@@ -1008,14 +1008,14 @@ export STATUS=NO
 export DUMP_NUMBER=10
 
 #===================================================================
-# Dump # 10: UPRAIR
+# Dump # 10: UPRAIR SALDRN SOFARW
 #             (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 1
+#            -- TOTAL NUMBER OF SUBTYPES = 3
 #===================================================================
 DTIM_latest_uprair=+0.49
 DTIM_earliest_uprair=-0.49
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair saldrn
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair saldrn sofarw
 error10=$?
 echo "$error10" > $DATA/error10
 

@@ -59,6 +59,7 @@ echo "         Oct 11 2023 - Split msonet to msonet and msone1, msone1=255.030 "
 echo "                       concatenate msonet and msone1 right after dump    "
 echo "                     - Pull adpupa and uprair into own Dump group        "
 echo "         Mar 14 2024 - Split gsrasr and gsrcsr to own dump hroups        "
+echo "         Feb 18 2025 - Split gpsipw to own dump group                    "
 ################################################################################
 
 set -xau
@@ -76,17 +77,18 @@ set +u
 # Dump group #2 (pb) = vadwnd satwnd
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 #                          subpfl saldrn
-# Dump group #4 (pb) = msonet->msone0 (gpsipw to #6) 
+# Dump group #4 (pb) = msonet->msone0 (gpsipw to #13) 
 # Dump group #5 (pb) = aircft aircar
-# Dump group #6 (non-pb) = nexrad gpsipw
+# Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
 #                          saphir gmi1cr
-# Dump group #8 (non-pb) = gsrasr [gsrcsr]
+# Dump group #8 (non-pb) = gsrasr (gsrcsr to #12)
 # Dump group #9 (non-pb) = lghtng + adpupa
 # Dump group #10(pb) = msone1 # ONLY tank b255/xx030, the largest
 # Dump group #11(pb) = adpupa uprair - adpupa
 # Dump group #12 (non-pb)= gsrcsr
-# Dump group #13 STATUS FILE
+# Dump group #13 (pb) = gpsipw
+# Dump group #14 STATUS FILE
 # ------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -116,6 +118,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"YES"}
+      DUMP_group13=${DUMP_group13:-"YES"}
    else
       dump_ind=DUMP
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -130,6 +133,7 @@ set -u
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"NO"}
+      DUMP_group13=${DUMP_group13:-"NO"}
    fi
 else
    dump_ind=DUMP
@@ -145,6 +149,7 @@ else
    DUMP_group10=${DUMP_group10:-"YES"}
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
+   DUMP_group13=${DUMP_group13:-"YES"}
 fi
 
 # Oct 2019; disable -- not needed for HRRRv4
@@ -247,6 +252,7 @@ echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
 echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
+echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
 err1=0
 err2=0
 err3=0
@@ -259,6 +265,7 @@ err9=0
 err10=0
 err11=0
 err12=0
+err13=0
 
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1 
@@ -696,7 +703,7 @@ export STATUS=NO
 export DUMP_NUMBER=4
 
 #============================================================================
-# Dump # 4 : MSONET, GPSIPW(moved to Dump#?) -- TOTAL NUMBER OF SUBTYPES = 31
+# Dump # 4 : MSONET, GPSIPW(moved to Dump#13) -- TOTAL NUMBER OF SUBTYPES = 31
 #             (30)     (1)
 #============================================================================
 
@@ -838,50 +845,6 @@ export DUMP_NUMBER=6
 export LALO=0  # GLOBAL dumps here (NEXRAD dumped globally to allow job to run
                # much quicker w/o the need for geographical filtering (all
                # radar reports are over CONUS anyway)
-
-# gpsipw
-if [ "$RUN" = 'rap_p' ]; then
-
-#  ===> For RUN = rap_p -- partial cycle runs
-#         -------------------------------------
-   
-   if [ $cyc -ne 08 -a $cyc -ne 20 ]; then
-
-# Time window -0.05 to +0.05 hours (-3 to +3 min) for GPSIPW at all cycles
-#   except 08 and 20z
-
-     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.05"}
-     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
-
-   else
-
-# Time window -0.55 to -0.45 hours (-33 to -27 min) for GPSIPW for 08 or 20z
-#  cycle
-
-     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.55"}
-     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.45"}
-
-   fi
-
-else
-
-#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
-#       -------------------------------------------------------------------
-
-# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
-
-     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
-     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
-                                           
-fi
-
-#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
-#         providers) is currently limited to obs closest to cycle-time that
-#         result in a U.S.-ENI dump count that is not too much larger than that
-#         from the previous U.S. (only) GSD-feed, since the ENI reports are
-#         available every 5 min while the GSD reports were available only every
-#         30 min. Also accounts for an approximate 80-min latency present in
-#         the U.S.-ENI reports.}
 
 def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
 
@@ -1063,7 +1026,7 @@ elif [ $cyc -eq 23 ]; then   # (22.50 - 23.49 Z)
 ###unset SKIP_006063 # reflectivity 23Z
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 nexrad gpsipw
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 nexrad
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -1523,6 +1486,91 @@ set -x
 EOF
 set -x
 
+set +x
+cat<<\EOF>thread_13; chmod +x thread_13
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=13
+
+#===========================================================================
+# Dump # 13 : GPSIPW -- TOTAL NUMBER OF SUBTYPES = 1
+#              (1)
+#===========================================================================
+
+def_time_window_13=0.5 # default time window for dump 13 is -0.5 to +0.5 hours
+
+# gpsipw
+if [ "$RUN" = 'rap_p' ]; then
+
+#  ===> For RUN = rap_p -- partial cycle runs
+#         -------------------------------------
+  
+  if [ $cyc -ne 08 -a $cyc -ne 20 ]; then
+
+# Time window -0.05 to +0.05 hours (-3 to +3 min) for GPSIPW at all cycles
+#   except 08 and 20z
+
+    DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.05"}
+    DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
+
+  else
+
+# Time window -0.55 to -0.45 hours (-33 to -27 min) for GPSIPW for 08 or 20z
+#  cycle
+
+     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.55"}
+     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.45"}
+
+  fi
+
+else
+
+#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
+#       -------------------------------------------------------------------
+
+# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
+
+   DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
+   DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
+                                                                                     
+fi
+
+#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
+#         providers) is currently limited to obs closest to cycle-time that
+#         result in a U.S.-ENI dump count that is not too much larger than that
+#         from the previous U.S. (only) GSD-feed, since the ENI reports are
+#         available every 5 min while the GSD reports were available only every
+#         30 min. Also accounts for an approximate 80-min latency present in
+#         the U.S.-ENI reports.}
+                                                                                     
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_13} 1 gpsipw
+error13=$?
+echo "$error13" > $DATA/error13
+
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/13.out 2>&1
+EOF
+set -x
 
 #----------------------------------------------------------------
 # Now launch the threads
@@ -1552,12 +1600,13 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group10 = YES ]  &&  echo ./thread_10 >> $DATA/poe.cmdfile
    #[ $DUMP_group11 = YES ]  &&  echo ./thread_11 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile 
+   [ $DUMP_group13 = YES ]  &&  echo ./thread_13 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
       #$launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      NPROCS=${NPROCS:-13}
+      NPROCS=${NPROCS:-14}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
@@ -1582,9 +1631,10 @@ else
       [ $DUMP_group10 = YES ]  &&  ./thread_10
       [ $DUMP_group11 = YES ]  &&  ./thread_11
       [ $DUMP_group12 = YES ]  &&  ./thread_12
+      [ $DUMP_group13 = YES ]  &&  ./thread_13
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
 
 set +x
 echo " "
@@ -1603,11 +1653,12 @@ set -x
 [ -s $DATA/error10 ] && err10=`cat $DATA/error10`
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
+[ -s $DATA/error13 ] && err13=`cat $DATA/error13`
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=13
+export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 #  endif loop $PROCESS_DUMP
@@ -1626,8 +1677,9 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-	"$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12
+	"$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
+       	"$err13" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1638,7 +1690,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1656,7 +1708,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
