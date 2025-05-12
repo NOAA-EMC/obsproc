@@ -85,7 +85,7 @@ set +u
 # Dump group #8 (non-pb) = gsrasr (gsrcsr to #12)
 # Dump group #9 (non-pb) = lghtng + adpupa
 # Dump group #10(pb) = msone1 # ONLY tank b255/xx030, the largest
-# Dump group #11(pb) = adpupa uprair - adpupa
+# Dump group #11(pb) = [adpupa to #9] uprair
 # Dump group #12 (non-pb)= gsrcsr
 # Dump group #13 (pb) = gpsipw
 # Dump group #14 STATUS FILE
