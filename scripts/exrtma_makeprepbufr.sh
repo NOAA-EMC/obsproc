@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 # Run under ksh
 
 #############################################################################
@@ -40,7 +40,7 @@ postmsg "$jlogfile" "$msg"
 
 #  Add variable cycM as 2nd argument below (may or may not be set)
 
-ksh $ushscript_prep/prepobs_makeprepbufr.sh $cdate10 $cycM
+sh $ushscript_prep/prepobs_makeprepbufr.sh $cdate10 $cycM
 errsc=$?
 
 [ "$errsc" -ne '0' ]  &&  exit $errsc

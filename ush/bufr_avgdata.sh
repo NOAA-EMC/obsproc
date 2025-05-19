@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 echo
 echo "-------------------------------------------------"
 echo "Datacount Averaging"             

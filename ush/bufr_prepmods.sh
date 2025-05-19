@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 # bufr_prepmods.sh - 30 Jan 2013
 #  trigger for multiday dumping of MODS data
 #

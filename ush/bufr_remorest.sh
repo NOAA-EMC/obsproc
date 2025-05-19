@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 # bufr_remorest.sh
 # 
 # modificaton history

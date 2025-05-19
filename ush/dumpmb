@@ -729,4 +729,4 @@ echo "dumpmb:            End time: `date`"
 echo 'dumpmb: ============================================================'
 
 exit $RC_MAX
-#---end of dumpmb.ksh
+#---end of dumpmb

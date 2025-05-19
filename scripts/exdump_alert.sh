@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 # exdump_alert.sh
 #
 # modification history

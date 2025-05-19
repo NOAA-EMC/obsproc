@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 #####################################################################
 echo "---------------------------------------------------------------------"
 echo "exairnow_dump.sh.ecf - Daily AIRNOW data dump and PREPBUFR processing"
