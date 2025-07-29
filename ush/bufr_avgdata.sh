@@ -37,12 +37,12 @@ set -aux
 #   NDATE  - pointer to ndate executable (typically set via prod_util module)
 #
 # Imported Variables that must be passed in under certain conditions:
-#   EXECobsproc
-#               - formerly EXECobsproc_shared_bufr_avgdata prior to WCOSS2
-#               - path to obsproc executable directory containing bufr_avgdata
+#   EXECobscore
+#               - formerly EXECobscore_shared_bufr_avgdata prior to WCOSS2
+#               - path to obscore executable directory containing bufr_avgdata
 #                 (invoked only if $AVGX is not imported)
 #   FIXbufr_dump_
-#               - formerly FIXobsproc_shared_bufr_dumplist prior to WCOSS2
+#               - formerly FIXobscore_shared_bufr_dumplist prior to WCOSS2
 #               - path to bufr_dump fix directory containing the
 #                 bufr_dumplist file
 #                 (invoked only if $DUMPLIST is not imported)
@@ -84,7 +84,7 @@ set -aux
 #   DUMPLIST   - path to the bufr_dumplist file
 #                (Default: $FIXbufr_dump/bufr_dumplist)
 #   AVGX       - path to bufr_avgdata executable
-#                (Default: $EXECobsproc/bufr_avgdata)
+#                (Default: $EXECobscore/bufr_avgdata)
 
 err=0
 net=$1
@@ -116,7 +116,7 @@ if [ $net = gfs -o $net = gdas ]; then
   comin_m1_nocyc=$(dirname $comin_m1_noatmos)
 fi
 DUMPLIST=${DUMPLIST:-$FIXbufr_dump/bufr_dumplist}
-AVGX=${AVGX:-$EXECobsproc/bufr_avgdata}
+AVGX=${AVGX:-$EXECobscore/bufr_avgdata}
 jlogfile=${jlogfile:=""}
 
 if [ $COPY = YES ]; then

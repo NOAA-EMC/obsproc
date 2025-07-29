@@ -1,26 +1,16 @@
-obsproc v1.3.0  RELEASED        OCT 04, 2024
-        v1.3.?  IMPLEMENTED     ??? ??, 2024
+obsproc v1.2.6  RELEASED        JUN 18, 2025
+        v1.2.6  IMPLEMENTED     AUG 11, 2025(tbc)
 
 PRELUDE
+ TANK_MAX_255004 was increased via a setting in run.ver in v1.2.2. This upgrade (v1.2.6) i)increases the default TANK_MAX_255004 value in the scripts that set this variable; ii)removes the variable from run.ver;
+ Add sofarw, sfcsno, snomad, gsbpfl, axbt, xbtctd, altkob dump files to the global networks; Save NIC.IMS* ascii file as *imssno*
+ Removes i)the INSAT satellite winds from *satwnd* bufr dumps; ii)CONUS satellite winds from *satwhr* bufr dumps;
 
- This update adds *saldrn* obs to prepbufr's SFCSHP component; report type 560 for kx=180,280
- IMPORTANT NOTE: 
- GSI needs to be updated (contact Andrew.Collard@noaa.gov) at the same time or shortly after 
- to add control on saildrone use in DA (switch on/off via subtype 02 for kx=180,280 in global_convinfo.txt)
- Without it the saildrone data will allways feed into GSI DA.
-
- Increase TANK_MAX_255004 to alow processing of larget mesonet tanks
- Restrict the SOFAR dump files.
- Reengineer the generation of satwnd and msonet (see satwn* and msone*)
- 
 FILE CHANGES
-
+ 
 M docs/Release_Notes.txt
-M jobs/JOBSPROC_URMA_PREP
-M jobs/JOBSPROC_GLOBAL_PREP
 M jobs/JOBSPROC_NAM_PREP_POST
-M parm/prepobs_prepdata.gdas.parm
-M parm/prepobs_prepdata.gfs.parm
+M jobs/JOBSPROC_URMA_PREP
 M scripts/excdas_dump.sh
 M scripts/excdas_makeprepbufr.sh
 M scripts/exdump_monitor.sh
@@ -32,7 +22,6 @@ M scripts/exrtma_dump.sh
 M scripts/exurma_dump.sh
 M sorc/bufr_prepmods.fd/bufr_prepmods.f
 M sorc/bufr_prepmods.fd/mbuoyb.f
-M ush/build.sh
 M versions/run.ver
 M versions/VERSION
 (M-modified; A-added; D-deleted)
@@ -40,85 +29,93 @@ M versions/VERSION
 DOCS CHANGES
  docs/Release_Notes.txt
  Reflect this release changes.
-
+ 
 JOBS CHANGES
- jobs/JOBSPROC_URMA_PREP
- Turn off GLERL Great Lakes pseudo obs for URMA's prepbufr
-
- jobs/JOBSPROC_GLOBAL_PREP
- Add saldrn to prepbufr list
-
  jobs/JOBSPROC_NAM_PREP_POST
  Replaced obssolete $utilscript with $UTILROOT
 
-PARM CHANGES
- parm/prepobs_prepdata.gdas.parm
- parm/prepobs_prepdata.gfs.parm
- Update the global parm cards to accomodate the saildrone obs in prepbufr
+ jobs/JOBSPROC_URMA_PREP
+ Added the date MDL requested GLERLBUFR to be turned off
 
 SCRIPTS CHANGES
-
  scripts/excdas_dump.sh
- Split satwnd processing to satwn0, satwn1, and satwn2, and concatenae into satwnd on $COMROOT
+ Corrected msonet to msone0, updated max tank threshold, corrected msonet concatenation
 
  scripts/excdas_makeprepbufr.sh
- Commented our lines 506-523, to skip obsolete copy to $LSB_OUTPUTFILE
+ Commented out lines 506-523, to skip obsolete copy to $LSB_OUTPUTFILE. Block starts with:
+ #if [ "$SENDCOM" = 'YES' -a "$COPY_TO_ARKV" = 'YES' ]; then
 
  scripts/exdump_monitor.sh
- Remove Indian AMV tanks for faster satwnd processing, i.e.  00502*
- Intrpduced saldrn tank to monitoring
+ Remove Indian AMV tanks for faster satwnd processing, i.e. 00502*
+ Introduced saldrn, sofarw, gsbpfl obs to monitoring
+ Changed "msonet" to "msone0"; Increased default TANK_MAX_255004 from 1.5Gb to 2.5Gb
+
+ scripts/exdump_post.sh
+ Add sfcsno to list of types that can be modified to be unrestricted and then alerted
 
  scripts/exglobal_dump.sh
- Remove Indian AMV tanks for faster satwnd processing, i.e.  00502*; Split satwnd processing to satwn0, satwn1, and satwn2;
- Concat satwn0, satwn1, and satwn2 into satwnd and then dbnet alert it.
- Add sfcsno, snomad and sofarw dump groups; 
- Save NIC.IMS* ascii file as imssno*, Copy and rename  557th/USAF snow AN to COMROOT as *snow.usaf.grib2
+ Remove Indian AMV tanks (unused) from satwnd for faster processing, i.e. 00502* 
+ Remove CONUS AMV tanks (unused) from satwhr for faster processing, i.e. 00505*
+ Turn off MESH16 snow copy. Improve rename/copy of USAF 557th snow analysis
+ Add sfcsno, snomad, sofarw, gsbpfl, axbt, xbtctd, altkob dump groups; Save NIC.IMS* ascii file as imssno*
+ Modify thread order in poe.cmdfile to avoid busy thread_1 (sstvcw and more) and thread_8 (satwnd) landing on same node
+ Correct syntax error in check of dump error variables 
+
+ scripts/exnam_dump.sh
+ Corrected mesonet to msone0, corrected msonet concatenation, corrected syntax error in check of dump error variables
 
  scripts/exrap_dump.sh
  Commented out line 487 which is comment text
- 
+ Corrected mesonet to msone0, corrected msonet concatenation; put gpsipw in separate dump group (so it's send to $COMROOT)
+ Increased default TANK_MAX_255004 from 1.5Gb to 2.5Gb
+
  scripts/exrtma_dump.sh
- Split satwnd processing to satwnd, satwn1, and satwn2
+ Corrected mesonet to msone0, corrected msonet concatenation, updated max tank threshold
+ Increased default TANK_MAX_255004 from 1.5 Gb to 2.5Gb
 
  scripts/exurma_dump.sh
- Split satwnd processing to satwnd, satwn1, and satwn2
+ Corrected mesonet to msone0, corrected msonet concatenation, updated max tank threshold
+ Increased default TANK_MAX_255004 from 1.5 Gb to 2.5Gb
 
 SORC CHANGES
  sorc/bufr_prepmods.fd/bufr_prepmods.f
- Change array sizes for CFS (Jack Woolen)
+ Increased MAXOUT from 15000 to 50000 for CFS (Jack Woolen)
 
  sorc/bufr_prepmods.fd/mbuoyb.f
  Change array sizes for CFS (Jack Woolen)
 
 VERSIONS CHANGES
  versions/run.ver
- Set bufr_dump_ver=1.3.0 and prepbufr_ver=1.3.0
+ Set bufr_dump_ver=1.3.0 and prepbufr_ver=1.1.2
+ Removed TANK_MAX_255004 value setup
 
  versions/VERSION
- Updated version to 1.3.0
+ Updated version to 1.2.6
 
 ECF
  Contents of ECF directory are not in GitHub
 
 CHANGES TO OUTPUT AND FILE SIZES
-
  Generate new dumps:
- sfcsno (30MB), snomad(2MB) (gdas,gfs) 
- sofarw (gdas,gfs,rtma,urma)
+ sfcsno(17-30Mb),snomad(1-2Mb),sofarw(300-500Kb),gsbpfl(200-900KB),imssnow96.asc(37Mb) 
+ Turn off MESH16 snow copy. Improve rename/copy of USAF 557th snow analysis;
+ satwnd dump sizes will drop insignificantly; satwhr dump sizes will grow by 50% when tropical cyclon is present in the Pacific ocean
+ snocvr dump sizes will be approxiamtely halved due to a bufr_dumplist fix (removed a duplicate entry)
 
- Update *prepbufr*  dumps (gdas, gfs), filesize up y up to 10%
+ The following files are no longer created:
+  *NPR.SNWS.SP.S1200.MESH16.grb for gfs and gdas
+  *msone1.tm??.bufr_d files for nam, rap, rap_e, rap_p, rtma, rtma_ru and urma 
 
 CHANGES TO RESOURCES
- 
  Note expecting increase in walltime; more  CPUs will be needed in the PBS cards for the following JOBSPROC_*_DUMP jobs:
- JOBSPROC_GLOBAL_DUMP - 16 CPUs
- JOBSPROC_CDAS_DUMP   - 13 
- JOBSPROC_NAM_DUMP    - 12
- JOBSPROC_RAP_DUMP    - 13
- JOBSPROC_RTMA_DUMP   - 6
- JOBSPROC_URMA_DUMP   - 7
- JOBSPROC_DUMP_MONITOR- 10
- 
+ JOBSPROC_GLOBAL_DUMP - 32 CPUs (see in ecf: #PBS -l place=vscatter:exclhost,select=2:ncpus=32:mem=500gb)
+ JOBSPROC_CDAS_DUMP   - 10
+ JOBSPROC_NAM_DUMP/DUMP2 - 11/3
+ JOBSPROC_RAP_DUMP    - 12
+ JOBSPROC_RTMA_DUMP   - 5
+ JOBSPROC_URMA_DUMP   - 6
+ JOBSPROC_DUMP_MONITOR- 15
+
 PRE-IMPLEMENTATION TESTING REQUIREMENTS
 
  obsproc needs modules bufr-dump and prepobs in order to run
@@ -129,12 +126,12 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
  for the following networkname values: GLOBAL, NAM, RAP, URMA, RTMA, CDAS
 
  Parallel Production Testing (PPT)
- After testing obsproc v1.3 in the /para space, we recommend doing for at least two weeks,
+ After testing obsproc v1.2.6 in the /para space, we recommend doing for at least two weeks,
  it is best to do a single cycle Parallel Production Testing (PPT) (i.e. obsproc + GFS + SDM/thanks + EVS).
  Copy the following directoris:
  $model.YYYYMMDD, where model: gfs,gdas,nam,rap,rap_e,rap_p,urma,cdas,rtma,rtma_ru,dump
  $model.YYYYMM,   where model: cdas
- $model.YYYY,     where model:mods
+ $model.YYYY,     where model: mods
  $model,          where:gdas, sdm_rtdm
  from the para run:
  /para/com/obsproc/v1.2/
@@ -144,26 +141,149 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
  Good to know:
  - the RAP uprair dumps might be 0 size for the hours not around 00,06,12,18 UTC
  - the CDAS prepbufr files are 6 different flavours, it takes about 26 hours for all to be generated
- - some *bufr_d files might be 0 size until the relevant data stream is recovered (wndtwr)
+ - some *bufr_d files might be 0 size until the relevant data stream is recovered (e.g. sofarw, saldrn)
  - please contact obsproc_support@noaa.gov should you have any Qs regarding testing
 
 DISSEMINATION INFORMATION
 
-  For the GLERL URMA prepbufr and saldrn GDAS/GFS prepbufr changes, a SCN will be issued/submitted to Data Flow
+  A 30 day SCN was issued
 
 SPECIAL INSTRUCTIONS
 
- 1.Implement release/obsproc.v1.3.0, release/bufr-dump.v1.3.0, and release/prepobs.v1.2.0 at the same time
+ 1.Implement release/bufr-dump.v1.3.0, and release/prepobs.v1.1.2 at the same time or before obsproc.v1.2.6
 
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-obsproc v1.2.0  RELEASED        AUG ??,2023
-        v1.2.0  IMPLEMENTED     MAY 22,2024
-        v1.2.1                  SEP 05,2024 (b/c of bufr-dump.v1.2.1)
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.2.5  SPA Update to reduce gfs/gdas dump runtime and runtime variability
+        v1.2.5  IMPLEMENTED     MAY 05, 2025
 
 FILE CHANGES
+ M ecf/global/dump/jobsproc_global_atmos_dump.ecf
+ M ecf/global/dump/jobsproc_gfs_atmos_dump.ecf
+ M ecf/global/dump/jobsproc_gdas_atmos_dump.ecf
+ M scripts/exglobal_dump.sh
+
+ECF CHANGES
+ jobsproc_global_atmos_dump.ecf, jobsproc_gfs_atmos_dump.ecf, jobsproc_gdas_atmos_dump.ecf
+ Specify exclhost; Increase node count from 1 to 2; Increase ncpus per chunk from 14 to 32 
+
+SCRIPTS CHANGES
+ scripts/exglobal_dump.sh
+ Reduce NAP (sleep) times by 480 seconds
+
+VERSIONS CHANGES
+ versions/VERSION
+ Updated version to 1.2.5
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.2.4  RELEASED        MAR 12,2025
+        v1.2.4  IMPLEMENTED     MAR 24,2025
+
+PRELUDE
+ Obsproc v.1.2.4 implements two changes. 
+ 1) URMA is modified to not include the GLERL observation adjustment step for URMA prepbufr.
+ 2) Global scripts have been modified to include USAF snow grib2 files  
+
+FILE CHANGES
+ M docs/Release_Notes.txt
+ M jobs/JOBSPROC_URMA_PREP
+ M scripts/exglobal_dump.sh
+ M versions/VERSION
+
+DOCS CHANGES
+ docs/Release_Notes.txt
+ Updates release notes for obsproc v1.2.4 as seen here.
+
+JOBS CHANGES
+ jobs/JOBSPROC_URMA_PREP
+ Disable the GLERL observation adjustment step for URMA prepbufr.
+
+SCRIPTS CHANGES
+ scripts/exglobal_dump.sh
+ Modify to include snow.usaf.grib2 files.
+
+VERSIONS CHANGES
+ versions/VERSION
+ Updated version to 1.2.4
+
+ECF
+ Contents of ECF directory are not in EMC repo.
+ Use $PACKAGEROOT/osbproc.v1.2.3/ecf as a starting poing and work with developers pre-implemenation to refine/update the /ecf files
+
+CHANGES TO OUTPUT AND FILE SIZES
+ Generate new snow file: [gdas,gfs].t${CC}z.snow.usaf.grib2
+ Updated URMA prepbufr will be slightly smaller than now. 
+
+CHANGES TO RESOURCES
+ None
+
+PRE-IMPLEMENTATION TESTING REQUIREMENTS
+ obsproc needs modules bufr-dump and prepobs in order to run
+ See docs/README.md for build instructions
+  See versions/build.ver and versions/run.ver for libaries
+  See previous Release Noted for generaic pre-implemenation testing steps.
+
+DISSEMINATION INFORMATION
+  For the URMA prepbufr on NOMAD changes, a SCN will be issued
+
+SPECIAL INSTRUCTIONS
+
+ Implement release/obsproc.v1.2.4 with the latest release/bufr-dump.v1.2.* and release/prepobs.v1.1.1
 
 
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+obsproc v1.2.3  RELEASED        MAR 05,2025
+        v1.2.3  IMPLEMENTED     MAR 05,2025
+
+PRELUDE
+ Prepobs was updated to reflect EO to rename Gulf of Mexico
+ Obsproc is just increasing a version number
+
+FILE CHANGES
+ M docs/Release_Notes.txt
+ M versions/run.ver
+ M versions/VERSION
+
+VERSIONS CHANGES
+
+ versions/run.ver
+ Point at prepobs.v1.1.1
+
+ versions/VERSION
+ Updated version to 1.2.3
+
+PRE-IMPLEMENTATION TESTING
+ Output shoudl be identical, changes are in print statements only
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.2.2  RELEASED        JAN 22,2025
+        v1.2.?  IMPLEMENTED     JAN ??,2025
+
+PRELUDE
+ Emergency update TANK_MAX_255004 value
+
+FILE CHANGES
+ M docs/Release_Notes.txt
+ M versions/run.ver
+ M versions/VERSION
+
+VERSIONS CHANGES
+
+ versions/run.ver
+ Export and overwrite TANK_MAX_255004
+
+ versions/VERSION
+ Updated version to 1.2.2
+
+PRE-IMPLEMENTATION TESTING
+
+ Updating the versions/run.ver will overwrite the TANK_MAX_255004 threshold and allow larger tanks to be processed.
+ The threshold is updated only slightly so that it won't increase the job runtime. 
+ 
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.2.0  RELEASED        AUG ??,2023
+        v1.2.1  IMPLEMENTED     MAY 22,2024
+
+FILE CHANGES
 D docs/ReleaseNotes.txt
 M docs/Release_Notes.txt
 M jobs/JOBSPROC_CDAS_PREP1

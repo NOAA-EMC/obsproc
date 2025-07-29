@@ -61,25 +61,25 @@ set -aux
 #   SENDSDM     - email files to SDM 
 #
 # Imported Variables that must be passed in under certain conditions:
-#   EXECobsproc
-#               - formerly EXECobsproc_dump_post prior to WCOSS2.  Path to
-#                 obsproc executable directory containing bufr_datacount.
+#   EXECobscore
+#               - formerly EXECobscore_dump_post prior to WCOSS2.  Path to
+#                 obscore executable directory containing bufr_datacount.
 #                 (invoked only if $DTCX is not imported)
 #   FIXbufr_dump
-#               - formerly FIXobsproc_shared_bufr_dumplist prior to WCOSS2
-#               - path to obsproc fix directory containing the
+#               - formerly FIXobscore_shared_bufr_dumplist prior to WCOSS2
+#               - path to obscore fix directory containing the
 #                 bufr_dumplist file
 #                 (invoked only if $LIST_CNT is not imported)
 #
 # Imported variables that can be passed in:
 #   DTCX        - path to bufr_datacount executable
-#                  (defaults to $EXECobsproc/bufr_datacount if not passed in)
+#                  (defaults to $EXECobscore/bufr_datacount if not passed in)
 #   LIST_CNT    - path to the bufr_dumplist file
 #                  (defaults to $FIXbufr_dump/bufr_dumplist
 #                   if not passed in)
 
 
-DTCX=${DTCX:-$EXECobsproc/bufr_datacount}
+DTCX=${DTCX:-$EXECobscore/bufr_datacount}
 LIST_CNT=${LIST_CNT:-$FIXbufr_dump/bufr_dumplist}
 
 cd $DATA

@@ -126,9 +126,9 @@
    KTOP      = 20*23,                    ! TOVS sndg
                60*0,                     ! GOES sndg
 
-   npkrpt    = 13*FALSE,
+   npkrpt    = 12*FALSE,
    JSURFM(3) = 9999, JSURFM(7) = 9999, JSURFM(10) = 9999,
-   JSURFW    = 0,0,9999,0,9999,0,9999,0,0,9999,0,0,0,
+   JSURFW    = 0,0,9999,0,9999,0,9999,0,0,9999,0,0,
    PFRALT    = TRUE,
    JPSSMI    =  6*9999, 6*9999, 6*9999, 6*9999,
    JPERSD    =  6*9999,

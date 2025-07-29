@@ -1,5 +1,5 @@
 
-  Cards for CDAS Version of PREPSSMI
+  Cards for GDAS/CORE Version of PREPSSMI
 
   Note: "IVAR" below must be on a line all to itself, and it must not be
         split across 2 lines (this is because the script may replace it

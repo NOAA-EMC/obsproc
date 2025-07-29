@@ -1,7 +1,7 @@
 #!/bin/ksh
 #####################################################################
 echo "----------------------------------------------------------"
-echo "exdump_post.sh version $obsproc_ver - If requested:       "
+echo "exdump_post.sh version $obscore_ver - If requested:       "
 echo "       1) Generates combined dump STATUS file             "
 echo "       2) Prepares data counts for the SDM                "
 echo "       3) Removes or masks restricted data from today's   "
@@ -204,7 +204,7 @@ fi
 #                  Prepare Data Counts for the SDM                     #
 ########################################################################
 
-[ "$PROCESS_DATACOUNTS" = 'YES' ]  &&  $USHobsproc/bufr_datacount.sh
+[ "$PROCESS_DATACOUNTS" = 'YES' ]  &&  $USHobscore/bufr_datacount.sh
 
 
 
@@ -331,17 +331,17 @@ cat <<\EOFparm > bufr_remorest.datadump.parm
 =========================================================================
 EOFparm
 
-   REMX=${REMX:-$EXECobsproc/bufr_remorest}
+   REMX=${REMX:-$EXECobscore/bufr_remorest}
    REMC=${REMC:-bufr_remorest.datadump.parm}
 
-   for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro
+   for file in adpsfc aircar aircft msonet sfcshp lghtng gpsipw saphir gpsro sfcsno
    do
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
 
       cp $COMIN/$filestem $filestem
 
-      $USHobsproc/bufr_remorest.sh $filestem
+      $USHobscore/bufr_remorest.sh $filestem
       rc=$?
       if [ $rc -gt 0 ] ; then
          [ $rc -gt $retcode ]  && retcode=$rc
@@ -355,7 +355,7 @@ EOFparm
          chmod 664 $COMOUT/$filestem.nr
 	 if [ "$SENDDBN" = "YES" ] ; then
            NETUP=`echo $RUN | tr {a-z} {A-Z}`
-           if  [[ $NETUP != 'GDAS' ]] || [[ $file != "saphir" ]]; then    ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr 
+           if  [[ $NETUP != 'CORE' ]] || [[ $file != "saphir" ]]; then    ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr 
              if [[ $NETUP != 'CDAS' ]] || [[ $file != "gpsro" ]]; then    ### no alert cdas.tCCz.gpsro.tm00.bufr_d.nr
                if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then   ### no alert rap.tCCz.gpsro.tm00.bufr_d.nr
                    $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
@@ -445,7 +445,7 @@ cat <<\EOF_EXPRSRDparm > bufr_remorest.datadump_EXPRSRD.parm
 =========================================================================
 EOF_EXPRSRDparm
 
-   REMX=${REMX:-$EXECobsproc_shared_bufr_remorest/bufr_remorest}
+   REMX=${REMX:-$EXECobscore_shared_bufr_remorest/bufr_remorest}
    REMC=${REMC_EXPRSRD:-bufr_remorest.datadump_EXPRSRD.parm}
 
    for file in aircar aircft
@@ -455,7 +455,7 @@ EOF_EXPRSRDparm
 
       cp $COMINm2/$filestem $filestem
 
-      $USHobsproc/bufr_remorest.sh $filestem
+      $USHobscore/bufr_remorest.sh $filestem
       rc=$?
       if [ $rc -gt 0 ] ; then
          [ $rc -gt $retcode ]  && retcode=$rc
@@ -621,7 +621,7 @@ $dumptime"
    $DATA/postmsg "$jlogfile" "$msg"
 
    retr=TRUE
-   [ "$NET" = 'gfs' -o "$NET" = 'gdas' ]  &&  retr=FALSE
+   [ "$NET" = 'gfs' -o "$NET" = 'gdas' -o "$NET" = 'core' ]  &&  retr=FALSE
    radn=TRUE
    [ "$NET" = 'rap' ]  &&  radn=FALSE
 
@@ -733,7 +733,7 @@ EOFthread
 #                    List BUFR Data Dump Files                         #
 ########################################################################
 
-   LSTX=${LSTX:-$EXECobsproc/bufr_listdumps}
+   LSTX=${LSTX:-$EXECobscore/bufr_listdumps}
 
    for file in msonet satwnd goesfv aircar ascatw adpsfc gpsipw sfcshp \
                aircft adpupa proflr vadwnd rassda goesnd wdsatr spssmi \
@@ -813,7 +813,7 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
 #    Update Data Count Average Tables for urma Network                 #
 ########################################################################
 
-   if [ "$NET" = 'gdas' -o "$NET" = 'gfs' -o "$NET" = 'nam' ]; then
+   if [ "$NET" = 'gdas' -o "$NET" = 'core' -o "$NET" = 'gfs' -o "$NET" = 'nam' ]; then
       networks=$NET
    elif [ "$NET" = 'rap' -a "$RUN" = 'rap' ]; then
       networks=rap
@@ -829,7 +829,7 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
    do
       network_uc=$(echo $network | tr [a-z] [A-Z])
 
-      $USHobsproc/bufr_avgdata.sh $network
+      $USHobscore/bufr_avgdata.sh $network
       errsc=$?
       if [ $UPDATE_AVERAGE_FILE = YES ]; then
       if [ "$errsc" -eq '0' ]; then
@@ -848,7 +848,7 @@ network"
             last_month=12
             year=`expr $year - 1`
          fi
-         if [ "$network" = 'nam' -o "$network" = 'gfs' -o "$network" = 'gdas' ]
+         if [ "$network" = 'nam' -o "$network" = 'gfs' -o "$network" = 'gdas' -o "$network" = 'core' ]
          then
         if [ ! -s $AVGDarch_OUT/obcount_30davg.${network}.${year}${last_month} ]
             then
@@ -889,7 +889,6 @@ echo " ****** PROCESSING COMPLETED NORMALLY"
 echo " ****** PROCESSING COMPLETED NORMALLY"
 echo " "
 set -x
-
 
 # save standard output
 
