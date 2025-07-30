@@ -1,11 +1,11 @@
 #!/bin/sh  
-#PBS -N obsproc_%JTYP%_dump_post_%PDY%_%CC%_%DESC%
+#PBS -N obscore_%JTYP%_dump_post_%PDY%_%CC%_%DESC%
 #PBS -j oe
 #PBS -S /bin/bash
 #PBS -q dev
 #PBS -l walltime=00:15:00
 #PBS -A OBSPROC-DEV
-#PBS -l place=vscatter,select=1:ncpus=3:mem=4gb
+#PBS -l place=vscatter,select=1:ncpus=14:mem=4gb
 #PBS -l debug=true
 
 
@@ -14,10 +14,10 @@
 # Run from [ps]tmp when running manually
 # When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/cycqsub /path/to/triggers/jglobal_dump_post.wc2.pbs
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun /u/iliana.genkova/cycqsub /path/to/triggers/jglobal_dump_post.wc2.pbs
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 desc=somethingfun /u/Shelley.Melchior/cycqsub /path/to/triggers/jglobal_*.wc2.lsf
-# cycqsub location: /u/Shelley.Melchior/bin
+# > jtyp=gdas cyc=00 desc=somethingfun /u/iliana.genkova/cycqsub /path/to/triggers/jglobal_*.wc2.lsf
+# cycqsub location: /u/iliana.genkova/bin
 #####################################################################
 
 set -xu
@@ -33,16 +33,16 @@ PDYm1=$(date -d "${PDY} 1 day ago" +%Y%m%d)
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsNET=obsproc
-export obsproc_ver=v1.0
-export obsproc_ver_pckg=v1.0.0 
-export bufr_dump_ver=1.0.0
+export obsNET=obscore
+export obscore_ver=v1.3.0
+export obscore_ver_pckg=v1.3.0
+#export bufr_dump_ver=1.0.0
 
-#export HOMEobsproc=${PACKAGEROOTpara}/${obsNET}.${obsproc_ver_pckg}   # NCO para
-#export HOMEobsproc=${PACKAGEROOT}/${obsNET}.${obsproc_ver_pckg}      # NCO prod
-export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
+export HOMEobscore=${userROOT}/git/CORe/obscore
 
-VERSION_FILE=$HOMEobsproc/versions/run.ver 
+VERSION_FILE=$HOMEobscore/versions/run.ver                           # NCO para & prod
+#VERSION_FILE=${userROOT}/install/obsproc-rel.v1.0.0/versions/run.ver # SM local
+#VERSION_FILE=${userROOT}/GIT/obsproc/versions/run.ver                 # IG local
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
@@ -50,21 +50,30 @@ else
  exit 7
 fi
 
+export bufr_dump_ver=1.2.1
+
 # Load the modules specified in $VERSION_FILE
 module load grib_util/${grib_util_ver}
 module load netcdf/${netcdf_ver}
+# use para installation
+#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
+# use local installation
+#module use ${userROOT}/install/bufr-dump/modulefiles         # SM local
+#module use ${userROOT}/GIT/bufr-dump/install/modulefiles    # IG local
+#module load bufr_dump/${bufr_dump_ver}
 module load intel/${intel_ver}
 module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
-# use para installation
-#module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304 
-# use local bufr_dump installation
+
+# use local installation
 module unload bufr_dump
-#module use ${userROOT}/install/bufr_dump/modulefiles
-module use ${userROOT}/install/bufr-dump-rel.1.0.0/modulefiles
+#module use ${userROOT}/install/bufr-dump/modulefiles         # SM local
+#module use ${userROOT}/GIT/play/bufr-dump.13/install/modulefiles    # IG local
+module use ${userROOT}/git/CORe/bufr-dump.core/install/modulefiles
 module load bufr_dump/${bufr_dump_ver}
+
 
 # Be sure the modules are loaded 
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)prod_util/") -eq 0 ]]; then echo "prod_util is not loaded!"; fi
@@ -83,6 +92,7 @@ export SENDDBN=NO  # developer
 export SENDSDM=NO  # developer
 
 export TANK=$DCOMROOT
+#export TANK_002001=/lfs/h1/ops/dev/dcom/ # dev tank 002/001 TAC profiles with 5 extra variables: STBS5,MWDL, MWSL, MWDH, MWSH
 
 export DATAROOT=/lfs/h2/emc/stmp/$USER 
 export jlogfile=/lfs/h2/emc/stmp/$USER/${JTYP}.$PDY.jlogfile
@@ -94,16 +104,19 @@ export KEEPDATA=YES
 export COMPONENT=atmos
 export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com 
 export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
-export comin=${COMIN_ROOT}/${obsNET}/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
-export comin_m1=${COMIN_ROOT}/${obsNET}/${obsproc_ver}/${JTYP}.${PDYm1}/${cyc}/${COMPONENT}
+export comin=${COMIN_ROOT}/${obsNET}/${obscore_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export comin_m1=${COMIN_ROOT}/${obsNET}/${obscore_ver}/${JTYP}.${PDYm1}/${cyc}/${COMPONENT}
 
 export COPY=YES
-export HOMEarch=${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/sdm_rtdm/gfs
+export HOMEarch=${COMOUT_ROOT}/${obsNET}/${obscore_ver}/sdm_rtdm/gfs
 export AVGDarch_IN=$HOMEarch/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day
 
-$HOMEobsproc/jobs/JOBSPROC_GLOBAL_DUMP_POST
+#This is the key variable, for unrestricting aircraft data after 48h, and run this code only on dev machine
+#export PROCESS_REMOREST_dm2=YES
+
+$HOMEobscore/jobs/JOBSCORE_GLOBAL_DUMP_POST
 
 err=$?
 echo $err
@@ -117,5 +130,20 @@ if [ -f "$cronlogfile" ]; then
   mkdir -p $outputdir
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
 fi
+
+# Kick off the dump_alert job
+#if [ $err -eq 0 ]; then
+#  echo "submit jdump_alert"
+#  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycpsub \
+#  /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jdump_alert.wc2.pbs.R13
+#fi
+
+
+# Kick off prep job
+#if [ $err -eq 0 ]; then
+#  echo "submit jrap_prep"
+#  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycpsub \
+#  ${userROOT}/Trigs.KEEP/renameGlobal/jcore_prep.wc2.pbs.R13
+#fi
 
 exit

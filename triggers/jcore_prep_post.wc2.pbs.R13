@@ -1,11 +1,11 @@
 #!/bin/sh  
-#PBS -N obsproc_%JTYP%_prep_post_%PDY%_%CC%_%DESC%
+#PBS -N obscore_%JTYP%_prep_post_%PDY%_%CC%_%DESC%
 #PBS -j oe
 #PBS -S /bin/bash
 #PBS -q dev
 #PBS -l walltime=00:05:00
 #PBS -A OBSPROC-DEV
-#PBS -l place=vscatter,select=1:ncpus=1:mem=1gb
+#PBS -l place=vscatter,select=1:ncpus=14:mem=4gb
 #PBS -l debug=true
 
 #####################################################################
@@ -13,10 +13,10 @@
 # Run from [ps]tmp when running manually
 # When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_prep_post.wc2.pbs
+# > jtyp=gdas cyc=00 PDY=20170126 desc=somethingfun /u/iliana.genkova/bin/cycqsub /path/to/triggers/jglobal_prep_post.wc2.pbs
 # For latest/current PDY:
-# > jtyp=gdas cyc=00 /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jglobal_prep_post.wc2.pbs
-# cycqsub location: /u/Shelley.Melchior/bin
+# > jtyp=gdas cyc=00 /u/iliana.genkova/bin/cycqsub /path/to/triggers/jglobal_prep_post.wc2.pbs
+# cycqsub location: /u/iliana.genkova/bin
 #####################################################################
 
 set -xu
@@ -30,22 +30,28 @@ export PDY=%PDY%
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsNET=obsproc
-export obsproc_ver=v1.0
-export obsproc_ver_pckg=v1.0.0 
-export prepobs_ver=1.0.0
+export obsNET=obscore
+export obscore_ver=v1.3.0
+export obscore_ver_pckg=v1.3.0 
+#export prepobs_ver=1.1.0 #1.0.0
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver_pckg}       # NCO prod
-export HOMEobsproc=${userROOT}/install/obsproc-rmprep           # local
+#export HOMEobsproc=${userROOT}/install/obsproc-rmprep          # SM local
+#export HOMEobsproc=${userROOT}/GIT/play/obsproc.13                      # IG local
+export HOMEobscore=${userROOT}/git/CORe/obscore
 
-VERSION_FILE=${HOMEobsproc}/versions/run.ver
+VERSION_FILE=${HOMEobscore}/versions/run.ver                     # NCO para & prod
+#VERSION_FILE=${userROOT}/install/obsproc-rmprep/versions/run.ver # SM local
+#VERSION_FILE=${userROOT}/GIT/play/obsproc/versions/run.ver             # IG local
 if [ -f $VERSION_FILE ]; then
    . $VERSION_FILE
 else
   echo Need version info...  Exiting...
  exit 7
 fi
+
+export prepobs_ver=1.2.0 #1.0.0 
 
 #Load the modules
 module load grib_util/${grib_util_ver}
@@ -55,13 +61,19 @@ module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
 module load cfp/${cfp_ver}
-# use local bufr_dump installation
-#module unload bufr_dump
-#module use ${userROOT}/install/bufr_dump/modulefiles
-module load bufr_dump/${bufr_dump_ver}
+
+#use para installation
+module use /apps/ops/para/nco/modulefiles/compiler/intel/19.1.3.304
+#use local installation
+#module use ${userROOT}/install/bufr-dump/modulefiles                                   # SM local
+#module use  ${userROOT}/GIT/bufr-dump/install/modulefiles # IG local
+#module load bufr_dump/${bufr_dump_ver}
+
 # use local prepobs installation
-#module unload prepobs
-#module use ${userROOT}/install/prepobs/modulefiles
+module unload prepobs
+#module use ${userROOT}/install/prepobs/modulefiles    # SM local
+#module use ${userROOT}/GIT/play/prepobs.13/install/modulefiles # IG local
+module use ${userROOT}/git/CORe/prepcore/install/modulefiles
 module load prepobs/${prepobs_ver}
 
 #Check if they exist
@@ -96,7 +108,24 @@ export LOUD=ON
 #export DATCOM1_IN=/lfs/h1/ops/canned/com/gfs/v16.2/gdascounts
 #export COMIN1=/lfs/h1/ops/canned/com/gfs/v16.2/$JTYP.
 
-$HOMEobsproc/jobs/JOBSPROC_GLOBAL_PREP_POST
+#not sure which one is needed, so let's have both
+export COMINgfs=${COMIN_ROOT}/obscore/${obscore_ver}/core.$PDY/${cyc}/atmos
+export COMINGFS=${COMIN_ROOT}/obscore/${obscore_ver}/core.$PDY/${cyc}/atmos
+#example to follow
+#COMINgfs=/lfs/h1/ops/prod/com/obsproc/v1.1/gfs.20231023/12/atmos
+#COMINGFS=/lfs/h1/ops/prod/com/obsproc/v1.1/gfs.20231023/12/atmos
+
+#export COMIN1=/lfs/h1/ops/para/com/obsproc/v1.2/gdas. # previous cycle's upa_* files ?! check with Shelley # can be taken from PROD or PARA (just to get going the COMIN1)
+export COMIN1=/lfs/h1/ops/prod/com/obsproc/v1.2/gdas.
+#export COMIN1=${COMOUT_ROOT}/obsproc/v1.2/gdas.
+
+#export COMIN1=${COMOUT_ROOT}/obsproc/v1.1/${JTYP}. #R12 and v1.1 don't coexist!
+#COMIN1=/lfs/h1/ops/para/com/obsproc/v1.1/gdas.   #v1.1 or v1.2???
+
+#This is the key variable,to unrestrict 48h odl aircraft, and run this code only on dev machine
+#export PROCESS_REMOREST_dm2=YES
+
+$HOMEobscore/jobs/JOBSCORE_GLOBAL_PREP_POST
 
 err=$?
 

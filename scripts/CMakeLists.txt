@@ -1,5 +1,4 @@
 list(APPEND scripts_files
-  exairnow_dump.sh
   exdump_alert.sh
   exdump_monitor.sh
   exdump_post.sh
