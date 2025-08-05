@@ -5,7 +5,7 @@
 #PBS -q dev
 #PBS -A OBSPROC-DEV
 #PBS -l walltime=00:15:00
-#PBS -l place=vscatter,select=1:ncpus=7:mem=500MB
+#PBS -l place=vscatter,select=1:ncpus=7:mem=4gb
 #PBS -l debug=TRUE
 
 ##############################################
@@ -13,10 +13,10 @@
 # Run from [ps]tmp when running manually
 # When running from cron, output is written to /u/$USER. Bottom of trigger mv's to stmp
 # For specific PDY:
-# > jtyp=[gfs][gdas][nam] cyc=00 PDY=20170126 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jdump._alert.wc2.pbs
+# > jtyp=[gfs][gdas][nam] cyc=00 PDY=20170126 desc=somethingfun /u/iliana.genkova/bin/cycqsub /path/to/triggers/jdump._alert.wc2.pbs
 # For latest/current PDY:
-# > jtyp=[gfs][gdas][nam] cyc=00 desc=somethingfun /u/Shelley.Melchior/bin/cycqsub /path/to/triggers/jdump_alert.wc2.pbs
-# cycqsub location: /u/Shelley.Melchior/bin
+# > jtyp=[gfs][gdas][nam] cyc=00 desc=somethingfun /u/iliana.genkova/bin/cycqsub /path/to/triggers/jdump_alert.wc2.pbs
+# cycqsub location: /u/iliana.genkova/bin
 ##############################################
 
 set -xa
@@ -35,14 +35,15 @@ export PDY=%PDY%
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsproc_ver=v1.0
-export obsproc_ver_pckg=v1.0.0
+export obsproc_ver=v1.3
+export obsproc_ver_pckg=v1.1.3
 export obsNET=obsproc
-PACKAGEROOTpara=/lfs/h1/ops/para/packages
-#export HOMEobsproc=${userROOT}/obsproc-cmake/$obsproc_ver/jdumpalert  # local
-export HOMEobsproc=${PACKAGEROOT}/obsproc.$obsproc_ver                 # NCO prod
+export PACKAGEROOTpara=/lfs/h1/ops/para/packages
+#export HOMEobsproc=${PACKAGEROOT}/obsproc.$obsproc_ver_pckg                 # NCO prod
+export HOMEobscore=${userROOT}/git/CORe/obscore/
 
-VERSION_FILE=${HOMEobsproc}/versions/run.ver
+
+VERSION_FILE=${HOMEobscore}/versions/run.ver
 if [ -f $VERSION_FILE ]; then
   . $VERSION_FILE
 else
@@ -74,7 +75,7 @@ if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-mpich/") -eq 0 ]]; then echo "
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cray-pals/") -eq 0 ]]; then echo "cray-pals is not loaded!"; fi
 if [[ $(echo $LOADEDMODULES | egrep -c "(^|:)cfp/") -eq 0 ]]; then echo "cfp is not loaded!"; fi
 
-export DATAROOT=/lfs/h2/emc/ptmp/${USER}
+export DATAROOT=/lfs/h2/emc/stmp/${USER}
 
 export DEBUG_LEVEL=3
 export KEEPDATA=YES
@@ -84,18 +85,29 @@ export SENDDBN=NO
 export SENDSDM=NO
 
 
+
+# --> these must normally be set based on the particular run you are making
+
+#export cyc=12  # must always be exported (choices are 00, 06, 12, 18)
+
+## ==> select RUN here
+## -------------------
+##export RUN=gdas # must always be exported
+##export RUN=gfs # must always be exported
+#export RUN=nam # must always be exported
+
+#export obsNET=obsproc
+#export NET=$RUN
+#[ $RUN = gdas ] && export NET=gfs
+#export job=${RUN}_dump_alert_${cyc} # normally not changed, but needs $RUN and $cyc
+
+
+#export PDY=20210824 # Add this to force in a different date than in /com2/date
+
+
 export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
 #export COMIN_ROOT=$COMROOT
 
-$HOMEobsproc/jobs/JOBSPROC_DUMP_ALERT
+$HOMEobscore/jobs/JOBSCORE_DUMP_ALERT
 err=$?
 
-# When run from cron, the stdout is written to /u/$USER
-# mv to stmp
-pbsjobid=$(echo $PBS_JOBID | cut -d'.' -f1)
-cronlogfile=/u/$USER/$PBS_JOBNAME.o$pbsjobid
-outputdir=/lfs/h2/emc/stmp/${USER}/CRON/${DESC}/output
-if [ -f "$cronlogfile" ]; then
-  mkdir -p $outputdir
-  mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
-fi
