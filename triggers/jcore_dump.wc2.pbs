@@ -101,12 +101,10 @@ export SENDDBN=NO   # developer
 export SENDSDM=NO   # developer
 
 export TANK=$DCOMROOT
+
+# dev environment tests
 #export TANK_001121=/lfs/h1/ops/dev/dcom #sofar
 #export TANK_255161=/lfs/h1/ops/dev/dcom #snomad
-
-# GMI tanks are in prod already June 2022
-#export TANK_021246=/lfs/h2/emc/obsproc/noscrub/ashley.stanfield/git/TANK_DUMP #${userROOT}/DCOMDIR/TEST/prod/
-
 #export EPRM=${userROOT}/sample_sdmedit.txt
 #export EPRM=/lfs/h2/emc/obsproc/noscrub/iliana.genkova/SDMEDIT/sample_sdmedit.txt
 
