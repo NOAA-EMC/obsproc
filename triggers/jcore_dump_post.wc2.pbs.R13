@@ -53,6 +53,7 @@ fi
 export bufr_dump_ver=1.2.1
 
 # Load the modules specified in $VERSION_FILE
+module load prod_envir/2.0.4
 module load grib_util/${grib_util_ver}
 module load netcdf/${netcdf_ver}
 # use para installation
@@ -132,11 +133,11 @@ if [ -f "$cronlogfile" ]; then
 fi
 
 # Kick off the dump_alert job
-#if [ $err -eq 0 ]; then
-#  echo "submit jdump_alert"
-#  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycpsub \
-#  /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jdump_alert.wc2.pbs.R13
-#fi
+if [ $err -eq 0 ]; then
+  echo "submit jcore_alert"
+  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycpsub \
+  /lfs/h2/emc/obsproc/noscrub/ashley.stanfield/Trigs.KEEP/jcore_alert.wc2.pbs.R13
+fi
 
 
 # Kick off prep job

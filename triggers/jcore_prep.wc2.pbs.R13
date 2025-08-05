@@ -55,6 +55,7 @@ fi
 export prepobs_ver=1.2.0
 
 #Load the modules
+module load prod_envir/2.0.4
 module load grib_util/${grib_util_ver}
 module load netcdf/${netcdf_ver}
 module load intel/${intel_ver}
