@@ -38,7 +38,7 @@ set +x
 echo
 echo "####################################################################"
 echo
-echo "OBSPROC version is ${obsproc_ver:-not set}"
+echo "OBSCORE version is ${obscore_ver:-not set}"
 echo
 echo "####################################################################"
 echo
@@ -94,11 +94,11 @@ export SENDECF=${SENDECF:-YES}
 # ----------------------------------
 # Paths for obsproc_dump_alert items
 # ----------------------------------
-export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
+export HOMEobscore=${HOMEobscore:\
+-${PACKAGEROOT:?}/${obsNET}/${obscore_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
-export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
+export SCRIPTSobscore=${SCRIPTSobscore:-$HOMEobscore/scripts}
 
 ##########################################
 # Run setpdy and initialize PDY variables
@@ -113,16 +113,16 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  if [[ "$RUN" == gfs || "$RUN" == gdas || "$RUN" == core ]]; then
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obscore_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   else
-    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obscore_ver}/${RUN}.${PDY})}
   fi
 else
-  if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
+  if [[ "$RUN" == gfs || "$RUN" == gdas || "$RUN" == core ]]; then
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obscore_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obscore_ver}/${RUN}.${PDY}}
   fi
 fi
 
@@ -131,7 +131,7 @@ env
 #####################
 # Execute the script
 #####################
-$SCRIPTSobsproc/exdump_alert.sh
+$SCRIPTSobscore/exdump_alert.sh
 err_dump_alert=$?
 [[ $err_dump_alert -ne 0 ]] && $DATA/err_exit
 
