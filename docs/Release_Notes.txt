@@ -1,3 +1,27 @@
+OBSCORE v*.*.* 
+
+obscore is a lighter version of obsproc and generates only core.tCCz.*.tm00.bufr_d dumps, core*.prepbufr*, and other core* output for CORe
+In a nutshell, core dumps and prepbufr are identical to gdas in term of obs types variety, but it shoudl be run on cdas time schedule to satify CDAS/CORe requirements.
+Curently CDAS runs at:
+10 16,22 * * * jtyp=cdas cyc=`date --date="-16 hour" +\%H` PDY=`date +\%Y\%m\%d` desc=wc2para /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jcdas_dump.wc2.pbs > /dev/null 2>&1
+10 04,10 * * * jtyp=cdas cyc=`date --date="-16 hour" +\%H` PDY=`date --date="-1 day" +\%Y\%m\%d` desc=wc2para /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jcdas_dump.wc2.pbs > /dev/null 2>&1
+
+So to run CORE:
+10 16,22 * * * jtyp=core cyc=`date --date="-16 hour" +\%H` PDY=`date +\%Y\%m\%d` desc=COREtest /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jcore_dump.wc2.pbs > /dev/null 2>&1
+10 04,10 * * * jtyp=core cyc=`date --date="-16 hour" +\%H` PDY=`date --date="-1 day" +\%Y\%m\%d` desc=COREtest /u/iliana.genkova/bin/cycqsub /lfs/h2/emc/obsproc/noscrub/iliana.genkova/Trigs.KEEP/jcore_dump.wc2.pbs > /dev/null 2>&1
+
+The jobs/JOBSCORE_DUMP_ALERT is triggered with trigger jcore_alert.wc2.pbs which is called in jcore_dump_post.wc2.pbs
+ 
+/triggers contain trigger-scripts to test the code with
+
+NCO doesn't use /trigers, they use /ecf workflow.
+We have not updated /ecf for CORe, please work with SPA on it
+
+Feel free to delete everything below these lines
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 obsproc v1.2.6  RELEASED        JUN 18, 2025
         v1.2.6  IMPLEMENTED     AUG 11, 2025(tbc)
 
