@@ -56,6 +56,7 @@ echo "                       added gmi1cr dump group #7                        "
 echo "                       b005/xx081 added to satwnd                        "
 echo "         Sep 26 2022 - Rewrote script to encorportate v1.1.0 additions   "
 echo "                       and finalize copy of RAP -> RRFS initial setup.   "
+echo "         May 16 2025 - Added gsbpfl to group 5.                          "
 ################################################################################
 
 set -xau
@@ -780,8 +781,8 @@ export STATUS=NO
 export DUMP_NUMBER=5
 
 #===========================================================================
-# Dump # 5 : AIRCFT, AIRCAR, GOESND -- TOTAL NUMBER OF SUBTYPES = 12
-#              (8)     (2)     (2)
+# Dump # 5 : AIRCFT, AIRCAR, GOESND, GSBPFL -- TOTAL NUMBER OF SUBTYPES = 12+?
+#              (8)     (2)     (2)     (?)
 #===========================================================================
 
 export LALO=0  # GLOBAL dumps here (AIRCFT and AIRCAR dumped globally to
@@ -831,7 +832,7 @@ else
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 aircft \
- aircar
+ aircar gsbpfl
 error5=$?
 echo "$error5" > $DATA/error5
 
