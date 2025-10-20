@@ -801,7 +801,7 @@ else
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 aircft \
- aircar
+ aircar gsbpfl
 error5=$?
 echo "$error5" > $DATA/error5
 

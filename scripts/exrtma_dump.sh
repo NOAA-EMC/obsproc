@@ -207,9 +207,9 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #========================================================================
-# Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN
-#              (11)     (6)   (1)   (1)     (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 20
+# Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN, SOFARW
+#              (11)     (6)   (1)   (1)     (1)     (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #            time window radius is +/- 0.50 hours for SFCSHP and ADPSFC
 #=======================================================================
 
@@ -221,6 +221,8 @@ DTIM_earliest_subpfl=-0.50
 DTIM_latest_subpfl=+0.50
 DTIM_earliest_saldrn=-0.50
 DTIM_latest_saldrn=+0.50
+DTIM_earliest_sofarw=-0.50
+DTIM_latest_sofarw=+0.50
 
 # for rtma_ru_0000 read only from previous day's tank
 # Temporary bug fix
@@ -228,7 +230,7 @@ if [ $RUN = "rtma_ru" -a $cycle = "t0000z" ]; then
   DTIM_latest_000000=-0.01
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc subpfl saldrn
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc subpfl saldrn sofarw
 error2=$?
 echo "$error2" > $DATA/error2
 

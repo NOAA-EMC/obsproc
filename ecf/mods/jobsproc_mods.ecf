@@ -13,7 +13,7 @@ export model=obsproc
 %include <envir-p1.h>
 
 #export cyc=14
-export cyc=`date -u +%%H`
+export cyc=%CYC% #export cyc=`date -u +%%H` # bugzilla #1672
 #JTYP=%JTYP% #=mods
 
 #Load the modules
