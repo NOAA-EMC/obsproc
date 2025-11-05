@@ -200,11 +200,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  snoold=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.global.grb
 #
 #  if [ -s $snogrb ]; then
-#     cp $snogrb ${COMSP}snogrb
+#     cpfs $snogrb ${COMSP}snogrb
 #     msg="todays 0.5 degree snow grib file located and copied to ${COMSP}snogrb"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $snoold ]; then
-#     cp $snoold ${COMSP}snogrb
+#     cpfs $snoold ${COMSP}snogrb
 #     msg="**todays 0.5 degree snow grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -224,11 +224,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  snoold_t574=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.t574.grb
 #
 #  if [ -s $snogrb_t574 ]; then
-#     cp $snogrb_t574 ${COMSP}snogrb_t574
+#     cpfs $snogrb_t574 ${COMSP}snogrb_t574
 #     msg="todays T574 snow grib file located and copied to ${COMSP}snogrb_t574"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $snoold_t574 ]; then
-#     cp $snoold_t574 ${COMSP}snogrb_t574
+#     cpfs $snoold_t574 ${COMSP}snogrb_t574
 #     msg="**todays T574 snow grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -248,11 +248,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    engiceold=${COM_ENGICE}.$PDYm1/engice.t00z.grb
 
    if [ -s $engicegrb ]; then
-      cp $engicegrb ${COMSP}engicegrb
+      cpfs $engicegrb ${COMSP}engicegrb
       msg="todays engice grib file located and copied to ${COMSP}engicegrb"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $engiceold ]; then
-      cp $engiceold ${COMSP}engicegrb
+      cpfs $engiceold ${COMSP}engicegrb
       msg="**todays engice grib file not located - copy 1-day old file"
       $DATA/postmsg "$jlogfile" "$msg"
    else
@@ -273,11 +273,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  sstold=${COM_SSTOI}.$PDYm1/sstoi_grb
 
 #  if [ -s $sstgrb ]; then
-#     cp $sstgrb ${COMSP}sstgrb
+#     cpfs $sstgrb ${COMSP}sstgrb
 #     msg="todays sst grib file located and copied to ${COMSP}sstgrb"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $sstold ]; then
-#     cp $sstold ${COMSP}sstgrb
+#     cpfs $sstold ${COMSP}sstgrb
 #     msg="**todays sst grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -688,11 +688,8 @@ export DUMP_NUMBER=5
 #
 #===================================================================
 
-#IG
 DTIM_earliest_msone0=${DTIM_latest_msone0:-"-1.99"}
 DTIM_latest_msone0=${DTIM_latest_msone0:-"+2.00"}
-
-#DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
 
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers. 
@@ -1332,7 +1329,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

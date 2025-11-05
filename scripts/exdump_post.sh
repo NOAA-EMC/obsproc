@@ -182,13 +182,13 @@ if [ ! -s $COMIN/$RUN.$cycle.status.$tmmark.bufr_d ]; then
       cat status1 bottom_part > $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
       rm $file1 $file2 bottom_part insert status status1 top_part
    elif [ -s $file1 ]; then
-      cp $file1 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
+      cpfs $file1 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
       rm $file1
       msg="***WARNING: DUMP status file successfully generated but only from \
 dump status1 file - dump status2 file not present"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $file2 ]; then
-      cp $file2 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
+      cpfs $file2 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
       rm $file2
       msg="***WARNING: DUMP status file successfully generated but only from \
 dump status2 file - dump status1 file not present"
@@ -339,7 +339,7 @@ EOFparm
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMIN/$filestem ]  ||  continue
 
-      cp $COMIN/$filestem $filestem
+      cpfs $COMIN/$filestem $filestem
 
       $USHobsproc/bufr_remorest.sh $filestem
       rc=$?
@@ -351,7 +351,7 @@ EOFparm
       else
          msg="Successful generation of non-restricted $file BUFR file"
          $DATA/postmsg "$jlogfile" "$msg"
-         cp $filestem $COMOUT/$filestem.nr
+         cpfs $filestem $COMOUT/$filestem.nr
          chmod 664 $COMOUT/$filestem.nr
 	 if [ "$SENDDBN" = "YES" ] ; then
            NETUP=`echo $RUN | tr {a-z} {A-Z}`
@@ -453,7 +453,7 @@ EOF_EXPRSRDparm
       filestem=$RUN.$cycle.$file.$tmmark.bufr_d
       [ -f $COMINm2/$filestem ]  ||  continue
 
-      cp $COMINm2/$filestem $filestem
+      cpfs $COMINm2/$filestem $filestem
 
       $USHobsproc/bufr_remorest.sh $filestem
       rc=$?
@@ -466,7 +466,7 @@ from 2-days ago (rc = $rc) -- existing file made 2-days ago is not overwritten"
          msg="Successful generation of non-restricted $file BUFR file from \
 2-days ago -- overwrite existing file made 2-days ago"
          $DATA/postmsg "$jlogfile" "$msg"
-         cp $filestem $COMOUTm2/$filestem.ur
+         cpfs $filestem $COMOUTm2/$filestem.ur
          chmod 664 $COMOUTm2/$filestem.ur
 	 if [ $SENDDBN = "YES" ] ; then
              NETUP=`echo $RUN | tr {a-z} {A-Z}`           # can this be net_uc?
@@ -534,13 +534,13 @@ $dumptime"
          filestem=$RUN.$cycle.$file.$tmmark.bufr_d
          [ -f $COMIN_here/$filestem$qual ]  ||  continue
 
-         cp $COMIN_here/$filestem$qual $file.$qual
+         cpfs $COMIN_here/$filestem$qual $file.$qual
 
 # ---> ON WCOSS dump files are already unblocked, so for now just copy each one
 #      to the unblok file location used before on CCS - hopefully this can be
 #      removed someday!
 
-         cp -p $file.$qual $file.unblock$qual >> $pgmout 2>&1
+         cpfs -p $file.$qual $file.unblock$qual >> $pgmout 2>&1
          rc=$?
          if [ $rc -gt 0 ] ; then
             [ $rc -gt $retcode ]  && retcode=$rc
@@ -555,7 +555,7 @@ to $file.unblock$qual -- overwrite existing file made 2-days ago"
                msg="$file$qual BUFR file SUCCESSFULLY copied to $file.unblock$qual"
 	    fi
             $DATA/postmsg "$jlogfile" "$msg"
-            cp $file.unblock$qual $COMOUT/$filestem.unblok$qual
+            cpfs $file.unblock$qual $COMOUT/$filestem.unblok$qual
             chmod 664 $COMOUT/$filestem.unblok$qual
             if [ "$SENDDBN" = "YES" ] ; then
               NETUP=`echo $RUN | tr {a-z} {A-Z}`
@@ -586,7 +586,7 @@ permission"
                         echo "$msg"
                         echo " "
                      else
-                        cp /dev/null $COMOUT/$filestem.unblok$qual
+                        cpfs /dev/null $COMOUT/$filestem.unblok$qual
                         msg="**WARNING: \"unblocked\" (now really just copied) \
 $file file contains RESTRICTED data, since user $USER is not in rstprod group \
 a null file is copied in its place"
@@ -643,7 +643,7 @@ EOFlistdumps
       file=$2
       filestem=$3
 
-      cp $COMIN/$filestem $file
+      cpfs $COMIN/$filestem $file
 
       cat <<EOFc > parms1
  &RDATA
@@ -665,7 +665,7 @@ EOFc
       time -p $LSTX < parms > $file.listing 2> errfile
       errlst=$?
       echo "$errlst" > $DATA/error${1}
-      cp $file.listing $COMOUT/$filestem.listing
+      cpfs $file.listing $COMOUT/$filestem.listing
       chmod 664 $COMOUT/$filestem.listing
       cat errfile >> $DATA/thread${1}/$pgmout
       if [ "$errlst" -ne '0' ]; then
@@ -708,7 +708,7 @@ only users in rstprod group have read permission"
                   echo "$msg"
                   echo " "
                else
-                  cp /dev/null $COMOUT/$filestem.listing
+                  cpfs /dev/null $COMOUT/$filestem.listing
                   msg="**WARNING: $file listing file contains RESTRICTED \
 data, since user $USER is not in rstprod group a null file is copied in its \
 place"
@@ -834,7 +834,7 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
       if [ $UPDATE_AVERAGE_FILE = YES ]; then
       if [ "$errsc" -eq '0' ]; then
          rm $AVGDarch_OUT/obcount_30davg.${network}.current
-         cp obcount_30davg.${network}.current \
+         cpfs obcount_30davg.${network}.current \
           $AVGDarch_OUT/obcount_30davg.${network}.current
          chmod 775 $AVGDarch_OUT/obcount_30davg.${network}.current
          msg="Data count average table SUCCESSFULLY updated for $network_uc \
@@ -856,7 +856,7 @@ network"
 #  If no data count average table found for previous month, save this one
 
                rm $AVGDarch_OUT/obcount_30davg.${network}.*${last_month}
-               cp obcount_30davg.${network}.current \
+               cpfs obcount_30davg.${network}.current \
                 $AVGDarch_OUT/obcount_30davg.${network}.${year}${last_month}
               chmod 775 $AVGDarch_OUT/obcount_30davg.${network}.${year}${last_month}
                msg="DATA COUNT AVERAGE table for ${year}${last_month} saved \

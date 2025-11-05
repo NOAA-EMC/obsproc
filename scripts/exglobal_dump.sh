@@ -292,11 +292,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    #snoold=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.global.grb
 
    #if [ -s $snogrb ]; then
-   #   cp $snogrb ${COMSP}snogrb
+   #   cpfs $snogrb ${COMSP}snogrb
    #   msg="todays 0.5 degree snow grib file located and copied to ${COMSP}snogrb"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #elif [ -s $snoold ]; then
-   #   cp $snoold ${COMSP}snogrb
+   #   cpfs $snoold ${COMSP}snogrb
    #   msg="**todays 0.5 degree snow grib file not located - copy 1-day old file"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #else
@@ -315,11 +315,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    #snoold_t574=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.t574.grb
 
    #if [ -s $snogrb_t574 ]; then
-   #   cp $snogrb_t574 ${COMSP}snogrb_t574
+   #   cpfs $snogrb_t574 ${COMSP}snogrb_t574
    #   msg="todays T574 snow grib file located and copied to ${COMSP}snogrb_t574"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #elif [ -s $snoold_t574 ]; then
-   #   cp $snoold_t574 ${COMSP}snogrb_t574
+   #   cpfs $snoold_t574 ${COMSP}snogrb_t574
    #   msg="**todays T574 snow grib file not located - copy 1-day old file"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #else
@@ -338,11 +338,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    engiceold=${COM_ENGICE}.$PDYm1/engice.t00z.grb
 
    if [ -s $engicegrb ]; then
-      cp $engicegrb ${COMSP}engicegrb
+      cpfs $engicegrb ${COMSP}engicegrb
       msg="todays engice grib file located and copied to ${COMSP}engicegrb"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $engiceold ]; then
-      cp $engiceold ${COMSP}engicegrb
+      cpfs $engiceold ${COMSP}engicegrb
       msg="**todays engice grib file not located - copy 1-day old file"
       $DATA/postmsg "$jlogfile" "$msg"
    else
@@ -362,11 +362,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  sstold=${COM_SSTOI}.$PDYm1/sstoi_grb
 
 #  if [ -s $sstgrb ]; then
-#     cp $sstgrb ${COMSP}sstgrb
+#     cpfs $sstgrb ${COMSP}sstgrb
 #     msg="todays lowres sst grib file located and copied to ${COMSP}sstgrb"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $sstold ]; then
-#     cp $sstold ${COMSP}sstgrb
+#     cpfs $sstold ${COMSP}sstgrb
 #     msg="**todays lowres sst grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -484,7 +484,7 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
          eval tryfile=$grib_source/$gribfile
          if [ -s $tryfile ];then
             set +x; echo -e "\nPicking up file $tryfile\n"; set -x
-            cp $tryfile ${COMSP}$target_filename
+            cpfs $tryfile ${COMSP}$target_filename
             found=true
             break
          fi
@@ -519,13 +519,13 @@ fi
   last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
   if [ -n "${last_file}" -a -s "${last_file}" ]; then
     set +x; echo -e "\nPicking up IMS ascii file ${last_file}\n"; set -x	
-    cp ${last_file} ${COMSP}${target_filename}
+    cpfs ${last_file} ${COMSP}${target_filename}
   else
     ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
     last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
     set +x; echo -e "\nPicking up a day old IMS ascii file ${last_file}\n"; set -x
     if [ -n "${last_file}" -a -s "${last_file}" ]; then
-      cp ${last_file} ${COMSP}$target_filename
+      cpfs ${last_file} ${COMSP}$target_filename
     else
       set +x; echo -e "\nNo useful IMS ascii file found\n"; set -x
     fi
@@ -538,7 +538,7 @@ fi
   target_filename=snow.usaf.grib2
   if [ -s "${ascii_source}/${ascii_file1}${ascii_file1_var}" ]; then
       set +x; echo -e "\nPicking up USAF 557thWW_snow file ${ascii_source}/${ascii_file1}${ascii_file1_var}\n"; set -x
-      cp "${ascii_source}/${ascii_file1}${ascii_file1_var}" "${COMSP}${target_filename}"
+      cpfs "${ascii_source}/${ascii_file1}${ascii_file1_var}" "${COMSP}${target_filename}"
       usaf_in=true
   else
       usaf_in=false
@@ -550,7 +550,7 @@ fi
          ascii_source="${TANK_GRIBFLDS}/${PDY_p}/wgrbbul/557thWW_snow"
          ascii_file1_var="_DD.${PDY_p}_DT.${cyc_p}00_DF.GR2"
          if [ -s  "${ascii_source}/${ascii_file1}${ascii_file1_var}" ]; then
-           cp "${ascii_source}/${ascii_file1}${ascii_file1_var}" "${COMSP}${target_filename}"
+           cpfs "${ascii_source}/${ascii_file1}${ascii_file1_var}" "${COMSP}${target_filename}"
            usaf_in=true
            set +x; echo -e "\nPicking up a ${step_back}-hour-old 557thWW_snow file \n"; set -x
            break
@@ -1876,9 +1876,6 @@ launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
-   echo "Running threads in parallel IG2023"
-   myPDY=`date +\%Y\%m\%d\%H\%M\%S`
-   echo "DATE IG2023 start " $myPDY
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
 
@@ -2032,7 +2029,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp 
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp 
 chmod 644 $LIST_cp
 
 # GOOD RUN

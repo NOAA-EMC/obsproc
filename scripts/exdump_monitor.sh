@@ -1190,7 +1190,7 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
    errsc=$?
    if [ "$errsc" -eq '0' ]; then
       rm $AVGDarch_OUT/obcount_30davg.${NET}.current
-      cp obcount_30davg.${NET}.current \
+      cpfs obcount_30davg.${NET}.current \
        $AVGDarch_OUT/obcount_30davg.${NET}.current
       chmod 775 $AVGDarch_OUT/obcount_30davg.${NET}.current
       msg="Data count average table SUCCESSFULLY updated for dump monitoring"
@@ -1232,7 +1232,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

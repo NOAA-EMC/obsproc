@@ -213,12 +213,12 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    for i in "${!flarr[@]}"
    do
      if [ -s $imssnow/${flarr[$i]} ]; then
-       cp $imssnow/${flarr[$i]} ${COMSP}${i}
+       cpfs $imssnow/${flarr[$i]} ${COMSP}${i}
        msg="todays IMS snow grib file (${flarr[$i]}) located and copied \
 to ${COMSP}${i}"
        $DATA/postmsg "$jlogfile" "$msg"
      elif [ -s $imssold/${flarr[$i]} ]; then
-       cp $imssold/${flarr[$i]} ${COMSP}${i}
+       cpfs $imssold/${flarr[$i]} ${COMSP}${i}
        msg="**todays IMS snow grib file (${flarr[$i]}) not located - copy \
 1-day old file"
        $DATA/postmsg "$jlogfile" "$msg"
@@ -1300,7 +1300,6 @@ set -x
 EOF
 set -x
 
-### NEW GROUP MSONET IG #10
 set +x
 #----------------------------------------------------------------
 cat<<\EOF>thread_10; chmod +x thread_10
@@ -1346,7 +1345,6 @@ set -x
 } > $DATA/10.out 2>&1
 EOF
 set -x
-### NEW GROUP MSONET IG end #10
 
 set +x
 #----------------------------------------------------------------
@@ -1841,7 +1839,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

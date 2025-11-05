@@ -1,5 +1,4 @@
 list(APPEND scripts_files
-  exairnow_dump.sh
   excdas_dump.sh
   excdas_makeprepbufr.sh
   exdump_alert.sh
