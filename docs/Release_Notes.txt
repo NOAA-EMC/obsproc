@@ -1,136 +1,145 @@
-obsproc v1.2.7  RELEASED        NOV ??, 2025
-        v1.2.7  IMPLEMENTED     ??? ??, 2026 (must be before RRFS model)
+obsproc v1.2.8  RELEASED        NOV 10, 2025RNING
+        v1.2.8  IMPLEMENTED     ??? ??, 2026 (must be before RRFS model)
 
 PRELUDE
-
- 1.This release (obsproc 1.2.7 + bufr-dump 1.3.1 + prepobs 1.1.3)adds: 
+ 1.This release (obsproc 1.2.8 + bufr-dump 1.3.1 + prepobs 1.1.3) adds: 
    i)gsbpfl dump to RAP; ii)sofarw dump to RTMA and URMA (none of them added to prepbufr)
- 2.This release introduces RRFS observational network (when to run it?????????????get from Ashley)
+ 2.This release introduces RRFS observational network
  3.Code pertaining to the retired airnow job (JOBSPROC_AIRNOW_DUMP) is removed
  4.Code pertaining to unused module dumpmb is removed
- 5.Simpliefied the code build in Debug mode
+ 5.Simplifies the code build in Debug mode (bufr-dump, prepobs)
  6.Replaced "cp" with "cpfs" when they write in $COMROOT
-  
 
+FILE CHANGES
+M docs/Release_Notes.txt  
 D ecf/airnow/jobsproc_airnow_dump.ecf
+M ecf/mods/jobsproc_mods.ecf
+M jobs/CmakeLists.txt
 D jobs/JOBSPROC_AIRNOW_DUMP
-D modulefiles/dumpmb/1.0.1
-D 
+M jobs/CMakeLists.txt - add RRFS , remobe airnow
+M jobs/JOBSPROC_GLOBAL_PREP - remove IG
+A jobs/JOBSPROC_RRFS_DUMP
+A jobs/JOBSPROC_RRFS_DUMP_POST
+A jobs/JOBSPROC_RRFS_PREP
+A jobs/JOBSPROC_RRFS_PREP_POST 
+D modulefiles/dumpmb
+M parm/CMakeLists.txt  - remove airnow relevant lines
+A parm/prepobs_cqcbufr.rrfs.parm
+A parm/prepobs_prepacqc.rrfs.parm
+A parm/prepobs_prepdata.rrfs.parm
+A parm/prepobs_prepssmi.rrfs.parm
+A parm/prepobs_profcqc.rrfs.parm
 D parm/transfer/transfer_obsproc_airnow.list 
 D parm/transfer_airnow.list  
 D parm/transfer_hourly.list.old0203 
+M scripts/CMakeLists.txt 
 D scripts/exairnow_dump.sh 
-D triggers/jairnow_dump.wc2.pbs 
-M jobs/CMakeLists.txt - add RRFS , remobe airnow
-M scripts/CMakeLists.txt - remove airnow, add rrfs
-M  parm/CMakeLists.txt  - remove airnow relevant lines
-
-M scripts/excdas_dump.sh  Replaced "cp" with "cpfs"
+M scripts/excdas_dump.sh  
 M scripts/excdas_makeprepbufr.sh
 M scripts/exdump_monitor.sh
 M scripts/exdump_post.sh
 M scripts/exglobal_dump.sh
 M scripts/exglobal_makeprepbufr.sh
+M scripts/exnam_dump.sh
 M scripts/exnam_makeprepbufr.sh
-M scripts/exrap_dump.sh ------> cpfs and IG removed
+M scripts/exrap_dump.sh
 M scripts/exrap_makeprepbufr.sh
-M scripts/exrrfs_dump.sh
-M scripts/exrrfs_makeprepbufr.sh
+A scripts/exrrfs_dump.sh
+A scripts/exrrfs_makeprepbufr.sh
 M scripts/exrtma_dump.sh 
 M scripts/exrtma_makeprepbufr.sh
 M scripts/exurma_dump.sh 
 M scripts/exurma_makeprepbufr.sh
- 
-M jobs/JOBSPROC_GLOBAL_PREP - remove IG
-
-
-FILE CHANGES
-
-M docs/Release_Notes.txt
-...
+D triggers/jairnow_dump.wc2.pbs
+M versions/build.ver
 M versions/run.ver
 M versions/VERSION
 (M-modified; A-added; D-deleted)
 
-DOCS CHANGES
+DOCS 
  docs/Release_Notes.txt
  Reflect this release changes.
 
-JOBS CHANGES
- jobs/JOBSPROC_NAM_PREP_POST
- Replaced obssolete $utilscript with $UTILROOT
+JOBS
+ jobs/CMakeLists.txt
+ Add RRFS related lines, remove AIRNOW related lines
 
- jobs/JOBSPROC_URMA_PREP
- Added the date MDL requested GLERLBUFR to be turned off
+ jobs/JOBSPROC_GLOBAL_PREP
+ Remove development/testing comments
+
+ jobs/JOBSPROC_RRFS_DUMP, JOBSPROC_RRFS_DUMP_POST, JOBSPROC_RRFS_PREP, JOBSPROC_RRFS_PREP_POST 
+ Add RRFS jobs
+
+PARM
+ parm/CMakeLists.txt
+ Remove AIRNOW relevant lines
+
+ parm/prepobs_cqcbufr.rrfs.parm
+ parm/prepobs_prepacqc.rrfs.parm
+ parm/prepobs_prepdata.rrfs.parm
+ parm/prepobs_prepssmi.rrfs.parm
+ parm/prepobs_profcqc.rrfs.parm
+ Add RRFS related parm cards
+
+ parm/transfer/transfer_obsproc_airnow.list
+ parm/transfer_airnow.list
+ Remove AIRNOW related lists
 
 SCRIPTS CHANGES
- scripts/excdas_dump.sh
- Corrected msonet to msone0, updated max tank threshold, corrected msonet concatenation
+ scripts/CMakeLists.txt
+ Remove AIRNOW related lines, add RRFS lines
 
+ scripts/excdas_dump.sh  
  scripts/excdas_makeprepbufr.sh
- Commented out lines 506-523, to skip obsolete copy to $LSB_OUTPUTFILE. Block starts with:
- #if [ "$SENDCOM" = 'YES' -a "$COPY_TO_ARKV" = 'YES' ]; then
-
- scripts/exdump_monitor.sh
- Remove Indian AMV tanks for faster satwnd processing, i.e. 00502*
- Introduced saldrn, sofarw, gsbpfl obs to monitoring
- Changed "msonet" to "msone0"; Increased default TANK_MAX_255004 from 1.5Gb to 2.5Gb
-
+ scripts/exdump_monitor.sh 
  scripts/exdump_post.sh
- Add sfcsno to list of types that can be modified to be unrestricted and then alerted
-
  scripts/exglobal_dump.sh
- Remove Indian AMV tanks (unused) from satwnd for faster processing, i.e. 00502*
- Remove CONUS AMV tanks (unused) from satwhr for faster processing, i.e. 00505*
- Turn off MESH16 snow copy. Improve rename/copy of USAF 557th snow analysis
- Add sfcsno, snomad, sofarw, gsbpfl, axbt, xbtctd, altkob dump groups; Save NIC.IMS* ascii file as imssno*
- Modify thread order in poe.cmdfile to avoid busy thread_1 (sstvcw and more) and thread_8 (satwnd) landing on same node
- Correct syntax error in check of dump error variables
+ scripts/exglobal_makeprepbufr.sh
+ scripts/exnam_makeprepbufr.sh
+ scripts/exrap_dump.sh
+ scripts/exrap_makeprepbufr.sh
+ scripts/exrrfs_dump.sh
+ scripts/exrrfs_makeprepbufr.sh
+ scripts/exrtma_dump.sh
+ scripts/exrtma_makeprepbufr.sh
+ scripts/exurma_dump.sh
+ scripts/exurma_makeprepbufr.sh
+ Replaced "cp" with "cpfs" when writing in $COMROOT
 
  scripts/exnam_dump.sh
- Corrected mesonet to msone0, corrected msonet concatenation, corrected syntax error in check of dump error variables
-
- scripts/exrap_dump.sh
- Commented out line 487 which is comment text
- Corrected mesonet to msone0, corrected msonet concatenation; put gpsipw in separate dump group (so it's send to $COMROOT)
- Increased default TANK_MAX_255004 from 1.5Gb to 2.5Gb
-
- scripts/exrtma_dump.sh
- Corrected mesonet to msone0, corrected msonet concatenation, updated max tank threshold
- Increased default TANK_MAX_255004 from 1.5 Gb to 2.5Gb
-
- scripts/exurma_dump.sh
- Corrected mesonet to msone0, corrected msonet concatenation, updated max tank threshold
- Increased default TANK_MAX_255004 from 1.5 Gb to 2.5Gb
+ Concatenates msone* dumps in the first nam dump job only: obsproc_nam_dump (not in the obsporc_nam_dump2)
 
 SORC CHANGES
- sorc/bufr_prepmods.fd/bufr_prepmods.f
- Increased MAXOUT from 15000 to 50000 for CFS (Jack Woolen)
-
- sorc/bufr_prepmods.fd/mbuoyb.f
- Change array sizes for CFS (Jack Woolen)
+ none
 
 VERSIONS CHANGES
+ versions/build.ver
+ Updated libarary versions
+
  versions/run.ver
- Set bufr_dump_ver=1.3.0 and prepbufr_ver=1.1.2
+ Set bufr_dump_ver=1.3.1 and prepbufr_ver=1.1.3
  Removed TANK_MAX_255004 value setup
 
  versions/VERSION
- Updated version to 1.2.6
+ Updated version to 1.2.8
 
 ECF
  Contents of ECF directory are not in GitHub b/c developers do not use ECF.
- Per Bug1672(SPA Bugzill):
- Please change:
+ Per Bug1672(SPA Bugzill), please change:
   export cyc=`date -u +%%H`
  to:
   export cyc=%CYC%
- 
+ in ecf/mods/jobsproc_mods.ecf 
+
+ RRFS ecf directoryi (not tested b/c EMC doesn't run ecf!):  /lfs/h2/emc/obsproc/noscrub/iliana.genkova/GIT/play/obsproc.REL/ecf/rrfs (CACTUS)
 
 CHANGES TO OUTPUT AND FILE SIZES
- Generate new dumps:
- RAP *gsbpfl* RTMA s*sofarw* URMA *sofar*
- RRFS 
+ New dumps:
+ RAP  - *gsbpfl* ~250K 
+ RTMA - *sofarw* ~60K
+ URMA - *sofarw* ~180K
+ RFFS - RRFS observational network will generate ~200GB per day per rrfs, ~100Gb rrfs_p, ~16GB rrfs_e
+        Also, see PRE-IMPLEMENTATION TESTING REQUIREMENTS
 
 CHANGES TO RESOURCES
  Note expecting increase in walltime; more  CPUs will be needed in the PBS cards for the following JOBSPROC_*_DUMP jobs:
@@ -164,6 +173,85 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
  to
  /prod/com/obsproc/v1.2/  for the PPT.
 
+
+ RRFS crons were tested and approved my users with the following schedule:
+
+# RRFS_P
+00 7,19 * * * jtyp=rrfs_p cyc=`date --date="-4 hours" +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs_p bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+00 7,8,19,20 * * * jtyp=rrfs_p cyc=`date --date="-3 hours" +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs_p bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+00 8,9,20,21 * * * jtyp=rrfs_p cyc=`date --date="-2 hours" +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs_p bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+00 9,21 * * * jtyp=rrfs_p cyc=`date --date="-1 hours" +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs_p bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+
+# RRFS_E
+26 0,12 * * * jtyp=rrfs_e cyc=`date +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs_e bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+
+# RRFS
+17 1-11 * * * jtyp=rrfs cyc=`date +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+17 13-23 * * * jtyp=rrfs cyc=`date +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+49 0,12 * * * jtyp=rrfs cyc=`date +\%H` PDY=`date +\%Y\%m\%d` desc=rrfs bash /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/cycqsub /lfs/h2/emc/lam/noscrub/emc.lam/obsproc/triggers/jrrfs_dump.wc2.pbs.126 > /dev/null 2>&1
+
+RRFS generated files:
+ rrfs.tCCz.variablename.tm00.bufr_d [and may include *.listing / *.bufr_d.nr files] where variablename could be the following:
+  1bamua
+  1bhrs4
+  1bmhs
+  adpsfc [.listing,.nr]
+  adpupa [.listing]
+  aircar_status_flag
+  aircar [.listing,.nr]
+  aircft [.listing,.nr]
+  airsev
+  amsr2
+  ascatt
+  ascatw [.listing]
+  atmsdb
+  atms
+  crisf4
+  crsfdb
+  esamua
+  esatms
+  eshrs3
+  esiasi
+  esmhs
+  gmi1cr
+  gpsipw [.listing,.nr]
+  gpsro [.nr]
+  gsbpfl
+  gsrasr
+  gsrcsr
+  iasidb
+  lghtng [.nr]
+  lgycld
+  msonet [listing,.nr]
+  mtiasi
+  nexrad
+  osbuv8
+  prepbufr.acft_profiles_sfc
+  prepbufr.acft_profiles
+  prepbufr_pre-qc [.nr]
+  prepbufr [.nr]
+  proflr [.listing]
+  rassda [.listing]
+  saldrn
+  saphir [.nr]
+  satwhr
+  satwnd [.listing]
+  sevasr
+  sevcsr
+  sfcshp [.listing,.nr]
+  snocvr
+  ssmisu
+  status
+  subpfl
+  tedeg
+  uprair
+  vadwnd
+  wndtwr
+
+RRFS runs can be validated against User approved output:
+/lfs/h2/emc/lam/noscrub/emc.lam/obsproc.DATA/CRON/com/obsproc/v1.3  (ignore that it shows version v1.3)
+
+
  Good to know:
  - the RAP uprair dumps might be 0 size for the hours not around 00,06,12,18 UTC
  - the CDAS prepbufr files are 6 different flavours, it takes about 26 hours for all to be generated
@@ -177,6 +265,20 @@ DISSEMINATION INFORMATION
 SPECIAL INSTRUCTIONS
 
  1.Implement release/bufr-dump.v1.3.0, and release/prepobs.v1.1.2 at the same time or before obsproc.v1.2.6
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.2.7  SPA Update      Oct 27, 2025
+                IMPLEMENTED     Oct 30, 2025 
+
+Revert prepobs_ver back to v1.1.1.  This change corrects the METAR information 
+reported on the Monthly GDAS Counts site.  There is no impact on prepbufr output.
+
+NOTE:SPA/Diane Stokes, 30 Oct 2025
+Implementation of obsproc 1.2.7 using prepobs 1.1.1 (and bufr-dump 1.3.0) was approved for today.
+It will be starting ~17:30 UTC (i.e. 18z RAP dumps)
+It is reverting prepobs from 1.1.2 to 1.1.1 b/c of a bug in adpsfc/sfcsno counts - big will be fixed in prepobs 1.1.3
+
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 obsproc v1.2.6  RELEASED        JUN 18, 2025
         v1.2.6  IMPLEMENTED     AUG 11, 2025
