@@ -116,6 +116,8 @@ net=$NET
 
 [[ $RUN == rap_p ]]  &&  net=$RUN
 [[ $RUN == rap_e ]]  &&  net=$RUN
+[[ $RUN == rrfs_p ]]  &&  net=$RUN
+[[ $RUN == rrfs_e ]]  &&  net=$RUN
 
 net_uc=$(echo $net | tr [a-z] [A-Z])
 set +u
@@ -624,6 +626,7 @@ $dumptime"
    [ "$NET" = 'gfs' -o "$NET" = 'gdas' ]  &&  retr=FALSE
    radn=TRUE
    [ "$NET" = 'rap' ]  &&  radn=FALSE
+   [ "$NET" = 'rrfs' ]  &&  radn=FALSE
 
    cat << EOFlistdumps > parms
  &PDATA
@@ -806,6 +809,9 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
 #    If this is RAP network (normally full cycle RAP at 23Z only) ...  #
 #    Update Data Count Average Tables for rap Network                  #
 #                                                                      #
+#    If this is RRFS network (normally full cycle RRFS at 23Z only) ...#
+#    Update Data Count Average Tables for rrfs Network                 #
+#                                                                      #
 #    If this is RTMA network (not RTMA_RU and normally at 23Z only) ...#
 #    Update Data Count Average Tables for rtma Network                 #
 #                                                                      #
@@ -817,6 +823,8 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
       networks=$NET
    elif [ "$NET" = 'rap' -a "$RUN" = 'rap' ]; then
       networks=rap
+   elif [ "$NET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
+      networks=rrfs
    elif [ "$NET" = 'rtma' ]; then
       networks=rtma
    elif [ "$NET" = 'urma' ]; then

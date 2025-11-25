@@ -270,17 +270,17 @@ err13=0
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
 TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
-if [ -s ${TANK}/${PDY}/b255/xx003 && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
+if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
  msg="WARNING: TANK b255/xx003 exceeds TANK_MAX_255003 => not dumped"
  echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
 fi
-if [ -s ${TANK}/${PDY}/b255/xx004 && "$(stat -c '%s' ${TANK}/${PDY}/b255/xx004)" -gt "$TANK_MAX_255004" ]; then
+if [ -s ${TANK}/${PDY}/b255/xx004 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx004)" -gt "$TANK_MAX_255004" ]; then
  export SKIP_255004=YES
  msg="WARNING: TANK b255/xx004 exceeds TANK_MAX_255004 => not dumped"
  echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
 fi
-if [ -s ${TANK}/${PDY}/b255/xx030 &&  "$(stat -c '%s' ${TANK}/${PDY}/b255/xx030)" -gt "$TANK_MAX_255030" ]; then
+if [ -s ${TANK}/${PDY}/b255/xx030 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx030)" -gt "$TANK_MAX_255030" ]; then
  export SKIP_255030=YES
  msg="WARNING: TANK b255/xx030 exceeds TANK_MAX_255030 => not dumped"
  echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
@@ -751,7 +751,7 @@ export DUMP_NUMBER=5
 export LALO=0  # GLOBAL dumps here (AIRCFT and AIRCAR dumped globally to
                # improve PREPOBS_PREPACQC track-check performance; GOESND
                # dumped globally to allow job to run much quicker w/o the need
-               # for geogrrfshical filtering (all GOES reports are in expanded
+               # for geographical filtering (all GOES reports are in expanded
                # NAM domain anyway)
 
 def_time_window_5=3.25 # default time window for dump 5 is -3.25 to +3.25 hours
@@ -762,7 +762,7 @@ def_time_window_5=3.25 # default time window for dump 5 is -3.25 to +3.25 hours
 #  {note: time window increased to improve PREPOBS_PREPACQC track-check
 #         performance; time window will be winnowed down to +/- 1.00 hours in
 #         output from PREPOBS_PREPACQC (for full and partial cycle runs), and
-#         geogrrfshical domain will be limited to north of 20S latitude)
+#         geographical domain will be limited to north of 20S latitude)
 
 
 # Time window -1.25 to -0.01 hours for GOESND cloud (only) for full and partial
@@ -837,7 +837,7 @@ export DUMP_NUMBER=6
 #===========================================================================
 
 export LALO=0  # GLOBAL dumps here (NEXRAD dumped globally to allow job to run
-               # much quicker w/o the need for geogrrfshical filtering (all
+               # much quicker w/o the need for geographical filtering (all
                # radar reports are over CONUS anyway)
 
 def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
@@ -1259,8 +1259,8 @@ export STATUS=NO
 export DUMP_NUMBER=9
 
 #==========================================================================
-# Dump # 9 : LGHTNG, SATWHR, WNDTWR, ADPUPA
-#              (1)     (?)    (?)     (1)
+# Dump # 9 : LGHTNG, SATWHR, ADPUPA
+#              (1)     (?)    (1)
 #             TOTAL NUMBER OF SUBTYPES = 2+?
 #=========================================================================
  
@@ -1269,8 +1269,6 @@ DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.00"}
 DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+0.50"}
 DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-1.00"}
 DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+1.00"}
-DTIM_earliest_wndtwr=${DTIM_earliest_wndtwr:-"-1.00"}
-DTIM_latest_wndtwr=${DTIM_latest_wndtwr:-"+1.00"}
 
 # Time window -1.00 to +1.00 hours for ADPUPA/UPRAIR w/ full & partial cycle runs
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
@@ -1287,7 +1285,7 @@ else
    def_time_window_9=3.0 # default time window for dump 9 is -3.0 to +3.0 hours
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng satwhr wndtwr adpupa
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_9} 1 lghtng satwhr adpupa
 error9=$?
 echo "$error9" > $DATA/error9
 
