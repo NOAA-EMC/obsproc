@@ -1263,7 +1263,8 @@ export DUMP_NUMBER=9
 #              (1)     (?)    (1)
 #             TOTAL NUMBER OF SUBTYPES = 2+?
 #=========================================================================
- 
+export SKIP_005099=YES
+
 # Time window -1.00 to +0.50 hours for LGHTNG for all cycle runs
 DTIM_earliest_lghtng=${DTIM_earliest_lghtng:-"-1.00"}
 DTIM_latest_lghtng=${DTIM_latest_lghtng:-"+0.50"}
