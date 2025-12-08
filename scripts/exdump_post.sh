@@ -357,11 +357,13 @@ EOFparm
          chmod 664 $COMOUT/$filestem.nr
 	 if [ "$SENDDBN" = "YES" ] ; then
            NETUP=`echo $RUN | tr {a-z} {A-Z}`
-           if  [[ $NETUP != 'GDAS' ]] || [[ $file != "saphir" ]]; then    ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr 
-             if [[ $NETUP != 'CDAS' ]] || [[ $file != "gpsro" ]]; then    ### no alert cdas.tCCz.gpsro.tm00.bufr_d.nr
-               if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then   ### no alert rap.tCCz.gpsro.tm00.bufr_d.nr
-                  $DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
-                  $COMOUT/$filestem.nr
+           if  [[ $NETUP != 'GDAS' ]] || [[ $file != "saphir" ]]; then       ### no alert gdas.tCCz.saphir.tm00.bufr_d.nr
+             if [[ $NETUP != 'CDAS' ]] || [[ $file != "gpsro" ]]; then       ### no alert cdas.tCCz.gpsro.tm00.bufr_d.nr
+               if [[ $NETUP != 'RAP' ]] || [[ $file != "gpsro" ]]; then      ### no alert rap.tCCz.gpsro.tm00.bufr_d.nr
+                 if [[ $NETUP != 'RRFS' ]] || [[ $file != "gpsro" ]]; then   ### no alert rrfs.tCCz.gpsro.tm00.bufr_d.nr
+			$DBNROOT/bin/dbn_alert MODEL ${NETUP}_BUFR_${file}_nr $job \
+			$COMOUT/$filestem.nr
+		 fi
 	       fi
              fi
            fi
