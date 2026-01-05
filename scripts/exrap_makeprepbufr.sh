@@ -1,5 +1,4 @@
-#!/bin/ksh
-# Run under ksh
+#!/bin/sh
 
 ################################################################################
 echo "------------------------------------------------------------------------"
@@ -39,7 +38,7 @@ fi
 msg="CENTER TIME FOR PREPBUFR PROCESSING IS $cdate10"
 $DATA/postmsg "$jlogfile" "$msg"
 
-ksh ${ushscript_prep}/prepobs_makeprepbufr.sh $cdate10
+sh ${ushscript_prep}/prepobs_makeprepbufr.sh $cdate10
 errsc=$?
 
 [ "$errsc" -ne '0' ]  &&  exit $errsc
