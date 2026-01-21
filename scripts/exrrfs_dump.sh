@@ -218,22 +218,22 @@ err13=0
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msonet0 and msone1 
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
  msg="WARNING: TANK b255/xx003 exceeds TANK_MAX_255003 => not dumped"
- echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
+ echo $msg | mail.py -s "$msg"
 fi
 if [ -s ${TANK}/${PDY}/b255/xx004 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx004)" -gt "$TANK_MAX_255004" ]; then
  export SKIP_255004=YES
  msg="WARNING: TANK b255/xx004 exceeds TANK_MAX_255004 => not dumped"
- echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
+ echo $msg | mail.py -s "$msg"
 fi
 if [ -s ${TANK}/${PDY}/b255/xx030 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx030)" -gt "$TANK_MAX_255030" ]; then
  export SKIP_255030=YES
  msg="WARNING: TANK b255/xx030 exceeds TANK_MAX_255030 => not dumped"
- echo $msg | mail.py -s $msg -c iliana.genkova@noaa.gov
+ echo $msg | mail.py -s "$msg"
 fi
 #end of block
 
