@@ -412,9 +412,11 @@ def_time_window_6=0.5 # default time window for dump 6 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 msone1
-error6=$?
-echo "$error6" > $DATA/error6
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_6} 1 msone1
+  error6=$?
+  echo "$error6" > $DATA/error6
+fi
 
 set +x
 echo "********************************************************************"

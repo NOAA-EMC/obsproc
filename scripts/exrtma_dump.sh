@@ -405,9 +405,11 @@ def_time_window_5=0.5 # default time window for dump 5 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 msone1
-error5=$?
-echo "$error5" > $DATA/error5
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 msone1
+  error5=$?
+  echo "$error5" > $DATA/error5
+fi
 
 set +x
 echo "********************************************************************"

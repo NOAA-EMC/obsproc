@@ -1142,9 +1142,11 @@ DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.00"}
 
 TIME_TRIM=on #off
 
-SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
-error10=$?
-echo "$error10" > $DATA/error10
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
+  error10=$?
+  echo "$error10" > $DATA/error10
+fi
 
 set +x
 echo "********************************************************************"
