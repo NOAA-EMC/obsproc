@@ -232,7 +232,7 @@ fi
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
-export JOB_NUMBER=1
+export JOB_NUMBER=2
 export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-YES} # normally runs
 export PROCESS_DUMP=${PROCESS_DUMP:-YES}         # normally runs
 export prepssmi=NO # "spssmi" reprocessed dump no longer generated

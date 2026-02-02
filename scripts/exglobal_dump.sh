@@ -179,34 +179,34 @@ if [ -n "$JOB_NUMBER" ]; then
 set -u
    if [ $JOB_NUMBER = 2 ]; then
       dump_ind=DUMP2
-      DUMP_group1=${DUMP_group1:-"YES"}
+      DUMP_group1=${DUMP_group1:-"NO"}
       DUMP_group2=${DUMP_group2:-"NO"}
       DUMP_group3=${DUMP_group3:-"NO"}
       DUMP_group4=${DUMP_group4:-"NO"}
       DUMP_group5=${DUMP_group5:-"NO"}
-      DUMP_group6=${DUMP_group6:-"YES"}
-      DUMP_group7=${DUMP_group7:-"YES"}
-      DUMP_group8=${DUMP_group8:-"NO"}
-      DUMP_group9=${DUMP_group9:-"YES"}
-      DUMP_group10=${DUMP_group10:-"YES"}
-      DUMP_group11=${DUMP_group11:-"YES"}
-      DUMP_group12=${DUMP_group12:-"YES"}
-      DUMP_group13=${DUMP_group13:-"NO"}
-   else
-      dump_ind=DUMP
-      DUMP_group1=${DUMP_group1:-"NO"}
-      DUMP_group2=${DUMP_group2:-"YES"}
-      DUMP_group3=${DUMP_group3:-"YES"}
-      DUMP_group4=${DUMP_group4:-"YES"}
-      DUMP_group5=${DUMP_group5:-"NO"}
       DUMP_group6=${DUMP_group6:-"NO"}
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
-      DUMP_group9=${DUMP_group9:-"NO"}
+      DUMP_group9=${DUMP_group9:-"YES"}
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
       DUMP_group13=${DUMP_group13:-"YES"}
+   else
+      dump_ind=DUMP
+      DUMP_group1=${DUMP_group1:-"YES"}
+      DUMP_group2=${DUMP_group2:-"YES"}
+      DUMP_group3=${DUMP_group3:-"YES"}
+      DUMP_group4=${DUMP_group4:-"YES"}
+      DUMP_group5=${DUMP_group5:-"YES"}
+      DUMP_group6=${DUMP_group6:-"YES"}
+      DUMP_group7=${DUMP_group7:-"YES"}
+      DUMP_group8=${DUMP_group8:-"NO"}
+      DUMP_group9=${DUMP_group9:-"NO"}
+      DUMP_group10=${DUMP_group10:-"YES"}
+      DUMP_group11=${DUMP_group11:-"YES"}
+      DUMP_group12=${DUMP_group12:-"YES"}
+      DUMP_group13=${DUMP_group13:-"NO"}
    fi
 else
    dump_ind=DUMP
