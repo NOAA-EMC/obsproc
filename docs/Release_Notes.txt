@@ -2,7 +2,7 @@ obsproc v1.2.8  RELEASED        NOV 10, 2025RNING
         v1.2.8  IMPLEMENTED     ??? ??, 2026 (must be before RRFS model)
 
 PRELUDE
- 1.This release (obsproc 1.2.8 + bufr-dump 1.3.1 + prepobs 1.1.3) adds: 
+ 1.This release (obsproc 1.2.8 and bufr_dump 1.3.1) adds: 
    i)gsbpfl dump to RAP; ii)sofarw dump to RTMA and URMA (none of them added to prepbufr)
  2.This release introduces RRFS observational network
  3.Code pertaining to the retired airnow job (JOBSPROC_AIRNOW_DUMP) is removed
@@ -117,7 +117,7 @@ VERSIONS CHANGES
  Updated libarary versions
 
  versions/run.ver
- Set bufr_dump_ver=1.3.1 and prepbufr_ver=1.1.3
+ Use bufr_dump_ver=1.3.1 and prepbufr_ver=1.1.1
  Removed TANK_MAX_255004 value setup
 
  versions/VERSION
@@ -161,7 +161,7 @@ PRE-IMPLEMENTATION TESTING REQUIREMENTS
  for the following networkname values: GLOBAL, NAM, RAP, URMA, RTMA, CDAS
 
  Parallel Production Testing (PPT)
- After testing obsproc v1.2.6 in the /para space, we recommend doing for at least two weeks,
+ After testing obsproc v1.2.8 in the /para space, we recommend doing so for at least two weeks,
  it is best to do a single cycle Parallel Production Testing (PPT) (i.e. obsproc + GFS + SDM/thanks + EVS).
  Copy the following directoris:
  $model.YYYYMMDD, where model: gfs,gdas,nam,rap,rap_e,rap_p,urma,cdas,rtma,rtma_ru,dump
@@ -264,7 +264,7 @@ DISSEMINATION INFORMATION
 
 SPECIAL INSTRUCTIONS
 
- 1.Implement release/bufr-dump.v1.3.0, and release/prepobs.v1.1.2 at the same time or before obsproc.v1.2.6
+ None
 
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
