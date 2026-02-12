@@ -60,8 +60,6 @@ echo "                       concatenate msonet and msone1 right after dump    "
 echo "                     - Pull adpupa and uprair into own Dump group        "
 echo "         Mar 14 2024 - Split gsrasr and gsrcsr to own dump hroups        "
 echo "         Feb 18 2025 - Split gpsipw to own dump group                    "
-echo "         Dec 05 2025 - Removed sevcsr from group 1 as sevcsr data is no  "
-echo "                       longer available.                                 "
 ################################################################################
 
 set -xau
@@ -74,7 +72,7 @@ set +u
 # JOB_NUMBER = 2 indicates the non-prepbufr dump job.
 # JOB_NUMBER not present indicates dump BOTH prepbufr and non-prepbufr data.
 # ------------------------------------------------------------------------
-# Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi
+# Dump group #1 (non-pb) = 1bamua 1bmhs esamua esmhs atms mtiasi sevcsr
 #                          gpsro esiasi iasidb esatms atmsdb sevasr amsr2
 # Dump group #2 (pb) = vadwnd satwnd
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
@@ -328,8 +326,8 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #===============================================================================
-# Dump # 1 : 1BAMUA, 1BMHS,  ESAMUA, ESMHS, ATMS, MTIASI, GPSRO,
-#              (1)    (1)     (1)     (1)   (1)    (1)    (1)
+# Dump # 1 : 1BAMUA, 1BMHS,  ESAMUA, ESMHS, ATMS, MTIASI, SEVCSR, GPSRO,
+#              (1)    (1)     (1)     (1)   (1)    (1)    (1)     (1)
 #            ESIASI, IASIDB, ESATMS, ATMSDB, SEVASR, AMSR2, SUBPFL, SALDRN
 #              (1)    (1)     (1)     (1)     (1)     (1)    (1)    (1)
 #             TOTAL NUMBER OF SUBTYPES = 16
@@ -365,6 +363,8 @@ if [ "$RUN" = 'rap_p' ]; then
    DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+0.99"}
 
 # Time window is -1.00 to +0.99 hours for SEVCSR, SEVASR, GPSRO
+  DTIM_earliest_sevcsr=${DTIM_earliest_sevcsr:-"-1.00"}
+  DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+0.99"}
   DTIM_earliest_sevasr=${DTIM_earliest_sevasr:-"-1.00"}
   DTIM_latest_sevasr=${DTIM_latest_sevasr:-"+0.99"}
   DTIM_earliest_gpsro=${DTIM_earliest_gpsro:-"-1.00"}
@@ -416,6 +416,8 @@ else
    DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+1.99"}
 
 # Time window is -2.00 to +1.99 hours for SEVCSR, SEVASR, GPSRO, GSRASR, GSRCSR
+   DTIM_earliest_sevcsr=${DTIM_earliest_sevcsr:-"-2.00"}
+   DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+1.99"}
    DTIM_earliest_sevasr=${DTIM_earliest_sevasr:-"-2.00"}
    DTIM_latest_sevasr=${DTIM_latest_sevasr:-"+1.99"}
    DTIM_earliest_gpsro=${DTIM_earliest_gpsro:-"-2.00"}
@@ -437,7 +439,7 @@ else
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_1} 1 1bamua \
- 1bmhs esamua esmhs atms mtiasi gpsro esiasi iasidb esatms \
+ 1bmhs esamua esmhs atms mtiasi sevcsr gpsro esiasi iasidb esatms \
  atmsdb sevasr amsr2 subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
@@ -1822,6 +1824,9 @@ if [ $SENDDBN = YES ]; then
    fi
    if [ -s ${COMSP}sevasr.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_sevasr $job ${COMSP}sevasr.tm00.bufr_d
+   fi
+   if [ -s ${COMSP}sevcsr.tm00.bufr_d ]; then
+    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_sevcsr $job ${COMSP}sevcsr.tm00.bufr_d
    fi
    if [ -s ${COMSP}ssmisu.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_ssmisu $job ${COMSP}ssmisu.tm00.bufr_d
