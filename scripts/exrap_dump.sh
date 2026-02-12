@@ -1604,7 +1604,7 @@ if [ "$launcher" = cfp ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
       #$launcher_DUMP -np 3 --cpu-bind verbose,core cfp $DATA/poe.cmdfile
-      NPROCS=${NPROCS:-14}
+      NPROCS=${NPROCS:-13}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then

@@ -7,8 +7,7 @@ PRELUDE
  2.This release introduces RRFS observational network
  3.Code pertaining to the retired airnow job (JOBSPROC_AIRNOW_DUMP) is removed
  4.Code pertaining to unused module dumpmb is removed
- 5.Simplifies the code build in Debug mode (bufr-dump, prepobs)
- 6.Replaced "cp" with "cpfs" when they write in $COMROOT
+ 5.Replaced "cp" with "cpfs" when they write in $COMROOT
 
 FILE CHANGES
 M docs/Release_Notes.txt  
@@ -92,7 +91,6 @@ SCRIPTS CHANGES
  scripts/excdas_dump.sh  
  scripts/excdas_makeprepbufr.sh
  scripts/exdump_monitor.sh 
- scripts/exdump_post.sh
  scripts/exglobal_dump.sh
  scripts/exglobal_makeprepbufr.sh
  scripts/exnam_makeprepbufr.sh
@@ -106,6 +104,10 @@ SCRIPTS CHANGES
  scripts/exurma_makeprepbufr.sh
  Replaced "cp" with "cpfs" when writing in $COMROOT
 
+ scripts/exdump_post.sh 
+ Replaced "cp" with "cpfs" when writing in $COMROOT
+ Added RRFS integration/setup similar to RAP
+
  scripts/exnam_dump.sh
  Concatenates msone* dumps in the first nam dump job only: obsproc_nam_dump (not in the obsporc_nam_dump2)
 
@@ -118,20 +120,18 @@ VERSIONS CHANGES
 
  versions/run.ver
  Use bufr_dump_ver=1.3.1 and prepbufr_ver=1.1.1
- Removed TANK_MAX_255004 value setup
 
  versions/VERSION
  Updated version to 1.2.8
 
 ECF
- Contents of ECF directory are not in GitHub b/c developers do not use ECF.
  Per Bug1672(SPA Bugzill), please change:
   export cyc=`date -u +%%H`
  to:
   export cyc=%CYC%
  in ecf/mods/jobsproc_mods.ecf 
 
- RRFS ecf directoryi (not tested b/c EMC doesn't run ecf!):  /lfs/h2/emc/obsproc/noscrub/iliana.genkova/GIT/play/obsproc.REL/ecf/rrfs (CACTUS)
+ RRFS ecf directory (not tested b/c EMC doesn't run ecf!):  /lfs/h2/emc/obsproc/noscrub/iliana.genkova/GIT/play/obsproc.REL/ecf/rrfs (CACTUS)
 
 CHANGES TO OUTPUT AND FILE SIZES
  New dumps:
@@ -237,16 +237,14 @@ RRFS generated files:
   satwhr
   satwnd [.listing]
   sevasr
-  sevcsr
   sfcshp [.listing,.nr]
   snocvr
   ssmisu
   status
   subpfl
-  tedeg
+  tideg
   uprair
   vadwnd
-  wndtwr
 
 RRFS runs can be validated against User approved output:
 /lfs/h2/emc/lam/noscrub/emc.lam/obsproc.DATA/CRON/com/obsproc/v1.3  (ignore that it shows version v1.3)
@@ -260,7 +258,7 @@ RRFS runs can be validated against User approved output:
 
 DISSEMINATION INFORMATION
 
-  A 30 day SCN was issued
+ None
 
 SPECIAL INSTRUCTIONS
 
