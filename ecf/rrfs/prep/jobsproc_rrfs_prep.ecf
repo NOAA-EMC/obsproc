@@ -7,9 +7,6 @@
 #PBS -l place=vscatter,select=1:ncpus=4:mem=100gb:prepost=true
 #PBS -l debug=true
 
-#LO 20260205 turn off obsproc RRFS alerts until RRFS is in prod
-export SENDDBN=NO
-
 export model=obsproc
 
 %include <head.h>

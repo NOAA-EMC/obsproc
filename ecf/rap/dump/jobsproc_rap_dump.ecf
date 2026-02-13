@@ -4,7 +4,7 @@
 #PBS -q %QUEUE%
 #PBS -A %PROJ%-%PROJENVIR%
 #PBS -l walltime=00:30:00
-#PBS -l place=vscatter,select=1:ncpus=12:mem=50gb
+#PBS -l place=vscatter,select=1:ncpus=13:mem=50gb
 #PBS -l debug=true
 
 export model=obsproc
@@ -18,7 +18,7 @@ JTYP=%JTYP% # '', erly_, pcyc_
 #Load the modules
 module load intel/${intel_ver}
 
-export NPROCS=12
+export NPROCS=13
 module load craype/${craype_ver}
 module load cray-mpich/${cray_mpich_ver}
 module load cray-pals/${cray_pals_ver}
