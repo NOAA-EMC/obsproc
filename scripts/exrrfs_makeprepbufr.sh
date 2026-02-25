@@ -25,6 +25,8 @@ export COMSP=${COMSP:-$COMIN/${RUN}.${cycle}.}
 
 cdate10=`cut -c7-16 ncepdate`
 
+RUN_uc=$(echo $RUN | tr [a-z] [A-Z])
+
 #  Unless an overriding value for $errPREPDATA_limit is imported, the highest
 #   allowed foreground exit status for program PREPOBS_PREPDATA (where any exit
 #   status higher than this is considered a failure) is dependent upon the
@@ -123,7 +125,7 @@ if [ "$DO_QC" = 'YES' ]; then
       fi
    fi
    if [ "$SENDDBN" = 'YES' ] ; then
-      $DBNROOT/bin/dbn_alert MODEL FSL_PREPBUFR $job \
+      $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_PREPBUFR $job \
        $COMOUT/${RUN}.${cycle}.prepbufr.tm00
    fi
 
