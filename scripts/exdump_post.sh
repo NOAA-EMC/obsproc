@@ -544,7 +544,8 @@ $dumptime"
 #      to the unblok file location used before on CCS - hopefully this can be
 #      removed someday!
 
-         cpfs -p $file.$qual $file.unblock$qual >> $pgmout 2>&1
+#problem with option -p          cpfs -p $file.$qual $file.unblock$qual >> $pgmout 2>&1
+         cp -p $file.$qual $file.unblock$qual >> $pgmout 2>&1
          rc=$?
          if [ $rc -gt 0 ] ; then
             [ $rc -gt $retcode ]  && retcode=$rc
