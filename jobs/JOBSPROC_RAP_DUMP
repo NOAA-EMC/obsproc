@@ -249,6 +249,8 @@ fi
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
+export JOB_NUMBER=1
+
 if [ $RUN = rap_p ]; then
 #if [ $RUN = rap_p -o $RUN = rap_eh ]; then         # 10/2019; rap_eh disabled for HRRRv4
    export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO}  # defaults to NO in

@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N obsproc_%JTYP%_dump_%PDY%_%CC%_%DESC%
+#PBS -N obsproc_%JTYP%_dump2_%PDY%_%CC%_%DESC%
 #PBS -j oe
 #PBS -S /bin/bash
 #PBS -q dev
@@ -114,8 +114,9 @@ export KEEPDATA=YES
 export DEBUG_LEVEL=3
 
 
-$HOMEobsproc/jobs/JOBSPROC_RAP_DUMP #slow dump groups
+$HOMEobsproc/jobs/JOBSPROC_RAP_DUMP2
 err=$?
+
 
 # When run from cron, the stdout is written to /u/$USER
 # mv to stmp
@@ -127,12 +128,12 @@ if [ -f "$cronlogfile" ]; then
   mv $cronlogfile ${outputdir}/$PBS_JOBNAME.o$pbsjobid
 fi
 
-# ... existing Script A code ...
+# ... existing Script B code ...
 if [ $err -eq 0 ]; then
-    touch /lfs/h2/emc/stmp/${USER}/${JTYP}_dump_done.txt
-    # Check if B is already done
-    if [ -f /lfs/h2/emc/stmp/${USER}/${JTYP}_dump2_done.txt ]; then
-        echo "A finished last. Triggering Script C."
+    touch /lfs/h2/emc/stmp/${USER}/${JTYP}_dump2_done.txt
+    # Check if A is already done
+    if [ -f /lfs/h2/emc/stmp/${USER}/${JTYP}_dump_done.txt ]; then
+        echo "B finished last. Triggering Script C."
         echo "submit jrap_dump_post"
   jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
   ${userROOT}/Trigs.KEEP/jrap_dump_post.wc2.pbs.G
@@ -143,28 +144,25 @@ if [ $err -eq 0 ]; then
 fi
 
 exit
+
 # If you wish to only run the dump job, un-comment the exit line below
-#exit
+echo "leaving second rap dump job"
+exit
 
-# Kick off dump2 job
-if [ $err1 -eq 0 ]; then
-  echo "submit jrap_dump2"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/Trigs.KEEP/jrap_dump2.wc2.pbs.G
-fi
+echo "we are not here"
 
-# Kick off dump_post job
-if [ $err -eq 0 ]; then
-  echo "submit jrap_dump_post"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/Trigs.KEEP/jrap_dump_post.wc2.pbs.G
-fi
+## Kick off dump_post job
+#if [ $err -eq 0 ]; then
+#  echo "submit jrap_dump_post"
+#  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
+#  /lfs/h2/emc/obsproc/noscrub/$USER/Trigs.KEEP/jrap_dump_post.wc2.pbs.G
+#fi
 
-# Kick off prep job
-if [ $err -eq 0 ]; then
-  echo "submit jrap_prep"
-  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
-  /lfs/h2/emc/obsproc/noscrub/$USER/Trigs.KEEP/jrap_prep.wc2.pbs.G
-fi
+## Kick off prep job
+#if [ $err -eq 0 ]; then
+#  echo "submit jrap_prep"
+#  jtyp=$JTYP PDY=$PDY desc=$DESC bash -l /u/$USER/bin/cycqsub \
+#  /lfs/h2/emc/obsproc/noscrub/$USER/Trigs.KEEP/jrap_prep.wc2.pbs.G
+#fi
 
 exit

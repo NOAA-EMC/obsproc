@@ -93,6 +93,8 @@ echo "         Jul 20 2024 - Turn on group #6, do not run nexrad, run marine"
 echo "                       obs instead-axbt,xbtctd,altkob - longer windows"
 echo "                       Add sofarw                                     "
 echo "                     - Add snomad to group #2                         "
+echo "         Mar 30 2026 - Remove NAP and introdude                       "
+echo "                       second JOBSPROC_GLOBAL_DUMP2                   "               
 #############################################################################
 
 # NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
@@ -175,34 +177,41 @@ set +u
 # -----------------------------------------------------------------------------
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+# NOTE:
+# Split global dumps to 2 jobs, b/c of slow satwnd and uprair
+# Remove NAP and go back to Shelley's original cron kick off times
+# But for satwnd and upair - start NAP minutes earlier (global->10min, rap->2min)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 if [ -n "$JOB_NUMBER" ]; then
 set -u
    if [ $JOB_NUMBER = 2 ]; then
-      dump_ind=DUMP2
+      dump_ind=DUMP2 # quick jobs
       DUMP_group1=${DUMP_group1:-"YES"}
-      DUMP_group2=${DUMP_group2:-"NO"}
-      DUMP_group3=${DUMP_group3:-"NO"}
-      DUMP_group4=${DUMP_group4:-"NO"}
-      DUMP_group5=${DUMP_group5:-"NO"}
+      DUMP_group2=${DUMP_group2:-"YES"}
+      DUMP_group3=${DUMP_group3:-"YES"}
+      DUMP_group4=${DUMP_group4:-"YES"}
+      DUMP_group5=${DUMP_group5:-"NO"} #msonet
       DUMP_group6=${DUMP_group6:-"YES"}
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"NO"}
-      DUMP_group9=${DUMP_group9:-"YES"}
+      DUMP_group9=${DUMP_group9:-"NO"}
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"NO"}
    else
-      dump_ind=DUMP
+      dump_ind=DUMP # slow jobs
       DUMP_group1=${DUMP_group1:-"NO"}
-      DUMP_group2=${DUMP_group2:-"YES"}
-      DUMP_group3=${DUMP_group3:-"YES"}
-      DUMP_group4=${DUMP_group4:-"YES"}
-      DUMP_group5=${DUMP_group5:-"NO"}
+      DUMP_group2=${DUMP_group2:-"NO"}
+      DUMP_group3=${DUMP_group3:-"NO"}
+      DUMP_group4=${DUMP_group4:-"NO"}
+      DUMP_group5=${DUMP_group5:-"NO"} #msonet
       DUMP_group6=${DUMP_group6:-"NO"}
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
-      DUMP_group9=${DUMP_group9:-"NO"}
+      DUMP_group9=${DUMP_group9:-"YES"}
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
@@ -227,16 +236,19 @@ fi
 
 # NAP and NAP_adpupa instroduced so that uprair can run early on his own
 #NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
-NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
+#NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
+#NAP=${NAP:0} #b/c cron is moved to run 2min (120s) early
 if [ "$NET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
+#   ADPUPA_wait=${ADPUPA_wait:-"NO"}
 #   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
-   NAP_adpupa=${NAP_adpupa:-320} #120s(compensate early cron) + 200s(for adpupa data to come)
+   #NAP_adpupa=${NAP_adpupa:-320} #120s(compensate early cron) + 200s(for adpupa data to come)
+   #NAP_adpupa=${NAP_adpupa:-200} #120s(compensate early cron) + 200s(for adpupa data to come)
 ########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
 #   NAP_adpupa=${NAP_adpupa:-600} #like other dump groups
-   NAP_adpupa=${NAP_adpupa:-120} #like other dump groups
+   #NAP_adpupa=${NAP_adpupa:-120} #like other dump groups
 fi
 
 # send extra output of DUMP2 for monitoring purposes.
@@ -606,6 +618,17 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 msg="START THE $tmmark_uc $NET_uc DATA $dump_ind CENTERED ON $dumptime"
 $DATA/postmsg "$jlogfile" "$msg"
 
+### ASK DIANE IF WE NEED THIS (taken from exnam_dump.sh)
+#if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
+#then
+#
+#msg="**WARNING: status${JOB_NUMBER} file already exists for $tmmark \
+#$PDY$cyc run - no data dumps produced"
+#$DATA/postmsg "$jlogfile" "$msg"
+#
+#else
+#....................
+
 set +x
 #----------------------------------------------------------------
 cat<<\EOF>thread_1; chmod +x thread_1
@@ -623,7 +646,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -758,7 +781,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -891,7 +914,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP_adpupa} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP_adpupa} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -948,7 +971,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -1061,7 +1084,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -1114,7 +1137,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1273,7 +1296,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1381,7 +1404,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1491,7 +1514,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1568,7 +1591,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1669,7 +1692,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
@@ -1726,7 +1749,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=12
 
@@ -1823,7 +1846,7 @@ echo
 set -x
 
 # UPRAIR requires early start, no need to NAP
-#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+##sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=13
 
@@ -1929,6 +1952,7 @@ else
 fi
 
 # long run times for uprair lead to use of NAP and NAP_adpupa variables (see code above) instead of this code
+#  IGDK : consider opening up this if adpupa is not catching enough obs
 #
 ##  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
 ##   threads have run (normally done in real-time GFS runs to dump as late as
@@ -1965,6 +1989,10 @@ set -x
 export STATUS=YES
 export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
+
+## ASK DIANE IF WE NEED THIS (taken from exnam_dump.sh)
+#  endif test for existence of status file
+#fi
 
 #  endif loop $PROCESS_DUMP
 fi
@@ -2023,6 +2051,7 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
 
 #  endif loop $PROCESS_DUMP
 fi
+
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request

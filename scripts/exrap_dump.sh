@@ -60,6 +60,7 @@ echo "                       concatenate msonet and msone1 right after dump    "
 echo "                     - Pull adpupa and uprair into own Dump group        "
 echo "         Mar 14 2024 - Split gsrasr and gsrcsr to own dump hroups        "
 echo "         Feb 18 2025 - Split gpsipw to own dump group                    "
+echo "         Mar 30 2026 - Remove NAP and introduce second DUMP job          "
 ################################################################################
 
 set -xau
@@ -102,35 +103,42 @@ set +u
 # -----------------------------------------------------------------------------
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+# NOTE:
+# Split global dumps to 2 jobs, b/c of slow satwnd and uprair
+# Remove NAP and go back to Shelley's original cron kick off times
+# But for satwnd and upair - start NAP minutes earlier (global->10min, rap->2min)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 if [ -n "$JOB_NUMBER" ]; then
 set -u
    if [ $JOB_NUMBER = 2 ]; then
-      dump_ind=DUMP2
-      DUMP_group1=${DUMP_group1:-"YES"}
+      dump_ind=DUMP2 #quick jobs
+      DUMP_group1=${DUMP_group1:-"NO"}
       DUMP_group2=${DUMP_group2:-"NO"}
-      DUMP_group3=${DUMP_group3:-"NO"}
-      DUMP_group4=${DUMP_group4:-"NO"}
-      DUMP_group5=${DUMP_group5:-"NO"}
+      DUMP_group3=${DUMP_group3:-"YES"}
+      DUMP_group4=${DUMP_group4:-"YES"}
+      DUMP_group5=${DUMP_group5:-"YES"}
       DUMP_group6=${DUMP_group6:-"YES"}
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"YES"}
-      DUMP_group10=${DUMP_group10:-"NO"}
+      DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"YES"}
    else
-      dump_ind=DUMP
-      DUMP_group1=${DUMP_group1:-"NO"}
+      dump_ind=DUMP #slow
+      DUMP_group1=${DUMP_group1:-"YES"}
       DUMP_group2=${DUMP_group2:-"YES"}
-      DUMP_group3=${DUMP_group3:-"YES"}
-      DUMP_group4=${DUMP_group4:-"YES"}
-      DUMP_group5=${DUMP_group5:-"YES"}
+      DUMP_group3=${DUMP_group3:-"NO"}
+      DUMP_group4=${DUMP_group4:-"NO"}
+      DUMP_group5=${DUMP_group5:-"NO"}
       DUMP_group6=${DUMP_group6:-"NO"}
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"NO"}
-      DUMP_group10=${DUMP_group10:-"YES"}
+      DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"NO"}
       DUMP_group13=${DUMP_group13:-"NO"}
@@ -237,8 +245,8 @@ to ${COMSP}${i}"
    done
 fi  #  endif loop $PROCESS_GRIBFLDS
 
-# NAP is introduced so that uprair can run early on his own
-NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
+## NAP is introduced so that uprair can run early on his own
+#NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
@@ -321,7 +329,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -472,7 +480,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -604,7 +612,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -698,7 +706,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -745,7 +753,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -833,7 +841,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1058,7 +1066,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1189,7 +1197,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1256,7 +1264,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1317,7 +1325,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1366,7 +1374,7 @@ echo
 set -x
 
 # UPRAIR need to start early
-#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+##sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
@@ -1437,7 +1445,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=12
 
@@ -1502,7 +1510,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=13
 
@@ -1715,11 +1723,14 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13"
       set -x
    fi
 
+
+   if [ $JOB_NUMBER = 2 ]; then #don't do in JOBSPROC_RAP_DUMP2
 #  concatenate msone0 and msone1, b/c prepobs only wants one file
-   cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
-   cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
-   chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
-   chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
+    cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+    cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+    chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+    chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
+   fi
 
 #  endif loop $PROCESS_DUMP   
 fi
