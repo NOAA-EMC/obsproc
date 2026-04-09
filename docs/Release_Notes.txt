@@ -7,10 +7,19 @@ PRELUDE
 
 FILE CHANGES
 M docs/Release_Notes.txt 
+M versions/run.ver
+M versions/VERSION
 
 DOCS
  docs/Release_Notes.txt
  Reflect this release changes.
+
+VERSIONS CHANGES
+ versions/run.ver
+ Use bufr_dump_ver=1.3.2 and prepbufr_ver=1.1.1
+
+ versions/VERSION
+ Updated version to 1.2.9
 
 CHANGES TO OUTPUT AND FILE SIZES
  Increased counts appear in the *sfcshp* bufr dump (in the NC001102 subtype)
