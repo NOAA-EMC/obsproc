@@ -13,6 +13,7 @@
 *.tgz*
 fort.*
 *.log
+versions/VERSION
 
 # Ignore the contents of these directories
 exec/
