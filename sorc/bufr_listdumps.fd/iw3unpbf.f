@@ -4405,7 +4405,7 @@ C     ---> PROCESSES AIRCRAFT DATA (004/001-004, 004/006-011, 004/103)
      $ CBORG,actp,obsvr
       REAL(8) RID_8,UFBINT_8,RNS_8,OBS2_8(43),OBS3_8(5,255,7),
      $ RACID_8,RTAM_8(2),RTAM_WDIR_8,RQCD_8,BULL_8(2),RTAMB_8(7),
-     $ ractp_8,robsvr_8,obs8_8(2)
+     $ ractp_8,robsvr_8,obs8_8(2),RSMMO_8
       REAL(8) HDR_8(20),RCT_8(5,255),ARR_8(10,255),RAW_8(255),TRBX_8(5),
      $ ROLF_8,BMISS,AMINIMUM_8,AMAXIMUM_8,rialr_8
       DIMENSION    OBS(*),OBS2(43),OBS3(5,255,7),NOBS3(7),HDR(20),
@@ -5322,6 +5322,7 @@ CCC  & RTAMB_8(1), RTAMB_8(2), RTAMB_8(3), RTAMB_8(4)
 !      Order of QMRKH array representation:
 !  N = 1     2       3     4     5       6       7
 !      SMMO, TMDBST, WDIR, WSPD, TRBXST, TOPEDR, AFIC
+      
 Cfuture call ufbint(lunit,ufbint_8,1,1,iret,'SMMO')
 Cfuture if(ibfms(ufbint_8).eq.0) then
 Cfuture   print'(" SMMO   (not stored) is ",g0)', ufbint_8
@@ -5359,6 +5360,15 @@ CCC      print'(" REHU  PCCF, QM ",2(1X,F5.1))', RQCD_8, QQM(1)
 
       END IF
 
+      IF (SUBSET .EQ. 'NC004103') THEN
+         RSMMO_8 = BMISS
+         CALL UFBINT(LUNIT,RSMMO_8,1,1,IRET,'SMMO')
+         IF (IBFMS(RSMMO_8) .EQ. 0) THEN
+            PRINT '(" IW3UNPBF/R05UBF: NC004103 SMMO=",G0," SID=",A)',
+     $         RSMMO_8, SID
+         ENDIF
+      ENDIF
+      
       IF(SUBSET.NE.'NC004004' .and. SUBSET.NE.'NC004010') THEN
 
 C  -------------------------------------------------------------------
