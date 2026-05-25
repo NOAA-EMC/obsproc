@@ -207,7 +207,7 @@ set -x
  
 export COMSP=$COMOUT/$RUN.${cycle}.
  
-if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
+if [ "$PROCESS_GRIBFLDS" = 'YES' -a "${JOB_NUMBER:-2}" = '2' ]; then
 
 ###################################
 #  copy imssnow from $TANK_GRIBFLDS

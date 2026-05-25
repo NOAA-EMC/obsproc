@@ -258,6 +258,7 @@ if [ $RUN = rap_p ]; then
 else
    export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-YES} # defaults to YES in
                                                     # full and early cycle jobs
+                                                    # and for JOB_NUMBER=2
 fi
 export PROCESS_DUMP=${PROCESS_DUMP:-YES}
 export prepssmi=NO # "spssmi" reprocessed dump no longer generated
