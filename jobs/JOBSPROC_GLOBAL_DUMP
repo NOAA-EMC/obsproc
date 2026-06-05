@@ -234,7 +234,7 @@ fi
 #########################################################
 export JOB_NUMBER=1
 
-export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-YES} # normally runs
+export PROCESS_GRIBFLDS=${PROCESS_GRIBFLDS:-NO}  # GRIBFLDS run in JOB_NUMBER=2
 export PROCESS_DUMP=${PROCESS_DUMP:-YES}         # normally runs
 export prepssmi=NO # "spssmi" reprocessed dump no longer generated
                    # since SSM/I instrument on F-13 has failed (11/2009)
