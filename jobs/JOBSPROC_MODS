@@ -77,16 +77,16 @@ set -x
 # #############################################
 
 ##########################
-# Specify modNET and RUN Name
+# Specify mNET and RUN Name
 ##########################
 export NET=${NET:-obsproc}
-export modNET=${modNET:-mods}
+export mNET=${mNET:-mods}
 export RUN=${RUN:-mods}
 
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -178,7 +178,7 @@ export YYYY=`echo $PDYm9 | cut -c1-4` #mods doing $PDYm9  data
 # Define COMOUT directory  (no COMIN for this job)
 ##################################################
 
-export COMOUT=${COMOUT:-$(compath.py -o ${NET}/$obsproc_ver/${modNET}.${PDY})}
+export COMOUT=${COMOUT:-$(compath.py -o ${NET}/$obsproc_ver/${mNET}.${PDY})}
 export MODSDIR=${MODSDIR:-$(compath.py -o ${NET}/$obsproc_ver)/mods.$YYYY}
 mkdir -m 775 -p $COMOUT
 

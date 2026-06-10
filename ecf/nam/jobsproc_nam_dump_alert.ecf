@@ -16,8 +16,8 @@ export cyc=%CYC%
 export RUN=%JTYP% #=[nam, gfs, gdas]
 
 export NET=obsproc
-export modNET=$RUN
-[ $RUN = gdas ] && export modNET=gfs
+export mNET=$RUN
+[ $RUN = gdas ] && export mNET=gfs
 
 #########################################
 #Now load the modules

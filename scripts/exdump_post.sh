@@ -66,8 +66,8 @@ echo "----------------------------------------------------------"
 #                        data from 2-day old "aircar" and "aircft" dump files.
 #####################################################################
 
-# NOTE: modNET is changed to gdas in the parent Job script for the gdas RUN
-#       (was gfs - modNET remains gfs for gfs RUN)
+# NOTE: mNET is changed to gdas in the parent Job script for the gdas RUN
+#       (was gfs - mNET remains gfs for gfs RUN)
 # -----------------------------------------------------------------------
 
 set -aux
@@ -112,7 +112,7 @@ tmhr=`echo $tmmark|cut -c3-4`
 export dumptime=`$NDATE -$tmhr $PDY$cyc`$hr_fraction
 export dumptime10=`$NDATE -$tmhr $PDY$cyc`
 
-modnet=$modNET
+modnet=$mNET
 
 [[ $RUN == rap_p ]]  &&  modnet=$RUN
 [[ $RUN == rap_e ]]  &&  modnet=$RUN
@@ -625,10 +625,10 @@ $dumptime"
    $DATA/postmsg "$jlogfile" "$msg"
 
    retr=TRUE
-   [ "$modNET" = 'gfs' -o "$modNET" = 'gdas' ]  &&  retr=FALSE
+   [ "$mNET" = 'gfs' -o "$mNET" = 'gdas' ]  &&  retr=FALSE
    radn=TRUE
-   [ "$modNET" = 'rap' ]  &&  radn=FALSE
-   [ "$modNET" = 'rrfs' ]  &&  radn=FALSE
+   [ "$mNET" = 'rap' ]  &&  radn=FALSE
+   [ "$mNET" = 'rrfs' ]  &&  radn=FALSE
 
    cat << EOFlistdumps > parms
  &PDATA
@@ -821,15 +821,15 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
 #    Update Data Count Average Tables for urma Network                 #
 ########################################################################
 
-   if [ "$modNET" = 'gdas' -o "$modNET" = 'gfs' -o "$modNET" = 'nam' ]; then
-      networks=$modNET
-   elif [ "$modNET" = 'rap' -a "$RUN" = 'rap' ]; then
+   if [ "$mNET" = 'gdas' -o "$mNET" = 'gfs' -o "$mNET" = 'nam' ]; then
+      networks=$mNET
+   elif [ "$mNET" = 'rap' -a "$RUN" = 'rap' ]; then
       networks=rap
-   elif [ "$modNET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
+   elif [ "$mNET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
       networks=rrfs
-   elif [ "$modNET" = 'rtma' ]; then
+   elif [ "$mNET" = 'rtma' ]; then
       networks=rtma
-   elif [ "$modNET" = 'urma' ]; then
+   elif [ "$mNET" = 'urma' ]; then
       networks=urma
    fi
 

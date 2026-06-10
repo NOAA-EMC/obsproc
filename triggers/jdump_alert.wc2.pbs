@@ -26,9 +26,9 @@ export envir=prod
 export cyc=%CC%   # choices are 00, 06, 12, 18)
 DESC=%DESC%
 JTYP=%JTYP%       # choices are gfs, gdas, nam
-export modNET=$JTYP
+export mNET=$JTYP
 export RUN=$JTYP
-[ $JTYP = gdas ] && export modNET=gfs
+[ $JTYP = gdas ] && export mNET=gfs
 export job=${JTYP}_dump_alert_$cyc
 export jobid=$job.$PBS_JOBID
 export PDY=%PDY%

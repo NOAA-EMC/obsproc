@@ -55,10 +55,10 @@ echo
 set -x
 
 ######################
-# Specify modNET and RUN
+# Specify mNET and RUN
 ######################
 export NET=${NET:-obsproc}
-export modNET=${modNET:-gfs}
+export mNET=${mNET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
 echo $job | grep gdas
@@ -71,7 +71,7 @@ fi
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -174,9 +174,9 @@ fi
 
 # The following are used by $PROCESS_TIMETWINS in the GDAS when it is YES
 # -----------------------------------------------------------------------
-export COMINgdas=${COMINgdas:-$(compath.py ${envir}/${modNET}/${gfs_ver})/${RUN}.}
-export COMINGFS=${COMINGFS:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${modNET}.${PDY}/${cyc}/${COMPONENT})}
-#export COMIN1=${COMIN1:-$(compath.py ${envir}/${modNET}/${gfs_ver})/${RUN}.}
+export COMINgdas=${COMINgdas:-$(compath.py ${envir}/${mNET}/${gfs_ver})/${RUN}.}
+export COMINGFS=${COMINGFS:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${mNET}.${PDY}/${cyc}/${COMPONENT})}
+#export COMIN1=${COMIN1:-$(compath.py ${envir}/${mNET}/${gfs_ver})/${RUN}.}
 export COMIN1=${COMIN1:-$(compath.py ${envir}/${NET}/${obsproc_ver})/${RUN}.} #twinwind file now write in obsproc package
 
 #################################################################
@@ -250,7 +250,7 @@ fi
 
 env
 
-[ $RUN = gdas ] && export modNET=gdas
+[ $RUN = gdas ] && export mNET=gdas
 #####################
 # Execute the script
 #####################

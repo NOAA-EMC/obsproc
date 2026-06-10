@@ -64,10 +64,10 @@ echo
 set -x
 
 ###########################
-# Specify modNET and RUN Name
+# Specify mNET and RUN Name
 ###########################
 export NET=${NET:-obsproc}
-export modNET=${modNET:-rrfs}
+export mNET=${mNET:-rrfs}
 echo $job | grep pcyc
 err_p=$?
 echo $job | grep erly
@@ -82,7 +82,7 @@ fi
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -195,7 +195,7 @@ export comin_m1=${comin_m1:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.$
 # directory path to data count averaging executed in model script and in
 #  bufr_avgdata.sh
 # ----------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${NET}/${obsproc_ver}/sdm_rtdm/${modNET})}
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/${NET}/${obsproc_ver}/sdm_rtdm/${mNET})}
   
 #  .. AVGDarch_OUT is directory path for avg tables output by model script
 #     --------------------------------------------------------------------

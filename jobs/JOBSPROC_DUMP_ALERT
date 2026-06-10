@@ -25,7 +25,7 @@ echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
 echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
 echo
@@ -58,7 +58,7 @@ echo
 set -x
 
 ######################
-# Specify NET, modNET, and RUN
+# Specify NET, mNET, and RUN
 ######################
  # no default values - MUST be exported by trigger script
 

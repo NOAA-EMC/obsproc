@@ -55,15 +55,15 @@ echo
 set -x
 
 ######################
-# Specify modNET and RUN
+# Specify mNET and RUN
 ######################
 export NET=${NET:-obsproc}
-export modNET=${modNET:-nam}
+export mNET=${mNET:-nam}
 export RUN=${RUN:-nam}
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -212,7 +212,7 @@ export COMPONENT=${COMPONENT:-atmos}
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY})}
   #secure turn off SYNDAT for nam
-  #export COMINtcvital=${COMINtcvital:-$(compath.py ${envir}/${modNET}/${nam_ver}/${RUN}.${PDY})}
+  #export COMINtcvital=${COMINtcvital:-$(compath.py ${envir}/${mNET}/${nam_ver}/${RUN}.${PDY})}
   export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${obsproc_ver}/${RUN}.${PDY})}
   mkdir -m 775 -p $COMOUT
 else

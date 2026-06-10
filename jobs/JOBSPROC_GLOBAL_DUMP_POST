@@ -56,10 +56,10 @@ echo
 set -x
 
 ######################
-# Specify modNET and RUN
+# Specify mNET and RUN
 ######################
 export NET=${NET:-obsproc}
-export modNET=${modNET:-gfs}
+export mNET=${mNET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
 echo $job | grep gdas
@@ -72,7 +72,7 @@ fi
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -189,7 +189,7 @@ export comin_m1=${comin_m1:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.$
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$NET/${obsproc_ver})/sdm_rtdm/${modNET}} 
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$NET/${obsproc_ver})/sdm_rtdm/${mNET}} 
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)
@@ -250,7 +250,7 @@ fi
 
 env
 
-[ $RUN = gdas ] && export modNET=gdas
+[ $RUN = gdas ] && export mNET=gdas
 #####################
 # Execute the script
 #####################

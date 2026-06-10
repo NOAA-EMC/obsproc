@@ -55,16 +55,16 @@ echo
 set -x
 
 ###########################
-# Specify modNET and RUN Name
+# Specify mNET and RUN Name
 ###########################
 export NET=${NET:-obsproc}
-export modNET=${modNET:-rtma}
+export mNET=${mNET:-rtma}
 #export RUN=${RUN:-urma}
 
 set +x
 echo
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
-echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 #echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -83,7 +83,7 @@ else
 fi
 set +x
 echo
-echo modNET is ${modNET}
+echo mNET is ${mNET}
 echo RUN is ${RUN}
 echo
 set -x

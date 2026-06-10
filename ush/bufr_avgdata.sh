@@ -27,7 +27,7 @@ set -aux
 # Imported positional parameters:
 #   $1     - string indicating network {'nam', 'gfs', 'gdas', 'rap', 'rtma',
 #            'urma' or 'dump', tm00 for all networks}
-#           (Note: This is not defined the same as $modNET in the j-job)
+#           (Note: This is not defined the same as $mNET in the j-job)
 #
 # Imported variables that must be passed in:
 #   envir  - processing environment ('prod' or 'test')
