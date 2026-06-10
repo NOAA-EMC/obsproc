@@ -1186,13 +1186,13 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
    msg="Attempt to update data count average table dump monitoring"
    $DATA/postmsg "$jlogfile" "$msg"
 
-   $USHobsproc/bufr_avgdata.sh $NET
+   $USHobsproc/bufr_avgdata.sh $mNET
    errsc=$?
    if [ "$errsc" -eq '0' ]; then
-      rm $AVGDarch_OUT/obcount_30davg.${NET}.current
-      cpfs obcount_30davg.${NET}.current \
-       $AVGDarch_OUT/obcount_30davg.${NET}.current
-      chmod 775 $AVGDarch_OUT/obcount_30davg.${NET}.current
+      rm $AVGDarch_OUT/obcount_30davg.${mNET}.current
+      cpfs obcount_30davg.${mNET}.current \
+       $AVGDarch_OUT/obcount_30davg.${mNET}.current
+      chmod 775 $AVGDarch_OUT/obcount_30davg.${mNET}.current
       msg="Data count average table SUCCESSFULLY updated for dump monitoring"
       $DATA/postmsg "$jlogfile" "$msg"
       typeset -Z2 this_month last_month
@@ -1203,16 +1203,16 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
          last_month=12
          year=`expr $year - 1`
       fi
-###   if [ ! -s $AVGDarch_OUT/obcount_30davg.${NET}.${year}${last_month} ]
+###   if [ ! -s $AVGDarch_OUT/obcount_30davg.${mNET}.${year}${last_month} ]
 ###   then
 
 #  If no data count average table found for previous month, save this one
 #   (Currently not done in data monitoring)
 
-###      rm $AVGDarch_OUT/obcount_30davg.${NET}.*${last_month}
-###      cp obcount_30davg.${NET}.current \
-###       $AVGDarch_OUT/obcount_30davg.${NET}.${year}${last_month}
-###      chmod 775 $AVGDarch_OUT/obcount_30davg.${NET}.${year}${last_month}
+###      rm $AVGDarch_OUT/obcount_30davg.${mNET}.*${last_month}
+###      cp obcount_30davg.${mNET}.current \
+###       $AVGDarch_OUT/obcount_30davg.${mNET}.${year}${last_month}
+###      chmod 775 $AVGDarch_OUT/obcount_30davg.${mNET}.${year}${last_month}
 ###      msg="DATA COUNT AVERAGE table for ${year}${last_month} saved \
 ###for dump monitoring"
 ###      $DATA/postmsg "$jlogfile" "$msg"

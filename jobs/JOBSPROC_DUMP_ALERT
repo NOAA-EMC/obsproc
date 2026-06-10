@@ -24,8 +24,8 @@ echo
 echo cyc is ${cyc:?"###FATAL ERROR \"cyc\" is not set"}
 echo envir is ${envir:?"###FATAL ERROR \"envir\" is not set"}
 echo job is ${job:?"###FATAL ERROR \"job\" is not set"}
-echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo mNET is ${mNET:?"###FATAL ERROR \"mNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo DATAROOT is ${DATAROOT:?"###FATAL ERROR \"DATAROOT\" is not set"}
 echo
@@ -58,7 +58,7 @@ echo
 set -x
 
 ######################
-# Specify obsNET, NET, and RUN
+# Specify NET, mNET, and RUN
 ######################
  # no default values - MUST be exported by trigger script
 
@@ -95,7 +95,7 @@ export SENDECF=${SENDECF:-YES}
 # Paths for obsproc_dump_alert items
 # ----------------------------------
 export HOMEobsproc=${HOMEobsproc:\
--${PACKAGEROOT:?}/${obsNET}/${obsproc_ver:?\
+-${PACKAGEROOT:?}/${NET}/${obsproc_ver:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
@@ -114,15 +114,15 @@ export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   else
-    export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})}
+    export COMIN=${COMIN:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY})}
   fi
 else
   if [[ "$RUN" == gfs || "$RUN" == gdas ]]; then
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${NET}/${obsproc_ver}/${RUN}.${PDY}}/${cyc}/${COMPONENT}
   else
-    export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}}
+    export COMIN=${COMIN:-${COMIN_ROOT:?}/${NET}/${obsproc_ver}/${RUN}.${PDY}}
   fi
 fi
 
