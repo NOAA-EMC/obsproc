@@ -35,7 +35,7 @@ userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 export obsproc_ver=v1.0
 export obsproc_ver_pckg=v1.0.0
 export bufr_dump_ver=1.0.0
-export obsNET=obsproc
+export NET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver_pckg}        # NCO prod
@@ -100,7 +100,7 @@ export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com/
 # Need these settings only when cyc=18, tmmark=tm00, and have local set of dump status
 # files to process
 export COPY=YES
-export HOMEarch=${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/sdm_rtdm/nam
+export HOMEarch=${COMOUT_ROOT}/${NET}/${obsproc_ver}/sdm_rtdm/nam
 #export AVGDarch_IN=$HOMEarch/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day

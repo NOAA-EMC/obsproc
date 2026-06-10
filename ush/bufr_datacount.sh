@@ -37,9 +37,9 @@ set -aux
 #   DATA        - path to working directory
 #   job         - job name (e.g., 'gdas_dump_post_12' or
 #                                 'nam_dump_post_tm00_12')
-#   NET         - network  {'nam' (tm00), 'gfs', or 'gdas'}
-#                 NOTE: NET is changed to 'gdas' in the parent Job script
-#                       for the 'gdas' RUN (was 'gfs' - NET remains 'gfs' for
+#   modNET      - network  {'nam' (tm00), 'gfs', or 'gdas'}
+#                 NOTE: modNET is changed to 'gdas' in the parent Job script
+#                       for the 'gdas' RUN (was 'gfs' - modNET remains 'gfs' for
 #                       'gfs' RUN)
 #   RUN         - analysis/model run  {'nam' (tm00), 'gfs', or 'gdas'}
 #   COMIN       - FIRST choice for path to input $COMROOT directory containing
@@ -85,7 +85,7 @@ LIST_CNT=${LIST_CNT:-$FIXbufr_dump/bufr_dumplist}
 cd $DATA
 
 tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
-NET_uc=$(echo $NET | tr [a-z] [A-Z])
+NET_uc=$(echo $modNET | tr [a-z] [A-Z])
 cycle_uc=$(echo $cycle | tr [a-z] [A-Z] | cut -c2-)
 
 msg="CHECK DATA COUNTS FOR $tmmark_uc $NET_uc FOR $dumptime"
@@ -124,11 +124,11 @@ awk -F" in data group " '{print $1}' delete | \
 paste delete.l delete.r > ${RUN}.${cycle}.status.tm00.bufr_d
 rm delete delete.l delete.r
 
-> obcount_30davg.${NET}.current
-if [ -s $AVGDarch_IN/obcount_30davg.${NET}.current ]; then
-   grep --text "^#   " $AVGDarch_IN/obcount_30davg.${NET}.current | \
+> obcount_30davg.${modNET}.current
+if [ -s $AVGDarch_IN/obcount_30davg.${modNET}.current ]; then
+   grep --text "^#   " $AVGDarch_IN/obcount_30davg.${modNET}.current | \
     sed "s/#  ......./     /g" | sed "s/[^0-9]/ /g" \
-    > obcount_30davg.${NET}.current
+    > obcount_30davg.${modNET}.current
 fi
 
 typeset -Z2 this_month arch_month
@@ -144,11 +144,11 @@ for months_ago in 3 6 9 12; do
    fi
    arch_month=$a_month
 
-   > obcount_30davg.${NET}.${months_ago}months_ago
-   if [ -s $AVGDarch_IN/obcount_30davg.${NET}.${arch_year}${arch_month} ]; then
-     grep --text "^#   " $AVGDarch_IN/obcount_30davg.${NET}.${arch_year}${arch_month} | \
+   > obcount_30davg.${modNET}.${months_ago}months_ago
+   if [ -s $AVGDarch_IN/obcount_30davg.${modNET}.${arch_year}${arch_month} ]; then
+     grep --text "^#   " $AVGDarch_IN/obcount_30davg.${modNET}.${arch_year}${arch_month} | \
        sed "s/#  ......./     /g" | sed "s/[^0-9]/ /g" \
-       > obcount_30davg.${NET}.${months_ago}months_ago
+       > obcount_30davg.${modNET}.${months_ago}months_ago
    fi
 done
 
@@ -285,11 +285,11 @@ startmsg
    unset FORT00 `env | grep "FORT[0-9]\{1,\}" | awk -F= '{print $1}'`
    export FORT10="dumplist"
    export FORT11="$RUN.${cycle}.status.tm00.bufr_d"
-   export FORT13="obcount_30davg.${NET}.current"
-   export FORT14="obcount_30davg.${NET}.3months_ago"
-   export FORT15="obcount_30davg.${NET}.6months_ago"
-   export FORT16="obcount_30davg.${NET}.9months_ago"
-   export FORT17="obcount_30davg.${NET}.12months_ago"
+   export FORT13="obcount_30davg.${modNET}.current"
+   export FORT14="obcount_30davg.${modNET}.3months_ago"
+   export FORT15="obcount_30davg.${modNET}.6months_ago"
+   export FORT16="obcount_30davg.${modNET}.9months_ago"
+   export FORT17="obcount_30davg.${modNET}.12months_ago"
    export FORT51="updated.status.tm00.bufr_d"
    export FORT52="deficient"
    export FORT53="excessive"
@@ -302,7 +302,7 @@ time -p $DTCX < datacount.cards >> $pgmout 2> errfile
 RETC=$?
 
 [ ! -s ${RUN}.${cycle}.status.tm00.bufr_d ] && RETC=99
-[ ! -s obcount_30davg.${NET}.current ] && RETC=99
+[ ! -s obcount_30davg.${modNET}.current ] && RETC=99
 
 cat errfile >> $pgmout
 
@@ -321,15 +321,15 @@ if [ $RETC -eq 0 -o $RETC -eq 4 -o $RETC -eq 5 -o $RETC -eq 6 ]; then
 #  --> after NAMv4 impl. it makes sense to add $tmmark to end of below filename
 #      (eventually retain new form of filename and delete old form of filename
 #       which is still created further down in script)
-##### echo "Alert File For $cycle_uc $NET_uc On $PDY" > $ALERTL/${NET}.${cycle}
+##### echo "Alert File For $cycle_uc $NET_uc On $PDY" > $ALERTL/${modNET}.${cycle}
    echo "Alert File For $tmmark_uc $cycle_uc $NET_uc On $PDY" > \
-    $ALERTL/${NET}.${cycle}.$tmmark
-   echo " " >> $ALERTL/${NET}.${cycle}.$tmmark
+    $ALERTL/${modNET}.${cycle}.$tmmark
+   echo " " >> $ALERTL/${modNET}.${cycle}.$tmmark
    echo "Comparison of Data Counts for This Run vs. Current 30-Day Avg. Data \
-Counts" >> $ALERTL/${NET}.${cycle}.$tmmark
+Counts" >> $ALERTL/${modNET}.${cycle}.$tmmark
    echo "--------------------------------------------------------------------\
-------" >> $ALERTL/${NET}.${cycle}.$tmmark
-   echo " " >> $ALERTL/${NET}.${cycle}.$tmmark
+------" >> $ALERTL/${modNET}.${cycle}.$tmmark
+   echo " " >> $ALERTL/${modNET}.${cycle}.$tmmark
 
    if [ $RETC -eq 4 -o $RETC -eq 5  -o  $RETC -eq 6 ]; then
       nindx=`wc deficient  | awk '{ print $1 }'`
@@ -345,12 +345,12 @@ Counts" >> $ALERTL/${NET}.${cycle}.$tmmark
 # Also post alerts to alert log file if r.c. is 4, 5 or 6
 # -------------------------------------------------------
 
-      cat deficient >> $ALERTL/${NET}.${cycle}.$tmmark
+      cat deficient >> $ALERTL/${modNET}.${cycle}.$tmmark
       msg="DATACOUNT low -- SDM should check ALERTLOG messages"
       postmsg "$jlogfile" "$msg"
    else
       echo "There are no low data count alerts for today." >> \
-       $ALERTL/${NET}.${cycle}.$tmmark
+       $ALERTL/${modNET}.${cycle}.$tmmark
       RETC=0
    fi
 
@@ -367,7 +367,7 @@ Counts" >> $ALERTL/${NET}.${cycle}.$tmmark
 
 #  --> for now copy new form of filename to old form,
 #      but eventually delete this line
-   cp -p  $ALERTL/${NET}.${cycle}.$tmmark $ALERTL/${NET}.${cycle}
+   cp -p  $ALERTL/${modNET}.${cycle}.$tmmark $ALERTL/${modNET}.${cycle}
 
 # ------------------------------------------------------------------
 #  Post long term alerts to alert log file (but not to job log file)
@@ -380,23 +380,23 @@ Counts" >> $ALERTL/${NET}.${cycle}.$tmmark
 #      (eventually retain new form of filename and delete old form of filename
 #       which is still created further down in script)
 ##### echo "Alert File For $cycle_uc $NET_uc" On $PDY > \
-#####  $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}
+#####  $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}
       echo "Alert File For $tmmark_uc $cycle_uc $NET_uc" On $PDY > \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
       echo " " >> \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
       echo "Current 30-Day Avg. Data Counts vs. 30-Day Avg. Data Counts From \
 $months_ago Months Ago" >> \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
       echo "-----------------------------------------------------------------\
 -------------" >> \
-      $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+      $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
       echo " " >> \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
 
       if [ -s trend_m${months_ago} ]; then
          cat trend_m${months_ago} >> \
-          $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+          $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
          if [ $kflag -eq 0 ]; then
             msg="one or more DATACOUNT trends high or low -- SDM should check \
 ALERTLOG messages"
@@ -405,18 +405,18 @@ ALERTLOG messages"
          fi
       else
          echo "There are no high or low data count alerts for today." \
-          >> $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+          >> $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
       fi
       echo " " >> \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
       echo "##################################################################\
 #############" >> \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark
 
 #  --> for now copy new form of filename to old form,
 #      but eventually delete this line
-      cp -p $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}.$tmmark \
-       $ALERTL/trend_vs_${months_ago}months_ago.${NET}.${cycle}
+      cp -p $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}.$tmmark \
+       $ALERTL/trend_vs_${months_ago}months_ago.${modNET}.${cycle}
 
    done
 

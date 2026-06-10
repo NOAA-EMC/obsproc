@@ -66,8 +66,8 @@ echo "----------------------------------------------------------"
 #                        data from 2-day old "aircar" and "aircft" dump files.
 #####################################################################
 
-# NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
-#       (was gfs - NET remains gfs for gfs RUN)
+# NOTE: modNET is changed to gdas in the parent Job script for the gdas RUN
+#       (was gfs - modNET remains gfs for gfs RUN)
 # -----------------------------------------------------------------------
 
 set -aux
@@ -112,12 +112,12 @@ tmhr=`echo $tmmark|cut -c3-4`
 export dumptime=`$NDATE -$tmhr $PDY$cyc`$hr_fraction
 export dumptime10=`$NDATE -$tmhr $PDY$cyc`
 
-net=$NET
+modnet=$modNET
 
-[[ $RUN == rap_p ]]  &&  net=$RUN
-[[ $RUN == rap_e ]]  &&  net=$RUN
-[[ $RUN == rrfs_p ]]  &&  net=$RUN
-[[ $RUN == rrfs_e ]]  &&  net=$RUN
+[[ $RUN == rap_p ]]  &&  modnet=$RUN
+[[ $RUN == rap_e ]]  &&  modnet=$RUN
+[[ $RUN == rrfs_p ]]  &&  modnet=$RUN
+[[ $RUN == rrfs_e ]]  &&  modnet=$RUN
 
 net_uc=$(echo $net | tr [a-z] [A-Z])
 set +u
@@ -625,10 +625,10 @@ $dumptime"
    $DATA/postmsg "$jlogfile" "$msg"
 
    retr=TRUE
-   [ "$NET" = 'gfs' -o "$NET" = 'gdas' ]  &&  retr=FALSE
+   [ "$modNET" = 'gfs' -o "$modNET" = 'gdas' ]  &&  retr=FALSE
    radn=TRUE
-   [ "$NET" = 'rap' ]  &&  radn=FALSE
-   [ "$NET" = 'rrfs' ]  &&  radn=FALSE
+   [ "$modNET" = 'rap' ]  &&  radn=FALSE
+   [ "$modNET" = 'rrfs' ]  &&  radn=FALSE
 
    cat << EOFlistdumps > parms
  &PDATA
@@ -821,15 +821,15 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
 #    Update Data Count Average Tables for urma Network                 #
 ########################################################################
 
-   if [ "$NET" = 'gdas' -o "$NET" = 'gfs' -o "$NET" = 'nam' ]; then
-      networks=$NET
-   elif [ "$NET" = 'rap' -a "$RUN" = 'rap' ]; then
+   if [ "$modNET" = 'gdas' -o "$modNET" = 'gfs' -o "$modNET" = 'nam' ]; then
+      networks=$modNET
+   elif [ "$modNET" = 'rap' -a "$RUN" = 'rap' ]; then
       networks=rap
-   elif [ "$NET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
+   elif [ "$modNET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
       networks=rrfs
-   elif [ "$NET" = 'rtma' ]; then
+   elif [ "$modNET" = 'rtma' ]; then
       networks=rtma
-   elif [ "$NET" = 'urma' ]; then
+   elif [ "$modNET" = 'urma' ]; then
       networks=urma
    fi
 

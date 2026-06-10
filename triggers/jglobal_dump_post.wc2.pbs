@@ -33,13 +33,13 @@ PDYm1=$(date -d "${PDY} 1 day ago" +%Y%m%d)
 
 userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 
-export obsNET=obsproc
+export NET=obsproc
 export obsproc_ver=v1.0
 export obsproc_ver_pckg=v1.0.0 
 export bufr_dump_ver=1.0.0
 
-#export HOMEobsproc=${PACKAGEROOTpara}/${obsNET}.${obsproc_ver_pckg}   # NCO para
-#export HOMEobsproc=${PACKAGEROOT}/${obsNET}.${obsproc_ver_pckg}      # NCO prod
+#export HOMEobsproc=${PACKAGEROOTpara}/${NET}.${obsproc_ver_pckg}   # NCO para
+#export HOMEobsproc=${PACKAGEROOT}/${NET}.${obsproc_ver_pckg}      # NCO prod
 export HOMEobsproc=${userROOT}/install/obsproc-rmprep      # local
 
 VERSION_FILE=$HOMEobsproc/versions/run.ver 
@@ -94,11 +94,11 @@ export KEEPDATA=YES
 export COMPONENT=atmos
 export COMIN_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com 
 export COMOUT_ROOT=/lfs/h2/emc/stmp/$USER/CRON/${DESC}/com
-export comin=${COMIN_ROOT}/${obsNET}/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
-export comin_m1=${COMIN_ROOT}/${obsNET}/${obsproc_ver}/${JTYP}.${PDYm1}/${cyc}/${COMPONENT}
+export comin=${COMIN_ROOT}/${NET}/${obsproc_ver}/${JTYP}.${PDY}/${cyc}/${COMPONENT}
+export comin_m1=${COMIN_ROOT}/${NET}/${obsproc_ver}/${JTYP}.${PDYm1}/${cyc}/${COMPONENT}
 
 export COPY=YES
-export HOMEarch=${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/sdm_rtdm/gfs
+export HOMEarch=${COMOUT_ROOT}/${NET}/${obsproc_ver}/sdm_rtdm/gfs
 export AVGDarch_IN=$HOMEarch/avgdata
 export AVGDarch_OUT=$HOMEarch/avgdata
 export OBCNTarch=$HOMEarch/obcount_30day

@@ -56,10 +56,10 @@ echo
 set -x
 
 ######################
-# Specify NET and RUN
+# Specify modNET and RUN
 ######################
-export obsNET=${obsNET:-obsproc}
-export NET=${NET:-gfs}
+export NET=${NET:-obsproc}
+export modNET=${modNET:-gfs}
 echo $job | grep gfs
 err_gfs=$?
 echo $job | grep gdas
@@ -71,8 +71,8 @@ elif [ $err_gdas = 0 ]; then
 fi
 set +x
 echo
-echo obsNET is ${obsNET:?"###FATAL ERROR \"obsNET\" is not set"}
 echo NET is ${NET:?"###FATAL ERROR \"NET\" is not set"}
+echo modNET is ${modNET:?"###FATAL ERROR \"modNET\" is not set"}
 echo RUN is ${RUN:?"###FATAL ERROR \"RUN\" is not set"}
 echo
 set -x
@@ -117,7 +117,7 @@ export SENDSDM=${SENDSDM:-YES}
 # ------------------------
 # Paths for obsproc items
 # ------------------------
-export HOMEobsproc=${HOMEobsproc:-${PACKAGEROOT:?}/${obsNET}/${obsproc_ver}:?\
+export HOMEobsproc=${HOMEobsproc:-${PACKAGEROOT:?}/${NET}/${obsproc_ver}:?\
 "###FATAL ERROR \"obsproc_ver\" is not set"}
 
 export SCRIPTSobsproc=${SCRIPTSobsproc:-$HOMEobsproc/scripts}
@@ -154,33 +154,33 @@ export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
 
 if [[ "$RUN_ENVIR" == nco ]]; then
-  export COMIN=${COMIN:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
-  export COMOUT=${COMOUT:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMIN=${COMIN:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
+  export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
   mkdir -m 775 -p $COMOUT
 # The following are used by $PROCESS_REMOREST_dm2 when it is YES
 # --------------------------------------------------------------
-  export COMINm2=${COMINm2:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
-  export COMOUTm2=${COMOUTm2:-$(compath.py -o ${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
+  export COMINm2=${COMINm2:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
+  export COMOUTm2=${COMOUTm2:-$(compath.py -o ${NET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT})}
 else
-  export COMIN=${COMIN:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMIN=${COMIN:-${COMIN_ROOT:?}/${NET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
 
 # COMOUT_ROOT for developers defaults to unique $DATA/com directory as root to
 #  prevent job from writing into a non-unique directory that might already have
 #  output in it from a previous checkout run for the same cycle
 # -----------------------------------------------------------------------------
   export COMOUT_ROOT=${COMOUT_ROOT:-${DATA}/com}
-  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
+  export COMOUT=${COMOUT:-${COMOUT_ROOT}/${NET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUT
 # The following are used by $PROCESS_REMOREST_dm2 when it is YES
 # --------------------------------------------------------------
-  export COMINm2=${COMINm2:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
-  export COMOUTm2=${COMOUTm2:-${COMOUT_ROOT}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
+  export COMINm2=${COMINm2:-${COMIN_ROOT:?}/${NET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
+  export COMOUTm2=${COMOUTm2:-${COMOUT_ROOT}/${NET}/${obsproc_ver}/${RUN}.${PDYm2}/${cyc}/${COMPONENT}}
   mkdir -m 755 -p $COMOUTm2
 fi
 
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
-export comin=${comin:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDY})/${cyc}/${COMPONENT}}
-export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN}.${PDYm1})/${cyc}/${COMPONENT}}
+export comin=${comin:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY})/${cyc}/${COMPONENT}}
+export comin_m1=${comin_m1:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDYm1})/${cyc}/${COMPONENT}}
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -189,7 +189,7 @@ export comin_m1=${comin_m1:-$(compath.py ${envir}/${obsNET}/${obsproc_ver}/${RUN
 # directory path to data count/alert processing executed in bufr_datacount.sh
 #  and data count averaging executed in model script and in bufr_avgdata.sh
 # ---------------------------------------------------------------------------
-export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$obsNET/${obsproc_ver})/sdm_rtdm/${NET}} 
+export HOMEarch=${HOMEarch:-$(compath.py ${envir}/$NET/${obsproc_ver})/sdm_rtdm/${modNET}} 
 
 #  .. AVGDarch_IN is directory path containing 30-day avg files (read by
 #     bufr_datacount.sh)
@@ -205,8 +205,8 @@ if [[ "$RUN_ENVIR" == nco ]]; then
 else
   [ -n "$HOMEarch" ] && HOMEarch_avgdata=$HOMEarch/avgdata
   export AVGDarch_IN=\
-${AVGDarch_IN:-${HOMEarch_avgdata:-${COMIN_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}}
-  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${obsNET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
+${AVGDarch_IN:-${HOMEarch_avgdata:-${COMIN_ROOT:?}/${NET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}}
+  export AVGDarch_OUT=${AVGDarch_OUT:-${COMOUT_ROOT:?}/${NET}/${obsproc_ver}/sdm_rtdm/${RUN}/avgdata}
   mkdir -p $AVGDarch_OUT
 fi
 
@@ -250,7 +250,7 @@ fi
 
 env
 
-[ $RUN = gdas ] && export NET=gdas
+[ $RUN = gdas ] && export modNET=gdas
 #####################
 # Execute the script
 #####################

@@ -170,7 +170,7 @@ cat break > $pgmout
 export dumptime=`cut -c7-16 ncepdate`
 export cycp=`echo $dumptime|cut -c9-10`
 
-export NET_uc=$(echo $NET | tr [a-z] [A-Z])
+export NET_uc=$(echo $modNET | tr [a-z] [A-Z])
 export tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
 
 msg="$NET_uc ANALYSIS TIME IS $PDY$cyc"

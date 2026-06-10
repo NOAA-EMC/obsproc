@@ -5,7 +5,7 @@
 #PBS -q dev
 #PBS -A OBSPROC-DEV
 #PBS -l walltime=00:30:00
-#PBS -l place=vscatter,select=1:ncpus=13:mem=50gb
+#PBS -l place=vscatter,select=1:ncpus=13:mem=200gb
 #PBS -l debug=true
 #####################################################################
 # Submit notes:
@@ -42,7 +42,7 @@ export obsproc_ver=v1.2
 export obsproc_ver_pckg=v1.2.8
 #export bufr_dump_ver=1.0.0
 export bufr_dump_ver=1.3.1
-export obsNET=obsproc
+export NET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
 export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver_pckg}        # NCO prod

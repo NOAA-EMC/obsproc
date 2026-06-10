@@ -39,7 +39,7 @@ userROOT=/lfs/h2/emc/obsproc/noscrub/$USER
 export obsproc_ver=v1.0
 export obsproc_ver_pckg=v1.0.0
 export prepobs_ver=1.0.0
-export obsNET=obsproc
+export NET=obsproc
 PACKAGEROOTpara=/lfs/h1/ops/para/packages
 #export HOMEobsproc=${PACKAGEROOTpara}/obsproc.${obsproc_ver_pckg}   # NCO para
 #export HOMEobsproc=${PACKAGEROOT}/obsproc.${obsproc_ver_pckg}       # NCO prod
@@ -93,11 +93,11 @@ else
 fi
 
 if [ -z "$cycM" ]; then
-  export COMIN=${DATAROOT}/CRON/${DESC}/com/${obsNET}/$obsproc_ver/${JTYP}.${PDY}
-  export COMOUT=${DATAROOT}/CRON/${DESC}/com/${obsNET}/$obsproc_ver/${JTYP}.${PDY}
+  export COMIN=${DATAROOT}/CRON/${DESC}/com/${NET}/$obsproc_ver/${JTYP}.${PDY}
+  export COMOUT=${DATAROOT}/CRON/${DESC}/com/${NET}/$obsproc_ver/${JTYP}.${PDY}
 else
-  export COMIN=${DATAROOT}/CRON/${DESC}/com/${obsNET}/$obsproc_ver/${JTYP}_ru.${PDY}
-  export COMOUT=${DATAROOT}/CRON/${DESC}/com/${obsNET}/$obsproc_ver/${JTYP}_ru.${PDY}
+  export COMIN=${DATAROOT}/CRON/${DESC}/com/${NET}/$obsproc_ver/${JTYP}_ru.${PDY}
+  export COMOUT=${DATAROOT}/CRON/${DESC}/com/${NET}/$obsproc_ver/${JTYP}_ru.${PDY}
 fi
 
 export KEEPDATA=YES

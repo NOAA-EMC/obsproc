@@ -15,9 +15,9 @@ export model=obsproc
 export cyc=%CYC%
 export RUN=%JTYP% #=[nam, gfs, gdas]
 
-export obsNET=obsproc
-export NET=$RUN
-[ $RUN = gdas ] && export NET=gfs
+export NET=obsproc
+export modNET=$RUN
+[ $RUN = gdas ] && export modNET=gfs
 
 #########################################
 #Now load the modules

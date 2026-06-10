@@ -97,8 +97,8 @@ echo "         Mar 30 2026 - Remove NAP and introdude                       "
 echo "                       second JOBSPROC_GLOBAL_DUMP2                   "               
 #############################################################################
 
-# NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
-#       (was gfs - NET remains gfs for gfs RUN)
+# NOTE: modNET is changed to gdas in the parent Job script for the gdas RUN 
+#       (was gfs - modNET remains gfs for gfs RUN)
 # -----------------------------------------------------------------------
 
 set -xau
@@ -238,7 +238,7 @@ fi
 #NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
 #NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
 #NAP=${NAP:0} #b/c cron is moved to run 2min (120s) early
-if [ "$NET" = 'gfs' ]; then
+if [ "$modNET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
 #   ADPUPA_wait=${ADPUPA_wait:-"NO"}
 #   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
@@ -269,7 +269,7 @@ cat break > $pgmout
 export dumptime=`cut -c7-16 ncepdate`
 export cycp=`echo $dumptime|cut -c9-10`
 
-export NET_uc=$(echo $NET | tr [a-z] [A-Z])
+export NET_uc=$(echo $modNET | tr [a-z] [A-Z])
 export tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
 
 msg="$NET_uc ANALYSIS TIME IS $PDY$cyc"
@@ -405,7 +405,7 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' -a "${JOB_NUMBER:-2}" = '2' ]; then
 
 #  The following may no longer be needed, but leave them in place for now.
 #  Print msg in the rare case the grib2 files cannot be created.
-   if [ "$NET" = 'gdas' ]; then
+   if [ "$modNET" = 'gdas' ]; then
       if [ -s ${COMSP}engicegrb ]; then
          $CNVGRIB -g12 -p40 ${COMSP}engicegrb ${COMSP}engicegrb.grib2
       else
@@ -723,7 +723,7 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}eshrs3.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ssmisu $job \
     ${COMSP}ssmisu.tm00.bufr_d
-#   if [ "${NET}" = "gdas" ]; then
+#   if [ "${modNET}" = "gdas" ]; then
 #      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
 #       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
 #   fi
@@ -832,7 +832,7 @@ DTIM_latest_snomad=${DTIM_latest_snomad:-"+2.99"}
 DTIM_latest_sfcsno=${DTIM_latest_sfcsno:-"+2.99"}
 
 atovs=""
-if [ "$NET" = 'gdas' ]; then
+if [ "$modNET" = 'gdas' ]; then
    atovs=atovs
    DTIM_latest_atovs=${DTIM_latest_atovs:-"+2.99"}
 fi
@@ -873,7 +873,7 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}ascatt.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_snocvr $job \
     ${COMSP}snocvr.tm00.bufr_d
-   if [ "$NET" = 'gdas' ]; then
+   if [ "$modNET" = 'gdas' ]; then
     ####### ALERT TURNED ON for GDAS only ########################
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatw $job \
        ${COMSP}ascatw.tm00.bufr_d
