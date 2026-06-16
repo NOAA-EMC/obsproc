@@ -95,6 +95,7 @@ echo "                       Add sofarw                                     "
 echo "                     - Add snomad to group #2                         "
 echo "         Mar 30 2026 - Remove NAP and introdude                       "
 echo "                       second JOBSPROC_GLOBAL_DUMP2                   "               
+echo "         Jun 11 2026 - Add amsr, msmws, and msro to group #14         "
 #############################################################################
 
 # NOTE: mNET is changed to gdas in the parent Job script for the gdas RUN 
@@ -160,10 +161,14 @@ set +u
 #
 # Dump group #12 crisfs atms (previously group1)
 #                crsfdb iasidb (previously group10)
+#
 # Dump group #13 (pb, TIME_TRIM defaults to OFF) = 
 #                uprair
+# 
+# Dump group #14 (non-pb, TIME_TRIM defaults to OFF) =
+#               amsr msmws msro
 #
-# Dump group #14 STATUS FILE
+# Dump group #15 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -201,6 +206,7 @@ set -u
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"NO"}
+      DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks ready
    else
       dump_ind=DUMP # slow jobs
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -216,6 +222,7 @@ set -u
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
       DUMP_group13=${DUMP_group13:-"YES"}
+      DUMP_group14=${DUMP_group14:-"NO"}
    fi
 else
    dump_ind=DUMP
@@ -232,23 +239,13 @@ else
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
    DUMP_group13=${DUMP_group13:-"YES"}
+   DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks ready
 fi
 
-# NAP and NAP_adpupa instroduced so that uprair can run early on his own
-#NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
-#NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
-#NAP=${NAP:0} #b/c cron is moved to run 2min (120s) early
 if [ "$mNET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
-#   ADPUPA_wait=${ADPUPA_wait:-"NO"}
-#   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
-   #NAP_adpupa=${NAP_adpupa:-320} #120s(compensate early cron) + 200s(for adpupa data to come)
-   #NAP_adpupa=${NAP_adpupa:-200} #120s(compensate early cron) + 200s(for adpupa data to come)
-########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
-#   NAP_adpupa=${NAP_adpupa:-600} #like other dump groups
-   #NAP_adpupa=${NAP_adpupa:-120} #like other dump groups
 fi
 
 # send extra output of DUMP2 for monitoring purposes.
@@ -592,6 +589,7 @@ echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
 echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
+echo "=======> Dump group 14 (thread_14) not executed." > $DATA/14.out
 
 err1=0
 err2=0
@@ -606,6 +604,7 @@ err10=0
 err11=0
 err12=0
 err13=0
+err14=0
 
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
@@ -618,7 +617,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 msg="START THE $tmmark_uc $NET_uc DATA $dump_ind CENTERED ON $dumptime"
 $DATA/postmsg "$jlogfile" "$msg"
 
-### ASK DIANE IF WE NEED THIS (taken from exnam_dump.sh)
+## from exnam_dump.sh, but not needed
 #if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
 #then
 #
@@ -627,7 +626,6 @@ $DATA/postmsg "$jlogfile" "$msg"
 #$DATA/postmsg "$jlogfile" "$msg"
 #
 #else
-#....................
 
 set +x
 #----------------------------------------------------------------
@@ -1794,7 +1792,7 @@ fi
 DTIM_latest_crsfdb=${DTIM_latest_crsfdb:-"+2.99"}
 DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+2.99"}
 
-TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM12:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 $atms $crisfs crsfdb iasidb
 error12=$?
@@ -1886,6 +1884,71 @@ set -x
 EOF
 set -x
 
+set +x
+#------------------------------------------------------------------------------
+cat<<\EOF>thread_14; chmod +x thread_14
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=14
+
+#=========================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump #14 : AMSR:  1 subtype(s)
+#            MSMWS: 1 subtype(s)
+#            MSRO:  1 subtype(s)  
+#            --------------------
+#            TOTAL NUMBER OF SUBTYPES = 3
+#
+#=========================================================================
+
+DTIM_latest_amsr=${DTIM_latest_amsr:-"+2.99"}
+DTIM_latest_msmws=${DTIM_latest_msmws:-"+2.99"}
+DTIM_latest_msro=${DTIM_latest_msro:-"+2.99"}
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM14:-off}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 amsr msmws msro
+error14=$?
+echo "$error14" > $DATA/error14
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_amsr $job \
+    ${COMSP}amsr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msmws $job \
+    ${COMSP}msmws.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msro $job \
+    ${COMSP}msro.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/14.out 2>&1
+EOF
+set -x
+
+
 #----------------------------------------------------------------
 # Now launch the threads
 
@@ -1916,11 +1979,12 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
+   [ $DUMP_group14 = YES ]  &&  echo ./thread_14 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      NPROCS=${NPROCS:-14} # was 12
+      NPROCS=${NPROCS:-15} # was 12
       $launcher_DUMP -np ${NPROCS} --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 
       #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 1) 3)
       #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti suggestions
@@ -1948,6 +2012,7 @@ else
    [ $DUMP_group11 = YES ]  &&  ./thread_11 
    [ $DUMP_group12 = YES ]  &&  ./thread_12 
    [ $DUMP_group13 = YES ]  &&  ./thread_13
+   [ $DUMP_group14 = YES ]  &&  ./thread_14
 #     wait
 fi
 
@@ -1962,7 +2027,7 @@ fi
 ##
 #[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out $DATA/14.out
 
 set +x
 echo " "
@@ -1982,12 +2047,13 @@ set -x
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
 [ -s $DATA/error13 ] && err13=`cat $DATA/error13`
+[ -s $DATA/error14 ] && err14=`cat $DATA/error14`
 
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=14
+export DUMP_NUMBER=15
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
 ## ASK DIANE IF WE NEED THIS (taken from exnam_dump.sh)
@@ -2012,8 +2078,10 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o "$err13" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
+	"$err13" -gt '5' -o "$err14" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 \
+	       $err10 $err11 $err12 $err13 $err14
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -2024,7 +2092,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -2042,7 +2110,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo

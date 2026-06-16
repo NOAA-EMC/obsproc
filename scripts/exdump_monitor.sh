@@ -41,6 +41,7 @@ echo "                       sfcshp dump group tom ake individual dump     "
 echo "                       file.                                         " 
 echo "                     - Copy bufr_dumplist to COMOUT.                 "
 echo "         May 19 2025 - Add sofarw, saldrn, gsbpfl                    "        
+echo "         Jun 11 2026 - Add amsr, msmws, msro                         "
 ############################################################################
 
 set -aux
@@ -120,6 +121,7 @@ err7=0
 err8=0
 err9=0
 err10=0
+err11=0
 
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1
@@ -973,9 +975,11 @@ export DUMP_NUMBER=9
 DTIM_latest_msone1=+0.49
 DTIM_earliest_msone1=-1.00
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msone1
-error9=$?
-echo "$error9" > $DATA/error9
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msone1
+  error9=$?
+  echo "$error9" > $DATA/error9
+fi
 
 set +x
 echo "********************************************************************"
@@ -1032,6 +1036,57 @@ set -x
 EOF
 set -x
 
+
+set +x
+cat<<\EOF>thread_11; chmod +x thread_11
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=11
+
+#===========================================================================
+# Dump # 11 : AMSR, MSMWS, MSRO
+#             (1)   (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 3
+#  time window radius is -2.00 to -1.01 hours on AMSR
+#  time window radius is -2.50 to -1.51 hours on MSMWS, MSRO
+#===========================================================================
+
+DTIM_earliest_amsr=-2.00
+DTIM_latest_amsr=-1.01
+
+DTIM_earliest_msmws=-2.50
+DTIM_latest_msmws=-1.51
+
+DTIM_earliest_msro=-6.00 #large monitor window for dev tanks
+DTIM_latest_msro=-3.01   
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 amsr msmws msro
+error11=$?
+echo "$error11" > $DATA/error11
+
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/11.out 2>&1
+EOF
+set -x
 #----------------------------------------------------------------
 
 set +u
@@ -1050,11 +1105,12 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_4 >> $DATA/poe.cmdfile
    echo ./thread_9 >> $DATA/poe.cmdfile
    echo ./thread_10 >> $DATA/poe.cmdfile
+   echo ./thread_11 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      NPROCS=${NPROCS:-10}
+      NPROCS=${NPROCS:-11}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
@@ -1077,9 +1133,10 @@ else
    ./thread_8
    ./thread_9
    ./thread_10
+   ./thread_11
 fi
 cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out \
- $DATA/7.out $DATA/8.out  $DATA/9.out  $DATA/10.out
+ $DATA/7.out $DATA/8.out  $DATA/9.out  $DATA/10.out $DATA/11.out
 
 set +x
 echo " "
@@ -1096,11 +1153,12 @@ err7=`cat $DATA/error7`
 err8=`cat $DATA/error8`
 err9=`cat $DATA/error9`
 err10=`cat $DATA/error10`
+err11=`cat $DATA/error11`
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=11
+export DUMP_NUMBER=12
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 null
 
 
@@ -1132,10 +1190,11 @@ fi
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
-        "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5'  -o \
-        "$err7" -gt '5' -o "$err8" -gt '5' -o \
-        "$err9" -gt '5' -o "$err10" -gt '5'	]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10
+        "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
+        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
+	"$err10" -gt '5' -o "$err11" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 \
+	       $err9 $err10 $err11
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1146,7 +1205,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7 $err8 $err9 $err10"
+$err5, $err6, $err7 $err8 $err9 $err10 $err11 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1164,7 +1223,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7 $err8 $err9 $err10 "
+$err5, $err6, $err7 $err8 $err9 $err10 $err11 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
