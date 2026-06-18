@@ -42,6 +42,8 @@ echo "                       file.                                         "
 echo "                     - Copy bufr_dumplist to COMOUT.                 "
 echo "         May 19 2025 - Add sofarw, saldrn, gsbpfl                    "        
 echo "         Jun 11 2026 - Add amsr, msmws, msro                         "
+echo "                     - Remove omi, 1bhrs4, geoimr, avcspm, eshrs3,   "
+echo "                       airsev, osbuv8                                "
 ############################################################################
 
 set -aux
@@ -179,14 +181,14 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #=========================================================================
-# Dump # 1 : ADPUPA, 1BMHS, 1BHRS4, OSBUV8, TESAC, TRKOB,
-#              (6)    (1)     (1)     (1)     (1)   (1)
+# Dump # 1 : ADPUPA, 1BMHS, TESAC, TRKOB,
+#              (6)    (1)     (1)   (1)
 #            EFCLAM, SAPHIR, ATMSDB, OMPSN8, OMPST8, OMPSLP
 #              (1)     (1)     (1)     (1)     (1)    (1)
 #            -- TOTAL NUMBER OF SUBTYPES = 17
 #  time window radius is -0.50 to +0.49 hours on ADPUPA, TESAC, EFCLAM,
 #  time window radius is -1.50 to -0.51 hours on TRKOB,  ATMSDB
-#  time window radius is -2.00 to -1.01 hours on OSBUV8, 1BMHS,  1BHRS4
+#  time window radius is -2.00 to -1.01 hours on 1BMHS,
 #                                                OMPSN8, OMPST8
 #  time window radius is -2.50 to -1.51 hours on SAPHIR
 #  time window radius is -7.00 to -6.01 hours on OMPSLP
@@ -199,14 +201,8 @@ DTIM_latest_efclam=+0.49
 DTIM_earliest_1bmhs=-2.00
 DTIM_latest_1bmhs=-1.01
 
-DTIM_earliest_1bhrs4=-2.00
-DTIM_latest_1bhrs4=-1.01
-
 DTIM_earliest_trkob=-1.50
 DTIM_latest_trkob=-0.51
-
-DTIM_earliest_osbuv8=-2.00
-DTIM_latest_osbuv8=-1.01
 
 DTIM_earliest_ompsn8=-2.00
 DTIM_latest_ompsn8=-1.01
@@ -224,8 +220,8 @@ DTIM_earliest_atmsdb=-1.50
 DTIM_latest_atmsdb=-0.51
 
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 adpupa osbuv8 1bmhs \
- 1bhrs4 tesac trkob efclam saphir atmsdb ompsn8 ompst8 ompslp
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 adpupa 1bmhs \
+ tesac trkob efclam saphir atmsdb ompsn8 ompst8 ompslp
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -261,8 +257,8 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #==========================================================================
-# Dump # 2 : SFCSHP, ADPSFC, RASSDA, AIRSEV, GOESFV, MTIASI, GOME, AVCSAM
-#             (11)     (4)     (1)    (1)     (1)      (1)    (1)    (1)
+# Dump # 2 : SFCSHP, ADPSFC, RASSDA, GOESFV, MTIASI, GOME, AVCSAM
+#             (11)     (4)     (1)     (1)      (1)    (1)    (1)
 #            ESIASI, ESATMS, SEVASR, TIDEG
 #              (1)     (1)     (1)    (1)
 #            -- TOTAL NUMBER OF SUBTYPES = 25
@@ -278,7 +274,7 @@ export DUMP_NUMBER=2
 #                                                from CREX only)
 #  time window radius is -1.50 to -0.51 hours on GOME, ESATMS
 #  time window radius is -2.00 to -1.01 hours on MTIASI
-#  time window radius is -2.50 to -1.51 hours on AIRSEV, AVCSAM
+#  time window radius is -2.50 to -1.51 hours on AVCSAM
 #==========================================================================
 
 DTIM_latest_001001=+0.49
@@ -291,9 +287,6 @@ DTIM_latest_sevasr=+0.49
 
 DTIM_earliest_001005=-1.00
 DTIM_latest_001005=-0.01
-
-DTIM_earliest_airsev=-2.50
-DTIM_latest_airsev=-1.51
 
 DTIM_earliest_mtiasi=-2.00
 DTIM_latest_mtiasi=-1.01
@@ -311,7 +304,7 @@ DTIM_earliest_esatms=-1.50
 DTIM_latest_esatms=-0.51
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 sfcshp adpsfc rassda \
- airsev mtiasi gome avcsam esiasi esatms sevasr tideg
+  mtiasi gome avcsam esiasi esatms sevasr tideg
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -355,7 +348,7 @@ export DUMP_NUMBER=3
 #                                                    CRSFDB
 #  time window radius is -2.00 to -1.01 hours on 1BAMUA, AMSR2
 #  time window radius is -2.50 to -1.51 hours on all other    SATWND types,
-#                                                    GPSRO, AVCSPM
+#                                                    GPSRO
 #  time window radius is -4.00 to -3.01 hours on all POES (MODIS, AVHRR, VIIRS)
 #                                                    SATWND types
 #===========================================================================
@@ -461,16 +454,13 @@ DTIM_latest_005080=-3.01
 DTIM_earliest_005091=-4.00
 DTIM_latest_005091=-3.01
 
-DTIM_earliest_avcspm=-2.50
-DTIM_latest_avcspm=-1.51
-
 DTIM_earliest_amsr2=-2.00
 DTIM_latest_amsr2=-1.01
 
 DTIM_earliest_crsfdb=-1.50
 DTIM_latest_crsfdb=-0.51
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 satwnd gpsro 1bamua avcspm \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 satwnd gpsro 1bamua \
  amsr2 crsfdb
 error3=$?
 echo "$error3" > $DATA/error3
@@ -507,12 +497,11 @@ export STATUS=NO
 export DUMP_NUMBER=4
 
 #=========================================================================
-# Dump # 4 : AIRCAR, AIRCFT, PROFLR, VADWND, GEOIMR, ASCATT, HDOB, GSBPFL
+# Dump # 4 : AIRCAR, AIRCFT, PROFLR, VADWND, ASCATT, HDOB, GSBPFL
 #              (2)     (8)     (4)     (2)     (1)     (1)   (1)
 #            -- TOTAL NUMBER OF SUBTYPES = 19
 #  time window radius is -0.50 to +0.49 hours on AIRCAR, AIRCFT,
 #                                                PROFLR, VADWND, HDOB
-#  time window radius is -1.00 to -0.01 hours on GEOIMR
 #  time window radius is -1.50 to -0.51 hours on ASCATT
 #=========================================================================
 
@@ -523,14 +512,11 @@ DTIM_latest_vadwnd=+0.49
 DTIM_latest_hdob=+0.49
 DTIM_latest_gsbpfl=+0.49
 
-DTIM_earliest_geoimr=-1.00
-DTIM_latest_geoimr=-0.01
-
 DTIM_earliest_ascatt=-1.50
 DTIM_latest_ascatt=-0.51
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 aircar aircft proflr vadwnd \
- geoimr ascatt hdob gsbpfl
+ ascatt hdob gsbpfl
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -838,22 +824,20 @@ export STATUS=NO
 export DUMP_NUMBER=7
 
 #======================================================================
-# Dump # 7 : ATOVS, OMI, ESAMUA, ESHRS3, ESMHS, SSMISU, SEVCSR, LGHTNG,
-#             (1)   (1)    (1)     (1)    (1)     (1)     (1)     (2)
+# Dump # 7 : ATOVS, ESAMUA, ESHRS3, ESMHS, SSMISU, SEVCSR, LGHTNG,
+#             (1)     (1)     (1)    (1)     (1)     (1)     (2)
 #            LGYCLD, ATMS, BATHY, MLS, CRISF4, IASIDB  --
 #              (1)    (1)   (1)   (1)   (1)     (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 15
-#  time window radius is -0.50 to +0.49 hours on ESAMUA, ESHRS3, ESMHS,
+#            -- TOTAL NUMBER OF SUBTYPES = 14
+#  time window radius is -0.50 to +0.49 hours on ESAMUA, ESMHS,
 #                                                SEVCSR, LGHTNG, LGYCLD,
 #  time window radius is -1.50 to -0.51 hours on SSMISU, ATMS,
 #                                                CRISF4, IASIDB
 #  time window radius is -2.00 to -1.01 hours on ATOVS, MLS
-#  time window radius is -2.50 to -1.51 hours on OMI
 #  time window radius is -7.00 to -6.01 hours on BATHY
 #======================================================================
 
 DTIM_latest_esamua=+0.49
-DTIM_latest_eshrs3=+0.49
 DTIM_latest_esmhs=+0.49
 DTIM_latest_sevcsr=+0.49
 DTIM_latest_lghtng=+0.49
@@ -861,9 +845,6 @@ DTIM_latest_lgycld=+0.49
 
 DTIM_earliest_atovs=-2.00
 DTIM_latest_atovs=-1.01
-
-DTIM_earliest_omi=-2.50
-DTIM_latest_omi=-1.51
 
 DTIM_earliest_bathy=-7.00
 DTIM_latest_bathy=-6.01
@@ -883,8 +864,8 @@ DTIM_latest_crisf4=-0.51
 DTIM_earliest_iasidb=-1.50
 DTIM_latest_iasidb=-0.51
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 atovs omi esamua \
- eshrs3 esmhs ssmisu sevcsr lghtng lgycld atms bathy mls crisf4 iasidb
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 atovs esamua \
+  esmhs ssmisu sevcsr lghtng lgycld atms bathy mls crisf4 iasidb
 error7=$?
 echo "$error7" > $DATA/error7
 
@@ -1073,9 +1054,12 @@ DTIM_latest_msmws=-1.51
 DTIM_earliest_msro=-6.00 #large monitor window for dev tanks
 DTIM_latest_msro=-3.01   
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 amsr msmws msro
-error11=$?
-echo "$error11" > $DATA/error11
+# start monitor when the tanks go live
+if [ -s ${TANK}/${PDY}/b021/xx247 ] &&  [ -s ${TANK}/${PDY}/b021/xx0243 ] &&  [ -s ${TANK}/${PDY}/b003/xx012 ]; then
+ $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 amsr msmws msro
+ error11=$?
+ echo "$error11" > $DATA/error11
+fi
 
 set +x
 echo "********************************************************************"

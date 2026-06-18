@@ -506,10 +506,10 @@ $dumptime"
    for file in adpsfc adpupa aircar aircft satwnd sfcshp spssmi proflr \
                vadwnd goesnd erscat sfcbog erswnd ssmip  ssmipn ssmit  \
                atovs  qkscat qkswnd trmm   sptrmm geoimr 1bamua 1bamub \
-               1bhrs3 1bmhs  1bhrs4 airs   airswm amsre  gpsipw msonet \
-               rassda nexrad gpsro  airsev goesfv wndsat wdsatr osbuv8 \
-               ascatt ascatw mtiasi avcsam avcspm gome   lghtng omi    \
-               esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam \
+               1bhrs3 1bmhs  airs   airswm amsre  gpsipw msonet \
+               rassda nexrad gpsro  goesfv wndsat wdsatr        \
+               ascatt ascatw mtiasi avcsam gome   lghtng        \
+               esamua esamub esmhs  ssmisu sevcsr lgycld efclam \
 	       $aircraft_nr_dm2
 #  --> don't add any new dumps here since files are already unblocked
 #      on WCOSS!!

@@ -8,6 +8,7 @@ echo "                       exrap_dump.sh from Obsproc v1.2.6.                "
 echo "         Dec 05 2025 - Removed sevcsr from group 1 as sevcsr data is no  "
 echo "                       longer available.                                 "
 echo "         Mar 30 2026 - Remove NAP                                        "
+echo "         Jun 15 2026 - Stop dumping saphir,osbuv8,eshrs3,airsev,1bhrs4   "
 ################################################################################
 
 set -xau
@@ -28,8 +29,7 @@ set +u
 # Dump group #4 (pb) = msonet -> msone0
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
-# Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
-#                          saphir gmi1cr
+# Dump group #7 (non-pb) = lgycld ssmisu crsfdb gmi1cr
 # Dump group #8 (non-pb) = gsrasr 
 # Dump group #9 (non-pb) = lghtng + adpupa
 # Dump group #10 (pb) = msone1 # ONLY tank b255/xx030, the largest
@@ -1004,11 +1004,11 @@ export STATUS=NO
 export DUMP_NUMBER=7
 
 #==========================================================================
-# Dump # 7 : AIRSEV, 1BHRS4, ESHRS3, LGYCLD, SSMISU, OSBUV8, CRSFDB,
-#              (1)     (2)     (1)     (1)     (1)     (1)     (1)
-#            SAPHIR, CRISF4, GMI1CR
-#              (1)     (1)   (1)
-#             TOTAL NUMBER OF SUBTYPES = 11
+# Dump # 7 : LGYCLD, SSMISU, CRSFDB,
+#              (1)     (1)     (1)
+#            CRISF4, GMI1CR
+#              (1)     (1)
+#             TOTAL NUMBER OF SUBTYPES = 5
 #=========================================================================
  
 # Time window -0.50 to +0.50 hours for LGYCLD for all cycle runs
@@ -1022,14 +1022,6 @@ if [ "$RUN" = 'rrfs_p' ]; then
 
    def_time_window_7=1.0 # default time window for dump 7 is -1.0 to +1.0 hours
 
-# Time window is -1.00 to +0.99 hours for 1BHRS4
-#  (note: time window increased over +/- 0.5 hr standard to get more data)
-   DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+0.99"}      # earliest is default
-
-# Time window is -1.00 to +0.99 hours for AIRSEV
-#  (note: time window increased over +/- 0.5 hr standard to get more data)
-   DTIM_latest_airsev=${DTIM_latest_airsev:-"+0.99"}      # earliest is default
-
 # Time window is -1.00 to +0.99 hours for CRSFDB, CRISF4
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
    DTIM_earliest_crsfdb=${DTIM_earliest_crsfdb:-"-1.00"}
@@ -1037,17 +1029,9 @@ if [ "$RUN" = 'rrfs_p' ]; then
    DTIM_earliest_crisf4=${DTIM_earliest_crisf4:-"-1.00"}
    DTIM_latest_crisf4=${DTIM_latest_crisf4:-"+0.99"}
 
-# Time window is -0.50 to +0.49 hours for ESHRS3
-   DTIM_earliest_eshrs3=${DTIM_earliest_eshrs3:-"-0.50"}
-   DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+0.49"}
-
-# Time window is -1.00 to +0.99 hours for SSMISU, OSBUV8, SAPHIR
+# Time window is -1.00 to +0.99 hours for SSMISU
    DTIM_earliest_ssmisu=${DTIM_earliest_ssmisu:-"-1.00"}
    DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+0.99"}
-   DTIM_earliest_osbuv8=${DTIM_earliest_osbuv8:-"-1.00"}
-   DTIM_latest_osbuv8=${DTIM_latest_osbuv8:-"+0.99"}
-   DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-1.00"}
-   DTIM_latest_saphir=${DTIM_latest_saphir:-"+0.99"}
 
 # Time window is guesstimated as -1.00 to +0.99 hours for rrfs_p GMI1CR
    DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-1.00"}
@@ -1060,14 +1044,6 @@ else
 
    def_time_window_7=3.0 # default time window for dump 7 is -3.0 to +3.0 hours
 
-# Time window is -3.00 to +2.99 hours for 1BHRS4
-#  (note: time window increased over +/- 0.5 hr standard to get more data)
-   DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}      # earliest is default
-
-# Time window is -3.00 to +2.99 hours for AIRSEV
-#  (note: time window increased over +/- 0.5 hr standard to get more data)
-   DTIM_latest_airsev=${DTIM_latest_airsev:-"+2.99"}      # earliest is default
-
 # Time window is -2.00 to +1.99 hours for CRSFDB, CRISF4
 #  (note: time window increased over +/- 0.5 hr standard to get more data)
    DTIM_earliest_crsfdb=${DTIM_earliest_crsfdb:-"-2.00"}
@@ -1075,20 +1051,9 @@ else
    DTIM_earliest_crisf4=${DTIM_earliest_crisf4:-"-2.00"}
    DTIM_latest_crisf4=${DTIM_latest_crisf4:-"+1.99"}
 
-# Time window is -1.00 to +1.00 hours for ESHRS3
-#  (note: time window increased over +/- 0.5 hr standard to get more data)
-   DTIM_earliest_eshrs3=${DTIM_earliest_eshrs3:-"-1.00"}
-   DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+1.00"}
-
-# Time window is -2.00 to +1.99 hours for SSMISU, OSBUV8
+# Time window is -2.00 to +1.99 hours for SSMISU
    DTIM_earliest_ssmisu=${DTIM_earliest_ssmisu:-"-2.00"}
    DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+1.99"}
-   DTIM_earliest_osbuv8=${DTIM_earliest_osbuv8:-"-2.00"}
-   DTIM_latest_osbuv8=${DTIM_latest_osbuv8:-"+0.99"}
-
-# Time window is -3.00 to +2.99 hours for SAPHIR
-   DTIM_earliest_saphir=${DTIM_earliest_saphir:-"-3.00"}
-   DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 
 # Time window is guesstimated as -3.00 to +2.99 hours for GMI1CR
    DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
@@ -1096,8 +1061,8 @@ else
 
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 1bhrs4 \
- airsev eshrs3 lgycld ssmisu osbuv8 crsfdb saphir crisf4 gmi1cr
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_7} 1 lgycld \
+ ssmisu crsfdb crisf4 gmi1cr
 error7=$?
 echo "$error7" > $DATA/error7
 
@@ -1690,14 +1655,8 @@ if [ $SENDDBN = YES ]; then
    if [ -s ${COMSP}1bamua.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_1bamua $job ${COMSP}1bamua.tm00.bufr_d
    fi
-   if [ -s ${COMSP}1bhrs4.tm00.bufr_d ]; then
-    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_1bhrs4 $job ${COMSP}1bhrs4.tm00.bufr_d
-   fi
    if [ -s ${COMSP}1bmhs.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_1bmhs $job ${COMSP}1bmhs.tm00.bufr_d
-   fi
-   if [ -s ${COMSP}airsev.tm00.bufr_d ]; then
-    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_airsev $job ${COMSP}airsev.tm00.bufr_d
    fi
    if [ -s ${COMSP}amsr2.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_amsr2 $job ${COMSP}amsr2.tm00.bufr_d
@@ -1725,9 +1684,6 @@ if [ $SENDDBN = YES ]; then
    fi
    if [ -s ${COMSP}esatms.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_esatms $job ${COMSP}esatms.tm00.bufr_d
-   fi
-   if [ -s ${COMSP}eshrs3.tm00.bufr_d ]; then
-    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_eshrs3 $job ${COMSP}eshrs3.tm00.bufr_d
    fi
    if [ -s ${COMSP}esiasi.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_esiasi $job ${COMSP}esiasi.tm00.bufr_d
@@ -1759,14 +1715,8 @@ if [ $SENDDBN = YES ]; then
    if [ -s ${COMSP}nexrad.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_nexrad $job ${COMSP}nexrad.tm00.bufr_d
    fi
-   if [ -s ${COMSP}osbuv8.tm00.bufr_d ]; then
-    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_osbuv8 $job ${COMSP}osbuv8.tm00.bufr_d
-   fi
    if [ -s ${COMSP}rassda.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_rassda $job ${COMSP}rassda.tm00.bufr_d
-   fi
-   if [ -s ${COMSP}saphir.tm00.bufr_d ]; then
-    $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_saphir $job ${COMSP}saphir.tm00.bufr_d
    fi
    if [ -s ${COMSP}satwnd.tm00.bufr_d ]; then
     $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_satwnd $job ${COMSP}satwnd.tm00.bufr_d

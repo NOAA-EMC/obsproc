@@ -96,6 +96,8 @@ echo "                     - Add snomad to group #2                         "
 echo "         Mar 30 2026 - Remove NAP and introdude                       "
 echo "                       second JOBSPROC_GLOBAL_DUMP2                   "               
 echo "         Jun 11 2026 - Add amsr, msmws, and msro to group #14         "
+echo "         Jun 16 2026 - Remove omi, 1bhrs4, geoimr, avcspm,eshrs3,     "
+echo "                       airsev, osbuv8 (0 size)                        "
 #############################################################################
 
 # NOTE: mNET is changed to gdas in the parent Job script for the gdas RUN 
@@ -124,7 +126,7 @@ set +u
 # JOB_NUMBER not present indicates dump BOTH prepbufr and non-prepbufr data.
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcsam eshrs3 ssmisu 1bhrs4 tesac mls
+#               avcsam ssmisu tesac mls
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
 #               Stop: sevcsr, saphir in v1.2.0 
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
@@ -144,17 +146,17 @@ set +u
 #               nexrad, axbt, xbtctd, altkob, sofarw
 #
 # Dump group #7 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcspm esmhs 1bmhs airsev atmsdb gome omi trkob gpsro
+#               esmhs 1bmhs atmsdb gome trkob gpsro
 #               crisf4
 #
 # Dump group #8 (pb, TIME_TRIM defaults to ON) =
 #               satwnd
 #
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
-#               geoimr gmi1cr satwhr
+#                gmi1cr satwhr
 # Dump group #10 (non-pb, TIME_TRIM defaults to OFF) =
 #               esiasi mtiasi esamua sevasr 1bamua bathy
-#               osbuv8 ompst8 ompsn8 gsrasr ompslp sstvpw
+#               ompst8 ompsn8 gsrasr ompslp sstvpw
 #
 # Dump group #11 (non-pb, TIME_TRIM defaults to OFF) =
 #               amsr2
@@ -206,7 +208,7 @@ set -u
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"NO"}
-      DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks ready
+      DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
    else
       dump_ind=DUMP # slow jobs
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -239,7 +241,7 @@ else
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
    DUMP_group13=${DUMP_group13:-"YES"}
-   DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks ready
+   DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
 fi
 
 if [ "$mNET" = 'gfs' ]; then
@@ -655,10 +657,7 @@ export DUMP_NUMBER=1
 #
 #--------------------------------------------------------------------------
 # Dump # 1 : AVCSAM: 1 subtype(s)
-#            ESHRS3: 1 subtype(s)
 #            SSMISU: 1 subtype(s)
-#            SAPHIR: 1 subtype(s)
-#            1BHRS4: 1 subtype(s)
 #            SEVCSR: 1 subtype(s)
 #            TESAC:  1 subtype(s)
 #            MLS:    1 subtype(s) (if present in past 10 days of tanks)
@@ -674,12 +673,8 @@ export DUMP_NUMBER=1
 #=========================================================================
 
 DTIM_latest_avcsam=${DTIM_latest_avcsam:-"+2.99"}
-DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+2.99"}
 DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+2.99"}
-#DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
-DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
-#DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
 DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
 #-----------------------------------------------
 # check for mls tank presence in past 10 days
@@ -709,26 +704,16 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- 1bhrs4 tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam ssmisu \
+  tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_avcsam $job \
     ${COMSP}avcsam.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_eshrs3 $job \
-    ${COMSP}eshrs3.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ssmisu $job \
     ${COMSP}ssmisu.tm00.bufr_d
-#   if [ "${mNET}" = "gdas" ]; then
-#      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
-#       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
-#   fi
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bhrs4 $job \
-    ${COMSP}1bhrs4.tm00.bufr_d
-#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
-#    ${COMSP}sevcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tesac $job \
     ${COMSP}tesac.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
@@ -1304,28 +1289,22 @@ export DUMP_NUMBER=7
 #   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
 #
 #--------------------------------------------------------------------------
-# Dump # 7 : AVCSPM: 1 subtype(s)
-#            ESMHS:  1 subtype(s)
+# Dump # 7 : ESMHS:  1 subtype(s)
 #            1BMHS:  1 subtype(s)
-#            AIRSEV: 1 subtype(s)
 #            ATMSDB: 1 subtype(s)
 #            GOME:   1 subtype(s)
-#            OMI:    1 subtype(s)
 #            TRKOB:  1 subtype(s)
 #            GPSRO:  1 subtype(s)
 #            CRISF4: 1 subtype(s) (if present in past 10 days of tanks)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 10
+#            TOTAL NUMBER OF SUBTYPES = 7
 #
 #=========================================================================
 
-DTIM_latest_avcspm=${DTIM_latest_avcspm:-"+2.99"}
 DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+2.99"}
 DTIM_latest_1bmhs=${DTIM_latest_1bmhs:-"+2.99"}
-DTIM_latest_airsev=${DTIM_latest_airsev:-"+2.99"}
 DTIM_latest_atmsdb=${DTIM_latest_atmsdb:-"+2.99"}
 DTIM_latest_gome=${DTIM_latest_gome:-"+2.99"}
-DTIM_latest_omi=${DTIM_latest_omi:-"+2.99"}
 DTIM_latest_trkob=${DTIM_latest_trkob:-"+2.99"}
 DTIM_latest_gpsro=${DTIM_latest_gpsro:-"+2.99"}
 #-----------------------------------------------
@@ -1342,26 +1321,20 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM7:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcspm esmhs 1bmhs \
- airsev atmsdb gome omi trkob gpsro $crisf4
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 esmhs 1bmhs \
+  atmsdb gome trkob gpsro $crisf4
 error7=$?
 echo "$error7" > $DATA/error7
 
 if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_avcspm $job \
-    ${COMSP}avcspm.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_esmhs $job \
     ${COMSP}esmhs.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bmhs $job \
     ${COMSP}1bmhs.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_airsev $job \
-    ${COMSP}airsev.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_atmsdb $job \
     ${COMSP}atmsdb.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gome $job \
     ${COMSP}gome.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_omi $job \
-    ${COMSP}omi.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_trkob $job \
     ${COMSP}trkob.tm00.bufr_d
 # gpsro dump file has nr version which is alerted from
@@ -1542,19 +1515,14 @@ DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-3.00"}
 DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+2.99"}
 
-DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
-DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
-
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr satwhr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 gmi1cr satwhr
 
 error9=$?
 echo "$error9" > $DATA/error9
 
 if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_geoimr $job \
-    ${COMSP}geoimr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gmi1cr $job \
     ${COMSP}gmi1cr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwhr $job \
@@ -1605,13 +1573,12 @@ export DUMP_NUMBER=10
 #            SEVASR: 1 subtype(s)
 #            1BAMUA: 1 subtype(s)
 #            BATHY:  1 subtype(s)
-#            OSBUV8: 1 subtype(s)
 #            OMPSN8: 1 subtype(s)
 #            OMPST8: 1 subtype(s)
 #            GSRASR: 1 subtype(s)
 #            OMPSLP: 1 subtype(s)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 13
+#            TOTAL NUMBER OF SUBTYPES = 12
 #
 #=========================================================================
 
@@ -1621,7 +1588,6 @@ DTIM_latest_esamua=${DTIM_latest_esamua:-"+2.99"}
 DTIM_latest_sevasr=${DTIM_latest_sevasr:-"+2.99"}
 DTIM_latest_1bamua=${DTIM_latest_1bamua:-"+2.99"}
 DTIM_latest_bathy=${DTIM_latest_bathy:-"+2.99"}
-DTIM_latest_osbuv8=${DTIM_latest_osbuv8:-"+2.99"}
 DTIM_latest_ompsn8=${DTIM_latest_ompsn8:-"+2.99"}
 DTIM_latest_ompst8=${DTIM_latest_ompst8:-"+2.99"}
 DTIM_latest_gsrasr=${DTIM_latest_gsrasr:-"+2.99"}
@@ -1631,7 +1597,7 @@ DTIM_latest_sstvpw=${DTIM_latest_sstvpw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM10:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 esiasi mtiasi esamua \
- sevasr 1bamua bathy osbuv8 ompsn8 ompst8 gsrasr ompslp sstvpw
+ sevasr 1bamua bathy ompsn8 ompst8 gsrasr ompslp sstvpw
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1648,8 +1614,6 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}1bamua.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_bathy $job \
     ${COMSP}bathy.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_osbuv8 $job \
-    ${COMSP}osbuv8.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ompsn8 $job \
     ${COMSP}ompsn8.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ompst8 $job \
