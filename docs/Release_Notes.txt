@@ -14,6 +14,7 @@ PRELUDE
    Splitting the dump jobs allows to start the slow dumps groups (uprair, satwnd, satwhr) earlier (with JOBSPROC_[GLOBAL, RAP]_DUMP)   
    and the fast dump groups a bit later (with JOBSPROC_[GLOBAL, RAP]_DUMP2) 
  - Replaces NET with mNET (mNET=gfs, gdas, cdas, rap, etc), so obsNET could be replaced with NET (NET=obsproc)
+ - Accompanies SCN Obsproc.v1.3.0 : https://docs.google.com/document/d/1grFJNFXrGRWqSWWQZ9y4p2lkXhWfIZGd97l1UBDiKzE/edit?tab=t.0
 
 FILE CHANGES
  M docs/Release_Notes.txt
