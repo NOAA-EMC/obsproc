@@ -220,7 +220,13 @@ export OBCNTarch=${OBCNTarch:-$HOMEarch/obcount_30day}
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
-export PROCESS_DATACOUNTS=NO # Not processed in RRFS, RRFS_P, RRFS_E runs
+if [ "$RUN" = 'rrfs' ]; then
+   export PROCESS_DATACOUNTS=YES # for RTDM Section 3. replacing NAM
+else
+   export PROCESS_DATACOUNTS=NO # Not processed in RRFS_P, RRFS_E runs
+fi     
+#export PROCESS_DATACOUNTS=NO # Not processed in RRFS, RRFS_P, RRFS_E runs
+
 export PROCESS_REMOREST=${PROCESS_REMOREST:-YES}
 export PROCESS_UNBLKBUFR=${PROCESS_UNBLKBUFR:-NO}
 export PROCESS_LISTERS=${PROCESS_LISTERS:-YES}

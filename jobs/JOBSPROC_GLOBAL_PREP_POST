@@ -146,6 +146,12 @@ cp $UTILROOT/ush/setpdy.sh .; chmod +x setpdy.sh
 #########################
 export COMIN_ROOT=${COMIN_ROOT:-${COMROOT:-""}}
 export COMPONENT=${COMPONENT:-atmos}
+gfs_ver_num="${gfs_ver:1:2}" # extracts the 17
+if [[ "$gfs_ver_num" -le 16 ]]; then
+   export COMPONENTm="atmos"
+else
+   export COMPONENTm=""
+fi
 
 if [[ "$RUN_ENVIR" == nco ]]; then
   export COMIN=${COMIN:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY}/${cyc}/${COMPONENT})}
