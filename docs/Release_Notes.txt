@@ -1,8 +1,34 @@
-obsproc v1.2.8  RELEASED        ??? ??, 2026
-        v1.2.8  IMPLEMENTED     ??? ??, 2026 
+obsproc v1.2.10 SPA Update to mitigate rrfs dump failures
+                IMPLEMENTED     JUN 10, 2026
+
+M docs/Release_Notes.txt 
+M ecf/rrfs/dump/jobsproc_rrfs_dump.ecf
+M scripts/excdas_makeprepbufr.sh
+M versions/VERSION
+
+DOCS
+ docs/Release_Notes.txt
+  - add section for this release
+
+ECF CHANGES
+  ecf/rrfs/dump/jobsproc_rrfs_dump.ecf
+  - increase memory requested from 50GB to 200GB to avoid oom-kills
+    when there is a large amount of satwhr data to process
+
+SCRIPTS CHANGES
+  scripts/exrtma_makeprepbufr.sh
+  - add dbn_alert for the prepbufr file from the main rtma runs (requested by SPC)
+
+VERSIONS CHANGES
+ versions/VERSION
+  - Updated version to 1.2.10
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+obsproc v1.2.9  RELEASED        APR 10, 2026
+        v1.2.9  IMPLEMENTED     APR 20, 2026 
 
 PRELUDE
- This release (obsproc 1.2.9 and bufr_dump 1.3.2) just updates bufr_dump to use bufr 12.1.0  
+ This release (obsproc 1.2.9 and bufr_dump 1.3.2) just updates bufr_dump to use bufr 12.2.0  
  instead of bufr 11.7.0  
 
 FILE CHANGES
@@ -29,7 +55,7 @@ CHANGES TO RESOURCES
  None expected
 
 PRE-IMPLEMENTATION TESTING REQUIREMENTS
- obsproc v1.3.0 needs modules bufr-dump v1.3.2 and prepobs v1.1.1 in order to run properly
+ obsproc v1.2.9 needs modules bufr_dump v1.3.2 and prepobs v1.1.1 in order to run properly
  See docs/README.md for build instructions
  See versions/build.ver and versions/run.ver for libaries
  How to build in Debug mode: BUILD_TYPE=Debug ./ush/build.sh

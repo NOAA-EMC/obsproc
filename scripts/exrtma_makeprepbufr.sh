@@ -20,6 +20,7 @@ postmsg "$jlogfile" "$msg"
 cat break > $pgmout
 
 CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
+RUN_uc=$(echo $RUN | tr [a-z] [A-Z])
 
 # Get cycle center date/time (down to hour precision, YYYYMMDDHH)
 
@@ -76,8 +77,8 @@ if [ "$PREPDATA" = 'YES' ]; then
 echo "is the prepbufr file good?"
 echo `ls -l $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark`
 
-if [ "$RUN" = "rtma_ru" ] && [ "$SENDDBN" = YES ]; then
-   $DBNROOT/bin/dbn_alert MODEL RTMA_RU_BUFR_PREPda $job $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+if [ "$SENDDBN" = YES ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_PREPda $job $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
 fi
 
 # save current prepbufr mnemonic table in COMOUT if either it isn't already
