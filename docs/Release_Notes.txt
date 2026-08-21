@@ -1,3 +1,27 @@
+obsproc v1.2.11 RELEASED        AUG 21, 2026
+                IMPLEMENTED     ??? ??, 2026
+
+OVERTURE
+Updates bufr-dump to not crash when wrong RPID are in the land radiosone tank
+
+FILES
+M docs/Release_Notes.txt
+M versions/build.ver
+M versions/run.ver
+M versions/VERSION
+
+DOCS
+ docs/Release_Notes.txt
+  Add section for this release
+
+VERSIONS CHANGES
+ versions/VERSION
+ Updated version to 1.2.11
+ version/*.ver
+ UPdate bufr-dump version to 1.3.3
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 obsproc v1.2.10 SPA Update to mitigate rrfs dump failures
                 IMPLEMENTED     JUN 10, 2026
 
