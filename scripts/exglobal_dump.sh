@@ -518,8 +518,8 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
       fi    
    done
 
-#  endif loop $PROCESS_GRIBFLDS
-fi
+##  endif loop $PROCESS_GRIBFLDS
+#fi
 
 # Save NIC.IMS_v*_*_4km.ascii as imssnow96.asc in $COMROOT
   ascii_file=NIC.IMS
@@ -573,6 +573,9 @@ fi
   if [ "$usaf_in" = false ]; then
       set +x; echo -e "\n***WARNING: No suitable wrgbbul/557thWW_snow/PS.557WW_* file found the last 48h \n"; set -x
   fi
+
+#  endif loop $PROCESS_GRIBFLDS
+fi
 
   if [ "$SENDECF" = "YES" ]; then
      ecflow_client --event=release_sfcprep
