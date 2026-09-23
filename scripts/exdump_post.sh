@@ -112,12 +112,12 @@ tmhr=`echo $tmmark|cut -c3-4`
 export dumptime=`$NDATE -$tmhr $PDY$cyc`$hr_fraction
 export dumptime10=`$NDATE -$tmhr $PDY$cyc`
 
-modnet=$mNET
+net=$mNET
 
-[[ $RUN == rap_p ]]  &&  modnet=$RUN
-[[ $RUN == rap_e ]]  &&  modnet=$RUN
-[[ $RUN == rrfs_p ]]  &&  modnet=$RUN
-[[ $RUN == rrfs_e ]]  &&  modnet=$RUN
+[[ $RUN == rap_p ]]  &&  net=$RUN
+[[ $RUN == rap_e ]]  &&  net=$RUN
+[[ $RUN == rrfs_p ]]  &&  net=$RUN
+[[ $RUN == rrfs_e ]]  &&  net=$RUN
 
 net_uc=$(echo $net | tr [a-z] [A-Z])
 set +u
