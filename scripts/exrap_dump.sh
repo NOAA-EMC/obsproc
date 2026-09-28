@@ -160,6 +160,15 @@ else
    DUMP_group13=${DUMP_group13:-"YES"}
 fi
 
+if [ $tmmark = tm00 ]; then
+   #ADPUPA_wait=${ADPUPA_wait:-"YES"}
+########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves ~15 sec if ADPUPA_wait=NO
+   CHECK_STATUS=${CHECK_STATUS:-"NO"}
+else
+   #ADPUPA_wait=${ADPUPA_wait:-"NO"}
+   CHECK_STATUS=${CHECK_STATUS:-"YES"}
+fi
+
 # Oct 2019; disable -- not needed for HRRRv4
 #if [ $RUN = rap_eh ]; then
 #   set +u
@@ -311,6 +320,15 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 msg="START THE $tmmark_uc $RUN_uc DATA $dump_ind CENTERED ON $dumptime"
 $DATA/postmsg "$jlogfile" "$msg"
+
+if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
+then
+
+msg="**WARNING: status${JOB_NUMBER} file already exists for $tmmark \
+$PDY$cyc run - no data dumps produced"
+$DATA/postmsg "$jlogfile" "$msg"
+
+else
 
 set +x
 #----------------------------------------------------------------
@@ -1669,6 +1687,9 @@ export STATUS=YES
 export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
+#  endif test for existence of status file     
+fi
+
 #  endif loop $PROCESS_DUMP
 fi
 
@@ -1735,17 +1756,21 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13"
 #  endif loop $PROCESS_DUMP   
 fi
 
-grep -q "004.004 in data group aircar for .............-.........\
-.... HAS      0 REPORTS" ${COMSP}status.$tmmark.bufr_d
-err_grep1=$?
-grep -q "004.007 in data group aircar for .............-.........\
-.... HAS      0 REPORTS" ${COMSP}status.$tmmark.bufr_d
-err_grep2=$?
-if [ $err_grep1 -eq 0 -a $err_grep2 -eq 0 ]; then
-   msg="***WARNING: NO ACARS data from either ARINC (004.004) or AFWA \
-(004.007), run assimilation without any ACARS data"
-   $DATA/postmsg "$jlogfile" "$msg"
-fi
+if [ $JOB_NUMBER = 2 ]; then
+ # aircar is dumped in JOB_NUMBER=2, thus *status2* should be greped.
+ # if aircar is moved to JOB_NUMBER=1, change to *status1*
+ grep -q "004.004 in data group aircar for .............-.........\
+ .... HAS      0 REPORTS" ${COMSP}status2.$tmmark.bufr_d
+ err_grep1=$?
+ grep -q "004.007 in data group aircar for .............-.........\
+ .... HAS      0 REPORTS" ${COMSP}status2.$tmmark.bufr_d
+ err_grep2=$?
+ if [ $err_grep1 -eq 0 -a $err_grep2 -eq 0 ]; then
+    msg="***WARNING: NO ACARS data from either ARINC (004.004) or AFWA \
+ (004.007), run assimilation without any ACARS data"
+    $DATA/postmsg "$jlogfile" "$msg"
+ fi
+fi 
 
 
 if [ $SENDDBN = YES ]; then

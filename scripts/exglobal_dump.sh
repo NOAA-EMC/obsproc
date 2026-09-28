@@ -208,7 +208,7 @@ set -u
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"NO"}
-      DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
+      DUMP_group14=${DUMP_group14:-"YES"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
    else
       dump_ind=DUMP # slow jobs
       DUMP_group1=${DUMP_group1:-"NO"}
@@ -241,13 +241,26 @@ else
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
    DUMP_group13=${DUMP_group13:-"YES"}
-   DUMP_group14=${DUMP_group14:-"NO"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
+   DUMP_group14=${DUMP_group14:-"YES"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
 fi
+
+
+
 
 if [ "$mNET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
+fi
+
+#mimmic RAP (which mimmics NAM - has two dump groups)
+if [ $tmmark = tm00 ]; then
+   #ADPUPA_wait=${ADPUPA_wait:-"YES"}
+########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves ~15 sec if ADPUPA_wait=NO
+   CHECK_STATUS=${CHECK_STATUS:-"NO"}
+else
+   #ADPUPA_wait=${ADPUPA_wait:-"NO"}
+   CHECK_STATUS=${CHECK_STATUS:-"YES"}
 fi
 
 # send extra output of DUMP2 for monitoring purposes.
@@ -622,15 +635,15 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 msg="START THE $tmmark_uc $NET_uc DATA $dump_ind CENTERED ON $dumptime"
 $DATA/postmsg "$jlogfile" "$msg"
 
-## from exnam_dump.sh, but not needed
-#if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
-#then
-#
-#msg="**WARNING: status${JOB_NUMBER} file already exists for $tmmark \
-#$PDY$cyc run - no data dumps produced"
-#$DATA/postmsg "$jlogfile" "$msg"
-#
-#else
+# mimmic exnam_dump.sh
+if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
+then
+
+msg="**WARNING: status${JOB_NUMBER} file already exists for $tmmark \
+$PDY$cyc run - no data dumps produced"
+$DATA/postmsg "$jlogfile" "$msg"
+
+else
 
 set +x
 #----------------------------------------------------------------
@@ -2023,9 +2036,8 @@ export STATUS=YES
 export DUMP_NUMBER=15
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
-## ASK DIANE IF WE NEED THIS (taken from exnam_dump.sh)
-#  endif test for existence of status file
-#fi
+  endif test for existence of status file
+fi
 
 #  endif loop $PROCESS_DUMP
 fi
