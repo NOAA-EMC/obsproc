@@ -187,6 +187,8 @@ fi
 # comin and comin_m1 are paths to dump status files for bufr_avgdata.sh
 export comin=${comin:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDY})}
 export comin_m1=${comin_m1:-$(compath.py ${envir}/${NET}/${obsproc_ver}/${RUN}.${PDYm1})}
+echo IGBG comin= $comin
+echo IGBG comin_m1= $comin_m1
 
 # ---------------------------
 # Paths for non-obsproc items
@@ -220,12 +222,15 @@ export OBCNTarch=${OBCNTarch:-$HOMEarch/obcount_30day}
 #########################################################
 # Specify variables specific to this execution of script
 #########################################################
-if [ "$RUN" = 'rrfs' ]; then
-   export PROCESS_DATACOUNTS=YES # for RTDM Section 3. replacing NAM
-else
-   export PROCESS_DATACOUNTS=NO # Not processed in RRFS_P, RRFS_E runs
-fi     
-#export PROCESS_DATACOUNTS=NO # Not processed in RRFS, RRFS_P, RRFS_E runs
+
+# IG: No memory why we added this block i.p.v the single line below
+# IG: PROCESS_DATACOUNTS=YES causes error with AVGDarch_IN in bufr_datacount
+#if [ "$RUN" = 'rrfs' ]; then
+#   export PROCESS_DATACOUNTS=YES # for RTDM Section 3. replacing NAM
+#else
+#   export PROCESS_DATACOUNTS=NO # Not processed in RRFS_P, RRFS_E runs
+#fi     
+export PROCESS_DATACOUNTS=NO # Not processed in RRFS, RRFS_P, RRFS_E runs
 
 export PROCESS_REMOREST=${PROCESS_REMOREST:-YES}
 export PROCESS_UNBLKBUFR=${PROCESS_UNBLKBUFR:-NO}

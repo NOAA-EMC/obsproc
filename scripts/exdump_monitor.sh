@@ -1051,7 +1051,7 @@ DTIM_latest_amsr=-1.01
 DTIM_earliest_msmws=-2.50
 DTIM_latest_msmws=-1.51
 
-DTIM_earliest_msro=-6.00 #large monitor window for dev tanks
+DTIM_earliest_msro=-3.00 #large monitor window for dev tanks
 DTIM_latest_msro=-3.01   
 
 # start monitor when the tanks go live

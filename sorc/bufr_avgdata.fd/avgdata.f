@@ -43,6 +43,7 @@ C     Updated documentation (no logic changes necessary).
 C 2017-11-20  D. A. KEYSER -- ACCOUNTS FOR NAM NOW HAVING tm06 THROUGH
 C     tm00 TIME MARKERS (ONLY tm00 IS EXPECTED HERE FOR THIS AND ALL
 C     oTHER NETWORKS).
+C 2026-10-01  I. GENKOVA -- ADD RRFS NETWORK
 C
 C USAGE:
 C   INPUT FILES:
@@ -93,7 +94,7 @@ C
 C REMARKS:
 C     VARIABLES IN NAMELIST "INPUT" READ IN MAIN PROGRAM
 C       NETWORK  - C*5,  NETWORK {either 'NAM  '(tm00), 'GFS  ',
-C                                 'GDAS ', 'RAP', 'RTMA', 'URMA' or
+C                            'GDAS ', 'RAP', 'RRFS', 'RTMA', 'URMA' or
 C                                 'DUMP'}
 C                        (NOTE: 'DUMP' is the dump monitoring network
 C                               which runs hourly)
@@ -192,7 +193,7 @@ C     --------------------------------------------------------
       print *, ' '
 
       if(network.eq.'DUMP'.or.network.eq.'RAP'.or.network.eq.'RTMA'.or.
-     $   network.eq.'URMA') then
+     $   network.eq.'URMA'.or.network.eq.'RRFS') then
          icycle_iter = 1
       else
          icycle_iter = 6
@@ -256,7 +257,7 @@ C     ------------------------------------
 C        --> Headings
 
       if(network.ne.'DUMP'.and.network.ne.'RAP'.and.network.ne.'RTMA'
-     $ .and.network.ne.'URMA') then
+     $ .and.network.ne.'URMA'.and.network.ne.'RRFS') then
          write(51,104) network,currdate
   104 format(4x,69('-')/4x,'Mean dump counts at each cycle for ',a5,
      $ ' tm00 network, ','listed by'/5x,'BUFR message type/subtype.'//

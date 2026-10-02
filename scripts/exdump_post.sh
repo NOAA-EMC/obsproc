@@ -171,7 +171,7 @@ if [ ! -s $COMIN/$RUN.$cycle.status.$tmmark.bufr_d ]; then
        | cut -f1 -d:`
       total2=`cat <$file2 | wc -l`
       tail -n `expr $total2 - $mcount - 1` $file2 > bottom_part
-      mcount=`grep -n "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+  mcount=`grep -n -m 1 "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%" bottom_part | cut -f1 -d:`
       head -n `expr $mcount - 1` bottom_part > insert
       cat status1 insert > status
@@ -182,16 +182,22 @@ if [ ! -s $COMIN/$RUN.$cycle.status.$tmmark.bufr_d ]; then
 ++++" $file2 | cut -f1 -d:`
       tail -n `expr $total2 - $mcount - 1` $file2 > bottom_part
       cat status1 bottom_part > $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
+      ##for troubleshooting
+      #cpfs $file1 $COMOUT/$RUN.$cycle.status1.$tmmark.bufr_d.KEEP
+      #cpfs $file2 $COMOUT/$RUN.$cycle.status2.$tmmark.bufr_d.KEEP      
       rm $file1 $file2 bottom_part insert status status1 top_part
    elif [ -s $file1 ]; then
       cpfs $file1 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
+      ##for troubleshooting
+      #cpfs $file1 $COMOUT/$RUN.$cycle.status1.$tmmark.bufr_d.KEEP      
       rm $file1
       msg="***WARNING: DUMP status file successfully generated but only from \
 dump status1 file - dump status2 file not present"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $file2 ]; then
       cpfs $file2 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
-      rm $file2
+      ##for troubleshooting
+      #cpfs $file2 $COMOUT/$RUN.$cycle.status2.$tmmark.bufr_d.KEEP
       msg="***WARNING: DUMP status file successfully generated but only from \
 dump status2 file - dump status1 file not present"
       $DATA/postmsg "$jlogfile" "$msg"

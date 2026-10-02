@@ -16,6 +16,7 @@ PRELUDE
  - Replaces NET with mNET (mNET=gfs, gdas, cdas, rap, etc), so obsNET could be replaced with NET (NET=obsproc)
  - Accompanies SCN Obsproc.v1.3.0 : https://docs.google.com/document/d/1grFJNFXrGRWqSWWQZ9y4p2lkXhWfIZGd97l1UBDiKzE/edit?tab=t.0
 
+
 FILE CHANGES
  M docs/Release_Notes.txt
  M jobs/JOBSPROC_CDAS_DUMP
@@ -63,6 +64,7 @@ FILE CHANGES
  M scripts/exrap_dump.sh
  M scripts/exrrfs_dump.sh
  M scripts/exrtma_makeprepbufr.sh
+ M sorc/bufr_avgdata.fd/avgdata.f
  M ush/bufr_avgdata.sh
  M ush/bufr_datacount.sh
  M versions/build.ver
@@ -78,7 +80,7 @@ DOCS
 
 JOBS
  jobs/JOBSPROC_* 
- Replace NET with mNET, and obsNET with NET 
+ Replace NET with mNET, and obsNET with NET; 
 
 SCRIPTS 
  scripts/excdas_dump.sh
@@ -93,6 +95,7 @@ SCRIPTS
  
  script/exdump_post.sh
  Removed references to discontinued omi, 1bhrs4, geoimr, avcspm, eshrs3, airsev, osbuv8, saphir
+ Set RRFS to generate 24 status files
  
  scripts/exglobal_dump.sh
  Replace NET with mNET, and obsNET with NET
@@ -100,7 +103,7 @@ SCRIPTS
  Remove variable NAP which controlled when each dump group would start
  Adds functionality for two dump jobs (slow dump groups -JOBSPROC_GLOBAL_DUMP, fast -JOBSPROC_GLOBAL_DUMP2)
  Removes generation of 0 size dumps - omi, 1bhrs4, geoimr, avcspm, eshrs3, airsev, osbuv8
- Cleaned up some commented lines
+ Cleaned up some commented lines; Grid files are copied only in dump2 job;
 
  scripts/exrap_dump.sh
  Replace NET with mNET, and obsNET with NET
@@ -112,8 +115,15 @@ SCRIPTS
  Remove variable NAP which controlled when each dump group would start
  Removes generation of 0 size dumps - 1bhrs4, airsev, eshrs3, osbuv8, saphir 
 
+SORC CHANGES
+ sorc/bufr_avgdata.fd/avgdata.f
+ Set RRFS counts to be done hourly, i.e. 24 reports; this change is needed by ush/bufr_avgdata.sh
+
 USH CHANGES
  ush/bufr_avgdata.sh
+ Set RRFS to run 24 times a day for SDM
+ Replace NET with mNET, and obsNET with NET
+
  ush/bufr_datacounts.sh
  Replace NET with mNET, and obsNET with NET
 

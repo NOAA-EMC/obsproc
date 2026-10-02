@@ -588,11 +588,11 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
   fi
 
 #  endif loop $PROCESS_GRIBFLDS
-fi
-
   if [ "$SENDECF" = "YES" ]; then
      ecflow_client --event=release_sfcprep
   fi
+fi
+
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
@@ -2036,7 +2036,7 @@ export STATUS=YES
 export DUMP_NUMBER=15
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
 
-  endif test for existence of status file
+#  endif test for existence of status file
 fi
 
 #  endif loop $PROCESS_DUMP
