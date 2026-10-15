@@ -2,7 +2,7 @@ help([[
 Load environment to build obsproc on Gaea
 ]])
 
-prepend_path("MODULEPATH", os.getenv("spack_stack_mod_path"))
+prepend_path("MODULEPATH", os.getenv("stack_core_path"))
 
 stack_intel_ver=os.getenv("stack_intel_ver") or "None"
 stack_cray_mpich_ver=os.getenv("stack_cray_mpich_ver") or "None"
