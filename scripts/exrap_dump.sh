@@ -59,6 +59,8 @@ echo "         Oct 11 2023 - Split msonet to msonet and msone1, msone1=255.030 "
 echo "                       concatenate msonet and msone1 right after dump    "
 echo "                     - Pull adpupa and uprair into own Dump group        "
 echo "         Mar 14 2024 - Split gsrasr and gsrcsr to own dump hroups        "
+echo "         Feb 18 2025 - Split gpsipw to own dump group                    "
+echo "         Mar 30 2026 - Remove NAP and introduce second DUMP job          "
 ################################################################################
 
 set -xau
@@ -76,17 +78,18 @@ set +u
 # Dump group #2 (pb) = vadwnd satwnd
 # Dump group #3 (pb) = proflr rassda sfcshp adpsfc ascatt tideg snocvr
 #                          subpfl saldrn
-# Dump group #4 (pb) = msonet gpsipw 
+# Dump group #4 (pb) = msonet->msone0 (gpsipw to #13) 
 # Dump group #5 (pb) = aircft aircar
 # Dump group #6 (non-pb) = nexrad
 # Dump group #7 (non-pb) = airsev 1bhrs4 eshrs3 lgycld ssmisu osbuv8 crsfdb
 #                          saphir gmi1cr
-# Dump group #8 (non-pb) = gsrasr [gsrcsr]
+# Dump group #8 (non-pb) = gsrasr (gsrcsr to #12)
 # Dump group #9 (non-pb) = lghtng + adpupa
 # Dump group #10(pb) = msone1 # ONLY tank b255/xx030, the largest
-# Dump group #11(pb) = adpupa uprair - adpupa
+# Dump group #11(pb) = [adpupa to #9] uprair
 # Dump group #12 (non-pb)= gsrcsr
-# Dump group #13 STATUS FILE
+# Dump group #13 (pb) = gpsipw
+# Dump group #14 STATUS FILE
 # ------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -100,36 +103,45 @@ set +u
 # -----------------------------------------------------------------------------
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+# NOTE:
+# Split global dumps to 2 jobs, b/c of slow satwnd and uprair
+# Remove NAP and go back to Shelley's original cron kick off times
+# But for satwnd and upair - start NAP minutes earlier (global->10min, rap->2min)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 if [ -n "$JOB_NUMBER" ]; then
 set -u
    if [ $JOB_NUMBER = 2 ]; then
-      dump_ind=DUMP2
-      DUMP_group1=${DUMP_group1:-"YES"}
+      dump_ind=DUMP2 #quick jobs
+      DUMP_group1=${DUMP_group1:-"NO"}
       DUMP_group2=${DUMP_group2:-"NO"}
-      DUMP_group3=${DUMP_group3:-"NO"}
-      DUMP_group4=${DUMP_group4:-"NO"}
-      DUMP_group5=${DUMP_group5:-"NO"}
+      DUMP_group3=${DUMP_group3:-"YES"}
+      DUMP_group4=${DUMP_group4:-"YES"}
+      DUMP_group5=${DUMP_group5:-"YES"}
       DUMP_group6=${DUMP_group6:-"YES"}
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"YES"}
       DUMP_group9=${DUMP_group9:-"YES"}
-      DUMP_group10=${DUMP_group10:-"NO"}
+      DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"YES"}
+      DUMP_group13=${DUMP_group13:-"YES"}
    else
-      dump_ind=DUMP
-      DUMP_group1=${DUMP_group1:-"NO"}
+      dump_ind=DUMP #slow
+      DUMP_group1=${DUMP_group1:-"YES"}
       DUMP_group2=${DUMP_group2:-"YES"}
-      DUMP_group3=${DUMP_group3:-"YES"}
-      DUMP_group4=${DUMP_group4:-"YES"}
-      DUMP_group5=${DUMP_group5:-"YES"}
+      DUMP_group3=${DUMP_group3:-"NO"}
+      DUMP_group4=${DUMP_group4:-"NO"}
+      DUMP_group5=${DUMP_group5:-"NO"}
       DUMP_group6=${DUMP_group6:-"NO"}
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"NO"}
       DUMP_group9=${DUMP_group9:-"NO"}
-      DUMP_group10=${DUMP_group10:-"YES"}
+      DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"NO"}
+      DUMP_group13=${DUMP_group13:-"NO"}
    fi
 else
    dump_ind=DUMP
@@ -145,6 +157,16 @@ else
    DUMP_group10=${DUMP_group10:-"YES"}
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
+   DUMP_group13=${DUMP_group13:-"YES"}
+fi
+
+if [ $tmmark = tm00 ]; then
+   #ADPUPA_wait=${ADPUPA_wait:-"YES"}
+########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves ~15 sec if ADPUPA_wait=NO
+   CHECK_STATUS=${CHECK_STATUS:-"NO"}
+else
+   #ADPUPA_wait=${ADPUPA_wait:-"NO"}
+   CHECK_STATUS=${CHECK_STATUS:-"YES"}
 fi
 
 # Oct 2019; disable -- not needed for HRRRv4
@@ -194,7 +216,7 @@ set -x
  
 export COMSP=$COMOUT/$RUN.${cycle}.
  
-if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
+if [ "$PROCESS_GRIBFLDS" = 'YES' -a "${JOB_NUMBER:-2}" = '2' ]; then
 
 ###################################
 #  copy imssnow from $TANK_GRIBFLDS
@@ -208,12 +230,12 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    for i in "${!flarr[@]}"
    do
      if [ -s $imssnow/${flarr[$i]} ]; then
-       cp $imssnow/${flarr[$i]} ${COMSP}${i}
+       cpfs $imssnow/${flarr[$i]} ${COMSP}${i}
        msg="todays IMS snow grib file (${flarr[$i]}) located and copied \
 to ${COMSP}${i}"
        $DATA/postmsg "$jlogfile" "$msg"
      elif [ -s $imssold/${flarr[$i]} ]; then
-       cp $imssold/${flarr[$i]} ${COMSP}${i}
+       cpfs $imssold/${flarr[$i]} ${COMSP}${i}
        msg="**todays IMS snow grib file (${flarr[$i]}) not located - copy \
 1-day old file"
        $DATA/postmsg "$jlogfile" "$msg"
@@ -232,8 +254,8 @@ to ${COMSP}${i}"
    done
 fi  #  endif loop $PROCESS_GRIBFLDS
 
-# NAP is introduced so that uprair can run early on his own
-NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
+## NAP is introduced so that uprair can run early on his own
+#NAP=${NAP:-120} #b/c cron is moved to run 2min (120s) early
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
@@ -247,6 +269,7 @@ echo "=======> Dump group 9 (thread_9) not executed." > $DATA/9.out
 echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
+echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
 err1=0
 err2=0
 err3=0
@@ -259,11 +282,12 @@ err9=0
 err10=0
 err11=0
 err12=0
+err13=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1 
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1 
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -297,6 +321,15 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 msg="START THE $tmmark_uc $RUN_uc DATA $dump_ind CENTERED ON $dumptime"
 $DATA/postmsg "$jlogfile" "$msg"
 
+if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
+then
+
+msg="**WARNING: status${JOB_NUMBER} file already exists for $tmmark \
+$PDY$cyc run - no data dumps produced"
+$DATA/postmsg "$jlogfile" "$msg"
+
+else
+
 set +x
 #----------------------------------------------------------------
 cat<<\EOF>thread_1; chmod +x thread_1
@@ -314,7 +347,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -465,7 +498,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -484,7 +517,7 @@ export SKIP_005023=YES
 export SKIP_005090=YES
 
 # Skip old bufr EUMETSAT AMVs
-For testing, skip in ecflow or obsproc_rap.ver file
+#For testing, skip in ecflow or obsproc_rap.ver file
 #export SKIP_005064=YES
 #export SKIP_005065=YES
 #export SKIP_005066=YES
@@ -597,7 +630,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -691,65 +724,22 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
 #============================================================================
-# Dump # 4 : MSONET, GPSIPW -- TOTAL NUMBER OF SUBTYPES = 31
+# Dump # 4 : MSONET, GPSIPW(moved to Dump#13) -- TOTAL NUMBER OF SUBTYPES = 31
 #             (30)     (1)
 #============================================================================
 
 def_time_window_4=0.5 # default time window for dump 4 is -0.5 to +0.5 hours
 
-if [ "$RUN" = 'rap_p' ]; then
-
-#  ===> For RUN = rap_p -- partial cycle runs
-#       -------------------------------------
-
-   if [ $cyc -ne 08 -a $cyc -ne 20 ]; then
-
-# Time window -0.05 to +0.05 hours (-3 to +3 min) for GPSIPW at all cycles
-#   except 08 and 20z
-
-      DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.05"}
-      DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
-
-   else
-
-# Time window -0.55 to -0.45 hours (-33 to -27 min) for GPSIPW for 08 or 20z
-#  cycle
-
-      DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.55"}
-      DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.45"}
-
-   fi
-
-else
-
-#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
-#       -------------------------------------------------------------------
-
-# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
-
-   DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
-   DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
-
-fi
-#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
-#         providers) is currently limited to obs closest to cycle-time that
-#         result in a U.S.-ENI dump count that is not too much larger than that
-#         from the previous U.S. (only) GSD-feed, since the ENI reports are
-#         available every 5 min while the GSD reports were available only every
-#         30 min. Also accounts for an approximate 80-min latency present in
-#         the U.S.-ENI reports.}
-
-
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msonet gpsipw
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_4} 1 msone0
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -781,13 +771,13 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
 #===========================================================================
 # Dump # 5 : AIRCFT, AIRCAR, GOESND -- TOTAL NUMBER OF SUBTYPES = 12
-#              (8)     (2)     (2)
+#              (8)     (2)     (2)  
 #===========================================================================
 
 export LALO=0  # GLOBAL dumps here (AIRCFT and AIRCAR dumped globally to
@@ -837,7 +827,7 @@ else
 fi
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 aircft \
- aircar
+ aircar gsbpfl
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -869,7 +859,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
@@ -1094,7 +1084,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1225,7 +1215,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1292,7 +1282,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1336,7 +1326,6 @@ set -x
 EOF
 set -x
 
-### NEW GROUP MSONET IG #10
 set +x
 #----------------------------------------------------------------
 cat<<\EOF>thread_10; chmod +x thread_10
@@ -1354,7 +1343,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1368,9 +1357,11 @@ def_time_window_10=0.5 # default time window for dump 10 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_10} 1 msone1
-error10=$?
-echo "$error10" > $DATA/error10
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_10} 1 msone1
+  error10=$?
+  echo "$error10" > $DATA/error10
+fi
 
 set +x
 echo "********************************************************************"
@@ -1382,7 +1373,6 @@ set -x
 } > $DATA/10.out 2>&1
 EOF
 set -x
-### NEW GROUP MSONET IG end #10
 
 set +x
 #----------------------------------------------------------------
@@ -1402,7 +1392,7 @@ echo
 set -x
 
 # UPRAIR need to start early
-#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+##sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
@@ -1473,7 +1463,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=12
 
@@ -1522,6 +1512,91 @@ set -x
 EOF
 set -x
 
+set +x
+cat<<\EOF>thread_13; chmod +x thread_13
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+#sleep ${NAP} # to reverse 2min early start of jrap_dump in cron
+export STATUS=NO
+export DUMP_NUMBER=13
+
+#===========================================================================
+# Dump # 13 : GPSIPW -- TOTAL NUMBER OF SUBTYPES = 1
+#              (1)
+#===========================================================================
+
+def_time_window_13=0.5 # default time window for dump 13 is -0.5 to +0.5 hours
+
+# gpsipw
+if [ "$RUN" = 'rap_p' ]; then
+
+#  ===> For RUN = rap_p -- partial cycle runs
+#         -------------------------------------
+  
+  if [ $cyc -ne 08 -a $cyc -ne 20 ]; then
+
+# Time window -0.05 to +0.05 hours (-3 to +3 min) for GPSIPW at all cycles
+#   except 08 and 20z
+
+    DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.05"}
+    DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
+
+  else
+
+# Time window -0.55 to -0.45 hours (-33 to -27 min) for GPSIPW for 08 or 20z
+#  cycle
+
+     DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-0.55"}
+     DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.45"}
+
+  fi
+
+else
+
+#  ===> For RUN = rap, rap_e -- full cycle runs (including early at 00/12z)
+#       -------------------------------------------------------------------
+
+# Time window -1.05 to -0.95 hours (-63 to -57 min) for GPSIPW
+
+   DTIM_earliest_gpsipw=${DTIM_earliest_gpsipw:-"-1.05"}
+   DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"-0.95"}
+                                                                                     
+fi
+
+#  {note: new Ground Based GPS-IPW/ZTD (from U.S.-ENI and foreign GNSS
+#         providers) is currently limited to obs closest to cycle-time that
+#         result in a U.S.-ENI dump count that is not too much larger than that
+#         from the previous U.S. (only) GSD-feed, since the ENI reports are
+#         available every 5 min while the GSD reports were available only every
+#         30 min. Also accounts for an approximate 80-min latency present in
+#         the U.S.-ENI reports.}
+                                                                                     
+$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_13} 1 gpsipw
+error13=$?
+echo "$error13" > $DATA/error13
+
+set +x
+echo "********************************************************************"
+echo Script thread_13
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/13.out 2>&1
+EOF
+set -x
 
 #----------------------------------------------------------------
 # Now launch the threads
@@ -1551,6 +1626,7 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group10 = YES ]  &&  echo ./thread_10 >> $DATA/poe.cmdfile
    #[ $DUMP_group11 = YES ]  &&  echo ./thread_11 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile 
+   [ $DUMP_group13 = YES ]  &&  echo ./thread_13 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
@@ -1581,9 +1657,10 @@ else
       [ $DUMP_group10 = YES ]  &&  ./thread_10
       [ $DUMP_group11 = YES ]  &&  ./thread_11
       [ $DUMP_group12 = YES ]  &&  ./thread_12
+      [ $DUMP_group13 = YES ]  &&  ./thread_13
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
 
 set +x
 echo " "
@@ -1602,12 +1679,16 @@ set -x
 [ -s $DATA/error10 ] && err10=`cat $DATA/error10`
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
+[ -s $DATA/error13 ] && err13=`cat $DATA/error13`
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=13
+export DUMP_NUMBER=14
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
+
+#  endif test for existence of status file     
+fi
 
 #  endif loop $PROCESS_DUMP
 fi
@@ -1625,8 +1706,9 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-	"$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' ]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12
+	"$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
+       	"$err13" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1637,7 +1719,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13"
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1655,31 +1737,40 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12"
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13"
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
       set -x
    fi
 
-#  endif loop $PROCESS_DUMP
+
+   if [ $JOB_NUMBER = 2 ]; then #don't do in JOBSPROC_RAP_DUMP2
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+    cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+    cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+    chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+    chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
+   fi
+
+#  endif loop $PROCESS_DUMP   
 fi
 
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
-
-
-grep -q "004.004 in data group aircar for .............-.........\
-.... HAS      0 REPORTS" ${COMSP}status.$tmmark.bufr_d
-err_grep1=$?
-grep -q "004.007 in data group aircar for .............-.........\
-.... HAS      0 REPORTS" ${COMSP}status.$tmmark.bufr_d
-err_grep2=$?
-if [ $err_grep1 -eq 0 -a $err_grep2 -eq 0 ]; then
-   msg="***WARNING: NO ACARS data from either ARINC (004.004) or AFWA \
-(004.007), run assimilation without any ACARS data"
-   $DATA/postmsg "$jlogfile" "$msg"
-fi
+if [ $JOB_NUMBER = 2 ]; then
+ # aircar is dumped in JOB_NUMBER=2, thus *status2* should be greped.
+ # if aircar is moved to JOB_NUMBER=1, change to *status1*
+ grep -q "004.004 in data group aircar for .............-.........\
+ .... HAS      0 REPORTS" ${COMSP}status2.$tmmark.bufr_d
+ err_grep1=$?
+ grep -q "004.007 in data group aircar for .............-.........\
+ .... HAS      0 REPORTS" ${COMSP}status2.$tmmark.bufr_d
+ err_grep2=$?
+ if [ $err_grep1 -eq 0 -a $err_grep2 -eq 0 ]; then
+    msg="***WARNING: NO ACARS data from either ARINC (004.004) or AFWA \
+ (004.007), run assimilation without any ACARS data"
+    $DATA/postmsg "$jlogfile" "$msg"
+ fi
+fi 
 
 
 if [ $SENDDBN = YES ]; then
@@ -1786,7 +1877,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

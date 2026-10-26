@@ -90,7 +90,7 @@ err5=0
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1 
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -207,9 +207,9 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #========================================================================
-# Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN
-#              (11)     (6)   (1)   (1)     (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 20
+# Dump # 2 : SFCSHP, ADPSFC, TIDEG, SUBPFL, SALDRN, SOFARW
+#              (11)     (6)   (1)   (1)     (1)     (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 21
 #            time window radius is +/- 0.50 hours for SFCSHP and ADPSFC
 #=======================================================================
 
@@ -221,6 +221,8 @@ DTIM_earliest_subpfl=-0.50
 DTIM_latest_subpfl=+0.50
 DTIM_earliest_saldrn=-0.50
 DTIM_latest_saldrn=+0.50
+DTIM_earliest_sofarw=-0.50
+DTIM_latest_sofarw=+0.50
 
 # for rtma_ru_0000 read only from previous day's tank
 # Temporary bug fix
@@ -228,7 +230,7 @@ if [ $RUN = "rtma_ru" -a $cycle = "t0000z" ]; then
   DTIM_latest_000000=-0.01
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc subpfl saldrn
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 sfcshp tideg adpsfc subpfl saldrn sofarw
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -268,7 +270,7 @@ export DUMP_NUMBER=3
 #            time window radius is 0.50 hours
 #===========================================================================
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.5 1 msone0
 error3=$?
 echo "$error3" > $DATA/error3
 
@@ -403,9 +405,11 @@ def_time_window_5=0.5 # default time window for dump 5 is -0.5 to +0.5 hours
 # Time window -0.50 to +0.50 hours for MSONET for full and partial cycle runs
 #  (default)
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 msone1
-error5=$?
-echo "$error5" > $DATA/error5
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime ${def_time_window_5} 1 msone1
+  error5=$?
+  echo "$error5" > $DATA/error5
+fi
 
 set +x
 echo "********************************************************************"
@@ -461,7 +465,7 @@ else
 #  wait
 fi
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out  
 
 set +x
 echo " "
@@ -526,6 +530,12 @@ echo
       set -x
    fi
 
+#  concatenate msone0 and msone1, b/c prepobs only wants one file
+   cat ${DATA}/msone0.ibm ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+   cpfs ${DATA}/msonet.ibm ${COMSP}msonet.${tmmark}.bufr_d
+   chmod 640 ${COMSP}msonet.${tmmark}.bufr_d
+   chgrp rstprod ${COMSP}msonet.${tmmark}.bufr_d
+
 #  endif loop $PROCESS_DUMP
 fi
 
@@ -533,8 +543,6 @@ if [ "$RUN" == "rtma_ru" ] && [ "${SENDDBN^^}" = YES ] && [ -s ${COMSP}satwnd.tm
    $DBNROOT/bin/dbn_alert MODEL RTMA_RU_BUFR_satwnd $job ${COMSP}satwnd.tm00.bufr_d
 fi
 
-#  concatenate msonet and msone1, b/c prepobs only wants one file
-cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
@@ -545,7 +553,7 @@ if [ $RUN = 'rtma_ru' ]; then
 else
    LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
 fi
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

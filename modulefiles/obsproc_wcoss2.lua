@@ -9,6 +9,7 @@ craype_ver=os.getenv("craype_ver") or "None"
 cray_mpich_ver=os.getenv("cray_mpich_ver") or "None"
 
 hdf5_ver=os.getenv("hdf5_ver") or "None"
+pnetcdf_ver=os.getenv("pnetcdf_ver") or "None"
 netcdf_ver=os.getenv("netcdf_ver") or "None"
 bacio_ver=os.getenv("bacio_ver") or "None"
 w3emc_ver=os.getenv("w3emc_ver") or "None"
@@ -24,8 +25,9 @@ load(pathJoin("cmake", cmake_ver))
 load(pathJoin("craype", craype_ver))
 load(pathJoin("cray-mpich", cray_mpich_ver))
 
-load(pathJoin("hdf5", hdf5_ver))
-load(pathJoin("netcdf", netcdf_ver))
+load(pathJoin("hdf5-D", hdf5_ver))
+load(pathJoin("pnetcdf-D", pnetcdf_ver))
+load(pathJoin("netcdf-D", netcdf_ver))
 load(pathJoin("bacio", bacio_ver))
 load(pathJoin("w3emc", w3emc_ver))
 load(pathJoin("sp", sp_ver))

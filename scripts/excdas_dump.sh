@@ -43,9 +43,11 @@ echo "         Jul 30 2022 - Subpfl, saldrn, snocvr, and gmi1cr added     "
 echo "                       to dump group #9.    "
 echo "         Sep 30 2022 - Don't / Enable dumping of UPRAIR data in     "
 echo "                       group #3./ b/c it is too slow                "
-echo "         Oct 17 2023 - Split msonet to msonet (#5) and msone1 (#10) "
-echo "                      concatenate msonet and msone1 right after dump"
-echo "                      Turn off msonet and msone1 - not needed       "
+echo "         Oct 12 2023 - Split msonet to msone0 and msone1,           "
+echo "                       where msone1=255.030; concatenate            "
+echo "                       msone0 and msone1 right after dump.          "
+echo "                       Separated satwnd to its own dump group.      "
+echo "         Oct 17 2023 - Turn off msone0 and msone1 - not needed      "
 ###########################################################################
 
 set -xau
@@ -73,7 +75,7 @@ set +u
 #               aircar aircft proflr vadwnd rassda
 #
 # Dump group #5 (pb, TIME_TRIM = OFF) =
-#               msonet
+#               msonet->msone0
 #
 # Dump group #6 (non-pb, TIME_TRIM = OFF) =
 #               nexrad
@@ -168,7 +170,7 @@ cat break > $pgmout
 export dumptime=`cut -c7-16 ncepdate`
 export cycp=`echo $dumptime|cut -c9-10`
 
-export NET_uc=$(echo $NET | tr [a-z] [A-Z])
+export NET_uc=$(echo $mNET | tr [a-z] [A-Z])
 export tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
 
 msg="$NET_uc ANALYSIS TIME IS $PDY$cyc"
@@ -198,11 +200,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  snoold=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.global.grb
 #
 #  if [ -s $snogrb ]; then
-#     cp $snogrb ${COMSP}snogrb
+#     cpfs $snogrb ${COMSP}snogrb
 #     msg="todays 0.5 degree snow grib file located and copied to ${COMSP}snogrb"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $snoold ]; then
-#     cp $snoold ${COMSP}snogrb
+#     cpfs $snoold ${COMSP}snogrb
 #     msg="**todays 0.5 degree snow grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -222,11 +224,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  snoold_t574=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.t574.grb
 #
 #  if [ -s $snogrb_t574 ]; then
-#     cp $snogrb_t574 ${COMSP}snogrb_t574
+#     cpfs $snogrb_t574 ${COMSP}snogrb_t574
 #     msg="todays T574 snow grib file located and copied to ${COMSP}snogrb_t574"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $snoold_t574 ]; then
-#     cp $snoold_t574 ${COMSP}snogrb_t574
+#     cpfs $snoold_t574 ${COMSP}snogrb_t574
 #     msg="**todays T574 snow grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -246,11 +248,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    engiceold=${COM_ENGICE}.$PDYm1/engice.t00z.grb
 
    if [ -s $engicegrb ]; then
-      cp $engicegrb ${COMSP}engicegrb
+      cpfs $engicegrb ${COMSP}engicegrb
       msg="todays engice grib file located and copied to ${COMSP}engicegrb"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $engiceold ]; then
-      cp $engiceold ${COMSP}engicegrb
+      cpfs $engiceold ${COMSP}engicegrb
       msg="**todays engice grib file not located - copy 1-day old file"
       $DATA/postmsg "$jlogfile" "$msg"
    else
@@ -271,11 +273,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  sstold=${COM_SSTOI}.$PDYm1/sstoi_grb
 
 #  if [ -s $sstgrb ]; then
-#     cp $sstgrb ${COMSP}sstgrb
+#     cpfs $sstgrb ${COMSP}sstgrb
 #     msg="todays sst grib file located and copied to ${COMSP}sstgrb"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $sstold ]; then
-#     cp $sstold ${COMSP}sstgrb
+#     cpfs $sstold ${COMSP}sstgrb
 #     msg="**todays sst grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -325,7 +327,7 @@ err10=0
 #restrict processing of unexpected big tanks
 #this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -686,11 +688,8 @@ export DUMP_NUMBER=5
 #
 #===================================================================
 
-#IG
-DTIM_earliest_msonet=${DTIM_latest_msonet:-"-1.99"}
-DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.00"}
-
-#DTIM_latest_msonet=${DTIM_latest_msonet:-"+2.99"}
+DTIM_earliest_msone0=${DTIM_latest_msone0:-"-1.99"}
+DTIM_latest_msone0=${DTIM_latest_msone0:-"+2.00"}
 
 export SKIP_255031=YES  # Skip for port to Dell since no new data allowed.
 export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers. 
@@ -698,7 +697,7 @@ export SKIP_255101=YES  # Also, b/c CDAS has not tested these providers.
 TIME_TRIM=on
 #TIME_TRIM=off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msonet
+SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone0
 error5=$?
 echo "$error5" > $DATA/error5
 
@@ -1143,9 +1142,11 @@ DTIM_latest_msone1=${DTIM_latest_msone1:-"+2.00"}
 
 TIME_TRIM=on #off
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
-error10=$?
-echo "$error10" > $DATA/error10
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 msone1
+  error10=$?
+  echo "$error10" > $DATA/error10
+fi
 
 set +x
 echo "********************************************************************"
@@ -1314,18 +1315,23 @@ $err5, $err6, $err7, $err8, $err9 $err10 "
       set -x
    fi
 
+##  concatenate msone0 and msone1, b/c prepobs only wants one file
+##  Turn off msonet dumping for CDAS, staring in obsproc v1.2 
+#    cat ${DATA}/msone0.ibm  ${DATA}/msone1.ibm > ${DATA}/msonet.ibm
+#    cpfs ${DATA}/msonet.ibm  ${COMSP}msonet.${tmmark}.bufr_d
+#    if [ "$SENDDBN" = "YES" ]; then
+#        $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msonet $job \
+#	${COMSP}msonet.${tmmark}.bufr_d
+
 #  endif loop $PROCESS_DUMP
 fi
-
-##  concatenate msonet and msone1, b/c prepobs only wants one file
-#cat ${COMSP}msone1.tm00.bufr_d >> ${COMSP}msonet.tm00.bufr_d
 
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

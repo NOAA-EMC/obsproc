@@ -88,10 +88,20 @@ echo "                       gmi1cr,and snocvr                              "
 echo "         Oct 17 2022 - Split up groups 1 and 10 into a new group 12   "
 echo "                       for better optimization.                       "
 echo "         Sep 30 2022 - Enable dumping of UPRAIR data in group #3.     "
+echo "         May 22 2024 - sfcsno added to dump group #2                  "
+echo "         Jul 20 2024 - Turn on group #6, do not run nexrad, run marine"
+echo "                       obs instead-axbt,xbtctd,altkob - longer windows"
+echo "                       Add sofarw                                     "
+echo "                     - Add snomad to group #2                         "
+echo "         Mar 30 2026 - Remove NAP and introdude                       "
+echo "                       second JOBSPROC_GLOBAL_DUMP2                   "               
+echo "         Jun 11 2026 - Add amsr, msmws, and msro to group #14         "
+echo "         Jun 16 2026 - Remove omi, 1bhrs4, geoimr, avcspm,eshrs3,     "
+echo "                       airsev, osbuv8 (0 size)                        "
 #############################################################################
 
-# NOTE: NET is changed to gdas in the parent Job script for the gdas RUN 
-#       (was gfs - NET remains gfs for gfs RUN)
+# NOTE: mNET is changed to gdas in the parent Job script for the gdas RUN 
+#       (was gfs - mNET remains gfs for gfs RUN)
 # -----------------------------------------------------------------------
 
 set -xau
@@ -116,47 +126,51 @@ set +u
 # JOB_NUMBER not present indicates dump BOTH prepbufr and non-prepbufr data.
 # -----------------------------------------------------------------------------
 # Dump group #1 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcsam eshrs3 ssmisu 1bhrs4 tesac mls
+#               avcsam ssmisu tesac mls
 #               esatms gsrcsr ahicsr sstvcw subpfl saldrn
 #               Stop: sevcsr, saphir in v1.2.0 
 # Dump group #2 (pb, TIME_TRIM defaults to OFF) =
-#               sfcshp tideg atovs* adpsfc ascatt snocvr
+#               sfcshp tideg atovs* adpsfc ascatt snocvr snomad sfcsno
 #                   * - for GDAS only
 #
 # Dump group #3 (pb, TIME_TRIM defaults to OFF) =
 #               adpupa
 #
 # Dump group #4 (pb, TIME_TRIM defaults to ON) =
-#               aircar aircft proflr vadwnd rassda gpsipw hdob 
+#               aircar aircft proflr vadwnd rassda gpsipw hdob gsbpfl 
 #
 # Dump group #5 (pb, TIME_TRIM defaults to OFF) =
 #               msonet
 #
 # Dump group #6 (non-pb, TIME_TRIM defaults to OFF) =
-#               nexrad
+#               nexrad, axbt, xbtctd, altkob, sofarw
 #
 # Dump group #7 (non-pb, TIME_TRIM defaults to OFF) =
-#               avcspm esmhs 1bmhs airsev atmsdb gome omi trkob gpsro
+#               esmhs 1bmhs atmsdb gome trkob gpsro
 #               crisf4
 #
 # Dump group #8 (pb, TIME_TRIM defaults to ON) =
 #               satwnd
 #
 # Dump group #9 (non-pb, TIME_TRIM defaults to ON) =
-#               geoimr gmi1cr satwhr
+#                gmi1cr satwhr
 # Dump group #10 (non-pb, TIME_TRIM defaults to OFF) =
 #               esiasi mtiasi esamua sevasr 1bamua bathy
-#               osbuv8 ompst8 ompsn8 gsrasr ompslp sstvpw
+#               ompst8 ompsn8 gsrasr ompslp sstvpw
 #
 # Dump group #11 (non-pb, TIME_TRIM defaults to OFF) =
 #               amsr2
 #
 # Dump group #12 crisfs atms (previously group1)
 #                crsfdb iasidb (previously group10)
+#
 # Dump group #13 (pb, TIME_TRIM defaults to OFF) = 
 #                uprair
+# 
+# Dump group #14 (non-pb, TIME_TRIM defaults to OFF) =
+#               amsr msmws msro
 #
-# Dump group #14 STATUS FILE
+# Dump group #15 STATUS FILE
 # -----------------------------------------------------------------------------
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -170,38 +184,47 @@ set +u
 # -----------------------------------------------------------------------------
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+# NOTE:
+# Split global dumps to 2 jobs, b/c of slow satwnd and uprair
+# Remove NAP and go back to Shelley's original cron kick off times
+# But for satwnd and upair - start NAP minutes earlier (global->10min, rap->2min)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 if [ -n "$JOB_NUMBER" ]; then
 set -u
    if [ $JOB_NUMBER = 2 ]; then
-      dump_ind=DUMP2
+      dump_ind=DUMP2 # quick jobs
       DUMP_group1=${DUMP_group1:-"YES"}
-      DUMP_group2=${DUMP_group2:-"NO"}
-      DUMP_group3=${DUMP_group3:-"NO"}
-      DUMP_group4=${DUMP_group4:-"NO"}
-      DUMP_group5=${DUMP_group5:-"NO"}
-      DUMP_group6=${DUMP_group6:-"NO"}
+      DUMP_group2=${DUMP_group2:-"YES"}
+      DUMP_group3=${DUMP_group3:-"YES"}
+      DUMP_group4=${DUMP_group4:-"YES"}
+      DUMP_group5=${DUMP_group5:-"NO"} #msonet
+      DUMP_group6=${DUMP_group6:-"YES"}
       DUMP_group7=${DUMP_group7:-"YES"}
       DUMP_group8=${DUMP_group8:-"NO"}
-      DUMP_group9=${DUMP_group9:-"YES"}
+      DUMP_group9=${DUMP_group9:-"NO"}
       DUMP_group10=${DUMP_group10:-"YES"}
       DUMP_group11=${DUMP_group11:-"YES"}
       DUMP_group12=${DUMP_group12:-"YES"}
       DUMP_group13=${DUMP_group13:-"NO"}
+      DUMP_group14=${DUMP_group14:-"YES"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
    else
-      dump_ind=DUMP
+      dump_ind=DUMP # slow jobs
       DUMP_group1=${DUMP_group1:-"NO"}
-      DUMP_group2=${DUMP_group2:-"YES"}
-      DUMP_group3=${DUMP_group3:-"YES"}
-      DUMP_group4=${DUMP_group4:-"YES"}
-      DUMP_group5=${DUMP_group5:-"NO"}
+      DUMP_group2=${DUMP_group2:-"NO"}
+      DUMP_group3=${DUMP_group3:-"NO"}
+      DUMP_group4=${DUMP_group4:-"NO"}
+      DUMP_group5=${DUMP_group5:-"NO"} #msonet
       DUMP_group6=${DUMP_group6:-"NO"}
       DUMP_group7=${DUMP_group7:-"NO"}
       DUMP_group8=${DUMP_group8:-"YES"}
-      DUMP_group9=${DUMP_group9:-"NO"}
+      DUMP_group9=${DUMP_group9:-"YES"}
       DUMP_group10=${DUMP_group10:-"NO"}
       DUMP_group11=${DUMP_group11:-"NO"}
       DUMP_group12=${DUMP_group12:-"NO"}
       DUMP_group13=${DUMP_group13:-"YES"}
+      DUMP_group14=${DUMP_group14:-"NO"}
    fi
 else
    dump_ind=DUMP
@@ -210,7 +233,7 @@ else
    DUMP_group3=${DUMP_group3:-"YES"}
    DUMP_group4=${DUMP_group4:-"YES"}
    DUMP_group5=${DUMP_group5:-"NO"}
-   DUMP_group6=${DUMP_group6:-"NO"}
+   DUMP_group6=${DUMP_group6:-"YES"}
    DUMP_group7=${DUMP_group7:-"YES"}
    DUMP_group8=${DUMP_group8:-"YES"}
    DUMP_group9=${DUMP_group9:-"YES"}
@@ -218,17 +241,26 @@ else
    DUMP_group11=${DUMP_group11:-"YES"}
    DUMP_group12=${DUMP_group12:-"YES"}
    DUMP_group13=${DUMP_group13:-"YES"}
+   DUMP_group14=${DUMP_group14:-"YES"} #turn on when tanks b003/xx012,b021/xx243,xx247 go live
 fi
 
-# NAP and NAP_adpupa instroduced so that uprair can run early on his own
-NAP=${NAP:-600} #b/c cron is moved to run 10min (600s) early
-if [ "$NET" = 'gfs' ]; then
+
+
+
+if [ "$mNET" = 'gfs' ]; then
    ADPUPA_wait=${ADPUPA_wait:-"YES"}
-   NAP_adpupa=${NAP_adpupa:-800} #600s(compensate early cron) + 300s(for adpupa data to come)
-########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves time if ADPUPA_wait=NO
 else
    ADPUPA_wait=${ADPUPA_wait:-"NO"}
-   NAP_adpupa=${NAP_adpupa:-600} #like other dump groups
+fi
+
+#mimmic RAP (which mimmics NAM - has two dump groups)
+if [ $tmmark = tm00 ]; then
+   #ADPUPA_wait=${ADPUPA_wait:-"YES"}
+########ADPUPA_wait=${ADPUPA_wait:-"NO"} # saves ~15 sec if ADPUPA_wait=NO
+   CHECK_STATUS=${CHECK_STATUS:-"NO"}
+else
+   #ADPUPA_wait=${ADPUPA_wait:-"NO"}
+   CHECK_STATUS=${CHECK_STATUS:-"YES"}
 fi
 
 # send extra output of DUMP2 for monitoring purposes.
@@ -249,7 +281,7 @@ cat break > $pgmout
 export dumptime=`cut -c7-16 ncepdate`
 export cycp=`echo $dumptime|cut -c9-10`
 
-export NET_uc=$(echo $NET | tr [a-z] [A-Z])
+export NET_uc=$(echo $mNET | tr [a-z] [A-Z])
 export tmmark_uc=$(echo $tmmark | tr [a-z] [A-Z])
 
 msg="$NET_uc ANALYSIS TIME IS $PDY$cyc"
@@ -263,7 +295,7 @@ set -x
 
 export COMSP=$COMOUT/$RUN.${cycle}.
 
-if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
+if [ "$PROCESS_GRIBFLDS" = 'YES' -a "${JOB_NUMBER:-2}" = '2' ]; then
 
 ########################################################
 ########################################################
@@ -284,11 +316,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    #snoold=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.global.grb
 
    #if [ -s $snogrb ]; then
-   #   cp $snogrb ${COMSP}snogrb
+   #   cpfs $snogrb ${COMSP}snogrb
    #   msg="todays 0.5 degree snow grib file located and copied to ${COMSP}snogrb"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #elif [ -s $snoold ]; then
-   #   cp $snoold ${COMSP}snogrb
+   #   cpfs $snoold ${COMSP}snogrb
    #   msg="**todays 0.5 degree snow grib file not located - copy 1-day old file"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #else
@@ -307,11 +339,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    #snoold_t574=$TANK_GRIBFLDS/$PDYm1/wgrbbul/snowdepth.t574.grb
 
    #if [ -s $snogrb_t574 ]; then
-   #   cp $snogrb_t574 ${COMSP}snogrb_t574
+   #   cpfs $snogrb_t574 ${COMSP}snogrb_t574
    #   msg="todays T574 snow grib file located and copied to ${COMSP}snogrb_t574"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #elif [ -s $snoold_t574 ]; then
-   #   cp $snoold_t574 ${COMSP}snogrb_t574
+   #   cpfs $snoold_t574 ${COMSP}snogrb_t574
    #   msg="**todays T574 snow grib file not located - copy 1-day old file"
    #   $DATA/postmsg "$jlogfile" "$msg"
    #else
@@ -330,11 +362,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    engiceold=${COM_ENGICE}.$PDYm1/engice.t00z.grb
 
    if [ -s $engicegrb ]; then
-      cp $engicegrb ${COMSP}engicegrb
+      cpfs $engicegrb ${COMSP}engicegrb
       msg="todays engice grib file located and copied to ${COMSP}engicegrb"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $engiceold ]; then
-      cp $engiceold ${COMSP}engicegrb
+      cpfs $engiceold ${COMSP}engicegrb
       msg="**todays engice grib file not located - copy 1-day old file"
       $DATA/postmsg "$jlogfile" "$msg"
    else
@@ -354,11 +386,11 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  sstold=${COM_SSTOI}.$PDYm1/sstoi_grb
 
 #  if [ -s $sstgrb ]; then
-#     cp $sstgrb ${COMSP}sstgrb
+#     cpfs $sstgrb ${COMSP}sstgrb
 #     msg="todays lowres sst grib file located and copied to ${COMSP}sstgrb"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  elif [ -s $sstold ]; then
-#     cp $sstold ${COMSP}sstgrb
+#     cpfs $sstold ${COMSP}sstgrb
 #     msg="**todays lowres sst grib file not located - copy 1-day old file"
 #     $DATA/postmsg "$jlogfile" "$msg"
 #  else
@@ -385,7 +417,7 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 
 #  The following may no longer be needed, but leave them in place for now.
 #  Print msg in the rare case the grib2 files cannot be created.
-   if [ "$NET" = 'gdas' ]; then
+   if [ "$mNET" = 'gdas' ]; then
       if [ -s ${COMSP}engicegrb ]; then
          $CNVGRIB -g12 -p40 ${COMSP}engicegrb ${COMSP}engicegrb.grib2
       else
@@ -411,8 +443,6 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 #  Post warning if no file found for $ndaysback_warn or beyond.      #
 #  The job will continue if no suitable file is available.           #
 #  ----------------------------------------------------------------  #
-#  copy NPR.SNWN.SP.S1200.MESH16   from $TANK_GRIBFLDS               #
-#  copy NPR.SNWS.SP.S1200.MESH16   from $TANK_GRIBFLDS               #
 #  copy imssnow96.grb.grib2        from $TANK_GRIBFLDS               #
 #  copy seaice.t00z.5min.grb       from $COM_ICE5MIN                 #
 #  copy seaice.t00z.5min.grb.grib2 from $COM_ICE5MIN                 #
@@ -421,8 +451,6 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
 ######################################################################
 ######################################################################
    for gribfile in  \
-    NPR.SNWN.SP.S1200.MESH16   \
-    NPR.SNWS.SP.S1200.MESH16   \
     imssnow96.grb.grib2        \
     seaice.t00z.5min.grb       \
     seaice.t00z.5min.grb.grib2 \
@@ -431,11 +459,6 @@ if [ "$PROCESS_GRIBFLDS" = 'YES' ]; then
    do
 # set the values specific to each file
       case $gribfile in
-         NPR.SNWN.SP.S1200.MESH16 | NPR.SNWS.SP.S1200.MESH16 )    # AFWA snow
-          grib_source='$TANK_GRIBFLDS/$DDATE/wgrbbul';
-          target_filename=$gribfile.grb
-          ndaysback=1;
-          ndaysback_warn=1;;
          imssnow96.grb.grib2 )                     # IMS snow
           grib_source='$TANK_GRIBFLDS/$DDATE/wgrbbul';
           target_filename=imssnow96.grib2
@@ -485,7 +508,7 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
          eval tryfile=$grib_source/$gribfile
          if [ -s $tryfile ];then
             set +x; echo -e "\nPicking up file $tryfile\n"; set -x
-            cp $tryfile ${COMSP}$target_filename
+            cpfs $tryfile ${COMSP}$target_filename
             found=true
             break
          fi
@@ -507,13 +530,69 @@ set +x; echo -e "\n---> path to finddate.sh below is: `which finddate.sh`"; set 
          $DATA/postmsg "$jlogfile" "$msg"
       fi    
    done
-   if [ "$SENDECF" = "YES" ]; then
-      ecflow_client --event=release_sfcprep
-   fi
+
+##  endif loop $PROCESS_GRIBFLDS
+#fi
+
+# Save NIC.IMS_v*_*_4km.ascii as imssnow96.asc in $COMROOT
+  ascii_file=NIC.IMS
+  ascii_file_var=_v3_*_4km.asc # expects single file availability _v3_YYYYjdy00_4km.asc
+  ascii_source=$TANK_GRIBFLDS/${PDY}/wgrbbul
+  target_filename=imssnow96.asc
+# Get a list of files in the directory, sort them, and get the last one
+  last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
+  if [ -n "${last_file}" -a -s "${last_file}" ]; then
+    set +x; echo -e "\nPicking up IMS ascii file ${last_file}\n"; set -x	
+    cpfs ${last_file} ${COMSP}${target_filename}
+  else
+    ascii_source=$TANK_GRIBFLDS/${PDYm1}/wgrbbul
+    last_file=$(ls -1  ${ascii_source}/${ascii_file}${ascii_file_var} 2>/dev/null  | sort | tail -n 1)
+    set +x; echo -e "\nPicking up a day old IMS ascii file ${last_file}\n"; set -x
+    if [ -n "${last_file}" -a -s "${last_file}" ]; then
+      cpfs ${last_file} ${COMSP}$target_filename
+    else
+      set +x; echo -e "\nNo useful IMS ascii file found\n"; set -x
+    fi
+  fi
+
+# Copy/Rename new 557th USAF 0.09 deg global snow AN files
+  ascii_file1=${ascii_file1:-"PS.557WW_SC.U_DI.C_GP.USAFSI_GR.C0P09DEG_AR.GLOBAL_PA.SNOW-ICE"}
+  ascii_file1_var=${ascii_file1_var:-"_DD.${PDY}_DT.${cyc}00_DF.GR2"}
+  ascii_source=${TANK_GRIBFLDS}/${PDY}/wgrbbul/557thWW_snow
+  target_filename=snow.usaf.grib2
+  if [ -s "${ascii_source}/${ascii_file1}${ascii_file1_var}" ]; then
+      set +x; echo -e "\nPicking up USAF 557thWW_snow file ${ascii_source}/${ascii_file1}${ascii_file1_var}\n"; set -x
+      cpfs "${ascii_source}/${ascii_file1}${ascii_file1_var}" "${COMSP}${target_filename}"
+      usaf_in=true
+  else
+      usaf_in=false
+      for step_back in 6 12 18 24 30 36 42 48
+      do
+         prior_yyyymmddCC=$($NDATE -${step_back} ${PDY}${cyc})
+         PDY_p=`echo $prior_yyyymmddCC|cut -c1-8`
+         cyc_p=`echo $prior_yyyymmddCC|cut -c9-10`
+         ascii_source="${TANK_GRIBFLDS}/${PDY_p}/wgrbbul/557thWW_snow"
+         ascii_file1_var="_DD.${PDY_p}_DT.${cyc_p}00_DF.GR2"
+         if [ -s  "${ascii_source}/${ascii_file1}${ascii_file1_var}" ]; then
+           cpfs "${ascii_source}/${ascii_file1}${ascii_file1_var}" "${COMSP}${target_filename}"
+           usaf_in=true
+           set +x; echo -e "\nPicking up a ${step_back}-hour-old 557thWW_snow file \n"; set -x
+           break
+	 else
+           set +x; echo -e "\n***WARNING: ${step_back}-hour-old 557thWW_snow file not found \n"; set -x
+         fi
+      done
+  fi
+  if [ "$usaf_in" = false ]; then
+      set +x; echo -e "\n***WARNING: No suitable wrgbbul/557thWW_snow/PS.557WW_* file found the last 48h \n"; set -x
+  fi
 
 #  endif loop $PROCESS_GRIBFLDS
 fi
 
+  if [ "$SENDECF" = "YES" ]; then
+     ecflow_client --event=release_sfcprep
+  fi
 
 echo "=======> Dump group 1 (thread_1) not executed." > $DATA/1.out
 echo "=======> Dump group 2 (thread_2) not executed." > $DATA/2.out
@@ -528,6 +607,7 @@ echo "=======> Dump group 10 (thread_10) not executed." > $DATA/10.out
 echo "=======> Dump group 11 (thread_11) not executed." > $DATA/11.out
 echo "=======> Dump group 12 (thread_12) not executed." > $DATA/12.out
 echo "=======> Dump group 13 (thread_13) not executed." > $DATA/13.out
+echo "=======> Dump group 14 (thread_14) not executed." > $DATA/14.out
 
 err1=0
 err2=0
@@ -542,6 +622,8 @@ err10=0
 err11=0
 err12=0
 err13=0
+err14=0
+
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 ####################################
@@ -552,6 +634,16 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 
 msg="START THE $tmmark_uc $NET_uc DATA $dump_ind CENTERED ON $dumptime"
 $DATA/postmsg "$jlogfile" "$msg"
+
+# mimmic exnam_dump.sh
+if [ $CHECK_STATUS = YES -a -s ${COMSP}status${JOB_NUMBER}.${tmmark}.bufr_d ]
+then
+
+msg="**WARNING: status${JOB_NUMBER} file already exists for $tmmark \
+$PDY$cyc run - no data dumps produced"
+$DATA/postmsg "$jlogfile" "$msg"
+
+else
 
 set +x
 #----------------------------------------------------------------
@@ -570,7 +662,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=1
 
@@ -581,10 +673,7 @@ export DUMP_NUMBER=1
 #
 #--------------------------------------------------------------------------
 # Dump # 1 : AVCSAM: 1 subtype(s)
-#            ESHRS3: 1 subtype(s)
 #            SSMISU: 1 subtype(s)
-#            SAPHIR: 1 subtype(s)
-#            1BHRS4: 1 subtype(s)
 #            SEVCSR: 1 subtype(s)
 #            TESAC:  1 subtype(s)
 #            MLS:    1 subtype(s) (if present in past 10 days of tanks)
@@ -600,12 +689,8 @@ export DUMP_NUMBER=1
 #=========================================================================
 
 DTIM_latest_avcsam=${DTIM_latest_avcsam:-"+2.99"}
-DTIM_latest_eshrs3=${DTIM_latest_eshrs3:-"+2.99"}
 DTIM_latest_ssmisu=${DTIM_latest_ssmisu:-"+2.99"}
-#DTIM_latest_saphir=${DTIM_latest_saphir:-"+2.99"}
 DTIM_latest_saldrn=${DTIM_latest_saldrn:-"+2.99"}
-DTIM_latest_1bhrs4=${DTIM_latest_1bhrs4:-"+2.99"}
-#DTIM_latest_sevcsr=${DTIM_latest_sevcsr:-"+2.99"}
 DTIM_latest_tesac=${DTIM_latest_tesac:-"+2.99"}
 #-----------------------------------------------
 # check for mls tank presence in past 10 days
@@ -635,26 +720,16 @@ DTIM_latest_sstvcw=${DTIM_latest_sstvcw:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam eshrs3 ssmisu \
- 1bhrs4 tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcsam ssmisu \
+  tesac $mls $esatms gsrcsr ahicsr sstvcw subpfl saldrn
 error1=$?
 echo "$error1" > $DATA/error1
 
 if [ "$SENDDBN" = "YES" ]; then
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_avcsam $job \
     ${COMSP}avcsam.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_eshrs3 $job \
-    ${COMSP}eshrs3.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ssmisu $job \
     ${COMSP}ssmisu.tm00.bufr_d
-#   if [ "${NET}" = "gdas" ]; then
-#      $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saphir $job \
-#       ${COMSP}saphir.tm00.bufr_d    ### restricted, only GDAS, turn on 01/13/2020
-#   fi
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bhrs4 $job \
-    ${COMSP}1bhrs4.tm00.bufr_d
-#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_sevcsr $job \
-#    ${COMSP}sevcsr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_tesac $job \
     ${COMSP}tesac.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_saldrn $job \
@@ -705,7 +780,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=2
 
@@ -725,11 +800,13 @@ export DUMP_NUMBER=2
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
 #            SNOCVR: 1 subtype(s)
+#            SNOMAD: 1 subtype(s)
+#            SFCSNO: 7 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 21 - 22
+#            TOTAL NUMBER OF SUBTYPES = 29 - 30
 #
 #--------------------------------------------------------------------------
 # GFS:
@@ -738,19 +815,23 @@ export DUMP_NUMBER=2
 #            ADPSFC: 7 subtype(s)
 #            ASCATT: 1 subtype(s)
 #            SNOCVR: 1 subtype(s)
+#            SNOMAD: 1 subtype(s)
+#            SFCSNO: 7 subtype(s)
 #  xxxxxxxxx WNDSAT: 1 subtype(s) (if present in past 10 days of tanks)
 # ===> Dumping of WNDSAT removed from here until new ingest feed is established
 #      (had been dumped with a time window radius of -3.00 to +2.99 hours)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES =  21 - 22
+#            TOTAL NUMBER OF SUBTYPES =  30 - 31
 #
 #==========================================================================
 DTIM_latest_snocvr=${DTIM_latest_snocvr:-"+2.99"}
 DTIM_latest_sfcshp=${DTIM_latest_sfcshp:-"+2.99"}
 DTIM_latest_tideg=${DTIM_latest_tideg:-"+2.99"}
+DTIM_latest_snomad=${DTIM_latest_snomad:-"+2.99"}
+DTIM_latest_sfcsno=${DTIM_latest_sfcsno:-"+2.99"}
 
 atovs=""
-if [ "$NET" = 'gdas' ]; then
+if [ "$mNET" = 'gdas' ]; then
    atovs=atovs
    DTIM_latest_atovs=${DTIM_latest_atovs:-"+2.99"}
 fi
@@ -773,7 +854,7 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM2:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 sfcshp tideg $atovs adpsfc snocvr ascatt $wndsat snomad sfcsno
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -791,7 +872,7 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}ascatt.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_snocvr $job \
     ${COMSP}snocvr.tm00.bufr_d
-   if [ "$NET" = 'gdas' ]; then
+   if [ "$mNET" = 'gdas' ]; then
     ####### ALERT TURNED ON for GDAS only ########################
       $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ascatw $job \
        ${COMSP}ascatw.tm00.bufr_d
@@ -832,7 +913,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP_adpupa} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP_adpupa} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=3
 
@@ -889,7 +970,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=4
 
@@ -947,10 +1028,13 @@ DTIM_latest_rassda=${DTIM_latest_rassda:-"+2.99"}
 DTIM_earliest_gpsipw=${DTIM_latest_gpsipw:-"-0.05"}
 DTIM_latest_gpsipw=${DTIM_latest_gpsipw:-"+0.05"}
 
+DTIM_earliest_gsbpfl=${DTIM_earliest_gsbpfl:-"-3.25"}
+DTIM_latest_gsbpfl=${DTIM_latest_gsbpfl:-"+3.25"}
+
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM4:-on}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 aircar aircft proflr vadwnd \
- rassda gpsipw hdob 
+ rassda gpsipw hdob gsbpfl 
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -999,7 +1083,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=5
 
@@ -1052,24 +1136,38 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=6
 
 #===================================================================
 # NOTES ABOUT THIS DUMP GROUP:
-#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (1) time window radius is -3.00 to +2.99 hours NOT on all types
 #   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
 #
 #--------------------------------------------------------------------------
 # Currently not executed in GDAS or GFS:
 # Dump # 6 : NEXRAD: 8 subtype(s)
+#            AXBT:   1 subtype
+#            XBTCTD: 1 subtype
+#            ALTKOB: 1 subtype
+#            SOFARW:  1 subtype
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 8
-#
+#            TOTAL NUMBER OF SUBTYPES = 12
 #===================================================================
 
 DTIM_latest_nexrad=${DTIM_latest_nexrad:-"+2.99"}
+
+DTIM_earliest_axbt=${DTIM_earliest_axbt:-"-5.99"}
+DTIM_earliest_xbtctd=${DTIM_earliest_xbtctd:-"-5.99"}
+DTIM_earliest_altkob=${DTIM_earliest_altkob:-"-14.99"}
+
+DTIM_latest_axbt=${DTIM_latest_axbt:-"+2.99"}
+DTIM_latest_xbtctd=${DTIM_latest_xbtctd:-"+2.99"}
+DTIM_latest_altkob=${DTIM_latest_altkob:-"+2.99"}
+
+DTIM_earliest_sofarw=${DTIM_earliest_sofarw:-"-3.00"}
+DTIM_latest_sofarw=${DTIM_latest_sofarw:-"+2.99"}
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM6:-off}}
 
@@ -1164,7 +1262,8 @@ elif [ $cycp -eq 18 ]; then # (16.5 - 19.5 Z)
    unset SKIP_006059 # reflectivity 19Z
 fi
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 nexrad
+#$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 nexrad
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 axbt xbtctd altkob sofarw
 error6=$?
 echo "$error6" > $DATA/error6
 
@@ -1196,7 +1295,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=7
 
@@ -1206,28 +1305,22 @@ export DUMP_NUMBER=7
 #   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
 #
 #--------------------------------------------------------------------------
-# Dump # 7 : AVCSPM: 1 subtype(s)
-#            ESMHS:  1 subtype(s)
+# Dump # 7 : ESMHS:  1 subtype(s)
 #            1BMHS:  1 subtype(s)
-#            AIRSEV: 1 subtype(s)
 #            ATMSDB: 1 subtype(s)
 #            GOME:   1 subtype(s)
-#            OMI:    1 subtype(s)
 #            TRKOB:  1 subtype(s)
 #            GPSRO:  1 subtype(s)
 #            CRISF4: 1 subtype(s) (if present in past 10 days of tanks)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 10
+#            TOTAL NUMBER OF SUBTYPES = 7
 #
 #=========================================================================
 
-DTIM_latest_avcspm=${DTIM_latest_avcspm:-"+2.99"}
 DTIM_latest_esmhs=${DTIM_latest_esmhs:-"+2.99"}
 DTIM_latest_1bmhs=${DTIM_latest_1bmhs:-"+2.99"}
-DTIM_latest_airsev=${DTIM_latest_airsev:-"+2.99"}
 DTIM_latest_atmsdb=${DTIM_latest_atmsdb:-"+2.99"}
 DTIM_latest_gome=${DTIM_latest_gome:-"+2.99"}
-DTIM_latest_omi=${DTIM_latest_omi:-"+2.99"}
 DTIM_latest_trkob=${DTIM_latest_trkob:-"+2.99"}
 DTIM_latest_gpsro=${DTIM_latest_gpsro:-"+2.99"}
 #-----------------------------------------------
@@ -1244,26 +1337,20 @@ fi
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM7:-off}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 avcspm esmhs 1bmhs \
- airsev atmsdb gome omi trkob gpsro $crisf4
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 esmhs 1bmhs \
+  atmsdb gome trkob gpsro $crisf4
 error7=$?
 echo "$error7" > $DATA/error7
 
 if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_avcspm $job \
-    ${COMSP}avcspm.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_esmhs $job \
     ${COMSP}esmhs.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_1bmhs $job \
     ${COMSP}1bmhs.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_airsev $job \
-    ${COMSP}airsev.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_atmsdb $job \
     ${COMSP}atmsdb.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gome $job \
     ${COMSP}gome.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_omi $job \
-    ${COMSP}omi.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_trkob $job \
     ${COMSP}trkob.tm00.bufr_d
 # gpsro dump file has nr version which is alerted from
@@ -1304,7 +1391,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=8
 
@@ -1325,7 +1412,7 @@ export DUMP_NUMBER=8
 #
 #=======================================================================
 
-ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
+ADD_satwnd="005030 005031 005032 005034 005039 005072"
 
 # Skip old bufr METEOSAT AMVs; for testing skip in trigger or version file
 #export SKIP_005064=YES
@@ -1334,12 +1421,12 @@ ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
 
 # satwnd types
 # ------------
-DTIM_earliest_005024=${DTIM_earliest_005024:-"-3.00"}
-DTIM_latest_005024=${DTIM_latest_005024:-"+2.99"}
-DTIM_earliest_005025=${DTIM_earliest_005025:-"-3.00"}
-DTIM_latest_005025=${DTIM_latest_005025:-"+2.99"}
-DTIM_earliest_005026=${DTIM_earliest_005026:-"-3.00"}
-DTIM_latest_005026=${DTIM_latest_005026:-"+2.99"}
+#DTIM_earliest_005024=${DTIM_earliest_005024:-"-3.00"}
+#DTIM_latest_005024=${DTIM_latest_005024:-"+2.99"}
+#DTIM_earliest_005025=${DTIM_earliest_005025:-"-3.00"}
+#DTIM_latest_005025=${DTIM_latest_005025:-"+2.99"}
+#DTIM_earliest_005026=${DTIM_earliest_005026:-"-3.00"}
+#DTIM_latest_005026=${DTIM_latest_005026:-"+2.99"}
 DTIM_earliest_005030=${DTIM_earliest_005030:-"-3.00"}
 DTIM_latest_005030=${DTIM_latest_005030:-"+2.99"}
 DTIM_earliest_005031=${DTIM_earliest_005031:-"-3.00"}
@@ -1374,8 +1461,6 @@ DTIM_earliest_005081=${DTIM_earliest_005081:-"-3.00"}
 DTIM_latest_005081=${DTIM_latest_005081:-"+2.99"}
 DTIM_earliest_005091=${DTIM_earliest_005091:-"-3.00"}
 DTIM_latest_005091=${DTIM_latest_005091:-"+2.99"}
-
-
 
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM8:-on}}
 
@@ -1416,7 +1501,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=9
 
@@ -1434,25 +1519,26 @@ export DUMP_NUMBER=9
 #            TOTAL NUMBER OF SUBTYPES = 3
 #
 #=======================================================================
+SKIP_005052=YES
+SKIP_005053=YES
+SKIP_005054=YES
+SKIP_005055=YES
+SKIP_005056=YES
+
 DTIM_earliest_gmi1cr=${DTIM_earliest_gmi1cr:-"-3.00"}
 DTIM_latest_gmi1cr=${DTIM_latest_gmi1cr:-"+2.99"}
 
 DTIM_earliest_satwhr=${DTIM_earliest_satwhr:-"-3.00"}
 DTIM_latest_satwhr=${DTIM_latest_satwhr:-"+2.99"}
 
-DTIM_earliest_geoimr=${DTIM_earliest_geoimr:-"-0.50"}
-DTIM_latest_geoimr=${DTIM_latest_geoimr:-"+0.50"}
-
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM9:-on}}
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 geoimr gmi1cr satwhr
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 gmi1cr satwhr
 
 error9=$?
 echo "$error9" > $DATA/error9
 
 if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_geoimr $job \
-    ${COMSP}geoimr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_gmi1cr $job \
     ${COMSP}gmi1cr.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_satwhr $job \
@@ -1487,7 +1573,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=10
 
@@ -1503,13 +1589,12 @@ export DUMP_NUMBER=10
 #            SEVASR: 1 subtype(s)
 #            1BAMUA: 1 subtype(s)
 #            BATHY:  1 subtype(s)
-#            OSBUV8: 1 subtype(s)
 #            OMPSN8: 1 subtype(s)
 #            OMPST8: 1 subtype(s)
 #            GSRASR: 1 subtype(s)
 #            OMPSLP: 1 subtype(s)
 #            --------------------
-#            TOTAL NUMBER OF SUBTYPES = 13
+#            TOTAL NUMBER OF SUBTYPES = 12
 #
 #=========================================================================
 
@@ -1519,7 +1604,6 @@ DTIM_latest_esamua=${DTIM_latest_esamua:-"+2.99"}
 DTIM_latest_sevasr=${DTIM_latest_sevasr:-"+2.99"}
 DTIM_latest_1bamua=${DTIM_latest_1bamua:-"+2.99"}
 DTIM_latest_bathy=${DTIM_latest_bathy:-"+2.99"}
-DTIM_latest_osbuv8=${DTIM_latest_osbuv8:-"+2.99"}
 DTIM_latest_ompsn8=${DTIM_latest_ompsn8:-"+2.99"}
 DTIM_latest_ompst8=${DTIM_latest_ompst8:-"+2.99"}
 DTIM_latest_gsrasr=${DTIM_latest_gsrasr:-"+2.99"}
@@ -1529,7 +1613,7 @@ DTIM_latest_sstvpw=${DTIM_latest_sstvpw:-"+2.99"}
 TIME_TRIM=${TIME_TRIM:-${TIME_TRIM10:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 esiasi mtiasi esamua \
- sevasr 1bamua bathy osbuv8 ompsn8 ompst8 gsrasr ompslp sstvpw
+ sevasr 1bamua bathy ompsn8 ompst8 gsrasr ompslp sstvpw
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1546,8 +1630,6 @@ if [ "$SENDDBN" = "YES" ]; then
     ${COMSP}1bamua.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_bathy $job \
     ${COMSP}bathy.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_osbuv8 $job \
-    ${COMSP}osbuv8.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ompsn8 $job \
     ${COMSP}ompsn8.tm00.bufr_d
    $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_ompst8 $job \
@@ -1588,7 +1670,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=11
 
@@ -1645,7 +1727,7 @@ echo "********************************************************************"
 echo
 set -x
 
-sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=12
 
@@ -1690,7 +1772,7 @@ fi
 DTIM_latest_crsfdb=${DTIM_latest_crsfdb:-"+2.99"}
 DTIM_latest_iasidb=${DTIM_latest_iasidb:-"+2.99"}
 
-TIME_TRIM=${TIME_TRIM:-${TIME_TRIM1:-off}}
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM12:-off}}
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 $atms $crisfs crsfdb iasidb
 error12=$?
@@ -1742,7 +1824,7 @@ echo
 set -x
 
 # UPRAIR requires early start, no need to NAP
-#sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
+##sleep ${NAP} # to reverse 10min early start of jglobal_dump in cron
 export STATUS=NO
 export DUMP_NUMBER=13
 
@@ -1782,6 +1864,70 @@ set -x
 EOF
 set -x
 
+set +x
+#------------------------------------------------------------------------------
+cat<<\EOF>thread_14; chmod +x thread_14
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=14
+
+#=========================================================================
+# NOTES ABOUT THIS DUMP GROUP:
+#   (1) time window radius is -3.00 to +2.99 hours on all types
+#   (2) TIME TRIMMING IS NOT DONE IN THIS DUMP (default, unless overridden)
+#
+#--------------------------------------------------------------------------
+# Dump #14 : AMSR:  1 subtype(s)
+#            MSMWS: 1 subtype(s)
+#            MSRO:  1 subtype(s)  
+#            --------------------
+#            TOTAL NUMBER OF SUBTYPES = 3
+#
+#=========================================================================
+
+DTIM_latest_amsr=${DTIM_latest_amsr:-"+2.99"}
+DTIM_latest_msmws=${DTIM_latest_msmws:-"+2.99"}
+DTIM_latest_msro=${DTIM_latest_msro:-"+2.99"}
+
+TIME_TRIM=${TIME_TRIM:-${TIME_TRIM14:-off}}
+
+$ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 amsr msmws msro
+error14=$?
+echo "$error14" > $DATA/error14
+
+if [ "$SENDDBN" = "YES" ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_amsr $job \
+    ${COMSP}amsr.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msmws $job \
+    ${COMSP}msmws.tm00.bufr_d
+   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msro $job \
+    ${COMSP}msro.tm00.bufr_d
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_14
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/14.out 2>&1
+EOF
+set -x
+
 
 #----------------------------------------------------------------
 # Now launch the threads
@@ -1796,9 +1942,6 @@ launcher=${launcher:-"cfp"}  # if not "cfp", threads will be run serially.
 
 if [ "$launcher" = cfp ]; then
    > $DATA/poe.cmdfile
-   echo "Running threads in parallel IG2023"
-   myPDY=`date +\%Y\%m\%d\%H\%M\%S`
-   echo "DATE IG2023 start " $myPDY
 # To better take advantage of cfp, execute the longer running commands first.
 # Some reordering was done here based on recent sample runtimes.
 
@@ -1807,20 +1950,21 @@ if [ "$launcher" = cfp ]; then
    [ $DUMP_group13 = YES ]  &&  echo ./thread_13 >> $DATA/poe.cmdfile
    [ $DUMP_group7 = YES ]  &&  echo ./thread_7 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group1 = YES ]  &&  echo ./thread_1 >> $DATA/poe.cmdfile
+   [ $DUMP_group8 = YES ]  &&  echo ./thread_8 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group5 = YES ]  &&  echo ./thread_5 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group6 = YES ]  &&  echo ./thread_6 >> $DATA/poe.cmdfile  # moved up
-   [ $DUMP_group8 = YES ]  &&  echo ./thread_8 >> $DATA/poe.cmdfile  # moved up
    [ $DUMP_group11 = YES ] &&  echo ./thread_11 >> $DATA/poe.cmdfile # moved up
    [ $DUMP_group10 = YES ] &&  echo ./thread_10 >> $DATA/poe.cmdfile # moved up
    [ $DUMP_group2 = YES ]  &&  echo ./thread_2 >> $DATA/poe.cmdfile
    [ $DUMP_group4 = YES ]  &&  echo ./thread_4 >> $DATA/poe.cmdfile
    [ $DUMP_group9 = YES ]  &&  echo ./thread_9 >> $DATA/poe.cmdfile
    [ $DUMP_group12 = YES ]  &&  echo ./thread_12 >> $DATA/poe.cmdfile
+   [ $DUMP_group14 = YES ]  &&  echo ./thread_14 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      NPROCS=${NPROCS:-14} # was 12
+      NPROCS=${NPROCS:-15} # was 12
       $launcher_DUMP -np ${NPROCS} --cpu-bind verbose,core cfp $DATA/poe.cmdfile 2>&1 
       #$launcher_DUMP -np 14 --cpu-bind core cfp $DATA/poe.cmdfile 2>&1 # 1) 3)
       #$launcher_DUMP -np ${NPROCS} cfp $DATA/poe.cmdfile 2>&1 # 4) Carolyn Pasti suggestions
@@ -1848,10 +1992,12 @@ else
    [ $DUMP_group11 = YES ]  &&  ./thread_11 
    [ $DUMP_group12 = YES ]  &&  ./thread_12 
    [ $DUMP_group13 = YES ]  &&  ./thread_13
+   [ $DUMP_group14 = YES ]  &&  ./thread_14
 #     wait
 fi
 
 # long run times for uprair lead to use of NAP and NAP_adpupa variables (see code above) instead of this code
+#  IGDK : consider opening up this if adpupa is not catching enough obs
 #
 ##  if ADPUPA_wait is YES, adpupa and uprair are dumped AFTER all other dump
 ##   threads have run (normally done in real-time GFS runs to dump as late as
@@ -1861,7 +2007,7 @@ fi
 ##
 #[ $DUMP_group3 = YES -a $ADPUPA_wait  = YES ]  &&  ./thread_3
 
-cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out
+cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out $DATA/7.out $DATA/8.out $DATA/9.out $DATA/10.out $DATA/11.out $DATA/12.out $DATA/13.out $DATA/14.out
 
 set +x
 echo " "
@@ -1881,16 +2027,21 @@ set -x
 [ -s $DATA/error11 ] && err11=`cat $DATA/error11`
 [ -s $DATA/error12 ] && err12=`cat $DATA/error12`
 [ -s $DATA/error13 ] && err13=`cat $DATA/error13`
+[ -s $DATA/error14 ] && err14=`cat $DATA/error14`
 
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=14
+export DUMP_NUMBER=15
 $ushscript_dump/bufr_dump_obs.sh $dumptime 3.00 1 null
+
+  endif test for existence of status file
+fi
 
 #  endif loop $PROCESS_DUMP
 fi
+
 
 echo " " >> $pgmout
 echo "##################################################################\
@@ -1906,8 +2057,10 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
         "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
         "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
-        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o "$err13" -gt '5']; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10 $err11 $err12 $err13
+        "$err10" -gt '5' -o "$err11" -gt '5' -o "$err12" -gt '5' -o \
+	"$err13" -gt '5' -o "$err14" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 \
+	       $err10 $err11 $err12 $err13 $err14
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1918,7 +2071,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1936,7 +2089,7 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
+$err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13, $err14 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
@@ -1946,12 +2099,13 @@ $err5, $err6, $err7, $err8, $err9, $err10, $err11, $err12, $err13 "
 #  endif loop $PROCESS_DUMP
 fi
 
+
 #
 # copy bufr_dumplist to $COMOUT per NCO SPA request
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp 
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp 
 chmod 644 $LIST_cp
 
 # GOOD RUN

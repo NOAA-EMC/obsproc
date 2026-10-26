@@ -25,9 +25,9 @@ echo
 set -aux
 
 # Imported positional parameters:
-#   $1     - string indicating network {'nam', 'gfs', 'gdas', 'rap', 'rtma',
-#            'urma' or 'dump', tm00 for all networks}
-#           (Note: This is not defined the same as $NET in the j-job)
+#   $1     - string indicating network {'nam', 'gfs', 'gdas', 'rap', 'rrfs',
+#            'rtma', 'urma' or 'dump', tm00 for all networks}
+#           (Note: This is not defined the same as $mNET in the j-job)
 #
 # Imported variables that must be passed in:
 #   envir  - processing environment ('prod' or 'test')
@@ -133,7 +133,7 @@ mkdir -p $OBCNTarch/${net}.${PDY}
 chmod 775 $OBCNTarch/${net}.${PDY}
 mkdir -p $OBCNTarch/${net}.${PDYm1}
 chmod 775 $OBCNTarch/${net}.${PDYm1}
-[ $net = dump -o $net = rap -o $net = rtma -o $net = urma ] && set +x
+[ $net = dump -o $net = rap -o $net = rrfs -o $net = rtma -o $net = urma ] && set +x
 if [ $net = gfs -o $net = gdas ]; then
    cp -p ${comin_nocyc}/*/*/${qual3}.t*z.status.tm00.bufr_d $OBCNTarch/${net}.${PDY}
 else
@@ -309,7 +309,7 @@ set -x
 #  Grep out the individual counts for all types, based on cycle
 #  ------------------------------------------------------------
 
-if [ $net = dump -o $net = rap -o $net = rtma -o $net = urma ] ; then
+if [ $net = dump -o $net = rap -o $net = rrfs -o $net = rtma -o $net = urma ] ; then
    cycles="t00z t01z t02z t03z t04z t05z t06z t07z t08z t09z t10z t11z \
            t12z t13z t14z t15z t16z t17z t18z t19z t20z t21z t22z t23z"
 else

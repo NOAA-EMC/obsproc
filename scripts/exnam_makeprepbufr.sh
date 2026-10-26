@@ -69,7 +69,7 @@ warning=no
 if [ "$PREPDATA" = 'YES' ]; then
 
 # save snapshot of prepbufr file after PREPOBS_PREPDATA in COMOUT
-   cp prepda.prepdata $COMOUT/${RUN}.${cycle}.prepbufr_pre-qc.$tmmark
+   cpfs prepda.prepdata $COMOUT/${RUN}.${cycle}.prepbufr_pre-qc.$tmmark
 
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
       chgrp rstprod $COMOUT/${RUN}.${cycle}.prepbufr_pre-qc.$tmmark
@@ -77,7 +77,7 @@ if [ "$PREPDATA" = 'YES' ]; then
       if [ $errch -eq 0 ]; then
          chmod 640 $COMOUT/${RUN}.${cycle}.prepbufr_pre-qc.$tmmark
       else
-         cp /dev/null $COMOUT/${RUN}.${cycle}.prepbufr_pre-qc.$tmmark
+         cpfs /dev/null $COMOUT/${RUN}.${cycle}.prepbufr_pre-qc.$tmmark
          warning=yes
       fi
    fi
@@ -88,13 +88,13 @@ if [ "$PREPDATA" = 'YES' ]; then
 #  COMOUT if either it isn't already there for a previous cycle at tm06 or
 #  tm00 or if it has changed from a previous cycle at tm06 or tm00
       if [ ! -s $COMOUT/*prep.bufrtable.$tmmark ]; then
-         cp prep.bufrtable  $COMOUT/${RUN}.${cycle}.prep.bufrtable.$tmmark
+         cpfs prep.bufrtable  $COMOUT/${RUN}.${cycle}.prep.bufrtable.$tmmark
       else
          diff `ls -t  $COMOUT/*prep.bufrtable.$tmmark | head -n1` prep.bufrtable \
           > /dev/null 2>&1
          errdiff=$?
          [ "$errdiff" -ne '0' ]  &&  \
-          cp prep.bufrtable  $COMOUT/${RUN}.${cycle}.prep.bufrtable.$tmmark
+          cpfs prep.bufrtable  $COMOUT/${RUN}.${cycle}.prep.bufrtable.$tmmark
       fi
    fi
 fi
@@ -104,19 +104,19 @@ fi
 #  processing (encoded into PREPBUFR file and used by q.c. programs)
 if [ -s sgesprep ]; then
    if [ -s sgesprepA ]; then
-      cp sgesprep  $COMOUT/${RUN}.${cycle}.sgesprep_before.$tmmark
-      cp sgesprepA $COMOUT/${RUN}.${cycle}.sgesprep_after.$tmmark
+      cpfs sgesprep  $COMOUT/${RUN}.${cycle}.sgesprep_before.$tmmark
+      cpfs sgesprepA $COMOUT/${RUN}.${cycle}.sgesprep_after.$tmmark
    else
       [ ! -s $COMOUT/${RUN}.${cycle}.sgesprep.$tmmark ]  &&  \
-       cp sgesprep $COMOUT/${RUN}.${cycle}.sgesprep.$tmmark
+       cpfs sgesprep $COMOUT/${RUN}.${cycle}.sgesprep.$tmmark
    fi
 
 # save path name of this global sigma guess file in COMOUT
    if [ "$GETGUESS" = 'YES' ]; then
       if [ -s sgesprepA_pathname ]; then
-         cp sgesprep_pathname  \
+         cpfs sgesprep_pathname  \
           $COMOUT/${RUN}.${cycle}.sgesprep_pathname_before.$tmmark
-         cp sgesprepA_pathname \
+         cpfs sgesprepA_pathname \
           $COMOUT/${RUN}.${cycle}.sgesprep_pathname_after.$tmmark
       else
 
@@ -131,34 +131,34 @@ if [ -s sgesprep ]; then
 #   ---------------------------------------------------------------------------
 
          [ ! -s $COMOUT/${RUN}.${cycle}.sgesprep_pathname.$tmmark ]  &&  \
-         cp sgesprep_pathname $COMOUT/${RUN}.${cycle}.sgesprep_pathname.$tmmark
+         cpfs sgesprep_pathname $COMOUT/${RUN}.${cycle}.sgesprep_pathname.$tmmark
       fi
    fi
 fi
 
 # save synthetic bogus files in COMOUT
-[ -s bogrept ]  &&  cp bogrept  $COMOUT/${RUN}.${cycle}.syndata.bogrept.$tmmark
-[ -s bogdata ]  &&  cp bogdata  $COMOUT/${RUN}.${cycle}.syndata.bogdata.$tmmark
-[ -s dthistry ] &&  cp dthistry $COMOUT/${RUN}.${cycle}.syndata.dthistry.$tmmark
+[ -s bogrept ]  &&  cpfs bogrept  $COMOUT/${RUN}.${cycle}.syndata.bogrept.$tmmark
+[ -s bogdata ]  &&  cpfs bogdata  $COMOUT/${RUN}.${cycle}.syndata.bogdata.$tmmark
+[ -s dthistry ] &&  cpfs dthistry $COMOUT/${RUN}.${cycle}.syndata.dthistry.$tmmark
 
 if [ "$DO_QC" = 'YES' ]; then
 
 # save final form of prepbufr file in COMOUT
-   cp prepda.t${cycp}z $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
+   cpfs prepda.t${cycp}z $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
       chgrp rstprod $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
       errch=$?
       if [ $errch -eq 0 ]; then
          chmod 640 $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
       else
-         cp /dev/null $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
+         cpfs /dev/null $COMOUT/${RUN}.${cycle}.prepbufr.$tmmark
          warning=yes
       fi
    fi
 
 # save prepacqc prepbufr.acft_profiles file in COMOUT
    if [ -s prepbufr.acft_profiles ]; then
-      cp prepbufr.acft_profiles \
+      cpfs prepbufr.acft_profiles \
        $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles.$tmmark
@@ -166,7 +166,7 @@ if [ "$DO_QC" = 'YES' ]; then
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles.$tmmark
             warning=yes
          fi
       fi
@@ -174,7 +174,7 @@ if [ "$DO_QC" = 'YES' ]; then
 
 # save prepacqc prepbufr.acft_profiles_sfc file in COMOUT
    if [ -s prepbufr.acft_profiles_sfc ]; then
-      cp prepbufr.acft_profiles_sfc \
+      cpfs prepbufr.acft_profiles_sfc \
        $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles_sfc.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
         chgrp rstprod $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles_sfc.$tmmark
@@ -182,7 +182,7 @@ if [ "$DO_QC" = 'YES' ]; then
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles_sfc.$tmmark
          else
-            cp /dev/null \
+            cpfs /dev/null \
              $COMOUT/${RUN}.${cycle}.prepbufr.acft_profiles_sfc.$tmmark
             warning=yes
          fi
@@ -192,14 +192,14 @@ if [ "$DO_QC" = 'YES' ]; then
 # save prepacqc output files in COMOUT
    if [ -s acftqc_*.sus ]; then
       mv acftqc_*.sus acftqc_sus
-      cp acftqc_sus $COMOUT/${RUN}.${cycle}.acqc_sus.$tmmark
+      cpfs acftqc_sus $COMOUT/${RUN}.${cycle}.acqc_sus.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_sus.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_sus.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_sus.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_sus.$tmmark
             warning=yes
          fi
       fi
@@ -207,14 +207,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.stk ]; then
       mv acftqc_*.stk acftqc_stk
-      cp acftqc_stk $COMOUT/${RUN}.${cycle}.acqc_stk.$tmmark
+      cpfs acftqc_stk $COMOUT/${RUN}.${cycle}.acqc_stk.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_stk.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_stk.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_stk.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_stk.$tmmark
             warning=yes
          fi
       fi
@@ -222,14 +222,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.spk ]; then
       mv acftqc_*.spk acftqc_spk
-      cp acftqc_spk $COMOUT/${RUN}.${cycle}.acqc_spk.$tmmark
+      cpfs acftqc_spk $COMOUT/${RUN}.${cycle}.acqc_spk.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_spk.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_spk.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_spk.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_spk.$tmmark
             warning=yes
          fi
       fi
@@ -237,14 +237,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.ord ]; then
       mv acftqc_*.ord acftqc_ord
-      cp acftqc_ord $COMOUT/${RUN}.${cycle}.acqc_ord.$tmmark
+      cpfs acftqc_ord $COMOUT/${RUN}.${cycle}.acqc_ord.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_ord.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_ord.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_ord.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_ord.$tmmark
             warning=yes
          fi
       fi
@@ -252,14 +252,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.lst ]; then
       mv acftqc_*.lst acftqc_lst
-      cp acftqc_lst $COMOUT/${RUN}.${cycle}.acqc_lst.$tmmark
+      cpfs acftqc_lst $COMOUT/${RUN}.${cycle}.acqc_lst.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_lst.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_lst.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_lst.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_lst.$tmmark
             warning=yes
          fi
       fi
@@ -267,14 +267,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.inv ]; then
       mv acftqc_*.inv acftqc_inv
-      cp acftqc_inv $COMOUT/${RUN}.${cycle}.acqc_inv.$tmmark
+      cpfs acftqc_inv $COMOUT/${RUN}.${cycle}.acqc_inv.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_inv.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_inv.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_inv.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_inv.$tmmark
             warning=yes
          fi
       fi
@@ -282,14 +282,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.inc ]; then
       mv acftqc_*.inc acftqc_inc
-      cp acftqc_inc $COMOUT/${RUN}.${cycle}.acqc_inc.$tmmark
+      cpfs acftqc_inc $COMOUT/${RUN}.${cycle}.acqc_inc.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_inc.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_inc.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_inc.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_inc.$tmmark
             warning=yes
          fi
       fi
@@ -297,14 +297,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.grc ]; then
       mv acftqc_*.grc acftqc_grc
-      cp acftqc_grc $COMOUT/${RUN}.${cycle}.acqc_grc.$tmmark
+      cpfs acftqc_grc $COMOUT/${RUN}.${cycle}.acqc_grc.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_grc.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_grc.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_grc.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_grc.$tmmark
             warning=yes
          fi
       fi
@@ -312,14 +312,14 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.dup ]; then
       mv acftqc_*.dup acftqc_dup
-      cp acftqc_dup $COMOUT/${RUN}.${cycle}.acqc_dup.$tmmark
+      cpfs acftqc_dup $COMOUT/${RUN}.${cycle}.acqc_dup.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_dup.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_dup.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_dup.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_dup.$tmmark
             warning=yes
          fi
       fi
@@ -327,21 +327,21 @@ if [ "$DO_QC" = 'YES' ]; then
 
    if [ -s acftqc_*.log ]; then
       mv acftqc_*.log acftqc_log
-      cp acftqc_log $COMOUT/${RUN}.${cycle}.acqc_log.$tmmark
+      cpfs acftqc_log $COMOUT/${RUN}.${cycle}.acqc_log.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_log.$tmmark
          errch=$?
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_log.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_log.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_log.$tmmark
             warning=yes
          fi
       fi
    fi
 
    if [ -s merged.reports.post_acftobs_qc.sorted ]; then
-      cp merged.reports.post_acftobs_qc.sorted \
+      cpfs merged.reports.post_acftobs_qc.sorted \
        $COMOUT/${RUN}.${cycle}.acqc_merged_sorted.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_merged_sorted.$tmmark
@@ -349,14 +349,14 @@ if [ "$DO_QC" = 'YES' ]; then
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_merged_sorted.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_merged_sorted.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_merged_sorted.$tmmark
             warning=yes
          fi
       fi
    fi
 
    if [ -s merged.profile_reports.post_acftobs_qc.sorted ]; then
-      cp merged.profile_reports.post_acftobs_qc.sorted \
+      cpfs merged.profile_reports.post_acftobs_qc.sorted \
        $COMOUT/${RUN}.${cycle}.acqc_merged.prof_sorted.$tmmark
       if [ "$CHGRP_RSTPROD" = 'YES' ]; then
          chgrp rstprod $COMOUT/${RUN}.${cycle}.acqc_merged.prof_sorted.$tmmark
@@ -364,7 +364,7 @@ if [ "$DO_QC" = 'YES' ]; then
          if [ $errch -eq 0 ]; then
             chmod 640 $COMOUT/${RUN}.${cycle}.acqc_merged.prof_sorted.$tmmark
          else
-            cp /dev/null $COMOUT/${RUN}.${cycle}.acqc_merged.prof_sorted.$tmmark
+            cpfs /dev/null $COMOUT/${RUN}.${cycle}.acqc_merged.prof_sorted.$tmmark
             warning=yes
          fi
       fi
@@ -372,19 +372,19 @@ if [ "$DO_QC" = 'YES' ]; then
 
 # save cqcbufr output files in COMOUT
    touch cqc_events
-   cp cqc_events $COMOUT/${RUN}.${cycle}.cqc_events.$tmmark
+   cpfs cqc_events $COMOUT/${RUN}.${cycle}.cqc_events.$tmmark
    touch cqc_stncnt
-   cp cqc_stncnt $COMOUT/${RUN}.${cycle}.cqc_stncnt.$tmmark
+   cpfs cqc_stncnt $COMOUT/${RUN}.${cycle}.cqc_stncnt.$tmmark
    touch cqc_stnlst
-   cp cqc_stnlst $COMOUT/${RUN}.${cycle}.cqc_stnlst.$tmmark
+   cpfs cqc_stnlst $COMOUT/${RUN}.${cycle}.cqc_stnlst.$tmmark
    touch cqc_sdm
-   cp cqc_sdm $COMOUT/${RUN}.${cycle}.cqc_sdm.$tmmark
+   cpfs cqc_sdm $COMOUT/${RUN}.${cycle}.cqc_sdm.$tmmark
    touch cqc_radcor
-   cp cqc_radcor $COMOUT/${RUN}.${cycle}.cqc_radcor.$tmmark
+   cpfs cqc_radcor $COMOUT/${RUN}.${cycle}.cqc_radcor.$tmmark
 
 # save cqcvad bird algorithm q.c. info list in COMOUT
    touch cqcvad.birdqc
-   cp cqcvad.birdqc  $COMOUT/${RUN}.${cycle}.cqcvad.birdqc.$tmmark
+   cpfs cqcvad.birdqc  $COMOUT/${RUN}.${cycle}.cqcvad.birdqc.$tmmark
 
 fi
 

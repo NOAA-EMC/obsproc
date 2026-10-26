@@ -34,7 +34,7 @@ postmsg "$jlogfile" "$msg"
 export analtime=`cut -c7-16 ncepdate`
 
 set +x
-echo "CENTER DATA DUMP DATE-TIME FOR $NET IS $analtime"
+echo "CENTER DATA DUMP DATE-TIME FOR $mNET IS $analtime"
 set -x
  
 # ---------------------------------------

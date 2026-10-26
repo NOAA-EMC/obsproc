@@ -40,6 +40,10 @@ echo "                       to match bufr_dumplist.  Removed tideg from   "
 echo "                       sfcshp dump group tom ake individual dump     "
 echo "                       file.                                         " 
 echo "                     - Copy bufr_dumplist to COMOUT.                 "
+echo "         May 19 2025 - Add sofarw, saldrn, gsbpfl                    "        
+echo "         Jun 11 2026 - Add amsr, msmws, msro                         "
+echo "                     - Remove omi, 1bhrs4, geoimr, avcspm, eshrs3,   "
+echo "                       airsev, osbuv8                                "
 ############################################################################
 
 set -aux
@@ -119,11 +123,12 @@ err7=0
 err8=0
 err9=0
 err10=0
+err11=0
 
 #restrict processing of unexpected big tanks
-#this block appear in all /scripts/ex*_dump.sh proessing msonet and msone1
+#this block appear in all /scripts/ex*_dump.sh proessing msone0 and msone1
 TANK_MAX_255003=${TANK_MAX_255003:-3221225472} #3Gb
-TANK_MAX_255004=${TANK_MAX_255004:-1610612736} #1.5Gb
+TANK_MAX_255004=${TANK_MAX_255004:-2684354560} #2.5Gb
 TANK_MAX_255030=${TANK_MAX_255030:-4187593114} #3.9Gb
 if [ -s ${TANK}/${PDY}/b255/xx003 ] && [ "$(stat -c '%s' ${TANK}/${PDY}/b255/xx003)" -gt "$TANK_MAX_255003" ]; then
  export SKIP_255003=YES
@@ -176,14 +181,14 @@ export STATUS=NO
 export DUMP_NUMBER=1
 
 #=========================================================================
-# Dump # 1 : ADPUPA, 1BMHS, 1BHRS4, OSBUV8, TESAC, TRKOB,
-#              (6)    (1)     (1)     (1)     (1)   (1)
+# Dump # 1 : ADPUPA, 1BMHS, TESAC, TRKOB,
+#              (6)    (1)     (1)   (1)
 #            EFCLAM, SAPHIR, ATMSDB, OMPSN8, OMPST8, OMPSLP
 #              (1)     (1)     (1)     (1)     (1)    (1)
 #            -- TOTAL NUMBER OF SUBTYPES = 17
 #  time window radius is -0.50 to +0.49 hours on ADPUPA, TESAC, EFCLAM,
 #  time window radius is -1.50 to -0.51 hours on TRKOB,  ATMSDB
-#  time window radius is -2.00 to -1.01 hours on OSBUV8, 1BMHS,  1BHRS4
+#  time window radius is -2.00 to -1.01 hours on 1BMHS,
 #                                                OMPSN8, OMPST8
 #  time window radius is -2.50 to -1.51 hours on SAPHIR
 #  time window radius is -7.00 to -6.01 hours on OMPSLP
@@ -196,14 +201,8 @@ DTIM_latest_efclam=+0.49
 DTIM_earliest_1bmhs=-2.00
 DTIM_latest_1bmhs=-1.01
 
-DTIM_earliest_1bhrs4=-2.00
-DTIM_latest_1bhrs4=-1.01
-
 DTIM_earliest_trkob=-1.50
 DTIM_latest_trkob=-0.51
-
-DTIM_earliest_osbuv8=-2.00
-DTIM_latest_osbuv8=-1.01
 
 DTIM_earliest_ompsn8=-2.00
 DTIM_latest_ompsn8=-1.01
@@ -221,8 +220,8 @@ DTIM_earliest_atmsdb=-1.50
 DTIM_latest_atmsdb=-0.51
 
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 adpupa osbuv8 1bmhs \
- 1bhrs4 tesac trkob efclam saphir atmsdb ompsn8 ompst8 ompslp
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 adpupa 1bmhs \
+ tesac trkob efclam saphir atmsdb ompsn8 ompst8 ompslp
 error1=$?
 echo "$error1" > $DATA/error1
 
@@ -258,8 +257,8 @@ export STATUS=NO
 export DUMP_NUMBER=2
 
 #==========================================================================
-# Dump # 2 : SFCSHP, ADPSFC, RASSDA, AIRSEV, GOESFV, MTIASI, GOME, AVCSAM
-#             (11)     (4)     (1)    (1)     (1)      (1)    (1)    (1)
+# Dump # 2 : SFCSHP, ADPSFC, RASSDA, GOESFV, MTIASI, GOME, AVCSAM
+#             (11)     (4)     (1)     (1)      (1)    (1)    (1)
 #            ESIASI, ESATMS, SEVASR, TIDEG
 #              (1)     (1)     (1)    (1)
 #            -- TOTAL NUMBER OF SUBTYPES = 25
@@ -275,7 +274,7 @@ export DUMP_NUMBER=2
 #                                                from CREX only)
 #  time window radius is -1.50 to -0.51 hours on GOME, ESATMS
 #  time window radius is -2.00 to -1.01 hours on MTIASI
-#  time window radius is -2.50 to -1.51 hours on AIRSEV, AVCSAM
+#  time window radius is -2.50 to -1.51 hours on AVCSAM
 #==========================================================================
 
 DTIM_latest_001001=+0.49
@@ -288,9 +287,6 @@ DTIM_latest_sevasr=+0.49
 
 DTIM_earliest_001005=-1.00
 DTIM_latest_001005=-0.01
-
-DTIM_earliest_airsev=-2.50
-DTIM_latest_airsev=-1.51
 
 DTIM_earliest_mtiasi=-2.00
 DTIM_latest_mtiasi=-1.01
@@ -308,7 +304,7 @@ DTIM_earliest_esatms=-1.50
 DTIM_latest_esatms=-0.51
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 sfcshp adpsfc rassda \
- airsev mtiasi gome avcsam esiasi esatms sevasr tideg
+  mtiasi gome avcsam esiasi esatms sevasr tideg
 error2=$?
 echo "$error2" > $DATA/error2
 
@@ -352,7 +348,7 @@ export DUMP_NUMBER=3
 #                                                    CRSFDB
 #  time window radius is -2.00 to -1.01 hours on 1BAMUA, AMSR2
 #  time window radius is -2.50 to -1.51 hours on all other    SATWND types,
-#                                                    GPSRO, AVCSPM
+#                                                    GPSRO
 #  time window radius is -4.00 to -3.01 hours on all POES (MODIS, AVHRR, VIIRS)
 #                                                    SATWND types
 #===========================================================================
@@ -365,7 +361,8 @@ SKIP_005023=YES
 #SKIP_005065=YES
 #SKIP_005066=YES
 
-ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
+#ADD_satwnd="005024 005025 005026 005030 005031 005032 005034 005039 005072"
+ADD_satwnd="005030 005031 005032 005034 005039 005072"
 
 DTIM_earliest_1bamua=-2.00
 DTIM_latest_1bamua=-1.01
@@ -457,16 +454,13 @@ DTIM_latest_005080=-3.01
 DTIM_earliest_005091=-4.00
 DTIM_latest_005091=-3.01
 
-DTIM_earliest_avcspm=-2.50
-DTIM_latest_avcspm=-1.51
-
 DTIM_earliest_amsr2=-2.00
 DTIM_latest_amsr2=-1.01
 
 DTIM_earliest_crsfdb=-1.50
 DTIM_latest_crsfdb=-0.51
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 satwnd gpsro 1bamua avcspm \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 satwnd gpsro 1bamua \
  amsr2 crsfdb
 error3=$?
 echo "$error3" > $DATA/error3
@@ -503,12 +497,11 @@ export STATUS=NO
 export DUMP_NUMBER=4
 
 #=========================================================================
-# Dump # 4 : AIRCAR, AIRCFT, PROFLR, VADWND, GEOIMR, ASCATT, HDOB
+# Dump # 4 : AIRCAR, AIRCFT, PROFLR, VADWND, ASCATT, HDOB, GSBPFL
 #              (2)     (8)     (4)     (2)     (1)     (1)   (1)
 #            -- TOTAL NUMBER OF SUBTYPES = 19
 #  time window radius is -0.50 to +0.49 hours on AIRCAR, AIRCFT,
 #                                                PROFLR, VADWND, HDOB
-#  time window radius is -1.00 to -0.01 hours on GEOIMR
 #  time window radius is -1.50 to -0.51 hours on ASCATT
 #=========================================================================
 
@@ -517,15 +510,13 @@ DTIM_latest_aircft=+0.49
 DTIM_latest_proflr=+0.49
 DTIM_latest_vadwnd=+0.49
 DTIM_latest_hdob=+0.49
-
-DTIM_earliest_geoimr=-1.00
-DTIM_latest_geoimr=-0.01
+DTIM_latest_gsbpfl=+0.49
 
 DTIM_earliest_ascatt=-1.50
 DTIM_latest_ascatt=-0.51
 
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 aircar aircft proflr vadwnd \
- geoimr ascatt hdob
+ ascatt hdob gsbpfl
 error4=$?
 echo "$error4" > $DATA/error4
 
@@ -569,7 +560,7 @@ export DUMP_NUMBER=5
 #  time window radius is -1.00 to -0.01 hours on GPSIPW, AHICSR
 #===================================================================
 
-DTIM_latest_msonet=+0.49
+DTIM_latest_msone0=+0.49
 DTIM_latest_gsrcsr=+0.49
 DTIM_latest_gsrasr=+0.49
 
@@ -578,7 +569,7 @@ DTIM_latest_gpsipw=-0.01
 DTIM_earliest_ahicsr=-1.00
 DTIM_latest_ahicsr=-0.01
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msonet gpsipw \
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msone0 gpsipw \
  gsrcsr gsrasr ahicsr
 error5=$?
 echo "$error5" > $DATA/error5
@@ -833,22 +824,20 @@ export STATUS=NO
 export DUMP_NUMBER=7
 
 #======================================================================
-# Dump # 7 : ATOVS, OMI, ESAMUA, ESHRS3, ESMHS, SSMISU, SEVCSR, LGHTNG,
-#             (1)   (1)    (1)     (1)    (1)     (1)     (1)     (2)
+# Dump # 7 : ATOVS, ESAMUA, ESHRS3, ESMHS, SSMISU, SEVCSR, LGHTNG,
+#             (1)     (1)     (1)    (1)     (1)     (1)     (2)
 #            LGYCLD, ATMS, BATHY, MLS, CRISF4, IASIDB  --
 #              (1)    (1)   (1)   (1)   (1)     (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 15
-#  time window radius is -0.50 to +0.49 hours on ESAMUA, ESHRS3, ESMHS,
+#            -- TOTAL NUMBER OF SUBTYPES = 14
+#  time window radius is -0.50 to +0.49 hours on ESAMUA, ESMHS,
 #                                                SEVCSR, LGHTNG, LGYCLD,
 #  time window radius is -1.50 to -0.51 hours on SSMISU, ATMS,
 #                                                CRISF4, IASIDB
 #  time window radius is -2.00 to -1.01 hours on ATOVS, MLS
-#  time window radius is -2.50 to -1.51 hours on OMI
 #  time window radius is -7.00 to -6.01 hours on BATHY
 #======================================================================
 
 DTIM_latest_esamua=+0.49
-DTIM_latest_eshrs3=+0.49
 DTIM_latest_esmhs=+0.49
 DTIM_latest_sevcsr=+0.49
 DTIM_latest_lghtng=+0.49
@@ -856,9 +845,6 @@ DTIM_latest_lgycld=+0.49
 
 DTIM_earliest_atovs=-2.00
 DTIM_latest_atovs=-1.01
-
-DTIM_earliest_omi=-2.50
-DTIM_latest_omi=-1.51
 
 DTIM_earliest_bathy=-7.00
 DTIM_latest_bathy=-6.01
@@ -878,8 +864,8 @@ DTIM_latest_crisf4=-0.51
 DTIM_earliest_iasidb=-1.50
 DTIM_latest_iasidb=-0.51
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 atovs omi esamua \
- eshrs3 esmhs ssmisu sevcsr lghtng lgycld atms bathy mls crisf4 iasidb
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 atovs esamua \
+  esmhs ssmisu sevcsr lghtng lgycld atms bathy mls crisf4 iasidb
 error7=$?
 echo "$error7" > $DATA/error7
 
@@ -970,9 +956,11 @@ export DUMP_NUMBER=9
 DTIM_latest_msone1=+0.49
 DTIM_earliest_msone1=-1.00
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msone1
-error9=$?
-echo "$error9" > $DATA/error9
+if [ "${SKIP_255030:-NO}" != "YES" ]; then
+  SENDCOM=NO $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 msone1
+  error9=$?
+  echo "$error9" > $DATA/error9
+fi
 
 set +x
 echo "********************************************************************"
@@ -1007,14 +995,14 @@ export STATUS=NO
 export DUMP_NUMBER=10
 
 #===================================================================
-# Dump # 10: UPRAIR
+# Dump # 10: UPRAIR SALDRN SOFARW
 #             (1)
-#            -- TOTAL NUMBER OF SUBTYPES = 1
+#            -- TOTAL NUMBER OF SUBTYPES = 3
 #===================================================================
 DTIM_latest_uprair=+0.49
 DTIM_earliest_uprair=-0.49
 
-$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair
+$ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 uprair saldrn sofarw
 error10=$?
 echo "$error10" > $DATA/error10
 
@@ -1029,6 +1017,60 @@ set -x
 EOF
 set -x
 
+
+set +x
+cat<<\EOF>thread_11; chmod +x thread_11
+set -uax
+
+cd $DATA
+
+{ echo
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Executing on node  `hostname`
+echo Starting time: `date -u`
+echo "********************************************************************"
+echo
+set -x
+
+export STATUS=NO
+export DUMP_NUMBER=11
+
+#===========================================================================
+# Dump # 11 : AMSR, MSMWS, MSRO
+#             (1)   (1)    (1)
+#            -- TOTAL NUMBER OF SUBTYPES = 3
+#  time window radius is -2.00 to -1.01 hours on AMSR
+#  time window radius is -2.50 to -1.51 hours on MSMWS, MSRO
+#===========================================================================
+
+DTIM_earliest_amsr=-2.00
+DTIM_latest_amsr=-1.01
+
+DTIM_earliest_msmws=-2.50
+DTIM_latest_msmws=-1.51
+
+DTIM_earliest_msro=-6.00 #large monitor window for dev tanks
+DTIM_latest_msro=-3.01   
+
+# start monitor when the tanks go live
+if [ -s ${TANK}/${PDY}/b021/xx247 ] &&  [ -s ${TANK}/${PDY}/b021/xx0243 ] &&  [ -s ${TANK}/${PDY}/b003/xx012 ]; then
+ $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 amsr msmws msro
+ error11=$?
+ echo "$error11" > $DATA/error11
+fi
+
+set +x
+echo "********************************************************************"
+echo Script thread_11
+echo Finished executing on node  `hostname`
+echo Ending time  : `date -u`
+echo "********************************************************************"
+set -x
+} > $DATA/11.out 2>&1
+EOF
+set -x
 #----------------------------------------------------------------
 
 set +u
@@ -1047,11 +1089,12 @@ if [ "$launcher" = cfp ]; then
    echo ./thread_4 >> $DATA/poe.cmdfile
    echo ./thread_9 >> $DATA/poe.cmdfile
    echo ./thread_10 >> $DATA/poe.cmdfile
+   echo ./thread_11 >> $DATA/poe.cmdfile
 
    if [ -s $DATA/poe.cmdfile ]; then
       export MP_CSS_INTERRUPT=yes  # ??
       launcher_DUMP=${launcher_DUMP:-mpiexec}
-      NPROCS=${NPROCS:-10}
+      NPROCS=${NPROCS:-11}
       $launcher_DUMP -np $NPROCS --cpu-bind verbose,core cfp $DATA/poe.cmdfile
       errpoe=$?
       if [ $errpoe -ne 0 ]; then
@@ -1074,9 +1117,10 @@ else
    ./thread_8
    ./thread_9
    ./thread_10
+   ./thread_11
 fi
 cat $DATA/1.out $DATA/2.out $DATA/3.out $DATA/4.out $DATA/5.out $DATA/6.out \
- $DATA/7.out $DATA/8.out  $DATA/9.out  $DATA/10.out
+ $DATA/7.out $DATA/8.out  $DATA/9.out  $DATA/10.out $DATA/11.out
 
 set +x
 echo " "
@@ -1093,11 +1137,12 @@ err7=`cat $DATA/error7`
 err8=`cat $DATA/error8`
 err9=`cat $DATA/error9`
 err10=`cat $DATA/error10`
+err11=`cat $DATA/error11`
 
 #===============================================================================
 
 export STATUS=YES
-export DUMP_NUMBER=11
+export DUMP_NUMBER=12
 $ushscript_dump/bufr_dump_obs.sh $dumptime 0.50 1 null
 
 
@@ -1129,10 +1174,11 @@ fi
 if [ "$PROCESS_DUMP" = 'YES' ]; then
 
    if [ "$err1" -gt '5' -o "$err2" -gt '5' -o "$err3" -gt '5' -o \
-        "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5'  -o \
-        "$err7" -gt '5' -o "$err8" -gt '5' -o \
-        "$err9" -gt '5' -o "$err10" -gt '5'	]; then
-      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 $err9 $err10
+        "$err4" -gt '5' -o "$err5" -gt '5' -o "$err6" -gt '5' -o \
+        "$err7" -gt '5' -o "$err8" -gt '5' -o "$err9" -gt '5' -o \
+	"$err10" -gt '5' -o "$err11" -gt '5' ]; then
+      for n in $err1 $err2 $err3 $err4 $err5 $err6 $err7 $err8 \
+	       $err9 $err10 $err11
       do
          if [ "$n" -gt '5' ]; then
             if [ "$n" -ne '11' -a "$n" -ne '22' ]; then
@@ -1143,7 +1189,7 @@ if [ "$PROCESS_DUMP" = 'YES' ]; then
 echo
 echo " ###################################################### "
 echo " --> > 22 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7 $err8 $err9 $err10"
+$err5, $err6, $err7 $err8 $err9 $err10 $err11 "
 echo " --> @@ F A T A L   E R R O R @@   --  ABNORMAL EXIT    "
 echo " ###################################################### "
 echo
@@ -1161,12 +1207,13 @@ echo
       echo
       echo " ###################################################### "
       echo " --> > 5 RETURN CODE FROM DATA DUMP, $err1, $err2, $err3, $err4, \
-$err5, $err6, $err7 $err8 $err9 $err10 "
+$err5, $err6, $err7 $err8 $err9 $err10 $err11 "
       echo " --> NOT ALL DATA DUMP FILES ARE COMPLETE - CONTINUE    "
       echo " ###################################################### "
       echo
       set -x
    fi
+
 
 #  endif loop $PROCESS_DUMP
 fi
@@ -1182,13 +1229,13 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
    msg="Attempt to update data count average table dump monitoring"
    $DATA/postmsg "$jlogfile" "$msg"
 
-   $USHobsproc/bufr_avgdata.sh $NET
+   $USHobsproc/bufr_avgdata.sh $mNET
    errsc=$?
    if [ "$errsc" -eq '0' ]; then
-      rm $AVGDarch_OUT/obcount_30davg.${NET}.current
-      cp obcount_30davg.${NET}.current \
-       $AVGDarch_OUT/obcount_30davg.${NET}.current
-      chmod 775 $AVGDarch_OUT/obcount_30davg.${NET}.current
+      rm $AVGDarch_OUT/obcount_30davg.${mNET}.current
+      cpfs obcount_30davg.${mNET}.current \
+       $AVGDarch_OUT/obcount_30davg.${mNET}.current
+      chmod 775 $AVGDarch_OUT/obcount_30davg.${mNET}.current
       msg="Data count average table SUCCESSFULLY updated for dump monitoring"
       $DATA/postmsg "$jlogfile" "$msg"
       typeset -Z2 this_month last_month
@@ -1199,16 +1246,16 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
          last_month=12
          year=`expr $year - 1`
       fi
-###   if [ ! -s $AVGDarch_OUT/obcount_30davg.${NET}.${year}${last_month} ]
+###   if [ ! -s $AVGDarch_OUT/obcount_30davg.${mNET}.${year}${last_month} ]
 ###   then
 
 #  If no data count average table found for previous month, save this one
 #   (Currently not done in data monitoring)
 
-###      rm $AVGDarch_OUT/obcount_30davg.${NET}.*${last_month}
-###      cp obcount_30davg.${NET}.current \
-###       $AVGDarch_OUT/obcount_30davg.${NET}.${year}${last_month}
-###      chmod 775 $AVGDarch_OUT/obcount_30davg.${NET}.${year}${last_month}
+###      rm $AVGDarch_OUT/obcount_30davg.${mNET}.*${last_month}
+###      cp obcount_30davg.${mNET}.current \
+###       $AVGDarch_OUT/obcount_30davg.${mNET}.${year}${last_month}
+###      chmod 775 $AVGDarch_OUT/obcount_30davg.${mNET}.${year}${last_month}
 ###      msg="DATA COUNT AVERAGE table for ${year}${last_month} saved \
 ###for dump monitoring"
 ###      $DATA/postmsg "$jlogfile" "$msg"
@@ -1228,7 +1275,7 @@ fi
 # -------------------------------------------------
 echo "Copy bufr_dumplist to comout"
 LIST_cp=$COMOUT/${RUN}.t${cyc}z.bufr_dumplist.${tmmark}
-cp ${FIXbufr_dump}/bufr_dumplist $LIST_cp
+cpfs ${FIXbufr_dump}/bufr_dumplist $LIST_cp
 chmod 644 $LIST_cp
 
 # GOOD RUN

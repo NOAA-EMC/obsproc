@@ -16,7 +16,7 @@ c      implicit none
       CHARACTER*8  SUBSET
       LOGICAL      COMPRESS,NOTIME
       REAL*8             CLONH,CLATH,ADATE,DATE(5)
-      REAL*8       BBYSTSL(3,25),ARR(10,255)
+      REAL*8       BBYSTSL(3,255),ARR(10,255)
  
 C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
@@ -56,9 +56,9 @@ c      CALL UFBINT(LUBFO,CLATH,1,1,IRET,'CLATH')
          IF(NRET.GT.0) CALL UFBINT(LUBFO,ARR,10,NRET,IRET,NEMOS(N))
       ENDDO
  
-      CALL UFBSEQ(LUBFR,BBYSTSL,3,25,IRET,'BBYSTSL')
+      CALL UFBSEQ(LUBFR,BBYSTSL,3,255,IRET,'BBYSTSL')
       NLVL = 0
-      DO I=1,25
+      DO I=1,255
          IF (BBYSTSL(1,I) .LT. 9999.) THEN
             NLVL = NLVL + 1
          ENDIF

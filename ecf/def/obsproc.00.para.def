@@ -1,0 +1,1021 @@
+extern /prod_clone/primary/00/gfs/v16.3/gfs/atmos/obsproc/dump
+extern /prod_clone/primary/00/gfs/v16.3/gdas/atmos/obsproc/dump
+extern /prod_clone/primary/00/gfs/v16.3/gdas/atmos/analysis/jgdas_atmos_analysis
+
+
+
+suite para
+  family primary
+  family 00
+
+  family gfs
+  family v16.3
+
+  family gfs
+  family atmos
+  family obsproc 
+  family dump 
+  endfamily
+  endfamily
+  endfamily
+  endfamily
+      
+  family gdas
+  family atmos
+  family obsproc
+  family dump
+  endfamily
+  endfamily 
+  family analysis
+    task jgdas_atmos_analysis == complete
+  endfamily 
+  endfamily   
+  endfamily   
+            
+  endfamily   
+  endfamily
+
+  family obsproc
+    edit PACKAGEHOME '/lfs/h1/ops/%ENVIR%/packages/obsproc.%obsproc_ver%'
+    edit PROJ 'OBSPROC'
+    family v1.2
+      family rtma
+        edit JTYP 'rtma'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/rtma'
+        edit CYCM ''
+        edit RAPID ''
+        family 00z
+          edit CYC '00'
+          family main
+            family dump
+              task jobsproc_rtma_dump
+                trigger :TIME >= 0030 and :TIME <= 1230
+              task jobsproc_rtma_dump_post
+                trigger jobsproc_rtma_dump == complete
+            endfamily
+            family prep
+              task jobsproc_rtma_prep
+                trigger ../dump/jobsproc_rtma_dump == complete
+              task jobsproc_rtma_prep_post
+                trigger jobsproc_rtma_prep == complete
+            endfamily
+          endfamily
+          family rapid
+            edit RAPID '_ru'
+            family 00
+              edit CYCM '00'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0008 and :TIME <= 0208
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 15
+              edit CYCM '15'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0023 and :TIME <= 0223
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 30
+              edit CYCM '30'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0038 and :TIME <= 0238
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 45
+              edit CYCM '45'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0053 and :TIME <= 0253
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+          endfamily
+        endfamily
+        family 01z
+          edit CYC '01'
+          family main
+            family dump
+              task jobsproc_rtma_dump
+                trigger :TIME >= 0130 and :TIME <= 0730
+              task jobsproc_rtma_dump_post
+                trigger jobsproc_rtma_dump == complete
+            endfamily
+            family prep
+              task jobsproc_rtma_prep
+                trigger ../dump/jobsproc_rtma_dump == complete
+              task jobsproc_rtma_prep_post
+                trigger jobsproc_rtma_prep == complete
+            endfamily
+          endfamily
+          family rapid
+            edit RAPID '_ru'
+            family 00
+              edit CYCM '00'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0108 and :TIME <= 0308
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 15
+              edit CYCM '15'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0123 and :TIME <= 0323
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 30
+              edit CYCM '30'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0138 and :TIME <= 0338
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 45
+              edit CYCM '45'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0153 and :TIME <= 0353
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+          endfamily
+        endfamily
+        family 02z
+          edit CYC '02'
+          family main
+            family dump
+              task jobsproc_rtma_dump
+                trigger :TIME >= 0230 and :TIME <= 0830
+              task jobsproc_rtma_dump_post
+                trigger jobsproc_rtma_dump == complete
+            endfamily
+            family prep
+              task jobsproc_rtma_prep
+                trigger ../dump/jobsproc_rtma_dump == complete
+              task jobsproc_rtma_prep_post
+                trigger jobsproc_rtma_prep == complete
+            endfamily
+          endfamily
+          family rapid
+            edit RAPID '_ru'
+            family 00
+              edit CYCM '00'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0208 and :TIME <= 0408
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 15
+              edit CYCM '15'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0223 and :TIME <= 0423
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 30
+              edit CYCM '30'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0238 and :TIME <= 0438
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 45
+              edit CYCM '45'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >=0253 and :TIME <= 0453
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+          endfamily
+        endfamily
+        family 03z
+          edit CYC '03'
+          family main
+            family dump
+              task jobsproc_rtma_dump
+                trigger :TIME >= 0330 and :TIME <= 0930
+              task jobsproc_rtma_dump_post
+                trigger jobsproc_rtma_dump == complete
+            endfamily
+            family prep
+              task jobsproc_rtma_prep
+                trigger ../dump/jobsproc_rtma_dump == complete
+              task jobsproc_rtma_prep_post
+                trigger jobsproc_rtma_prep == complete
+            endfamily
+          endfamily
+          family rapid
+            edit RAPID '_ru'
+            family 00
+              edit CYCM '00'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0308 and :TIME <= 0508
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 15
+              edit CYCM '15'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0323 and :TIME <= 0523
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 30
+              edit CYCM '30'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0338 and :TIME <= 0538
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 45
+              edit CYCM '45'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0353 and :TIME <= 0553
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+          endfamily
+        endfamily
+        family 04z
+          edit CYC '04'
+          family main
+            family dump
+              task jobsproc_rtma_dump
+                trigger :TIME >= 0430 and :TIME <= 1030
+              task jobsproc_rtma_dump_post
+                trigger jobsproc_rtma_dump == complete
+            endfamily
+            family prep
+              task jobsproc_rtma_prep
+                trigger ../dump/jobsproc_rtma_dump == complete
+              task jobsproc_rtma_prep_post
+                trigger jobsproc_rtma_prep == complete
+            endfamily
+          endfamily
+          family rapid
+            edit RAPID '_ru'
+            family 00
+              edit CYCM '00'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0408 and :TIME <= 0608
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 15
+              edit CYCM '15'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0423 and :TIME <= 0623
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 30
+              edit CYCM '30'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0438 and :TIME <= 0638
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 45
+              edit CYCM '45'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0453 and :TIME <= 0653
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+          endfamily
+        endfamily
+        family 05z
+          edit CYC '05'
+          family main
+            family dump
+              task jobsproc_rtma_dump
+                trigger :TIME >= 0530 and :TIME <= 1130
+              task jobsproc_rtma_dump_post
+                trigger jobsproc_rtma_dump == complete
+            endfamily
+            family prep
+              task jobsproc_rtma_prep
+                trigger ../dump/jobsproc_rtma_dump == complete
+              task jobsproc_rtma_prep_post
+                trigger jobsproc_rtma_prep == complete
+            endfamily
+          endfamily
+          family rapid
+            edit RAPID '_ru'
+            family 00
+              edit CYCM '00'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0508 and :TIME <= 0708
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 15
+              edit CYCM '15'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0523 and :TIME <= 0723
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 30
+              edit CYCM '30'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0538 and :TIME <= 0738
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+            family 45
+              edit CYCM '45'
+              family dump
+                task jobsproc_rtma_dump
+                  trigger :TIME >= 0553 and :TIME <= 0753
+                task jobsproc_rtma_dump_post
+                  trigger jobsproc_rtma_dump == complete
+              endfamily
+              family prep
+                task jobsproc_rtma_prep
+                  trigger ../dump/jobsproc_rtma_dump == complete
+                task jobsproc_rtma_prep_post
+                  trigger jobsproc_rtma_prep == complete
+              endfamily
+            endfamily
+          endfamily
+        endfamily
+      endfamily
+      family nam
+        edit JTYP 'nam'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/nam'
+        family 00z
+          family tm00
+            edit TMMARK 'tm00'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0115 and :TIME <= 0715
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0115 and :TIME <= 0715
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+                event 1 release_nam00_dump_alert
+              task jobsproc_nam_dump_alert
+                trigger jobsproc_nam_dump_post:release_nam00_dump_alert
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+        endfamily
+        family 06z
+          edit CYC '06'
+          family tm06
+            edit TMMARK 'tm06'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0340 and :TIME <= 0940
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0340 and :TIME <= 0940
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+          family tm05
+            edit TMMARK 'tm05'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0400 and :TIME <= 1000
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0400 and :TIME <= 1000
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+          family tm04
+            edit TMMARK 'tm04'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0400 and :TIME <= 1000
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0400 and :TIME <= 1000
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+          family tm03
+            edit TMMARK 'tm03'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0430 and :TIME <= 1030
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0430 and :TIME <= 1030
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+          family tm02
+            edit TMMARK 'tm02'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0523 and :TIME <= 1123
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0523 and :TIME <= 1123
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+          family tm01
+            edit TMMARK 'tm01'
+            family dump
+              task jobsproc_nam_dump
+                trigger :TIME >= 0618 and :TIME <= 1218
+              task jobsproc_nam_dump2
+                trigger :TIME >= 0618 and :TIME <= 1218
+              task jobsproc_nam_dump_post
+                trigger jobsproc_nam_dump == complete and jobsproc_nam_dump2 == complete
+            endfamily
+            family prep
+              task jobsproc_nam_prep
+                trigger ../dump/jobsproc_nam_dump == complete and ../dump/jobsproc_nam_dump2 == complete
+              task jobsproc_nam_prep_post
+                trigger jobsproc_nam_prep == complete
+            endfamily
+          endfamily
+        endfamily
+      endfamily
+      family cdas
+        edit JTYP 'cdas'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/cdas'
+        family 12z
+          edit CYC '12'
+          family dump
+            task jobsproc_cdas_dump
+              trigger :TIME >= 0410 and :TIME <=1010
+            task jobsproc_cdas_dump_post
+              trigger jobsproc_cdas_dump == complete
+          endfamily
+          family prep
+            task jobsproc_cdas_prep1
+              trigger ../dump/jobsproc_cdas_dump == complete
+            task jobsproc_cdas_prep1_post
+              trigger jobsproc_cdas_prep1 == complete
+            task jobsproc_cdas_prep2
+              trigger jobsproc_cdas_prep1 == complete
+            task jobsproc_cdas_prep2_post
+              trigger jobsproc_cdas_prep2 == complete
+          endfamily
+        endfamily
+      endfamily
+      family gfs
+        edit JTYP 'gfs'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/global'
+        family atmos
+          family dump
+            task jobsproc_gfs_atmos_dump
+              trigger :TIME >= 0237 and :TIME <= 0837
+#             trigger :TIME >= 0247 and :TIME <= 0847
+              event 1 release_sfcprep
+            task jobsproc_gfs_atmos_dump_post
+              trigger jobsproc_gfs_atmos_dump == complete
+              event 1 release_gfs00_dump_alert
+            task jobsproc_gfs_atmos_dump_alert
+              trigger jobsproc_gfs_atmos_dump_post:release_gfs00_dump_alert
+          endfamily
+          family prep
+            task jobsproc_gfs_atmos_prep
+              trigger ../dump/jobsproc_gfs_atmos_dump == complete and /prod_clone/primary/00/gfs/v16.3/gfs/atmos/obsproc/dump == complete
+            task jobsproc_gfs_atmos_prep_post
+              trigger jobsproc_gfs_atmos_prep == complete
+          endfamily
+        endfamily
+      endfamily
+      family gdas
+        edit JTYP 'gdas'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/global'
+        family atmos
+          family dump
+            task jobsproc_gdas_atmos_dump
+              trigger :TIME >= 0540 and :TIME <= 1140
+#             trigger :TIME >= 0550 and :TIME <= 1150
+              event 1 release_sfcprep
+            task jobsproc_gdas_atmos_dump_post
+              trigger jobsproc_gdas_atmos_dump == complete
+              event 1 release_gdas00_dump_alert
+            task jobsproc_gdas_atmos_dump_alert
+              trigger jobsproc_gdas_atmos_dump_post:release_gdas00_dump_alert
+          endfamily
+          family prep
+            task jobsproc_gdas_atmos_prep
+              trigger ../dump/jobsproc_gdas_atmos_dump == complete and /prod_clone/primary/00/gfs/v16.3/gdas/atmos/obsproc/dump == complete
+            task jobsproc_gdas_atmos_prep_post
+              trigger jobsproc_gdas_atmos_prep == complete
+          endfamily
+        endfamily
+      endfamily
+      family urma
+        edit JTYP 'urma'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/urma'
+        family 18z
+          edit CYC '18'
+          family dump
+            task jobsproc_urma_dump
+              trigger :TIME >= 0030 and :TIME <= 0630
+            task jobsproc_urma_dump_post
+              trigger jobsproc_urma_dump == complete
+          endfamily
+          family prep
+            task jobsproc_urma_prep
+              trigger ../dump/jobsproc_urma_dump == complete
+            task jobsproc_urma_prep_post
+              trigger jobsproc_urma_prep == complete
+          endfamily
+        endfamily
+        family 19z
+          edit CYC '19'
+          family dump
+            task jobsproc_urma_dump
+              trigger :TIME >= 0130 and :TIME <= 0730
+            task jobsproc_urma_dump_post
+              trigger jobsproc_urma_dump == complete
+          endfamily
+          family prep
+            task jobsproc_urma_prep
+              trigger ../dump/jobsproc_urma_dump == complete
+            task jobsproc_urma_prep_post
+              trigger jobsproc_urma_prep == complete
+          endfamily
+        endfamily
+        family 20z
+          edit CYC '20'
+          family dump
+            task jobsproc_urma_dump
+              trigger :TIME >= 0230 and :TIME <= 0830
+            task jobsproc_urma_dump_post
+              trigger jobsproc_urma_dump == complete
+          endfamily
+          family prep
+            task jobsproc_urma_prep
+              trigger ../dump/jobsproc_urma_dump == complete
+            task jobsproc_urma_prep_post
+              trigger jobsproc_urma_prep == complete
+          endfamily
+        endfamily
+        family 21z
+          edit CYC '21'
+          family dump
+            task jobsproc_urma_dump
+              trigger :TIME >= 0330 and :TIME <= 0930
+            task jobsproc_urma_dump_post
+              trigger jobsproc_urma_dump == complete
+          endfamily
+          family prep
+            task jobsproc_urma_prep
+              trigger ../dump/jobsproc_urma_dump == complete
+            task jobsproc_urma_prep_post
+              trigger jobsproc_urma_prep == complete
+          endfamily
+        endfamily
+        family 22z
+          edit CYC '22'
+          family dump
+            task jobsproc_urma_dump
+              trigger :TIME >= 0430 and :TIME <= 1030
+            task jobsproc_urma_dump_post
+              trigger jobsproc_urma_dump == complete
+          endfamily
+          family prep
+            task jobsproc_urma_prep
+              trigger ../dump/jobsproc_urma_dump == complete
+            task jobsproc_urma_prep_post
+              trigger jobsproc_urma_prep == complete
+          endfamily
+        endfamily
+        family 23z
+          edit CYC '23'
+          family dump
+            task jobsproc_urma_dump
+              trigger :TIME >= 0530 and :TIME <= 1130
+            task jobsproc_urma_dump_post
+              trigger jobsproc_urma_dump == complete
+          endfamily
+          family prep
+            task jobsproc_urma_prep
+              trigger ../dump/jobsproc_urma_dump == complete
+            task jobsproc_urma_prep_post
+              trigger jobsproc_urma_prep == complete
+          endfamily
+        endfamily
+      endfamily
+      family rap
+        edit JTYP ''
+        edit ECF_FILES '%PACKAGEHOME%/ecf/rap'
+        family 00z
+          edit CYC '00'
+          family dump
+            task jobsproc_rap_dump_erly
+              trigger :TIME >= 0022 and :TIME <= 0622
+#             trigger :TIME >= 0026 and :TIME <= 0626
+              edit JTYP 'erly_'
+            task jobsproc_rap_dump_post_erly
+              trigger jobsproc_rap_dump_erly == complete
+              edit JTYP 'erly_'
+            task jobsproc_rap_dump
+              trigger :TIME >= 0054 and :TIME <= 0654
+#             trigger :TIME >= 0058 and :TIME <= 0658
+            task jobsproc_rap_dump_post
+              trigger jobsproc_rap_dump == complete
+          endfamily
+          family prep
+            task jobsproc_rap_prep_erly
+              trigger ../dump/jobsproc_rap_dump_erly == complete
+              edit JTYP 'erly_'
+            task jobsproc_rap_prep_post_erly
+              trigger jobsproc_rap_prep_erly == complete
+              edit JTYP 'erly_'
+            task jobsproc_rap_prep
+              trigger ../dump/jobsproc_rap_dump == complete
+            task jobsproc_rap_prep_post
+              trigger jobsproc_rap_prep == complete
+          endfamily
+        endfamily
+        family 01z
+          edit CYC '01'
+          family dump
+            task jobsproc_rap_dump
+              trigger :TIME >= 0122 and :TIME <= 0722
+#             trigger :TIME >= 0126 and :TIME <= 0726
+            task jobsproc_rap_dump_post
+              trigger jobsproc_rap_dump == complete
+          endfamily
+          family prep
+            task jobsproc_rap_prep
+              trigger ../dump/jobsproc_rap_dump == complete
+            task jobsproc_rap_prep_post
+              trigger jobsproc_rap_prep == complete
+          endfamily
+        endfamily
+        family 02z
+          edit CYC '02'
+          family dump
+            task jobsproc_rap_dump
+              trigger :TIME >= 0222 and :TIME <= 0822
+#             trigger :TIME >= 0226 and :TIME <= 0826
+            task jobsproc_rap_dump_post
+              trigger jobsproc_rap_dump == complete
+          endfamily
+          family prep
+            task jobsproc_rap_prep
+              trigger ../dump/jobsproc_rap_dump == complete
+            task jobsproc_rap_prep_post
+              trigger jobsproc_rap_prep == complete
+          endfamily
+        endfamily
+        family 03z
+          edit CYC '03'
+          family dump
+            task jobsproc_rap_dump
+              trigger :TIME >= 0322 and :TIME <= 0922
+#             trigger :TIME >= 0326 and :TIME <= 0926
+            task jobsproc_rap_dump_post
+              trigger jobsproc_rap_dump == complete
+          endfamily
+          family prep
+            task jobsproc_rap_prep
+              trigger ../dump/jobsproc_rap_dump == complete
+            task jobsproc_rap_prep_post
+              trigger jobsproc_rap_prep == complete
+          endfamily
+          family pcyc
+            edit JTYP 'pcyc_'
+            family dump
+              task jobsproc_rap_dump_pcyc
+                trigger :TIME >= 0656 and :TIME <= 0956
+#               trigger :TIME >= 0700 and :TIME <= 1000
+              task jobsproc_rap_dump_post_pcyc
+                trigger jobsproc_rap_dump_pcyc == complete
+            endfamily
+            family prep
+              task jobsproc_rap_prep_pcyc
+                trigger ../dump/jobsproc_rap_dump_pcyc == complete
+              task jobsproc_rap_prep_post_pcyc
+                trigger jobsproc_rap_prep_pcyc == complete
+            endfamily
+          endfamily
+        endfamily
+        family 04z
+          edit CYC '04'
+          family dump
+            task jobsproc_rap_dump
+              trigger :TIME >= 0422 and :TIME <= 1022
+#             trigger :TIME >= 0426 and :TIME <= 1026
+            task jobsproc_rap_dump_post
+              trigger jobsproc_rap_dump == complete
+          endfamily
+          family prep
+            task jobsproc_rap_prep
+              trigger ../dump/jobsproc_rap_dump == complete
+            task jobsproc_rap_prep_post
+              trigger jobsproc_rap_prep == complete
+          endfamily
+          family pcyc
+            edit JTYP 'pcyc_'
+            family dump
+              task jobsproc_rap_dump_pcyc
+                trigger :TIME >= 0656 and :TIME <= 0956
+#               trigger :TIME >= 0700 and :TIME <= 1000
+              task jobsproc_rap_dump_post_pcyc
+                trigger jobsproc_rap_dump_pcyc == complete
+            endfamily
+            family prep
+              task jobsproc_rap_prep_pcyc
+                trigger ../dump/jobsproc_rap_dump_pcyc == complete
+              task jobsproc_rap_prep_post_pcyc
+                trigger jobsproc_rap_prep_pcyc == complete
+            endfamily
+          endfamily
+        endfamily
+        family 05z
+          edit CYC '05'
+          family dump
+            task jobsproc_rap_dump
+              trigger :TIME >= 0522 and :TIME <= 1122
+#             trigger :TIME >= 0526 and :TIME <= 1126
+            task jobsproc_rap_dump_post
+              trigger jobsproc_rap_dump == complete
+          endfamily
+          family prep
+            task jobsproc_rap_prep
+              trigger ../dump/jobsproc_rap_dump == complete
+            task jobsproc_rap_prep_post
+              trigger jobsproc_rap_prep == complete
+          endfamily
+          family pcyc
+            edit JTYP 'pcyc_'
+            family dump
+              task jobsproc_rap_dump_pcyc
+                trigger :TIME >= 0756 and :TIME <= 1056
+#               trigger :TIME >= 0800 and :TIME <= 1100
+              task jobsproc_rap_dump_post_pcyc
+                trigger jobsproc_rap_dump_pcyc == complete
+            endfamily
+            family prep
+              task jobsproc_rap_prep_pcyc
+                trigger ../dump/jobsproc_rap_dump_pcyc == complete
+              task jobsproc_rap_prep_post_pcyc
+                trigger jobsproc_rap_prep_pcyc == complete
+            endfamily
+          endfamily
+        endfamily
+      endfamily
+      family dump_monitor
+        edit JTYP 'dump_monitor'
+        edit ECF_FILES '%PACKAGEHOME%/ecf/dump_monitor'
+        family 00z
+          edit CYC '00'
+          task jobsproc_dump_monitor
+            trigger :TIME >= 0030 and :TIME <= 0630
+        endfamily
+        family 01z
+          edit CYC '01'
+          task jobsproc_dump_monitor
+            trigger :TIME >= 0130 and :TIME <= 0730
+        endfamily
+        family 02z
+          edit CYC '02'
+          task jobsproc_dump_monitor
+            trigger :TIME >= 0230 and :TIME <= 0830
+        endfamily
+        family 03z
+          edit CYC '03'
+          task jobsproc_dump_monitor
+            trigger :TIME >= 0330 and :TIME <= 0930
+        endfamily
+        family 04z
+          edit CYC '04'
+          task jobsproc_dump_monitor
+            trigger :TIME >= 0430 and :TIME <= 1030
+        endfamily
+        family 05z
+          edit CYC '05'
+          task jobsproc_dump_monitor
+            trigger :TIME >= 0530 and :TIME <= 1130
+        endfamily
+      endfamily
+    endfamily
+  endfamily
+  endfamily
+  endfamily
+endsuite

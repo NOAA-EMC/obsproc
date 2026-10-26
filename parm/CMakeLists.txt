@@ -30,8 +30,6 @@ list(APPEND parm_files
   syndat_syndata.gdas.parm
   syndat_syndata.gfs.parm
   syndat_syndata.nam.parm
-  transfer_airnow.list
-  transfer_hourly.list.old0203
   wave_dcodquikscat.rtma.parm
   )
 

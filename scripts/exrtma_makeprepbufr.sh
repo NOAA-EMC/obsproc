@@ -20,6 +20,7 @@ postmsg "$jlogfile" "$msg"
 cat break > $pgmout
 
 CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
+RUN_uc=$(echo $RUN | tr [a-z] [A-Z])
 
 # Get cycle center date/time (down to hour precision, YYYYMMDDHH)
 
@@ -60,7 +61,7 @@ warning=no
 if [ "$PREPDATA" = 'YES' ]; then
 
 # save snapshot of prepbufr file after PREPOBS_PREPDATA in COMOUT
-   cp prepda.prepdata $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+   cpfs prepda.prepdata $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
 
    if [ "$CHGRP_RSTPROD" = 'YES' ]; then
       chgrp rstprod $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
@@ -68,7 +69,7 @@ if [ "$PREPDATA" = 'YES' ]; then
       if [ $errch -eq 0 ]; then
          chmod 640 $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
       else
-         cp /dev/null $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+         cpfs /dev/null $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
          warning=yes
       fi
    fi
@@ -76,20 +77,20 @@ if [ "$PREPDATA" = 'YES' ]; then
 echo "is the prepbufr file good?"
 echo `ls -l $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark`
 
-if [ "$RUN" = "rtma_ru" ] && [ "$SENDDBN" = YES ]; then
-   $DBNROOT/bin/dbn_alert MODEL RTMA_RU_BUFR_PREPda $job $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
+if [ "$SENDDBN" = YES ]; then
+   $DBNROOT/bin/dbn_alert MODEL ${RUN_uc}_BUFR_PREPda $job $COMOUT/${RUN}.${cycle_here}.prepbufr.$tmmark
 fi
 
 # save current prepbufr mnemonic table in COMOUT if either it isn't already
 #  there for a previous cycle or if it has changed from a previous cycle
    if [ ! -s $COMOUT/*prep.bufrtable ]; then
-      cp prep.bufrtable  $COMOUT/${RUN}.${cycle_here}.prep.bufrtable
+      cpfs prep.bufrtable  $COMOUT/${RUN}.${cycle_here}.prep.bufrtable
    else
       diff `ls -t  $COMOUT/*prep.bufrtable | head -n1` prep.bufrtable \
        > /dev/null 2>&1
       errdiff=$?
       [ "$errdiff" -ne '0' ]  &&  \
-       cp prep.bufrtable  $COMOUT/${RUN}.${cycle_here}.prep.bufrtable
+       cpfs prep.bufrtable  $COMOUT/${RUN}.${cycle_here}.prep.bufrtable
    fi
 fi
 
