@@ -1,5 +1,5 @@
 obsproc v1.3.0  RELEASED        JUN 22, 2026
-        v1.3.0  IMPLEMENTED     ??? ??, 2026
+        v1.3.1  IMPLEMENTED     OCT 26, 2026
 
 PRELUDE
  - It prepares the obsproc package to work with GFSv17 COM/filename changes (backward compatible with GFSv16.*)

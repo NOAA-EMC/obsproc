@@ -1908,14 +1908,14 @@ $ushscript_dump/bufr_dump_obs.sh $dumptime 3.0 1 amsr msmws msro
 error14=$?
 echo "$error14" > $DATA/error14
 
-if [ "$SENDDBN" = "YES" ]; then
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_amsr $job \
-    ${COMSP}amsr.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msmws $job \
-    ${COMSP}msmws.tm00.bufr_d
-   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msro $job \
-    ${COMSP}msro.tm00.bufr_d
-fi
+#if [ "$SENDDBN" = "YES" ]; then
+#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_amsr $job \
+#    ${COMSP}amsr.tm00.bufr_d
+#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msmws $job \
+#    ${COMSP}msmws.tm00.bufr_d
+#   $DBNROOT/bin/dbn_alert MODEL ${NET_uc}_BUFR_msro $job \
+#    ${COMSP}msro.tm00.bufr_d
+#fi
 
 set +x
 echo "********************************************************************"
