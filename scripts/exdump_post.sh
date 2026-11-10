@@ -66,8 +66,8 @@ echo "----------------------------------------------------------"
 #                        data from 2-day old "aircar" and "aircft" dump files.
 #####################################################################
 
-# NOTE: NET is changed to gdas in the parent Job script for the gdas RUN
-#       (was gfs - NET remains gfs for gfs RUN)
+# NOTE: mNET is changed to gdas in the parent Job script for the gdas RUN
+#       (was gfs - mNET remains gfs for gfs RUN)
 # -----------------------------------------------------------------------
 
 set -aux
@@ -112,7 +112,7 @@ tmhr=`echo $tmmark|cut -c3-4`
 export dumptime=`$NDATE -$tmhr $PDY$cyc`$hr_fraction
 export dumptime10=`$NDATE -$tmhr $PDY$cyc`
 
-net=$NET
+net=$mNET
 
 [[ $RUN == rap_p ]]  &&  net=$RUN
 [[ $RUN == rap_e ]]  &&  net=$RUN
@@ -171,7 +171,7 @@ if [ ! -s $COMIN/$RUN.$cycle.status.$tmmark.bufr_d ]; then
        | cut -f1 -d:`
       total2=`cat <$file2 | wc -l`
       tail -n `expr $total2 - $mcount - 1` $file2 > bottom_part
-      mcount=`grep -n "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+  mcount=`grep -n -m 1 "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%" bottom_part | cut -f1 -d:`
       head -n `expr $mcount - 1` bottom_part > insert
       cat status1 insert > status
@@ -182,16 +182,22 @@ if [ ! -s $COMIN/$RUN.$cycle.status.$tmmark.bufr_d ]; then
 ++++" $file2 | cut -f1 -d:`
       tail -n `expr $total2 - $mcount - 1` $file2 > bottom_part
       cat status1 bottom_part > $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
+      ##for troubleshooting
+      #cpfs $file1 $COMOUT/$RUN.$cycle.status1.$tmmark.bufr_d.KEEP
+      #cpfs $file2 $COMOUT/$RUN.$cycle.status2.$tmmark.bufr_d.KEEP      
       rm $file1 $file2 bottom_part insert status status1 top_part
    elif [ -s $file1 ]; then
       cpfs $file1 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
+      ##for troubleshooting
+      #cpfs $file1 $COMOUT/$RUN.$cycle.status1.$tmmark.bufr_d.KEEP      
       rm $file1
       msg="***WARNING: DUMP status file successfully generated but only from \
 dump status1 file - dump status2 file not present"
       $DATA/postmsg "$jlogfile" "$msg"
    elif [ -s $file2 ]; then
       cpfs $file2 $COMOUT/$RUN.$cycle.status.$tmmark.bufr_d
-      rm $file2
+      ##for troubleshooting
+      #cpfs $file2 $COMOUT/$RUN.$cycle.status2.$tmmark.bufr_d.KEEP
       msg="***WARNING: DUMP status file successfully generated but only from \
 dump status2 file - dump status1 file not present"
       $DATA/postmsg "$jlogfile" "$msg"
@@ -506,10 +512,10 @@ $dumptime"
    for file in adpsfc adpupa aircar aircft satwnd sfcshp spssmi proflr \
                vadwnd goesnd erscat sfcbog erswnd ssmip  ssmipn ssmit  \
                atovs  qkscat qkswnd trmm   sptrmm geoimr 1bamua 1bamub \
-               1bhrs3 1bmhs  1bhrs4 airs   airswm amsre  gpsipw msonet \
-               rassda nexrad gpsro  airsev goesfv wndsat wdsatr osbuv8 \
-               ascatt ascatw mtiasi avcsam avcspm gome   lghtng omi    \
-               esamua esamub eshrs3 esmhs  ssmisu sevcsr lgycld efclam \
+               1bhrs3 1bmhs  airs   airswm amsre  gpsipw msonet \
+               rassda nexrad gpsro  goesfv wndsat wdsatr        \
+               ascatt ascatw mtiasi avcsam gome   lghtng        \
+               esamua esamub esmhs  ssmisu sevcsr lgycld efclam \
 	       $aircraft_nr_dm2
 #  --> don't add any new dumps here since files are already unblocked
 #      on WCOSS!!
@@ -625,10 +631,10 @@ $dumptime"
    $DATA/postmsg "$jlogfile" "$msg"
 
    retr=TRUE
-   [ "$NET" = 'gfs' -o "$NET" = 'gdas' ]  &&  retr=FALSE
+   [ "$mNET" = 'gfs' -o "$mNET" = 'gdas' ]  &&  retr=FALSE
    radn=TRUE
-   [ "$NET" = 'rap' ]  &&  radn=FALSE
-   [ "$NET" = 'rrfs' ]  &&  radn=FALSE
+   [ "$mNET" = 'rap' ]  &&  radn=FALSE
+   [ "$mNET" = 'rrfs' ]  &&  radn=FALSE
 
    cat << EOFlistdumps > parms
  &PDATA
@@ -821,15 +827,15 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
 #    Update Data Count Average Tables for urma Network                 #
 ########################################################################
 
-   if [ "$NET" = 'gdas' -o "$NET" = 'gfs' -o "$NET" = 'nam' ]; then
-      networks=$NET
-   elif [ "$NET" = 'rap' -a "$RUN" = 'rap' ]; then
+   if [ "$mNET" = 'gdas' -o "$mNET" = 'gfs' -o "$mNET" = 'nam' ]; then
+      networks=$mNET
+   elif [ "$mNET" = 'rap' -a "$RUN" = 'rap' ]; then
       networks=rap
-   elif [ "$NET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
+   elif [ "$mNET" = 'rrfs' -a "$RUN" = 'rrfs' ]; then
       networks=rrfs
-   elif [ "$NET" = 'rtma' ]; then
+   elif [ "$mNET" = 'rtma' ]; then
       networks=rtma
-   elif [ "$NET" = 'urma' ]; then
+   elif [ "$mNET" = 'urma' ]; then
       networks=urma
    fi
 

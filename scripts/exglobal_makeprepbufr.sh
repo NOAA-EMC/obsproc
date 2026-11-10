@@ -40,7 +40,17 @@ CHGRP_RSTPROD=${CHGRP_RSTPROD:-YES}
 MAKE_NSSTBUFR=${MAKE_NSSTBUFR:-YES}
 
 export COMSP=${COMSP:-$COMIN/${RUN}.${cycle}.}
-export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.}
+
+#export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.}
+#
+#expects gfs_ver=v17.0 in versions/*.ver
+gfs_ver_num="${gfs_ver:1:2}" # extracts the 17
+if [[ "$gfs_ver_num" -le 16 ]]; then
+    export COMSPtcvital=${COMSPtcvital:-$COMINtcvital/${RUN}.${cycle}.} # GFSv16
+else
+    export COMSPtcvital=${COMSPtcvital:-$COMINtcvital} # GFSv17
+fi
+
 export tstsp=${tstsp:-/tmp/null/}
 
 if [ "$DO_QC" = 'YES' -a "$CQCBUFR" = 'YES' -a -n "$COM1" -a -n "$CQCC" ]; then

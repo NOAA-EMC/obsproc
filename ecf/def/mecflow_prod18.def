@@ -208,7 +208,7 @@ suite prod18
     edit CYC '18'
     edit ECF_FILES '/ecf/ecfnets/scripts/gfs'
     edit PROJ 'GFS-OPS'
-    edit NET 'gfs'
+    edit mNET 'gfs'
     edit RUN 'gfs'
     edit COM '/gpfs/dell1/nco/ops/com'
     edit QUEUESHARED 'prod_shared'
@@ -239,7 +239,7 @@ suite prod18
     edit CYC '18'
     edit COM '/gpfs/dell1/nco/ops/com'
     edit ECF_FILES '/ecf/ecfnets/scripts/gdas'
-    edit NET 'gfs'
+    edit mNET 'gfs'
     edit RUN 'gdas'
     family atmos
       family obsproc
