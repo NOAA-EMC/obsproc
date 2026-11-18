@@ -7,8 +7,6 @@ list(APPEND scripts_files
   exglobal_dump.sh
   exglobal_makeprepbufr.sh
   exmods.sh
-  exnam_dump.sh
-  exnam_makeprepbufr.sh
   exrap_dump.sh
   exrap_makeprepbufr.sh
   exrtma_dump.sh
