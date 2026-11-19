@@ -837,6 +837,10 @@ if [ "$PROCESS_AVGTABLES" = 'YES' ]; then
       networks=rtma
    elif [ "$mNET" = 'urma' ]; then
       networks=urma
+   elif [ "$mNET" = 'rtma3d' ]; then
+      networks=rtma3d
+   elif [ "$mNET" = 'urma3d' ]; then
+      networks=urma3d 
    fi
 
    mkdir -p $AVGDarch_OUT
